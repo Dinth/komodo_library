@@ -47,6 +47,9 @@ services:
     ipc: private
     logging:
       driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       scrutiny: null
     restart: unless-stopped
@@ -77,6 +80,9 @@ services:
     ipc: private
     logging:
       driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       scrutiny: null
     ports:
