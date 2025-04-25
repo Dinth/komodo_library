@@ -18,6 +18,8 @@ services:
       - EBUSD_ACCESSLEVEL="*"
       - EBUSD_SCANCONFIG=
       - EBUSD_DEVICE="ens:10.10.25.8:9999"
+      - EBUSD_MQTTUSER: "${EBUSD_MQTTUSER}"
+      - EBUSD_MQTTPASS: "${EBUSD_MQTTPASS}"
     logging:
       driver: json-file
       options:
