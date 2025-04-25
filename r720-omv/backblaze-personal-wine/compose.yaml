@@ -1,37 +1,20 @@
-version: "3"
 services:
   backblaze-personal-wine:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     command:
       - /init
     container_name: backblaze-personal-wine
     environment:
-      - TZ=Europe/London
       - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/base/sbin:/opt/base/bin
       - ENV=/root/.docker_rc
-      - USER_ID=1000
-      - GROUP_ID=1000
+      - USER_ID=1002
+      - GROUP_ID=100
       - SUP_GROUP_IDS=
       - UMASK=0022
       - LANG=en_US.UTF-8
       - KEEP_APP_RUNNING=0
-      - APP_NICENESS=0
+      - APP_NICENESS=1
       - INSTALL_PACKAGES=
       - PACKAGES_MIRROR=
       - CONTAINER_DEBUG=0
@@ -46,18 +29,20 @@ services:
       - VNC_PASSWORD=
       - ENABLE_CJK_FONT=0
       - WINEPREFIX=/config/wine/
-      - 'APP_NAME=Backblaze Personal Backup'
       - FORCE_LATEST_UPDATE=true
       - DISABLE_AUTOUPDATE=true
       - DISABLE_VIRTUAL_DESKTOP=false
       - WINEDEBUG=-all
       - DISPLAY=:0
+      - CLEAN_TMP_DIR=1
     hostname: backblaze-personal-wine
     image: tessypowder/backblaze-personal-wine:ubuntu22
     ipc: private
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backblaze-personal-wine
     ports:
