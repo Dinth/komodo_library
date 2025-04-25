@@ -3,8 +3,7 @@ services:
   cronicle:
     cap_drop:
       - ALL
-    command:
-      - node bin/docker-entrypoint.js
+    command: ['node','bin/docker-entrypoint.js']
     container_name: cronicle
     entrypoint:
       - docker-entrypoint.sh
