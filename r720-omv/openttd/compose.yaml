@@ -1,16 +1,68 @@
-## Add your compose file here
+name: openttd
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  openttd:
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    command:
+      - /openttd.sh
+    container_name: openttd
+    entrypoint:
+      - /usr/bin/dumb-init
+      - --rewrite
+      - "15:3"
+      - --rewrite
+      - "9:3"
+      - --
+    environment:
+      DEBUG: "1"
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PGID: "100"
+      PUID: "1002"
+      loadgame: last-autosave
+    hostname: openttd
+    image: bateau/openttd:latest
+    ipc: private
+    logging:
+      driver: json-file
+    networks:
+      openttd: null
+    ports:
+      - mode: ingress
+        target: 3978
+        published: "3978"
+        protocol: tcp
+      - mode: ingress
+        target: 3978
+        published: "3978"
+        protocol: udp
+      - mode: ingress
+        target: 3979
+        published: "3979"
+        protocol: tcp
+      - mode: ingress
+        target: 3979
+        published: "3979"
+        protocol: udp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /opt/docker/openttd/openttd_config
+        target: /home/openttd/.config/openttd
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /opt/docker/openttd/openttd_save
+        target: /home/openttd/.openttd/save
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /opt/docker/openttd/openttd_data
+        target: /home/openttd/.local/share/openttd
+        bind:
+          create_host_path: true
+networks:
+  openttd:
+    name: openttd
+    driver: bridge
