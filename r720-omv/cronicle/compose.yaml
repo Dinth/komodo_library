@@ -1,16 +1,55 @@
-## Add your compose file here
+name: cronicle
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  cronicle:
+    cap_drop:
+      - ALL
+    command:
+      - node bin/docker-entrypoint.js
+    container_name: cronicle
+    entrypoint:
+      - docker-entrypoint.sh
+    environment:
+      CRONICLE_color: "1"
+      CRONICLE_echo: "1"
+      CRONICLE_foreground: "1"
+      HOSTNAME: main
+      NODE_VERSION: 18.20.5
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      YARN_VERSION: 1.22.22
+      debug_level: "1"
+    hostname: 9923c43e8c5a
+    image: soulteary/cronicle:latest
+    ipc: private
+    logging:
+      driver: json-file
+    networks:
+      cronicle: null
+    ports:
+      - mode: ingress
+        target: 3012
+        published: "3012"
+        protocol: tcp
+    restart: unless-stopped
+    user: 1002:100
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /opt/docker/cronicle/cronicle_data
+        target: /opt/cronicle/data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+        bind:
+          create_host_path: true
+    working_dir: /opt/cronicle
+networks:
+  cronicle:
+    name: cronicle
+    driver: bridge
