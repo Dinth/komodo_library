@@ -1,16 +1,38 @@
-## Add your compose file here
+version: "3.8"
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  ebusd:
+    container_name: ebusd
+    hostname: ebusd
+    image: john30/ebusd:latest
+    ipc: private
+    environment:
+      - EBUSD_MQTTINT=/etc/ebusd/mqtt-hassio.cfg
+      - EBUSD_MQTTJSON="true"
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - EBUSD_FOREGROUND=
+      - EBUSD_MQTTHOST=10.10.1.11
+      - EBUSD_MQTTPORT=1883
+      - EBUSD_MQTTCLIENTID="ebusd"
+      - EBUSD_MQTTVAR="filter-direction=r|u|^w"
+      - EBUSD_MQTTLOG=
+      - EBUSD_ACCESSLEVEL="*"
+      - EBUSD_SCANCONFIG=
+      - EBUSD_DEVICE="ens:10.10.25.8:9999"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - ebusd
+    ports:
+      - 8888:8888/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/ebusd/ebusd_data:/etc/ebusd
+networks:
+  ebusd:
+    name: ebusd
+    driver: bridge
+    external: false
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
