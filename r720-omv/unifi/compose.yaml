@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-
   unifi-db:
     image: docker.io/mongo:8
     container_name: unifi-db
