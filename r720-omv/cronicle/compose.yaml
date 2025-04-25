@@ -12,12 +12,7 @@ services:
       CRONICLE_color: "1"
       CRONICLE_echo: "1"
       CRONICLE_foreground: "1"
-      HOSTNAME: main
-      NODE_VERSION: 18.20.5
-      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      YARN_VERSION: 1.22.22
-      debug_level: "1"
-    hostname: 9923c43e8c5a
+    hostname: cronicle
     image: soulteary/cronicle:latest
     ipc: private
     logging:
