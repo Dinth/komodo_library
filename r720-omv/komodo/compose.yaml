@@ -37,7 +37,7 @@ services:
       KOMODO_DATABASE_PASSWORD: "${KOMODO_DB_PASSWORD}"
       COMPOSE_KOMODO_IMAGE_TAG: "latest"
       COMPOSE_LOGGING_DRIVER: "local"
-      KOMODO_DB_USERNAME: "admin"
+      KOMODO_DB_USERNAME: "${KOMODO_DB_USERNAME}"
       KOMODO_HOST: "http://10.10.1.13"
       KOMODO_TITLE: "Komodo"
       KOMODO_FIRST_SERVER: "https://host.docker.internal:8120"
