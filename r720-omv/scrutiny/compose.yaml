@@ -68,6 +68,7 @@ services:
       SCRUTINY_WEB_INFLUXDB_ORG: "scrutiny"
       SCRUTINY_WEB_INFLUXDB_PORT: "8086"
       SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
+      SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
     hostname: scrutiny-web
     image: ghcr.io/analogj/scrutiny:master-web
     ipc: private
