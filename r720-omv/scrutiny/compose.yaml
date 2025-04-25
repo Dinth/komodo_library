@@ -1,16 +1,93 @@
-## Add your compose file here
+name: scrutiny
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  scrutiny-collector:
+    cap_drop:
+      - ALL
+    command:
+      - /entrypoint-collector.sh
+    container_name: scrutiny-collector
+    devices:
+      - source: /dev/sda
+        target: /dev/sda
+        permissions: rwm
+      - source: /dev/sdb
+        target: /dev/sdb
+        permissions: rwm
+      - source: /dev/sdc
+        target: /dev/sdc
+        permissions: rwm
+      - source: /dev/sdd
+        target: /dev/sdd
+        permissions: rwm
+      - source: /dev/sde
+        target: /dev/sde
+        permissions: rwm
+      - source: /dev/sdf
+        target: /dev/sdf
+        permissions: rwm
+      - source: /dev/sdg
+        target: /dev/sdg
+        permissions: rwm
+      - source: /dev/sdh
+        target: /dev/sdh
+        permissions: rwm
+      - source: /dev/sdi
+        target: /dev/sdi
+        permissions: rwm
+      - source: /dev/sdj
+        target: /dev/sdj
+        permissions: rwm
+    environment:
+      COLLECTOR_API_ENDPOINT: "http://10.10.1.13:93"
+    hostname: scrutiny-collector
+    image: ghcr.io/analogj/scrutiny:master-collector
+    ipc: private
+    logging:
+      driver: json-file
+    networks:
+      scrutiny: null
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /run/udev
+        target: /run/udev
+        read_only: true
+        bind:
+          create_host_path: true
+    working_dir: /opt/scrutiny
+  scrutiny-web:
+    cap_drop:
+      - ALL
+    command:
+      - /opt/scrutiny/bin/scrutiny
+      - start
+    container_name: scrutiny-web
+    environment:
+      PATH: /opt/scrutiny/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      SCRUTINY_WEB_INFLUXDB_HOST: "10.10.1.11"
+      SCRUTINY_WEB_INFLUXDB_ORG: "scrutiny"
+      SCRUTINY_WEB_INFLUXDB_PORT: "8086"
+    hostname: scrutiny-web
+    image: ghcr.io/analogj/scrutiny:master-web
+    ipc: private
+    logging:
+      driver: json-file
+    networks:
+      scrutiny: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "93"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /opt/docker/scrutiny/scrutiny_config
+        target: /opt/scrutiny/config
+        bind:
+          create_host_path: true
+    working_dir: /opt/scrutiny
+networks:
+  scrutiny:
+    name: scrutiny
+    driver: bridge
