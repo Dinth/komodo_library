@@ -1,5 +1,6 @@
 services:
   bricktracker:
+    user: "1002:100"
     cap_drop:
       - ALL
     container_name: bricktracker
