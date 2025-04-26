@@ -1,6 +1,7 @@
-
 services:
   bricktracker:
+    cap_drop:
+      - ALL
     container_name: bricktracker
     restart: unless-stopped
     image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
