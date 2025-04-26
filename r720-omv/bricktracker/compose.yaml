@@ -13,7 +13,8 @@ services:
       - /opt/docker/bricktracker/bricktracker_parts:/app/static/parts/
       - /opt/docker/bricktracker/bricktracker_sets:/app/static/sets/
     environment:
-      BK_DATABASE_PATH: /data/app.db
-      BK_MINIFIGURES_FOLDER: minifigures
-      BK_RETIRED_SETS_PATH: /data/retired_sets.csv
-      BK_THEMES_PATH: /data/themes.csv
+      BK_DATABASE_PATH: "/data/app.db"
+      BK_MINIFIGURES_FOLDER: "minifigures"
+      BK_RETIRED_SETS_PATH: "/data/retired_sets.csv"
+      BK_THEMES_PATH: "/data/themes.csv"
+      BK_REBRICKABLE_API_KEY: "${BK_REBRICKABLE_API_KEY}"
