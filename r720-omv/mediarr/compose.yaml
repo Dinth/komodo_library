@@ -385,7 +385,6 @@ services:
     command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
     container_name: flaresolverr
     entrypoint: ["/usr/bin/dumb-init","--"]
-    environment:
     hostname: flareresolverr
     image: flaresolverr/flaresolverr:latest
     ipc: private
