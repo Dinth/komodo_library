@@ -30,6 +30,10 @@ services:
         max-size: "10m"
         max-file: "3"
     ipc: private
-network: 
+    networks: 
+      - bricktracker
+networks: 
   bricktracker:
+    driver: bridge
+    name: bricktracker
     external: false
