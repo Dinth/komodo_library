@@ -108,8 +108,8 @@ services:
     security_opt:
       - label=disable
     volumes:
-      - /opt/docker/mediarr/jacketvpn_blackhole:/blackhole
-      - /opt/docker/mediarr/jacketvpn_config:/config
+      - /opt/docker/mediarr/jackettvpn_blackhole:/blackhole
+      - /opt/docker/mediarr/jackettvpn_config:/config
     working_dir: /opt
   recommendarr:
     cap_add:
