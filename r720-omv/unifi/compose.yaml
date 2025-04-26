@@ -19,6 +19,7 @@ services:
     environment:
       PUID: "1002"
       PGID: "100"
+      TZ: "${TZ}"
       MONGO_USER: "unifi"
       MONGO_PASS: "${MONGO_PASS}"
       MONGO_HOST: "unifi-db"
