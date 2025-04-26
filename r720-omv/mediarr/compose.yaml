@@ -88,6 +88,9 @@ services:
       PGID: "100"
       PUID: "1001"
       HEALTH_CHECK_AMOUNT: "300"
+      VPN_ENABLED: "yes"
+      VPN_USERNAME: "${VPN_USERNAME}"
+      VPN_PASSWORD: "${VPN_PASSWORD}"
     hostname: jackettvpn
     image: dyonr/jackettvpn:latest
     ipc: private
