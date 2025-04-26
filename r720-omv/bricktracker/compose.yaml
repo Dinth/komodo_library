@@ -18,3 +18,8 @@ services:
       BK_RETIRED_SETS_PATH: "/data/retired_sets.csv"
       BK_THEMES_PATH: "/data/themes.csv"
       BK_REBRICKABLE_API_KEY: "${BK_REBRICKABLE_API_KEY}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3333"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
