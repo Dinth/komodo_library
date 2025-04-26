@@ -1,16 +1,495 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  qbittorrentvpn:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/bin/bash','/usr/local/bin/init.sh']
+    container_name: qbittorrentvpn
+    devices:
+      - /dev/net/tun
+    entrypoint:
+      - /usr/bin/dumb-init
+      - --
+    environment:
+      VPN_ENABLED: "1"
+      LAN_NETWORK: "10.10.0.0/16"
+      PUID: "1001"
+      GUID: "100"
+      WEBUI_PORT: "8008"
+      VPN_PROV: "custom"
+      NAME_SERVERS: "1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4,10.10.0.1"
+      ENABLE_PRIVOXY: "no"
+      VPN_USERNAME: "${VPN_USERNAME}"
+      VPN_PASSWORD: "${VPN_PASSWORD}"
+    hostname: qbittorrentvpn
+    image: binhex/arch-qbittorrentvpn:latest
+    ipc: private
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 31408:31408/tcp
+      - 31408:31408/udp
+      - 8008:8008/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/mediarr/qbittorrentvpn_config:/config
+      - /Data/Unsorted:/data
+      - /etc/localtime:/etc/localtime:ro
+    working_dir: /
+  jackettvpn:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_ADMIN
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/bin/bash','/etc/openvpn/start.sh']
+    container_name: jackettvpn
+    devices:
+      - /dev/net/tun
+    environment:
+      DISABLE_IPV6: "1"
+      LAN_NETWORK: "10.10.0.0/16"
+      HEALTH_CHECK_HOST: "8.8.8.8"
+      PGID: "100"
+      PUID: "1001"
+      HEALTH_CHECK_AMOUNT: "300"
+    hostname: jackettvpn
+    image: dyonr/jackettvpn:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 9117:9117/tcp
+    privileged: true
+    restart: unless-stopped
+    security_opt:
+      - label=disable
+    volumes:
+      - /opt/docker/mediarr/jacketvpn_blackhole:/blackhole
+      - /opt/docker/mediarr/jacketvpn_config:/config
+    working_dir: /opt
+  recommendarr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['sh','/start-unified.sh']
+    container_name: recommendarr
+    entrypoint:
+      - docker-entrypoint.sh
+    environment:
+      PORT: "8282"
+    hostname: recommendarr
+    image: tannermiddleton/recommendarr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 8282:8282/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/mediarr/recommendarr_data:/app/server/data
+    working_dir: /app
+  bazarr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: bazarr
+    entrypoint:
+      - /init
+    environment:
+      TZ: "${TZ}"
+      PUID: "1001"
+      PGID: "100"
+    hostname: bazarr
+    image: linuxserver/bazarr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 6767:6767/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/mediarr/bazarr_config:/config
+      - /Data/Movies:/movies
+      - /Data/TVShows:/tv
+    working_dir: /   
+  lidarr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: lidarr
+    entrypoint:
+      - /init
+    environment:
+      PUID: "1001"
+      PGID: "100"
+      TZ: "${TZ}"
+    hostname: lidarr
+    image: linuxserver/lidarr:develop
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 8686:8686/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/Music:/music
+      - /opt/docker/mediarr/lidarr_config:/config
+      - /Data/Unsorted:/downloads
+    working_dir: /    
+  iplayarr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['npm','run','start']
+    container_name: iplayarr
+    entrypoint:
+      - docker-entrypoint.sh
+    environment:
+      PUID: "1001"
+      PGID: "100"
+      API_KEY: "${IPLAYARR_API_KEY}"
+      DOWNLOAD_DIR: "/mnt/media/!Complete"
+      COMPLETE_DIR: "/mnt/media/!Incomplete"
+      STORAGE_LOCATION: "/config"
+      CACHE_LOCATION: "/data"
+      REDIS_HOST: "10.10.1.13"
+      REDIS_PORT: "6379"
+    hostname: iplayarr
+    image: nikorag/iplayarr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 4404:4404/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/Unsorted:/mnt/media
+      - /opt/docker/mediarr/iplayarr_config:/config
+      - /opt/docker/mediarr/iplayarr_data:/data
+    working_dir: /app
+  cleanuperr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: cleanuperr
+    entrypoint:
+      - ./cleanuperr
+    environment:
+      TZ: "${TZ}"
+      TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?'"
+      TRIGGERS__CONTENTBLOCKER: "0 0/5 * * * ?"
+      TRIGGERS__DOWNLOADCLEANER: "0 0 * * * ?"
+      QUEUECLEANER__ENABLED: "true"
+      QUEUECLEANER__RUNSEQUENTIALLY: "true"
+      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: "5"
+      QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE: "false"
+      QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE: "false"
+      QUEUECLEANER__STALLED_MAX_STRIKES: "5"
+      QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS: "false"
+      QUEUECLEANER__STALLED_IGNORE_PRIVATE: "false"
+      QUEUECLEANER__STALLED_DELETE_PRIVATE: "false"
+      CONTENTBLOCKER__ENABLED: "true"
+      CONTENTBLOCKER__IGNORE_PRIVATE: "false"
+      CONTENTBLOCKER__DELETE_PRIVATE: "false"
+      DOWNLOADCLEANER__ENABLED: "true"
+      DOWNLOADCLEANER__DELETE_PRIVATE: "false"
+      DOWNLOAD_CLIENT: "qBittorrent"
+      QBITTORRENT__URL: "http://10.10.1.13:8008"
+      QBITTORRENT__USERNAME: "${QBITTORRENT__USERNAME}"
+      QBITTORRENT__PASSWORD: "${QBITTORRENT__PASSWORD}"
+      DOWNLOADCLEANER__CATEGORIES__0__NAME: "sonarr"
+      DOWNLOADCLEANER__CATEGORIES__0__MAX_RATIO: "0.1"
+      DOWNLOADCLEANER__CATEGORIES__0__MIN_SEED_TIME: "0"
+      DOWNLOADCLEANER__CATEGORIES__0__MAX_SEED_TIME: "10"
+      DOWNLOADCLEANER__CATEGORIES__1__NAME: "radarr"
+      DOWNLOADCLEANER__CATEGORIES__1__MAX_RATIO: "0.1"
+      DOWNLOADCLEANER__CATEGORIES__1__MIN_SEED_TIME: "0"
+      DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME: "10"
+      SONARR__ENABLED: "true"
+      SONARR__SEARCHTYPE: "Episode"
+      SONARR__BLOCK__TYPE: "blacklist"
+      SONARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
+      SONARR__INSTANCES__0__URL: "http://10.10.1.13:8989"
+      SONARR__INSTANCES__0__APIKEY: "${SONARR__INSTANCES__0__APIKEY}"
+      RADARR__ENABLED: "true"
+      RADARR__BLOCK__TYPE: "blacklist"
+      RADARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
+      RADARR__INSTANCES__0__URL: "http://10.10.1.13:7878"
+      RADARR__INSTANCES__0__APIKEY: "${RADARR__INSTANCES__0__APIKEY}"
+      LIDARR__ENABLED: "true"
+      LIDARR__BLOCK__TYPE: "blacklist"
+      LIDARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
+      LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
+      LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
+    hostname: cleanuperr
+    image: ghcr.io/flmorg/cleanuperr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    restart: unless-stopped
+    working_dir: /app
+  flaresolverr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
+    container_name: flaresolverr
+    entrypoint: ["/usr/bin/dumb-init","--"]
+    environment:
+    hostname: flareresolverr
+    image: flaresolverr/flaresolverr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 8191:8191/tcp
+    restart: unless-stopped
+    user: flaresolverr
+    working_dir: /app
+  radarr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: radarr
+    entrypoint:
+      - /init
+    environment:
+      TZ: "${TZ}"
+      PUID: "1001"
+      PGID: "100"
+    hostname: radarr
+    image: linuxserver/radarr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 7878:7878/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/Unsorted:/downloads
+      - /Data/Movies:/movies
+      - /opt/docker/mediarr/radarr_config:/config
+    working_dir: /
+  sonarr:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: sonarr
+    entrypoint:
+      - /init
+    environment:
+      TZ: "${TZ}"
+      PUID: "1001"
+      PGID: "100"
+    hostname: sonarr
+    image: linuxserver/sonarr:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    ports:
+      - 8989:8989/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/Cartoons:/cartoons
+      - /Data/Anime:/anime
+      - /opt/docker/mediarr/sonarr_config:/config
+      - /Data/Unsorted:/downloads
+      - /Data/TVShows:/tv
+    working_dir: /
+    
+networks:
+  mediarr:
+    external: false
