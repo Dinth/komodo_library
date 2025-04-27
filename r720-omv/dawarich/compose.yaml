@@ -189,3 +189,7 @@ services:
       - dawarich_public:/var/app/public
       - dawarich_storage:/var/app/storage
     working_dir: /var/app
+networks:
+  cronicle:
+    name: dawarich
+    driver: bridge
