@@ -24,7 +24,7 @@ services:
         published: "3012"
         protocol: tcp
     restart: unless-stopped
-    user: 1002:100
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - type: bind
         source: /etc/timezone
