@@ -21,7 +21,7 @@ services:
       BK_THEMES_PATH: "/data/themes.csv"
       BK_REBRICKABLE_API_KEY: "${BK_REBRICKABLE_API_KEY}"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3333"]
+      test: ["CMD", "python", "-c", "import requests; r = requests.get('http://localhost:3333'); print(r.status_code == 200)"]
       interval: 10s
       timeout: 5s
       retries: 3
