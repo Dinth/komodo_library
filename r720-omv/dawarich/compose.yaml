@@ -1,4 +1,47 @@
 services:
+  dawarich-redis:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['redis-server']
+    container_name: dawarich-redis
+    entrypoint: ['docker-entrypoint.sh']
+    hostname: dawarich-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    image: redis:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - dawarich
+    ports:
+      - 6379:6379/tcp
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    working_dir: /data
   dawarich-postgis:
     cap_add:
       - AUDIT_WRITE
@@ -99,7 +142,7 @@ services:
       dawarich-postgis:
         condition: service_healthy
         restart: true
-      redis:
+      dawarich-redis:
         condition: service_healthy
         restart: true
       dawarich:
@@ -170,7 +213,7 @@ services:
       dawarich-postgis:
         condition: service_healthy
         restart: true
-      redis:
+      dawarich-redis:
         condition: service_healthy
         restart: true
     logging:
