@@ -1,5 +1,7 @@
 services:
   uptime-kuma:
+    cap:add:
+      - SETGID
     cap_drop:
       - ALL
     command: ['node','server/server.js']
