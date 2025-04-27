@@ -16,8 +16,7 @@
       - SYS_CHROOT
     cap_drop:
       - ALL
-    command:
-      - postgres
+    command: ['postgres']
     container_name: dawarich-postgis
     entrypoint: ['docker-entrypoint.sh']
     environment:
