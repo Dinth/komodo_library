@@ -1,6 +1,6 @@
 services:
   uptime-kuma:
-    cap:add:
+    cap_add:
       - SETGID
     cap_drop:
       - ALL
