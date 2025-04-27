@@ -1,16 +1,42 @@
-## Add your compose file here
+version: "3"
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  uptime-kuma:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['node','server/server.js']
+    container_name: uptime-kuma
+    entrypoint: ['/usr/bin/dumb-init','--','extra/entrypoint.sh']
+    hostname: uptime-kuma
+    image: louislam/uptime-kuma:1
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - uptime-kuma
+    ports:
+      - 3001:3001/tcp
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma_data:/app/data
+    working_dir: /app
+networks:
+  uptime-kuma:
+    name: uptime-kuma
+    driver: bridge
+    external: false
