@@ -17,8 +17,8 @@ services:
     image: lscr.io/linuxserver/unifi-network-application:latest
     container_name: unifi-network-application
     environment:
-      PUID: "1002"
-      PGID: "100"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
       MONGO_USER: "unifi"
       MONGO_PASS: "${MONGO_PASS}"
