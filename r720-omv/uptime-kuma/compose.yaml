@@ -35,7 +35,7 @@ services:
       - 3001:3001/tcp
     restart: unless-stopped
     volumes:
-      - uptime-kuma_data:/app/data
+      - /opt/docker/uptime-kuma/uptime-kuma_data:/app/data
     working_dir: /app
 networks:
   uptime-kuma:
