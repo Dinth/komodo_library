@@ -40,7 +40,7 @@ services:
       - 6379:6379/tcp
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+      - /opt/docker/dawarich/redis_data:/data
     working_dir: /data
   dawarich-postgis:
     cap_add:
@@ -85,7 +85,7 @@ services:
       - 5433:5432/tcp
     restart: unless-stopped
     volumes:
-      - postgis_data:/var/lib/postgresql/data
+      - /opt/docker/dawarich/postgis_data:/var/lib/postgresql/data
     working_dir: /
 
   dawarich-sidekiq:
@@ -108,9 +108,7 @@ services:
       - ALL
     command: ['sidekiq']
     container_name: dawarich-sidekiq
-    entrypoint:
-      - bundle
-      - exec
+    entrypoint: ['bundle','exec']
     environment:
       DATABASE_HOST: "dawarich_postgis"
       DATABASE_USERNAME: "dawarich"
@@ -157,10 +155,10 @@ services:
       - dawarich
     restart: unless-stopped
     volumes:
-      - dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
-      - dawarich_public:/var/app/public
-      - dawarich_watched:/var/app/tmp/imports/watched
-      - dawarich_storage:/var/app/storage
+      - /opt/docker/dawarich/dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
+      - /opt/docker/dawarich/dawarich_public:/var/app/public
+      - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
+      - /opt/docker/dawarich/dawarich_storage:/var/app/storage
     working_dir: /var/app
   dawarich:
     cap_add:
@@ -227,10 +225,10 @@ services:
       - 4745:3000/tcp
     restart: unless-stopped
     volumes:
-      - dawarich_watched:/var/app/tmp/imports/watched
-      - dawarich_gem_cache_app:/usr/local/bundle/gems_app
-      - dawarich_public:/var/app/public
-      - dawarich_storage:/var/app/storage
+      - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
+      - /opt/docker/dawarich/dawarich_gem_cache_app:/usr/local/bundle/gems_app
+      - /opt/docker/dawarich/dawarich_public:/var/app/public
+      - /opt/docker/dawarich/dawarich_storage:/var/app/storage
     working_dir: /var/app
 networks:
   dawarich:
