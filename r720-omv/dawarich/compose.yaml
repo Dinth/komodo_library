@@ -96,7 +96,7 @@ services:
       start_period: 30s
       timeout: 10s
     depends_on:
-      postgis:
+      dawarich-postgis:
         condition: service_healthy
         restart: true
       redis:
@@ -167,7 +167,7 @@ services:
       start_period: 30s
       timeout: 10s
     depends_on:
-      postgis:
+      dawarich-postgis:
         condition: service_healthy
         restart: true
       redis:
