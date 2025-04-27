@@ -1,16 +1,185 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  dawarich-postgis:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command:
+      - postgres
+    container_name: dawarich-postgis
+    entrypoint: ['docker-entrypoint.sh']
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    hostname: dawarich-postgis
+    image: postgis/postgis:17-3.5-alpine
+    ipc: private
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - dawarich
+    ports:
+      - 5433:5432/tcp
+    restart: unless-stopped
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    working_dir: /
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  dawarich-sidekiq:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['sidekiq']
+    container_name: dawarich-sidekiq
+    entrypoint:
+      - bundle
+      - exec
+    environment:
+      DATABASE_HOST: "dawarich_postgis"
+      DATABASE_USERNAME: "dawarich"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_NAME: "dawarich"
+      APPLICATION_HOST: "localhost"
+      APPLICATION_HOSTS: "localhost"
+      DISTANCE_UNIT: "km"
+      REDIS_URL: "redis://10.10.1.13:6379/0"
+      BACKGROUND_PROCESSING_CONCURRENCY: "10"
+      APPLICATION_PROTOCOL: "http"
+      PHOTON_API_USE_HTTPS: "true"
+      REVERSE_GEOCODING_ENABLED: "true"
+      PHOTON_API_HOST: "photon.dawarich.app"
+      PHOTON_API_KEY: "${PHOTON_API_KEY}"
+      SELF_HOSTED: "true"
+    expose:
+      - 3000/tcp
+    hostname: dawarich-sidekiq
+    image: freikin/dawarich:0.25.4
+    ipc: private
+    healthcheck:
+      test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
+      interval: 10s
+      retries: 30
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      postgis:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+      dawarich:
+        condition: service_healthy
+         restart: true
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - dawarich
+    restart: unless-stopped
+    volumes:
+      - dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
+      - dawarich_public:/var/app/public
+      - dawarich_watched:/var/app/tmp/imports/watched
+      - dawarich_storage:/var/app/storage
+    working_dir: /var/app
+  dawarich:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['bin/rails','server','-p','3000','-b','::']
+    container_name: dawarich
+    entrypoint: ['bundle','exec']
+    environment:
+      DATABASE_HOST: "dawarich-postgis"
+      DATABASE_USERNAME: "dawarich"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_NAME: "dawarich"
+      APPLICATION_HOST: "localhost"
+      APPLICATION_HOSTS: "localhost,traces.wickhay.uk"
+      DISTANCE_UNIT: "km"
+      REDIS_URL: "redis://10.10.1.13:6379/0"
+      MIN_MINUTES_SPENT_IN_CITY: "120"
+      TIME_ZONE: "${TZ}"
+      PHOTON_API_USE_HTTP: "true"
+      APPLICATION_PROTOCOL: "http"
+      REVERSE_GEOCODING_ENABLED: "true"
+      PHOTON_API_HOST: "photon.dawarich.app"
+      PHOTON_API_KEY: "${PHOTON_API_KEY}"
+      SELF_HOSTED: "true"
+    hostname: dawarich
+    image: freikin/dawarich:0.25.4
+    ipc: private
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
+      interval: 10s
+      retries: 30
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      postgis:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
+        restart: true
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - dawarich
+    ports:
+      - 4745:3000/tcp
+    restart: unless-stopped
+    volumes:
+      - dawarich_watched:/var/app/tmp/imports/watched
+      - dawarich_gem_cache_app:/usr/local/bundle/gems_app
+      - dawarich_public:/var/app/public
+      - dawarich_storage:/var/app/storage
+    working_dir: /var/app
