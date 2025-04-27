@@ -1,3 +1,4 @@
+services:
   dawarich-postgis:
     cap_add:
       - AUDIT_WRITE
