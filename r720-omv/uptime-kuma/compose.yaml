@@ -26,7 +26,9 @@ services:
     ipc: private
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - uptime-kuma
     ports:
