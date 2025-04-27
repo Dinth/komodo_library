@@ -32,7 +32,9 @@
       timeout: 10s
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - dawarich
     ports:
@@ -104,7 +106,9 @@
         restart: true
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - dawarich
     restart: unless-stopped
@@ -170,7 +174,9 @@
         restart: true
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - dawarich
     ports:
