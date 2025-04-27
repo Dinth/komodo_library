@@ -101,7 +101,7 @@
         restart: true
       dawarich:
         condition: service_healthy
-         restart: true
+        restart: true
     logging:
       driver: json-file
       options: {}
