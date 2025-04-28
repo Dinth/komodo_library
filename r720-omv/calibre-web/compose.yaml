@@ -1,16 +1,45 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  calibre-web:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: calibre-web
+    entrypoint:
+      - /init
+    environment:
+      - TZ=Europe/London
+      - DOCKER_MODS=linuxserver/mods:universal-calibre|linuxserver/mods:universal-package-install
+      - PUID=1003
+      - PGID=100
+      - LANGUAGE=en_GB.UTF-8
+      - LANG=en_GB.UTF-8
+      - INSTALL_PACKAGES=libmagic1
+    hostname: calibre-web
+    image: linuxserver/calibre-web:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - calibre
+    ports:
+      - 8083:8083/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/Ebooks:/books
+      - /opt/docker/calibre-web/calibre-web_config:/config
+    working_dir: /
+    
