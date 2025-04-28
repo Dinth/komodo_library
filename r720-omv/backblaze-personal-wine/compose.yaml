@@ -2,6 +2,11 @@ services:
   backblaze-personal-wine:
     cap_add:
       - CHOWN
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
     cap_drop:
       - ALL
     command:
