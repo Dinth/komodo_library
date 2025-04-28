@@ -1,16 +1,48 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  romm:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command:
+      - /init
+    container_name: romm
+    entrypoint:
+      - /docker-entrypoint.sh
+    environment:
+      DB_HOST: "10.10.1.13"
+      DB_NAME: "romm"
+      DB_USER: "romm"
+      DB_PASSWD: "${ROMM_DB_PASSWD}"
+      ROMM_AUTH_SECRET_KEY: "${ROMM_AUTH_SECRET_KEY}"
+      IGDB_CLIENT_ID: "${IGDB_CLIENT_ID}"
+      IGDB_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
+    hostname: romm
+    image: rommapp/romm:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - romm
+    ports:
+      - 4040:8080/tcp
+    restart: unless-stopped
+    volumes:
+      - romm_assets:/romm/assets
+      - romm_config:/romm/config
+      - /Data/ROMs:/romm/library
+      - romm_resources:/romm/resources
+    working_dir: /romm
