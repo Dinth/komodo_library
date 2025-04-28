@@ -1,3 +1,4 @@
+services:
   calibre-web:
     cap_add:
       - AUDIT_WRITE
