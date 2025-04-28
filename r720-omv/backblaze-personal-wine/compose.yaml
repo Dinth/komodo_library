@@ -8,35 +8,18 @@ services:
       - /init
     container_name: backblaze-personal-wine
     environment:
-      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/base/sbin:/opt/base/bin
-      - ENV=/root/.docker_rc
-      - USER_ID=1002
-      - GROUP_ID=100
-      - SUP_GROUP_IDS=
-      - UMASK=0022
-      - LANG=en_US.UTF-8
-      - KEEP_APP_RUNNING=0
-      - APP_NICENESS=1
-      - INSTALL_PACKAGES=
-      - PACKAGES_MIRROR=
-      - CONTAINER_DEBUG=0
-      - DISPLAY_WIDTH=900
-      - DISPLAY_HEIGHT=700
-      - DARK_MODE=0
-      - SECURE_CONNECTION=0
-      - SECURE_CONNECTION_VNC_METHOD=SSL
-      - SECURE_CONNECTION_CERTS_CHECK_INTERVAL=60
-      - WEB_LISTENING_PORT=5800
-      - VNC_LISTENING_PORT=5900
-      - VNC_PASSWORD=
-      - ENABLE_CJK_FONT=0
-      - WINEPREFIX=/config/wine/
-      - FORCE_LATEST_UPDATE=true
-      - DISABLE_AUTOUPDATE=true
-      - DISABLE_VIRTUAL_DESKTOP=false
-      - WINEDEBUG=-all
-      - DISPLAY=:0
-      - CLEAN_TMP_DIR=1
+      USER_ID: "1002"
+      GROUP_ID: "100"
+      UMASK: "0022"
+      LANG: "en_GB.UTF-8"
+      KEEP_APP_RUNNING: "0"
+      APP_NICENESS: "1"
+      CONTAINER_DEBUG: "0"
+      DISPLAY_WIDTH: "900"
+      DISPLAY_HEIGHT: "700"
+      WEB_LISTENING_PORT: "5800"
+      VNC_LISTENING_PORT: "5900"
+      VNC_PASSWORD: ""
     hostname: backblaze-personal-wine
     image: tessypowder/backblaze-personal-wine:ubuntu22
     ipc: private
@@ -45,6 +28,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backblaze-personal-wine
     ports:
