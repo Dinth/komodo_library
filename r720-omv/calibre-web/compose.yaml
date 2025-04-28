@@ -35,7 +35,7 @@ services:
       driver: json-file
       options: {}
     networks:
-      - calibre
+      - calibre-web
     ports:
       - 8083:8083/tcp
     restart: unless-stopped
@@ -43,4 +43,8 @@ services:
       - /Data/Ebooks:/books
       - /opt/docker/calibre-web/calibre-web_config:/config
     working_dir: /
-    
+networks:
+  calibre-web:
+    name: calibre-web
+    driver: bridge
+    external: false
