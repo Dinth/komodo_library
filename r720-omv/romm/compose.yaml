@@ -47,3 +47,7 @@ services:
       - /Data/ROMs:/romm/library
       - /opt/docker/romm/romm_resources:/romm/resources
     working_dir: /romm
+networks:
+  romm:
+    name: romm
+    driver: bridge
