@@ -7,6 +7,8 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
+      - AUDIT_WRITE
+
     cap_drop:
       - ALL
     command:
