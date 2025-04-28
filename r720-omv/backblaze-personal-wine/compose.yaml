@@ -1,5 +1,7 @@
 services:
   backblaze-personal-wine:
+    cap_add:
+      - CHOWN
     cap_drop:
       - ALL
     command:
@@ -38,11 +40,11 @@ services:
     hostname: backblaze-personal-wine
     image: tessypowder/backblaze-personal-wine:ubuntu22
     ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3333"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - backblaze-personal-wine
     ports:
