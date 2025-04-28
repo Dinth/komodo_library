@@ -230,3 +230,4 @@ networks:
   dawarich:
     name: dawarich
     driver: bridge
+    external: false
