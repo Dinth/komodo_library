@@ -1,3 +1,4 @@
+services:
   romm:
     cap_add:
       - AUDIT_WRITE
