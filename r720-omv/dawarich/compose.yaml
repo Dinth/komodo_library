@@ -36,8 +36,6 @@ services:
         max-file: "3"
     networks:
       - dawarich
-    ports:
-      - 6379:6379/tcp
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/redis_data:/data
@@ -81,8 +79,6 @@ services:
         max-file: "3"
     networks:
       - dawarich
-    ports:
-      - 5433:5432/tcp
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/postgis_data:/var/lib/postgresql/data
