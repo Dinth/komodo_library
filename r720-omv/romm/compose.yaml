@@ -41,8 +41,8 @@
       - 4040:8080/tcp
     restart: unless-stopped
     volumes:
-      - romm_assets:/romm/assets
-      - romm_config:/romm/config
+      - /opt/docker/romm/romm_assets:/romm/assets
+      - /opt/docker/romm/romm_config:/romm/config
       - /Data/ROMs:/romm/library
-      - romm_resources:/romm/resources
+      - /opt/docker/romm/romm_resources:/romm/resources
     working_dir: /romm
