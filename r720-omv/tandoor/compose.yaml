@@ -27,7 +27,7 @@
       POSTGRES_USER: "tandoor"
       POSTGRES_PASSWORD: "${TANDOOR_DB_PASSWORD}"
       POSTGRES_DB: "tandoor"
-      ALLOWED_HOSTS: "recipes.wickhay.uk,127.0.0.1"
+      ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},127.0.0.1"
     hostname: tandoor
     image: vabene1111/recipes:latest
     ipc: private
