@@ -1,16 +1,45 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  tandoor:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: tandoor
+    entrypoint:
+      - /opt/recipes/boot.sh
+    environment:
+      DB_ENGINE: "django.db.backends.postgresql"
+      SECRET_KEY: "${TANDOOR_SECRET_KEY}"
+      POSTGRES_HOST: "10.10.1.13"
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: "tandoor"
+      POSTGRES_PASSWORD: "${TANDOOR_DB_PASSWORD}"
+      POSTGRES_DB: "tandoor"
+      ALLOWED_HOSTS: "recipes.wickhay.uk,127.0.0.1"
+    hostname: tandoor
+    image: vabene1111/recipes:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - tandoor
+    ports:
+      - 1244:8080/tcp
+    restart: unless-stopped
+    volumes:
+      - tandoor_static:/opt/recipes/staticfiles
+      - tandoor_media:/opt/recipes/mediafiles
+    working_dir: /opt/recipes
