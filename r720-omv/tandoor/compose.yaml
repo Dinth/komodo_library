@@ -18,8 +18,7 @@ services:
     cap_drop:
       - ALL
     container_name: tandoor
-    entrypoint:
-      - /opt/recipes/boot.sh
+    entrypoint: ['/opt/recipes/boot.sh']
     environment:
       DB_ENGINE: "django.db.backends.postgresql"
       SECRET_KEY: "${TANDOOR_SECRET_KEY}"
