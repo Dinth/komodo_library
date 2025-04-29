@@ -1,16 +1,17 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  deceptifeed:
+    image: deceptifeed/server:latest
+    container_name: deceptifeed
+    environment:
+      TZ: "${TZ}"
+    ports:
+      - "12222:2222"
+      - "18080:8080"
+      - "18443:8443"
+      - "19000:9000"
+    volumes:
+      - deceptifeed_data:/data/
+    restart: unless-stopped
+networks:
+  deceptifeed:
+    external: false
