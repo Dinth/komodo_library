@@ -50,4 +50,5 @@ networks:
   tandoor:
     external: false
     name: tandoor
+    driver: bridge
     
