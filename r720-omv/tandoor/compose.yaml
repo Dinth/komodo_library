@@ -34,7 +34,9 @@ services:
     ipc: private
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: 10m
+        max-file: 3
     networks:
       - tandoor
     ports:
@@ -44,3 +46,8 @@ services:
       - /opt/docker/tandoor/tandoor_static:/opt/recipes/staticfiles
       - /opt/docker/tandoor/tandoor_media:/opt/recipes/mediafiles
     working_dir: /opt/recipes
+networks:
+  tandoor:
+    external: false
+    name: tandoor
+    
