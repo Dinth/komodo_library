@@ -1,3 +1,4 @@
+services:
   tandoor:
     cap_add:
       - AUDIT_WRITE
@@ -40,6 +41,6 @@
       - 1244:8080/tcp
     restart: unless-stopped
     volumes:
-      - tandoor_static:/opt/recipes/staticfiles
-      - tandoor_media:/opt/recipes/mediafiles
+      - /opt/docker/tandoor/tandoor_static:/opt/recipes/staticfiles
+      - /opt/docker/tandoor/tandoor_media:/opt/recipes/mediafiles
     working_dir: /opt/recipes
