@@ -41,6 +41,12 @@ services:
       - /opt/docker/nextcloud/nextcloud_config:/config
       - /Data/IT/nextcloud:/data
     working_dir: /
+    healthcheck:
+      test: 'runuser -s /usr/local/bin/php - www-data /var/www/html/occ status 2>/dev/null | grep -e "installed: true" -e "maintenance: false" -e "needsDbUpgrade: false" | wc -l | [ "`cat`" = "3" ]'
+      interval: 60s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
 networks:
   nextcloud:
     driver: bridge
