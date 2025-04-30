@@ -1,16 +1,48 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+services  
+  nextcloud:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: nextcloud
+    entrypoint:
+      - /init
+    environment:
+      - TZ=Europe/London
+      - PUID=1001
+      - PGID=100
+    hostname: nextcloud
+    image: linuxserver/nextcloud:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - nextcloud
+    ports:
+      - 1357:80/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/nextcloud/nextcloud_config:/config
+      - /Data/IT/nextcloud:/data
+    working_dir: /
+networks:
+  nextcloud:
+    driver: bridge
+    name: nextcloud
+    external: false
