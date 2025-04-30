@@ -45,11 +45,11 @@ services:
       - 4142:80/tcp
     restart: unless-stopped
     volumes:
-      - hortusfox_logs:/var/www/html/app/logs
-      - hortusfox_backup:/var/www/html/public/backup
-      - hortusfox_themes:/var/www/html/public/themes
-      - hortusfox_migrate:/var/www/html/app/migrations
-      - hortusfox_images:/var/www/html/public/img
+      - /opt/docker/hortusfox/hortusfox_logs:/var/www/html/app/logs
+      - /opt/docker/hortusfox/hortusfox_backup:/var/www/html/public/backup
+      - /opt/docker/hortusfox/hortusfox_themes:/var/www/html/public/themes
+      - /opt/docker/hortusfox/hortusfox_migrate:/var/www/html/app/migrations
+      - /opt/docker/hortusfox/hortusfox_images:/var/www/html/public/img
     working_dir: /var/www/html
 networks:
   hortusfox:
