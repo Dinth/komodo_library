@@ -1,4 +1,4 @@
-services  
+services:
   nextcloud:
     cap_add:
       - AUDIT_WRITE
