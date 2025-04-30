@@ -1,16 +1,58 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  hortusfox:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command:
+      - apache2-foreground
+    container_name: hortusfox
+    entrypoint:
+      - docker-entrypoint.sh
+    environment:
+      APP_ADMIN_EMAIL: "${ADMIN_EMAIL}"
+      APP_ADMIN_PASSWORD: "${HORTUSFOX_ADMIN_PASS}"
+      APP_TIMEZONE: "${TZ}"
+      DB_HOST: "10.10.1.13"
+      DB_PORT: "3306"
+      DB_DATABASE: "hortusfox"
+      DB_USERNAME: "hortusfox"
+      DB_CHARSET: "utf8mb4"
+      DB_PASSWORD: "${HORTUSFOX_DB_PASS}"
+      APP_DEBUG: "true"
+    hostname: hortusfox
+    image: ghcr.io/danielbrendel/hortusfox-web:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - hortusfox
+    ports:
+      - 4142:80/tcp
+    restart: unless-stopped
+    volumes:
+      - hortusfox_logs:/var/www/html/app/logs
+      - hortusfox_backup:/var/www/html/public/backup
+      - hortusfox_themes:/var/www/html/public/themes
+      - hortusfox_migrate:/var/www/html/app/migrations
+      - hortusfox_images:/var/www/html/public/img
+    working_dir: /var/www/html
+networks:
+  hortusfox:
+    driver: bridge
+    name: hortusfox
+    external: false
