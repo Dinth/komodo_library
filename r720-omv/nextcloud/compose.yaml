@@ -21,9 +21,9 @@ services
     entrypoint:
       - /init
     environment:
-      - TZ=Europe/London
-      - PUID=1001
-      - PGID=100
+      TZ: "${TZ}"
+      PUID: "1001"
+      PGID: "100"
     hostname: nextcloud
     image: linuxserver/nextcloud:latest
     ipc: private
