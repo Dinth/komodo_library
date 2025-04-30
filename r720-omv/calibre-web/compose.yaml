@@ -21,19 +21,19 @@ services:
     entrypoint:
       - /init
     environment:
-      - TZ=Europe/London
-      - DOCKER_MODS=linuxserver/mods:universal-calibre|linuxserver/mods:universal-package-install
-      - PUID=1003
-      - PGID=100
-      - LANGUAGE=en_GB.UTF-8
-      - LANG=en_GB.UTF-8
-      - INSTALL_PACKAGES=libmagic1
+      TZ: "Europe/London"
+      DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:universal-package-install"
+      PUID: "1003"
+      PGID: "100"
+      INSTALL_PACKAGES: "libmagic1"
     hostname: calibre-web
     image: linuxserver/calibre-web:latest
     ipc: private
     logging:
       driver: json-file
-      options: {}
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - calibre-web
     ports:
