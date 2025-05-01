@@ -1,1 +1,6 @@
-## Add resources to get started
+[[server]]
+name = "r720-omv"
+tags = ["servers"]
+[server.config]
+address = "https://host.docker.internal:8120"
+enabled = true
