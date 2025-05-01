@@ -1,16 +1,45 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  navidrome:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: navidrome
+    entrypoint: ['/app/navidrome']
+    hostname: navidrome
+    image: deluan/navidrome:latest
+    ipc: private
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    networks:
+      - navidrome
+    ports:
+      - 4533:4533/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/navidrome/navidrome_data:/data
+      - /Data/Music:/music:ro
+    working_dir: /app
+networks:
+  navidrome:
+    name: navidrome
+    drive: bridge
+    external: false
