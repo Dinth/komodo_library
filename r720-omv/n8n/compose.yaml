@@ -44,6 +44,7 @@ services:
     volumes:
       - /opt/docker/n8n/n8n_data:/home/node/.n8n
     working_dir: /home/node
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
 networks:
   n8n:
     name: n8n
