@@ -1,1 +1,318 @@
-## Add resources to get started
+[[stack]]
+name = "audiobookshelf"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/audiobookshelf"
+environment = """
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "backblaze-personal-wine"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/backblaze-personal-wine"
+environment = """
+TZ=[[TZ]]
+"""
+
+##
+
+[[stack]]
+name = "bricktracker"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/bricktracker"
+environment = """
+BK_REBRICKABLE_API_KEY=[[BRICKTRACKER_REBRICKABLE_API_KEY]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "calibre-web"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/calibre-web"
+environment = """
+MEDIA_PGID=[[MEDIA_PGID]]
+MEDIA_PUID=[[MEDIA_PUID]]
+TZ=[[TZ]]
+"""
+
+##
+
+[[stack]]
+name = "cronicle"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/cronicle"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "dawarich"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/dawarich"
+environment = """
+TZ=[[TZ]]
+DATABASE_PASSWORD=[[DAWARICH_DATABASE_PASSWORD]]  
+POSTGRES_PASSWORD=[[DAWARICH_DATABASE_ROOT_PASSWORD]]
+PHOTON_API_KEY=[[DAWARICH_PHOTON_API_KEY]]
+"""
+
+##
+
+[[stack]]
+name = "deceptifeed"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/deceptifeed"
+environment = """
+TZ=[[TZ]]
+"""
+
+##
+
+[[stack]]
+name = "ebusd"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/ebusd"
+environment = """
+EBUSD_MQTTUSER="[[MQTT_USERNAME]]"
+EBUSD_MQTTPASS="[[MQTT_PASSWORD]]"
+"""
+
+##
+
+[[stack]]
+name = "hortusfox"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/hortusfox"
+environment = """
+TZ=[[TZ]]
+ADMIN_EMAIL=[[ADMIN_EMAIL]]
+HORTUSFOX_DB_PASS=[[HORTUSFOX_DB_PASS]]
+HORTUSFOX_ADMIN_PASS=[[HORTUSFOX_ADMIN_PASS]]
+"""
+
+##
+
+[[stack]]
+name = "komodo"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/komodo"
+environment = """
+KOMODO_DB_USERNAME=admin
+KOMODO_DB_PASSWORD=[[KOMODO_DB_PASSWORD]]
+KOMODO_PASSKEY=[[KOMODO_PASSKEY]]
+TZ=[[TZ]]
+
+"""
+
+##
+
+[[stack]]
+name = "mediarr"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/mediarr"
+environment = """
+TZ=[[TZ]]
+VPN_USERNAME=[[VPN_USERNAME]]
+VPN_PASSWORD=[[VPN_PASSWORD]]
+IPLAYARR_API_KEY=[[IPLAYARR_API_KEY]]
+QBITTORRENT__USERNAME=[[QBITTORRENT_USER]]
+QBITTORRENT__PASSWORD=[[QBITTORRENT_PASS]]
+SONARR__INSTANCES__0__APIKEY=[[SONARR_APIKEY]]
+RADARR__INSTANCES__0__APIKEY=[[RADARR_APIKEY]]
+LIDARR__INSTANCES__0__APIKEY=[[LIDARR_APIKEY]]
+"""
+
+##
+
+[[stack]]
+name = "navidrome"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/navidrome"
+environment = """
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "nextcloud"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/nextcloud"
+environment = """
+TZ=[[TZ]]
+"""
+
+##
+
+[[stack]]
+name = "openttd"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/openttd"
+
+##
+
+[[stack]]
+name = "romm"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/romm"
+environment = """
+ROMM_DB_PASS=[[ROMM_DB_PASS]]
+ROMM_AUTH_SECRET_KEY=[[ROMM_AUTH_SECRET_KEY]]
+IGDB_CLIENT_ID=[[IGDB_CLIENT_ID]]
+IGDB_CLIENT_SECRET=[[IGDB_CLIENT_SECRET]]
+"""
+
+##
+
+[[stack]]
+name = "scrutiny"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/scrutiny"
+environment = """
+SCRUTINY_WEB_INFLUXDB_TOKEN=[[SCRUTINY_WEB_INFLUXDB_TOKEN]]
+SCRUTINY_WEB_NOTIFY_URLS=[[SCRUTINY_WEB_NOTIFY_URLS]]
+TZ=[[TZ]]
+"""
+
+##
+
+[[stack]]
+name = "tandoor"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/tandoor"
+environment = """
+TANDOOR_DB_PASSWORD=[[TANDOOR_DB_PASSWORD]]
+TANDOOR_SECRET_KEY=[[TANDOOR_SECRET_KEY]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
+
+##
+
+[[stack]]
+name = "unifi"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/unifi"
+environment = """
+MONGO_PASS=[[UNIFI_MONGO_PASS]]
+TZ=[[TZ]]
+DOCKER-PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "uptime-kuma"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/uptime-kuma"
