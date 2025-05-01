@@ -30,8 +30,6 @@ services:
     hostname: n8n
     image: docker.n8n.io/n8nio/n8n:latest
     ipc: private
-    labels:
-      com.centurylinklabs.watchtower.enable: true
     logging:
       driver: json-file
       options: {}
