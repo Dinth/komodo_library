@@ -39,5 +39,5 @@ services:
 networks:
   navidrome:
     name: navidrome
-    drive: bridge
+    driver: bridge
     external: false
