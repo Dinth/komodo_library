@@ -21,10 +21,10 @@ services:
     entrypoint:
       - /init
     environment:
-      TZ: "Europe/London"
+      TZ: "${TZ}"
       DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:universal-package-install"
-      PUID: "1003"
-      PGID: "100"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
       INSTALL_PACKAGES: "libmagic1"
     hostname: calibre-web
     image: linuxserver/calibre-web:latest
