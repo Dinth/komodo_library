@@ -34,7 +34,7 @@ services:
       driver: json-file
       options: {}
     networks:
-      - bridge-dns
+      - n8n
     ports:
       - 5678:5678/tcp
     restart: unless-stopped
