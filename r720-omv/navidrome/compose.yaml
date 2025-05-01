@@ -22,8 +22,6 @@ services:
     hostname: navidrome
     image: deluan/navidrome:latest
     ipc: private
-    labels:
-      com.centurylinklabs.watchtower.enable: true
     logging:
       driver: json-file
       options:
