@@ -23,6 +23,8 @@ services:
       TZ: "${TZ}"
       CSRF_TRUSTED_ORIGINS: "https://baby.${DOMAIN_NAME},http://10.10.1.13:3938"
       DEBUG: "true"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
     hostname: babybuddy
     image: linuxserver/babybuddy:latest
     ipc: private
@@ -37,7 +39,7 @@ services:
       - 3938:8000/tcp
     restart: unless-stopped
     volumes:
-      - babybuddy_data:/config
+      - /opt/docker/babybuddy/babybuddy_data:/config
     working_dir: /
 networks:
   babybuddy:
