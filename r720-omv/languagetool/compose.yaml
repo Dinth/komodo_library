@@ -20,7 +20,7 @@
     container_name: languagetool
     environment:
       LANGUAGE: "en_GB:en"
-      EXTRAOPTIONS="-Xmx382M"
+      EXTRAOPTIONS: "-Xmx382M"
     hostname: languagetool
     image: silviof/docker-languagetool:latest
     ipc: private
