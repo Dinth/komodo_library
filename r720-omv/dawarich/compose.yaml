@@ -62,7 +62,7 @@ services:
     container_name: dawarich-postgis
     entrypoint: ['docker-entrypoint.sh']
     environment:
-      POSTGRES_USER: "postgres"
+      POSTGRES_USER: "dawarich"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     hostname: dawarich-postgis
     image: postgis/postgis:17-3.5-alpine
