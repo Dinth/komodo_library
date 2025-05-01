@@ -36,8 +36,8 @@ services:
     restart: unless-stopped
     volumes:
       - /Data/Ebooks/Audiobooks:/audiobooks
-      - audiobookshelf_config:/config
-      - audiobookshelf_metadata:/metadata
+      - /opt/docker/audiobookshelf/audiobookshelf_config:/config
+      - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
       - /Data/Ebooks/Podcasts:/podcasts
     working_dir: /
 networks:
