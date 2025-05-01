@@ -40,6 +40,7 @@ services:
       - /opt/docker/grocy/grocy_data:/config
     working_dir: /
 networks:
-  name: grocy
-  driver: bridge
-  external: false
+  grocy:  
+    name: grocy
+    driver: bridge
+    external: false
