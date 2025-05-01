@@ -18,8 +18,7 @@ services:
     cap_drop:
       - ALL
     container_name: calibre-web
-    entrypoint:
-      - /init
+    entrypoint: ['/init']
     environment:
       TZ: "${TZ}"
       DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:universal-package-install"
