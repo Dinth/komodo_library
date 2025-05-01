@@ -1,16 +1,47 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  audiobookshelf:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['node','index.js']
+    container_name: audiobookshelf
+    entrypoint: ['tini','--']
+    environment:
+    hostname: audiobookshelf
+    image: advplyr/audiobookshelf:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - audiobookshelf
+    ports:
+      - 3378:80/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/Ebooks/Audiobooks:/audiobooks
+      - audiobookshelf_config:/config
+      - audiobookshelf_metadata:/metadata
+      - /Data/Ebooks/Podcasts:/podcasts
+    working_dir: /
+networks:
+  audiobookshelf:
+    name: audiobookshelf
+    driver: bridge
+    external: false
