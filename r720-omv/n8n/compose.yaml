@@ -18,7 +18,7 @@ services:
     cap_drop:
       - ALL
     container_name: n8n
-    entrypoint: ['tini'.'--','/docker-entrypoint.sh']
+    entrypoint: ['tini','--','/docker-entrypoint.sh']
     environment:
       DB_TYPE: "postgresdb"
       DB_POSTGRESDB_DATABASE: "n8n"
