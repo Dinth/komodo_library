@@ -92,3 +92,8 @@ services:
       - /opt/docker/frigate/frigate_config:/config
       - /opt/docker/frigate/frigate_storage:/media/frigate
     working_dir: /opt/frigate
+networks:
+  frigate:
+    name: frigate
+    driver: bridge
+    external: false
