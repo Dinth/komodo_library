@@ -25,6 +25,7 @@ services:
       PHOTOPRISM_DATABASE_DRIVER: "mysql"
       PHOTOPRISM_DATABASE_SERVER: "10.10.1.13"
       PHOTOPRISM_DATABASE_PASSWORD: "${PHOTOPRISM_DB_PASS}"
+      PHOTOPRISM_LOG_LEVEL: "debug"
     hostname: photoprism
     image: photoprism/photoprism:latest
     ipc: private
