@@ -26,9 +26,10 @@ services:
       PHOTOPRISM_DATABASE_SERVER: "10.10.1.13"
       PHOTOPRISM_DATABASE_PASSWORD: "${PHOTOPRISM_DB_PASS}"
       PHOTOPRISM_LOG_LEVEL: "debug"
-      PHOTOPRISM_ADMIN_USER: "${PHOTOPRISM_ADMIN_USER}"                 # admin login username
-      PHOTOPRISM_ADMIN_PASSWORD: "${PHOTOPRISM_ADMIN_PASS}"          # initial admin password (8-72 characters)
-      PHOTOPRISM_AUTH_MODE: "password"            
+      PHOTOPRISM_ADMIN_USER: "${PHOTOPRISM_ADMIN_USER}"
+      PHOTOPRISM_ADMIN_PASSWORD: "${PHOTOPRISM_ADMIN_PASS}"
+      PHOTOPRISM_AUTH_MODE: "password"
+      PHOTOPRISM_ORIGINALS_LIMIT: 15000
     hostname: photoprism
     image: photoprism/photoprism:latest
     ipc: private
