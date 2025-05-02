@@ -1,0 +1,14 @@
+- name: quibble-action
+  uses: GeekMasher/quibble@0.3.3
+  with:
+    # Compose File Path
+    compose-file: # optional
+    # Repository Owner and Repository Name
+    repository: # optional, default is ${{ github.repository }}
+    # Filter
+    filter: # optional, default is all
+    # Output SARIF file path
+    output: # optional, default is ./quibble.sarif
+    # GitHub Personal Access Token
+    token: # optional, default is ${{ github.token }}
+          
