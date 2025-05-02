@@ -6,6 +6,9 @@ on:
     branches: ["main"]
 jobs:
   build:
+    name: Docker Compose Linter
+    runs-on: ubuntu-latest
+    steps:
     - name: Docker Compose Linter
       uses: sjafferali/docker-compose-lint-action@v0.1.2
 
