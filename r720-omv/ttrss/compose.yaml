@@ -1,16 +1,57 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  ttrss:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: ttrss
+    entrypoint: ['sh','/docker-entrypoint.sh']
+    environment:
+      DB_HOST: "10.10.1.13"
+      SELF_URL_PATH: "https://ttrss.${DOMAIN_NAME}"
+      DB_USER: "ttrss"
+      DB_PASS: "${TTRSS_DB_PASS}"
+      PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      ALLOW_PORTS: "80,443"
+      DB_NAME: "ttrss"
+      LD_PRELOAD: "/usr/lib/preloadable_libiconv.so php"
+      DB_PORT: "5432"
+      ENABLE_PLUGINS: "auth_internal,fever"
+      SESSION_COOKIE_LIFETIME: "24"
+      SINGLE_USER_MODE: "false"
+      LOG_DESTINATION: "sql"
+      FEED_LOG_QUIET: "false"
+    hostname: ttrss
+    image: wangqiru/ttrss:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - ttrss
+    ports:
+      - 2015:80/tcp
+    restart: always
+    volumes:
+      - /opt/docker/ttrss/ttrss_fever:/var/www/plugins/fever
+    working_dir: /var/www
+networks:
+  ttrss:
+    name: ttrss
+    driver: bridge
+    external: false
