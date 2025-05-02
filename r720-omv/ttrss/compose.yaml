@@ -17,7 +17,7 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+#    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: ttrss
     entrypoint: ['sh','/docker-entrypoint.sh']
     environment:
