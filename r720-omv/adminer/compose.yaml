@@ -19,7 +19,7 @@ services:
       - ALL
     command: ['php','-S','[::]:8080','-t','/var/www/html']
     container_name: adminer
-    entrypoint:['entrypoint.sh','docker-php-entrypoint']
+    entrypoint: ['entrypoint.sh','docker-php-entrypoint']
     hostname: adminer
     image: adminer:latest
     ipc: private
