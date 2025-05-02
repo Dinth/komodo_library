@@ -1,4 +1,39 @@
 services:
+  mercury-parser-api:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['npm','run','start']
+    container_name: mercury-parser-api
+    entrypoint: ['dumb-init','--']
+    hostname: mercury-parser-api
+    image: wangqiru/mercury-parser-api:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - ttrss
+    ports:
+      - 3000:3000/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/ttrss/mercury-parser-api_appcustomizer:/app/customizer
+    working_dir: /app
   ttrss:
     cap_add:
       - AUDIT_WRITE
