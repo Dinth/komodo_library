@@ -76,7 +76,7 @@ services:
     container_name: fireflyiii_paulina_dataimporter
     entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
-      FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN"
+      FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
       FIREFLY_III_URL: "http://fireflyiii:4747"
       NORDIGEN_ID: "${FIREFLYIII_PAULINA_NORD_ID}"
       NORDIGEN_KEY: "${FIREFLYIII_PAULINA_NORD_KEY}"
