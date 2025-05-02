@@ -1,3 +1,4 @@
+
 services:
   heimdall:
     cap_add:
@@ -32,7 +33,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-networks:
+    networks:
       - heimdall
     ports:
       - 3838:80/tcp
