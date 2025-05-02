@@ -1,16 +1,155 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  fireflyiii:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command:
+      - /init
+    container_name: fireflyiii
+    entrypoint: ['docker-php-serversideup-entrypoint']
+    environment:
+      DB_CONNECTION: "pgsql"
+      DB_PORT: "5432"
+      DB_HOST: "10.10.1.13"
+      DB_DATABASE: "fireflyiii"
+      DB_USERNAME: "fireflyiii"
+      DB_PASSWORD: "${FIREFLYIII_DB_PASS}"
+      APP_KEY: "${FIREFLYIII_APP_KEY}"
+      DEFAULT_LANGUAGE: "en_GB"
+      TZ: "${TZ}"
+      ENABLE_EXTERNAL_RATES: "true"
+      APP_URL: "https://finance.${DOMAIN_NAME}"
+      TRUSTED_PROXIES: "*"
+      FIREFLY_III_LAYOUT: "v2"
+      SESSION_DRIVER: "file"
+    hostname: firefly
+    image: fireflyiii/core:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - fireflyiii
+    ports:
+      - 4747:8080/tcp
+    restart: unless-stopped
+    user: www-data
+    volumes:
+      - /opt/docker/fireflyiii/fireflyiii_upload:/var/www/html/storage/upload
+    working_dir: /var/www/html
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  fireflyiii_paulina_dataimporter:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/init']
+    container_name: fireflyiii_paulina_dataimporter
+    entrypoint: ['docker-php-serversideup-entrypoint']
+    environment:
+      FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN"
+      FIREFLY_III_URL: "http://fireflyiii:4747"
+      NORDIGEN_ID: "${FIREFLYIII_PAULINA_NORD_ID}"
+      NORDIGEN_KEY: "${FIREFLYIII_PAULINA_NORD_KEY}"
+      CAN_POST_AUTOIMPORT: "true"
+      IMPORT_DIR_ALLOWLIST: "/import"
+      AUTO_IMPORT_SECRET: "${FIREFLYIII_PAULINA_AUTOIMPORT_KEY}"
+    hostname: fireflyiii_paulina_dataimporter
+    image: fireflyiii/data-importer:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - fireflyiii
+    ports:
+      - 4749:8080/tcp
+    restart: unless-stopped
+    user: www-data
+    volumes:
+      - /opt/docker/fireflyiii/fireflyiii_dataimporter_paulina_upload:/var/www/html/storage/upload
+      - /Data/IT/filebrowser-data/users/paulina/Paulina-Documents/firefly_configurations:/import:ro
+    working_dir: /var/www/html
+  fireflyiii_michal_dataimporter:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/init']
+    container_name: fireflyiii_michal_dataimporter
+    entrypoint: ['docker-php-serversideup-entrypoint']
+    environment:
+      FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
+      FIREFLY_III_URL: "http://fireflyiii:4747"
+      NORDIGEN_ID: "${FIREFLYIII_MICHAL_NORD_ID}"
+      NORDIGEN_KEY: "${FIREFLYIII_MICHAL_NORD_KEY}"
+      CAN_POST_AUTOIMPORT: "true"
+      IMPORT_DIR_ALLOWLIST: "/import"
+      AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
+    hostname: fireflyiii_michal_dataimporter
+    image: fireflyiii/data-importer:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - fireflyiii
+    ports:
+      - 4748:8080/tcp
+    restart: unless-stopped
+    user: www-data
+    volumes:
+      - /Data/IT/filebrowser-data/users/michal/Michal-Documents/firefly_configurations:/import:ro
+      - /opt/docker/fireflyiii/fireflyiii_dataimporter_michal_upload:/var/www/html/storage/upload
+    working_dir: /var/www/html
+networks:
+  fireflyiii:
+    name: fireflyiii
+    driver: bridge
+    external: false
