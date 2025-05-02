@@ -1,5 +1,11 @@
-- name: Docker Compose Linter
-  uses: sjafferali/docker-compose-lint-action@v0.1.2
-  with:
-    # path to docker-compose.yml file
-    compose-file: # optional, default is ./docker-compose.yml
+name: docker-compose-lint
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+jobs:
+  build:
+    - name: Docker Compose Linter
+      uses: sjafferali/docker-compose-lint-action@v0.1.2
+
