@@ -1,16 +1,51 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  photoprism:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/scripts/cmd.sh','/opt/photoprism/bin/photoprism','start']
+    container_name: photoprism
+    entrypoint: ['/init']
+    environment:
+      PHOTOPRISM_EXPERIMENTAL: "true"
+      PHOTOPRISM_DATABASE_DRIVER: "mysql"
+       PHOTOPRISM_DATABASE_SERVER: "10.10.1.13"
+      PHOTOPRISM_DATABASE_PASSWORD: "${PHOTOPRISM_DB_PASS}"
+    hostname: photoprism
+    image: photoprism/photoprism:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - photoprism
+    ports:
+      - 2342:2342/tcp
+    restart: unless-stopped
+    volumes:
+      - photoprism_data:/photoprism/storage
+      - /Data/IT/photoprism-cache:/photoprism/storage/cache
+      - /Data/IT/photoprism-sidecar:/photoprism/storage/sidecar
+      - /Data/Photos:/photoprism/originals
+    working_dir: /photoprism    
+networks:
+  photoprism:
+    name: photoprism
+    driver: bridge
+    external: false
