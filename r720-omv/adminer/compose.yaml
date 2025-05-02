@@ -1,16 +1,42 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  adminer:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['php','-S','[::]:8080','-t','/var/www/html']
+    container_name: adminer
+    entrypoint:['entrypoint.sh','docker-php-entrypoint']
+    hostname: adminer
+    image: adminer:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - adminer
+    ports:
+      - 9009:8080/tcp
+    restart: unless-stopped
+    user: adminer
+    working_dir: /var/www/html
+networks:
+  adminer:
+    name: adminer
+    driver: bridge
+    external: false
