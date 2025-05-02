@@ -1,16 +1,46 @@
-## Add your compose file here
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  heimdall:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: heimdall
+    entrypoint:
+      - /init
+    environment:
+      TZ: "${TZ}"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+    hostname: heimdall
+    image: linuxserver/heimdall:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options: {}
+    networks:
+      - heimdall
+    ports:
+      - 3838:80/tcp
+    restart: unless-stopped
+    volumes:
+      - heimdall_config:/config
+    working_dir: /
+networks:
+  heimdall:
+    name: heimdall
+    driver: bridge
+    external: false
