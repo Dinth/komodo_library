@@ -39,7 +39,7 @@ networks:
       - 3838:80/tcp
     restart: unless-stopped
     volumes:
-      - heimdall_config:/config
+      - /opt/docker/heimdall/heimdall_config:/config
     working_dir: /
 networks:
   heimdall:
