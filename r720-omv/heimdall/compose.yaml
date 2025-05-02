@@ -30,8 +30,10 @@ services:
     ipc: private
     logging:
       driver: json-file
-      options: {}
-    networks:
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
       - heimdall
     ports:
       - 3838:80/tcp
