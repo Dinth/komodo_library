@@ -97,7 +97,7 @@ jobs:
         uses: sjafferali/docker-compose-lint-action@v0.1.2
         with:
           # We still need to tell the action which patterns to lint when it runs
-          compose-files: |
+          compose-file: |
             **/docker-compose.yml
             **/docker-compose.yaml
             **/compose.yml
