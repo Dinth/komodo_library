@@ -23,7 +23,7 @@ services:
     environment:
       PHOTOPRISM_EXPERIMENTAL: "true"
       PHOTOPRISM_DATABASE_DRIVER: "mysql"
-       PHOTOPRISM_DATABASE_SERVER: "10.10.1.13"
+      PHOTOPRISM_DATABASE_SERVER: "10.10.1.13"
       PHOTOPRISM_DATABASE_PASSWORD: "${PHOTOPRISM_DB_PASS}"
     hostname: photoprism
     image: photoprism/photoprism:latest
@@ -39,7 +39,7 @@ services:
       - 2342:2342/tcp
     restart: unless-stopped
     volumes:
-      - photoprism_data:/photoprism/storage
+      - /opt/docker/photoprism/photoprism_data:/photoprism/storage
       - /Data/IT/photoprism-cache:/photoprism/storage/cache
       - /Data/IT/photoprism-sidecar:/photoprism/storage/sidecar
       - /Data/Photos:/photoprism/originals
