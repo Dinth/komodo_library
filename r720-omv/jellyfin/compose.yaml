@@ -1,16 +1,62 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  jellyfin:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: jellyfin
+    entrypoint: ['/init']
+    environment:
+      TZ: "${TZ}"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+    hostname: jellyfin
+    image: linuxserver/jellyfin:latest
+    ipc: private
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [video]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - jellyfin
+    ports:
+      - 1900:1900/udp
+      - 7359:7359/udp
+      - 8096:8096/tcp
+      - 8920:8920/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/jellyfin/jellyfin_config:/config
+      - /Data/TVShows:/tv
+      - /Data/Anime:/anime
+      - /Data/Cartoons:/cartoons
+      - /Data/DocumentaryMovies:/documentary_movies
+      - /Data/DocumentaryShows:/documentary_shows
+      - /Data/Movies:/movies
+    working_dir: /
+networks:
+  jellyfin:
+    name: jellyfin
+    driver: bridge
+    external: false
