@@ -128,6 +128,23 @@ EBUSD_MQTTPASS="[[MQTT_PASSWORD]]"
 ##
 
 [[stack]]
+name = "grocy"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/grocy"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+"""
+
+##
+
+[[stack]]
 name = "hortusfox"
 tags = [
   "stacks",
@@ -187,6 +204,28 @@ QBITTORRENT__PASSWORD=[[QBITTORRENT_PASS]]
 SONARR__INSTANCES__0__APIKEY=[[SONARR_APIKEY]]
 RADARR__INSTANCES__0__APIKEY=[[RADARR_APIKEY]]
 LIDARR__INSTANCES__0__APIKEY=[[LIDARR_APIKEY]]
+"""
+
+##
+
+[[stack]]
+name = "n8n"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/n8n"
+environment = """
+TZ=[[TZ]]
+N8N_DB_PASS=[[N8N_DB_PASS]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
