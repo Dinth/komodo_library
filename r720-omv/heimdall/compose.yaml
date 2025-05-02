@@ -1,4 +1,3 @@
-
 services:
   heimdall:
     cap_add:
@@ -39,7 +38,7 @@ networks:
       - 3838:80/tcp
     restart: unless-stopped
     volumes:
-      - /opt/docker/heimdall/heimdall_config:/config
+      - heimdall_config:/config
     working_dir: /
 networks:
   heimdall:
