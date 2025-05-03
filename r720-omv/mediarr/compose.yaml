@@ -237,6 +237,47 @@ services:
       - /opt/docker/mediarr/lidarr_config:/config
       - /Data/Unsorted:/downloads
     working_dir: /    
+  iplayarr-redis:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['redis-server']
+    container_name: iplayarr-redis
+    entrypoint: ['docker-entrypoint.sh']
+    hostname: iplayarr-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    image: redis:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - mediarr
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/iplayarr/redis_data:/data
+    working_dir: /data
   iplayarr:
     cap_add:
       - AUDIT_WRITE
@@ -267,7 +308,7 @@ services:
       COMPLETE_DIR: "/mnt/media/!Incomplete"
       STORAGE_LOCATION: "/config"
       CACHE_LOCATION: "/data"
-      REDIS_HOST: "10.10.1.13"
+      REDIS_HOST: "iplayarr-redis"
       REDIS_PORT: "6379"
     hostname: iplayarr
     image: nikorag/iplayarr:latest
