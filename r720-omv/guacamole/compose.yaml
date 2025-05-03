@@ -21,6 +21,8 @@
     container_name: guacd
     hostname: guacd
     image: guacamole/guacd:latest
+    environment:
+      GUACD_LOG_LEVEL: "info"
     ipc: private
     logging:
       driver: json-file
