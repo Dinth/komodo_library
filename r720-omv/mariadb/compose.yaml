@@ -1,3 +1,4 @@
+services:
   mariadb:
     cap_add:
       - AUDIT_WRITE
@@ -38,3 +39,8 @@
     volumes:
       - /opt/docker/mariadb/mariadb_data:/config
     working_dir: /
+networks:
+  mariadb:
+    name: mariadb
+    driver: bridge
+    external: false
