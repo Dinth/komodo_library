@@ -1,16 +1,50 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  postgresql:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['postgres']
+    container_name: postgresql
+    entrypoint: ['docker-entrypoint.sh']
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_ADMIN_PASS}"
+      PGDATA: "/var/lib/postgresql/data"
+    hostname: postgresql
+    image: postgres:15
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - postgresql
+    ports:
+      - 5432:5432/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/postgresql/postgres_data:/var/lib/postgresql/data
+networks:
+  postgresql:
+    name: postgresql
+    driver: bridge
+    external: false
