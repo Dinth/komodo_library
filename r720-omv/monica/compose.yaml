@@ -4,10 +4,10 @@ services:
     ports:
       - 8080:5435
     environment:
-      - APP_KEY: "${MONICA_APP_KEY}"
-      - DB_HOST: "10.10.1.13"
-      - DB_USERNAME: "monica"
-      - DB_PASSWORD: "${MONICA_DB_PASS}"
+      APP_KEY: "${MONICA_APP_KEY}"
+      DB_HOST: "10.10.1.13"
+      DB_USERNAME: "monica"
+      DB_PASSWORD: "${MONICA_DB_PASS}"
     volumes:
       - /opt/docker/monica/monica_data:/var/www/html/storage
     restart: always
