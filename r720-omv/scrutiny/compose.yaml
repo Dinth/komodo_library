@@ -4,6 +4,7 @@ services:
     cap_add:
       - SETGID
       - SETUID
+      - SYS_RAWIO
     cap_drop:
       - ALL
     command:
