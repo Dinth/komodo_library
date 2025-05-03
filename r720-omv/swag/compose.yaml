@@ -1,16 +1,50 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  swag:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: swag
+    entrypoint: ['/init']
+    environment:
+      DNSPLUGIN: "cloudflare"
+      EMAIL: "${ADMIN_EMAIL}"
+      MAXMINDDB_LICENSE_KEY: "${SWAG_MAXMINDB_KEY}"
+      ONLY_SUBDOMAINS: "true"
+      SUBDOMAINS: "home,cctv,ttrss,calibre,grocery,avocado,books,photos,projects,spellcheck,filebrowser,finance,music,baby,monica,nc,id,edr,rss,ai,cdn,auto,traces,recipes,bookmarks,nc,fp,jf"
+      TZ: "${TZ}"
+      URL: "${DOMAIN_NAME}"
+      VALIDATION: "dns"
+      PROPAGATION: "60"
+      DOCKER_MODS: "linuxserver/mods:swag-dashboard"
+    hostname: swag
+    image: lscr.io/linuxserver/swag:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - bridge-dns
+    ports:
+      - 443:443/tcp
+      - 80:80/tcp
+      - 82:81/tcp
+    restart: unless-stopped
+    volumes:
+      - /Data/IT/cdn:/cdn:ro
+      - /opt/docker/swag/swag_config:/config
+    working_dir: /
