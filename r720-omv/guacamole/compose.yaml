@@ -1,16 +1,83 @@
-## Add your compose file here
-services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  guacd:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/bin/sh','-c','/opt/guacamole/sbin/guacd','-b','0.0.0.0','-L','$GUACD_LOG_LEVEL','-f']
+    container_name: guacd
+    hostname: guacd
+    image: guacamole/guacd:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - guacamole
+    restart: unless-stopped
+    user: guacd
+    working_dir: /
+  guacamole:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['/opt/guacamole/bin/start.sh']
+    container_name: guacamole
+    environment:
+      POSTGRESQL_DATABASE: "guacamole"
+      POSTGRESQL_USER: "guacamole"
+      POSTGRESQL_PASSWORD: "${GUACAMOLE_DB_PASS}"
+      GUACD_HOSTNAME: "10.10.1.13"
+      GUACD_PORT: "4822"
+      POSTGRESQL_HOSTNAME: "10.10.1.13"
+      TOTP_ENABLED: "true"
+      WEBAPP_CONTEXT: "ROOT"
+    hostname: guacamole
+    image: guacamole/guacamole:latest
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - guacamole
+    ports:
+      - 8080:8080/tcp
+    restart: unless-stopped
+    user: guacamole
+    working_dir: /opt/guacamole
+networks:
+  guacamole:
+    name: guacamole
+    driver: bridge
+    external: false
