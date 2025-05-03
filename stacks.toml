@@ -1,4 +1,16 @@
 [[stack]]
+name = "adminer"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/adminer"
+
+##
+
+[[stack]]
 name = "audiobookshelf"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
@@ -10,6 +22,24 @@ run_directory = "r720-omv/audiobookshelf"
 environment = """
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "babybuddy"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/babybuddy"
+environment = """
+TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -68,6 +98,7 @@ name = "cronicle"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
+poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/cronicle"
@@ -93,6 +124,7 @@ TZ=[[TZ]]
 DATABASE_PASSWORD=[[DAWARICH_DATABASE_PASSWORD]]  
 POSTGRES_PASSWORD=[[DAWARICH_DATABASE_ROOT_PASSWORD]]
 PHOTON_API_KEY=[[DAWARICH_PHOTON_API_KEY]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -102,6 +134,7 @@ name = "deceptifeed"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
+poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/deceptifeed"
@@ -128,6 +161,47 @@ EBUSD_MQTTPASS="[[MQTT_PASSWORD]]"
 ##
 
 [[stack]]
+name = "fireflyiii"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/fireflyiii"
+environment = """
+TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+FIREFLYIII_DB_PASS=[[FIREFLYIII_DB_PASS]]
+FIREFLYIII_APP_KEY=[[FIREFLYIII_APP_KEY]]
+FIREFLYIII_PAULINA_ACCESS_TOKEN=[[FIREFLYIII_PAULINA_ACCESS_TOKEN]]
+FIREFLYIII_PAULINA_NORD_ID=[[FIREFLYIII_PAULINA_NORD_ID]]
+FIREFLYIII_PAULINA_NORD_KEY=[[FIREFLYIII_PAULINA_NORD_KEY]]
+FIREFLYIII_PAULINA_AUTOIMPORT_KEY=[[FIREFLYIII_PAULINA_AUTOIMPORT_KEY]]
+FIREFLYIII_MICHAL_ACCESS_TOKEN=[[FIREFLYIII_MICHAL_ACCESS_TOKEN]]
+FIREFLYIII_MICHAL_NORD_ID=[[FIREFLYIII_MICHAL_NORD_ID]]
+FIREFLYIII_MICHAL_NORD_KEY=[[FIREFLYIII_MICHAL_NORD_KEY]]
+FIREFLYIII_MICHAL_AUTOIMPORT_KEY=[[FIREFLYIII_MICHAL_AUTOIMPORT_KEY]]
+"""
+
+##
+
+[[stack]]
+name = "frigate"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/frigate"
+environment = """
+FRIGATE_PLUS_API_KEY=[[FRIGATE_PLUS_API_KEY]]
+"""
+
+##
+
+[[stack]]
 name = "grocy"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
@@ -136,6 +210,42 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/grocy"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "guacamole"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/guacamole"
+environment = """
+GUACAMOLE_DB_PASS=[[GUACAMOLE_DB_PASS]]
+"""
+
+##
+
+[[stack]]
+name = "heimdall"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/heimdall"
 environment = """
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
@@ -167,6 +277,23 @@ HORTUSFOX_ADMIN_PASS=[[HORTUSFOX_ADMIN_PASS]]
 ##
 
 [[stack]]
+name = "jellyfin"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/jellyfin"
+environment = """
+TZ=[[TZ]]
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
+"""
+
+##
+
+[[stack]]
 name = "komodo"
 tags = ["stacks"]
 [stack.config]
@@ -182,6 +309,18 @@ KOMODO_PASSKEY=[[KOMODO_PASSKEY]]
 TZ=[[TZ]]
 
 """
+
+##
+
+[[stack]]
+name = "languagetool"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/languagetool"
 
 ##
 
@@ -204,6 +343,26 @@ QBITTORRENT__PASSWORD=[[QBITTORRENT_PASS]]
 SONARR__INSTANCES__0__APIKEY=[[SONARR_APIKEY]]
 RADARR__INSTANCES__0__APIKEY=[[RADARR_APIKEY]]
 LIDARR__INSTANCES__0__APIKEY=[[LIDARR_APIKEY]]
+"""
+
+##
+
+[[stack]]
+name = "monica"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/monica"
+environment = """
+MONICA_DB_PASS=[[MONICA_DB_PASS]]
+MONICA_APP_KEY=[[MONICA_APP_KEY]]
 """
 
 ##
@@ -274,6 +433,27 @@ run_directory = "r720-omv/openttd"
 ##
 
 [[stack]]
+name = "photoprism"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/photoprism"
+environment = """
+PHOTOPRISM_DB_PASS=[[PHOTOPRISM_DB_PASS]]
+PHOTOPRISM_ADMIN_NAME=[[PHOTOPRISM_ADMIN_NAME]]
+PHOTOPRISM_ADMIN_PASS=[[PHOTOPRISM_ADMIN_PASS]]
+"""
+
+##
+
+[[stack]]
 name = "romm"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
@@ -296,6 +476,7 @@ name = "scrutiny"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
+poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/scrutiny"
@@ -303,6 +484,24 @@ environment = """
 SCRUTINY_WEB_INFLUXDB_TOKEN=[[SCRUTINY_WEB_INFLUXDB_TOKEN]]
 SCRUTINY_WEB_NOTIFY_URLS=[[SCRUTINY_WEB_NOTIFY_URLS]]
 TZ=[[TZ]]
+"""
+
+##
+
+[[stack]]
+name = "swag"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/swag"
+environment = """
+TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+ADMIN_EMAIL=[[ADMIN_EMAIL]]
+SWAG_MAXMINDB_KEY=[[SWAG_MAXMINDB_KEY]]
 """
 
 ##
@@ -324,6 +523,28 @@ environment = """
 TANDOOR_DB_PASSWORD=[[TANDOOR_DB_PASSWORD]]
 TANDOOR_SECRET_KEY=[[TANDOOR_SECRET_KEY]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
+
+##
+
+[[stack]]
+name = "ttrss"
+tags = [
+  "stacks",
+  "needs-improvement",
+  "database-to-migrate"
+]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/ttrss"
+environment = """
+TTRSS_DB_PASS=[[TTRSS_DB_PASS]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
