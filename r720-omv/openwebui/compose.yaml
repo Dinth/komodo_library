@@ -1,16 +1,104 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  ollama:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    command: ['serve']
+    container_name: ollama
+    entrypoint: ['/bin/ollama']
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - NVIDIA_VISIBLE_DEVICES=all
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=3
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_DEBUG=true
+      - OLLAMA_FLASH_ATTENTION=1
+    hostname: ollama
+    image: ollama/ollama:latest
+    ipc: private
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [compute,utility]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - openwebui
+    ports:
+      - 11434:11434/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/openwebui/ollama_data:/root/.ollama
+  openwebui:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: openwebui
+    environment:
+      USE_OLLAMA_DOCKER: "true"
+      PORT: "8080"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      WEBUI_SECRET_KEY: ""
+      SCARF_NO_ANALYTICS: "true"
+      DO_NOT_TRACK: "true"
+      ANONYMIZED_TELEMETRY: "true"
+    hostname: openwebui
+    image: ghcr.io/open-webui/open-webui:main
+    ipc: private
+    depends_on:
+      - ollama
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - openwebui
+    ports:
+      - 3311:8080/tcp
+    restart: unless-stopped
+    user: 0:0
+    volumes:
+      - /opt/docker/openwebui/openwebui_data:/app/backend/data
+    working_dir: /app/backend
+networks:
+  openwebui:
+    name: openwebui
+    driver: bridge
+    external: false
