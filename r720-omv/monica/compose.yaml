@@ -2,7 +2,7 @@ services:
   app:
     image: monica
     ports:
-      - 8080:5435
+      - 5435:80
     environment:
       APP_KEY: "${MONICA_APP_KEY}"
       DB_HOST: "10.10.1.13"
