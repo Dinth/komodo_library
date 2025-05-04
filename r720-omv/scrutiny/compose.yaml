@@ -79,11 +79,11 @@ services:
     image: ghcr.io/analogj/scrutiny:master-web
     ipc: private
     healthcheck:
-      test: curl --fail http://localhost:8080/ || exit 1
-      interval: 40s
-      timeout: 30s
+      test: curl -ILfSs http://localhost:8080/api/health  || exit 1
+      interval: 30s
+      timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 30s
     logging:
     logging:
       driver: json-file
