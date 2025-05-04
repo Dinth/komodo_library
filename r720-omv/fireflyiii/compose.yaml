@@ -18,7 +18,7 @@ services:
     cap_drop:
       - ALL
     container_name: fireflyiii
-    entrypoint: ['docker-php-serversideup-entrypoint']
+#    entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
       DB_CONNECTION: "pgsql"
       DB_PORT: "5432"
@@ -71,7 +71,7 @@ services:
     cap_drop:
       - ALL
     container_name: fireflyiii_paulina_dataimporter
-    entrypoint: ['docker-php-serversideup-entrypoint']
+#    entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
       FIREFLY_III_URL: "http://fireflyiii:4747"
