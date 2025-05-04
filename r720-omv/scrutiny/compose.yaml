@@ -78,6 +78,13 @@ services:
     hostname: scrutiny-web
     image: ghcr.io/analogj/scrutiny:master-web
     ipc: private
+    healthcheck:
+      test: curl --fail http://localhost:8080/ || exit 1
+      interval: 40s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    logging:
     logging:
       driver: json-file
       options:
