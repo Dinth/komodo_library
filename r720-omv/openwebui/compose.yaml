@@ -90,7 +90,7 @@ services:
     depends_on:
       - ollama
     healthcheck:
-      test: ["curl","--silent","--fail","http://localhost:${PORT:-8080}/health","|","jq","-ne","'input.status","==","true'","||","exit","1"]
+      test: ["CMD","curl","--silent","--fail","http://localhost:${PORT:-8080}/health","|","jq","-ne","'input.status","==","true'","||","exit","1"]
       interval: 10s
       timeout: 10s
       retries: 100
