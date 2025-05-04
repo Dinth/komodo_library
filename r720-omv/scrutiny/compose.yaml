@@ -4,7 +4,6 @@ services:
     cap_add:
       - SETGID
       - SETUID
-      - SYS_RAWIO
     cap_drop:
       - ALL
     command:
@@ -65,9 +64,8 @@ services:
   scrutiny-web:
     cap_drop:
       - ALL
-    command:
-      - /opt/scrutiny/bin/scrutiny
-      - start
+    command: ['/opt/scrutiny/bin/scrutiny','start']
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: scrutiny-web
     environment:
       PATH: /opt/scrutiny/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
