@@ -36,6 +36,12 @@ services:
       options:
         max-size: 10m
         max-file: 3
+    healthcheck:
+      test: curl --fail http://localhost:8080/ || exit 1
+      interval: 40s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
     networks:
       - tandoor
     ports:
