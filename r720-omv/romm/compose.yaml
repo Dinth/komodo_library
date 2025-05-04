@@ -33,6 +33,12 @@ services:
     hostname: romm
     image: rommapp/romm:latest
     ipc: private
+    healthcheck:
+      test: curl -ILfSs http://localhost:8080/  || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     logging:
       driver: json-file
       options:
