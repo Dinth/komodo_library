@@ -89,6 +89,12 @@ services:
     ipc: private
     depends_on:
       - ollama
+    healthcheck:
+      test: ["curl","--silent","--fail","http://localhost:${PORT:-8080}/health","|","jq","-ne","'input.status","==","true'","||","exit","1"]
+      interval: 10s
+      timeout: 10s
+      retries: 100
+      start_period: 10s
     logging:
       driver: json-file
       options:
