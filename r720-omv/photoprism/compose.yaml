@@ -17,6 +17,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
     command: ['/scripts/cmd.sh','/opt/photoprism/bin/photoprism','start']
     container_name: photoprism
     entrypoint: ['/init']
@@ -68,6 +71,11 @@ services:
     hostname: photoprism
     image: photoprism/photoprism:latest
     ipc: private
+    healthcheck:
+      test: "photoprism status"
+      interval: 60s
+      timeout: 15s
+      retries: 5
     logging:
       driver: json-file
       options:
