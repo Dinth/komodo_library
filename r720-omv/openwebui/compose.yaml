@@ -39,12 +39,6 @@ services:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
-    healthcheck:
-      test: ['CMD-SHELL','|','test','-f','/tmp/ollama_ready','&&','bash','-c','</dev/tcp/localhost/11434']
-      interval: 10s
-      timeout: 10s
-      retries: 100
-      start_period: 10s
     logging:
       driver: json-file
       options:
@@ -55,6 +49,13 @@ services:
     ports:
       - 11434:11434/tcp
     restart: unless-stopped
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.whoami.rule=Host('ai.${DOMAIN_NAME}')"
+    - "traefik.http.routers.whoami.entrypoints=websecure"
+    - "traefik.http.routers.whoami.tls=true"
+    - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
+    - "traefik.http.services.whoami.loadbalancer.server.port=11434"
     volumes:
       - /opt/docker/openwebui/ollama_data:/root/.ollama
   openwebui:
@@ -89,12 +90,6 @@ services:
     ipc: private
     depends_on:
       - ollama
-    healthcheck:
-      test: ["CMD","curl","--silent","--fail","http://localhost:${PORT:-8080}/health","|","jq","-ne","'input.status","==","true'","||","exit","1"]
-      interval: 10s
-      timeout: 10s
-      retries: 100
-      start_period: 10s
     logging:
       driver: json-file
       options:
