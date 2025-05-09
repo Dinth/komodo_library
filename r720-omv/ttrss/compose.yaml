@@ -86,6 +86,13 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host('ttrss.${DOMAIN_NAME}')"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
+      - "traefik.http.services.whoami.loadbalancer.server.port=2342"
     networks:
       - ttrss
     ports:
