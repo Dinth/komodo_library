@@ -44,17 +44,17 @@ services:
         max-file: "3"
     networks:
       - fireflyiii
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.whoami.entrypoints: websecure
+      traefik.http.routers.whoami.rule: Host('finance.<DOMAIN_NAME>')
+      traefik.http.routers.whoami.tls: "true"
+      traefik.http.routers.whoami.tls.certresolver: letencrypt
+      traefik.http.services.whoami.loadbalancer.server.port: "4747"
     ports:
       - 4747:8080/tcp
     restart: unless-stopped
     user: www-data
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('finance.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=4747"
     volumes:
       - /opt/docker/fireflyiii/fireflyiii_upload:/var/www/html/storage/upload
     working_dir: /var/www/html
@@ -124,10 +124,9 @@ services:
     cap_drop:
       - ALL
     container_name: fireflyiii_michal_dataimporter
-    entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
-      FIREFLY_III_URL: "http://fireflyiii:8080"
+      FIREFLY_III_URL: "http://fireflyiii:4747"
       NORDIGEN_ID: "${FIREFLYIII_MICHAL_NORD_ID}"
       NORDIGEN_KEY: "${FIREFLYIII_MICHAL_NORD_KEY}"
       CAN_POST_AUTOIMPORT: "true"
