@@ -34,7 +34,7 @@ services:
       - languagetool
     ports:
       - 8010:8010/tcp
-      labels:  
+    labels:  
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host('spellcheck.${DOMAIN_NAME}')"
       - "traefik.http.routers.whoami.entrypoints=websecure"
