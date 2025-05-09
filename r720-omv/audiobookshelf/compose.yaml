@@ -53,3 +53,6 @@ networks:
     name: audiobookshelf
     driver: bridge
     external: false
+  traefik:
+    name: traefik
+    external: true
