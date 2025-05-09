@@ -48,6 +48,13 @@ services:
       - 4747:8080/tcp
     restart: unless-stopped
     user: www-data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host('finance.${DOMAIN_NAME}')"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
+      - "traefik.http.services.whoami.loadbalancer.server.port=4747"
     volumes:
       - /opt/docker/fireflyiii/fireflyiii_upload:/var/www/html/storage/upload
     working_dir: /var/www/html
