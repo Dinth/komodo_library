@@ -1,16 +1,28 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  fgc:
+    container_name: fgc
+    image: ghcr.io/vogler/free-games-claimer 
+    build: .
+    ports:
+      # - "5900:5900" # VNC server
+      - "6080:6080" # noVNC (browser-based VNC client)
+    volumes:
+      - /opt/docker/fgc/fgc_data:/fgc/data
+    #command: ['bash','-c','"node epic-games; node gog"']
+    environment:
+      EMAIL: "${ADMIN_EMAIL}"
+      GOG_EMAIL: "${ADMIN_EMAIL}"
+      EG_EMAIL: "${ADMIN_EMAIL}"
+      PG_EMAIL: "${ADMIN_EMAIL}"
+      GOG_PASSWORD: "${FGC_GOG_PASS}"
+      EG_PASSWORD: "${FGC_EG_PASS}"
+      PG_PASSWORD: "${FGC_PG_PASS}"
+      PG_REDEEM: "1"
+      PG_CLAIMDLC: "1"
+    networks:
+      - fgc
+networks:
+  fgc:
+    name: fgc
+    driver: bridge
+    external: false
