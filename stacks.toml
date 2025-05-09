@@ -22,6 +22,7 @@ run_directory = "r720-omv/audiobookshelf"
 environment = """
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -91,6 +92,7 @@ environment = """
 MEDIA_PGID=[[MEDIA_PGID]]
 MEDIA_PUID=[[MEDIA_PUID]]
 TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -214,6 +216,7 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/frigate"
 environment = """
 FRIGATE_PLUS_API_KEY=[[FRIGATE_PLUS_API_KEY]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
