@@ -45,6 +45,13 @@ services:
       - 7359:7359/udp
       - 8096:8096/tcp
       - 8920:8920/tcp
+    labels:  
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host('jf.${DOMAIN_NAME}')"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
+      - "traefik.http.services.whoami.loadbalancer.server.port=8096"
     restart: unless-stopped
     volumes:
       - /opt/docker/jellyfin/jellyfin_config:/config
