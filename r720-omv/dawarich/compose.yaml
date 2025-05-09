@@ -153,7 +153,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('photos.${DOMAIN_NAME}')"
+      - "traefik.http.routers.whoami.rule=Host('traces.${DOMAIN_NAME}')"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls=true"
       - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
