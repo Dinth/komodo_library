@@ -55,6 +55,8 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/backblaze-personal-wine"
 environment = """
 TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -95,6 +97,7 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "cronicle"
+description = "cant be run as user"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -104,8 +107,7 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/cronicle"
 environment = """
 TZ=[[TZ]]
-DOCKER_PUID=[[DOCKER_PUID]]
-DOCKER_PGID=[[DOCKER_PGID]]
+
 """
 
 ##
@@ -182,6 +184,21 @@ FIREFLYIII_MICHAL_ACCESS_TOKEN=[[FIREFLYIII_MICHAL_ACCESS_TOKEN]]
 FIREFLYIII_MICHAL_NORD_ID=[[FIREFLYIII_MICHAL_NORD_ID]]
 FIREFLYIII_MICHAL_NORD_KEY=[[FIREFLYIII_MICHAL_NORD_KEY]]
 FIREFLYIII_MICHAL_AUTOIMPORT_KEY=[[FIREFLYIII_MICHAL_AUTOIMPORT_KEY]]
+"""
+
+##
+
+[[stack]]
+name = "free-games-claimer"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/fgc"
+environment = """
+ADMIN_EMAIL=[[ADMIN_EMAIL]]
 """
 
 ##
@@ -325,6 +342,21 @@ run_directory = "r720-omv/languagetool"
 ##
 
 [[stack]]
+name = "mariadb"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/mariadb"
+environment = """
+MARIADB_ADMIN_PASS=[[MARIADB_ADMIN_PASS]]
+"""
+
+##
+
+[[stack]]
 name = "mediarr"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
@@ -421,6 +453,18 @@ TZ=[[TZ]]
 ##
 
 [[stack]]
+name = "omnitools"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/omnitools"
+
+##
+
+[[stack]]
 name = "openttd"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
@@ -429,6 +473,21 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/openttd"
+
+##
+
+[[stack]]
+name = "openwebui"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/openwebui"
+environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
 
 ##
 
@@ -449,6 +508,41 @@ environment = """
 PHOTOPRISM_DB_PASS=[[PHOTOPRISM_DB_PASS]]
 PHOTOPRISM_ADMIN_NAME=[[PHOTOPRISM_ADMIN_NAME]]
 PHOTOPRISM_ADMIN_PASS=[[PHOTOPRISM_ADMIN_PASS]]
+"""
+
+##
+
+[[stack]]
+name = "postgresql"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/postgresql"
+environment = """
+POSTGRES_ADMIN_PASS=[[POSTGRES_ADMIN_PASS]]
+"""
+
+##
+
+[[stack]]
+name = "pricebuddy"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/pricebuddy"
+environment = """
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+ADMIN_EMAIL=[[ADMIN_EMAIL]]
+PRICEBUDDY_ADMIN_PASS=[[PRICEBUDDY_ADMIN_PASS]]
+PRICEBUDDY_DB_PASS=[[PRICEBUDDY_DB_PASS]]
+PRICEBUDDY_DB_ADMIN_PASS=[[PRICEBUDDY_DB_ADMIN_PASS]]
 """
 
 ##
@@ -486,6 +580,21 @@ SCRUTINY_WEB_NOTIFY_URLS=[[SCRUTINY_WEB_NOTIFY_URLS]]
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+"""
+
+##
+
+[[stack]]
+name = "searxng"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/searxng"
+environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -530,6 +639,23 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 ##
 
 [[stack]]
+name = "traefik"
+tags = ["stacks", "needs-improvement"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/traefik"
+environment = """
+TZ=[[TZ]]
+ADMIN_EMAIL=[[ADMIN_EMAIL]]
+TRAEFIK_CF_DNS_API_TOKEN=[[TRAEFIK_CF_DNS_API_TOKEN]]
+"""
+
+##
+
+[[stack]]
 name = "ttrss"
 tags = [
   "stacks",
@@ -563,7 +689,7 @@ run_directory = "r720-omv/unifi"
 environment = """
 MONGO_PASS=[[UNIFI_MONGO_PASS]]
 TZ=[[TZ]]
-DOCKER-PUID=[[DOCKER_PUID]]
+DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
 """
 
@@ -571,6 +697,9 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "uptime-kuma"
+description = """
+Port 3001
+Rootless not available until 2.0.0"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
