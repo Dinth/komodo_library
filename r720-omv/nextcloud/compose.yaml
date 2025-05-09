@@ -36,7 +36,6 @@ services:
       - nextcloud
     ports:
       - 1357:80/tcp
-    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host('nc.${DOMAIN_NAME}')"
@@ -44,6 +43,7 @@ services:
       - "traefik.http.routers.whoami.tls=true"
       - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
       - "traefik.http.services.whoami.loadbalancer.server.port=1357"
+    restart: unless-stopped
     volumes:
       - /opt/docker/nextcloud/nextcloud_config:/config
       - /Data/IT/nextcloud:/data
