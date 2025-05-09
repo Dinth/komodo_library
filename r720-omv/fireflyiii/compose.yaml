@@ -126,7 +126,7 @@ services:
     container_name: fireflyiii_michal_dataimporter
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
-      FIREFLY_III_URL: "http://fireflyiii:4747"
+      FIREFLY_III_URL: "http://fireflyiii:8080"
       NORDIGEN_ID: "${FIREFLYIII_MICHAL_NORD_ID}"
       NORDIGEN_KEY: "${FIREFLYIII_MICHAL_NORD_KEY}"
       CAN_POST_AUTOIMPORT: "true"
