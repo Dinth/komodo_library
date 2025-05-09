@@ -14,8 +14,8 @@ services:
     networks:
       - traefik
     ports:
-#      - 80:80
-#      - 443:443 
+      - 80:80
+      - 443:443 
       - 8281:8080 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
