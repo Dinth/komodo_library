@@ -67,3 +67,5 @@ networks:
     name: jellyfin
     driver: bridge
     external: false
+  traefik:
+    external: true
