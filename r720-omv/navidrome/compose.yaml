@@ -30,6 +30,7 @@ services:
         max-size: 10m
     networks:
       - navidrome
+      - traefik
     ports:
       - 4533:4533/tcp
     labels:
@@ -49,3 +50,5 @@ networks:
     name: navidrome
     driver: bridge
     external: false
+  traefik:
+    external: true
