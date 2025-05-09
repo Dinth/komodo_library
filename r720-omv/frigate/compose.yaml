@@ -73,6 +73,7 @@ services:
         max-file: "3"
     networks:
       - frigate
+      - traefik
     ports:
       - 5000:5000/tcp
       - 8554:8554/tcp
@@ -104,3 +105,5 @@ networks:
     name: frigate
     driver: bridge
     external: false
+  traefik:
+    external: true
