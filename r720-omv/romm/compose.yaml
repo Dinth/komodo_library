@@ -46,6 +46,7 @@ services:
         max-file: "3"
     networks:
       - romm
+      - traefik
     labels:  
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host('emu.${DOMAIN_NAME}')"
@@ -66,3 +67,5 @@ networks:
   romm:
     name: romm
     driver: bridge
+  traefik:
+    external: true
