@@ -88,6 +88,7 @@ services:
         max-file: "3"
     networks:
       - ttrss
+      - traefik
     ports:
       - 2015:80/tcp
     restart: always
@@ -99,3 +100,5 @@ networks:
     name: ttrss
     driver: bridge
     external: false
+  traefik:
+    external: true
