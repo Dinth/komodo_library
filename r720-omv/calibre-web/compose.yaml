@@ -35,6 +35,7 @@ services:
         max-file: "3"
     networks:
       - calibre-web
+      - frigate
     ports:
       - 8083:8083/tcp
     labels:
