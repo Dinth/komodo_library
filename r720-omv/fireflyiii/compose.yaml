@@ -44,13 +44,14 @@ services:
         max-file: "3"
     networks:
       - fireflyiii
+      - traefik
     labels:
       traefik.enable: "true"
       traefik.http.routers.whoami.entrypoints: websecure
       traefik.http.routers.whoami.rule: Host('finance.<DOMAIN_NAME>')
       traefik.http.routers.whoami.tls: "true"
       traefik.http.routers.whoami.tls.certresolver: letencrypt
-      traefik.http.services.whoami.loadbalancer.server.port: "4747"
+      traefik.http.services.whoami.loadbalancer.server.port: "8080"
     ports:
       - 4747:8080/tcp
     restart: unless-stopped
@@ -155,3 +156,5 @@ networks:
     name: fireflyiii
     driver: bridge
     external: false
+  traefik:
+    external: true
