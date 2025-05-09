@@ -35,7 +35,7 @@ services:
       - grocy
     ports:
       - 9283:80/tcp
-      labels:  
+    labels:  
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host('grocery.${DOMAIN_NAME}')"
       - "traefik.http.routers.whoami.entrypoints=websecure"
