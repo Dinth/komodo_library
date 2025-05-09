@@ -151,6 +151,13 @@ services:
     networks:
       - dawarich
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host('photos.${DOMAIN_NAME}')"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
+      - "traefik.http.services.whoami.loadbalancer.server.port=2342"
     volumes:
       - /opt/docker/dawarich/dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
       - /opt/docker/dawarich/dawarich_public:/var/app/public
