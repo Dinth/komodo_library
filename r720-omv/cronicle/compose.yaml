@@ -1,8 +1,7 @@
 name: cronicle
 services:
   cronicle:
-    cap_drop:
-      - ALL
+
     command: ['node','bin/docker-entrypoint.js']
     container_name: cronicle
     entrypoint:
@@ -24,7 +23,6 @@ services:
         published: "3012"
         protocol: tcp
     restart: unless-stopped
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - type: bind
         source: /etc/timezone
