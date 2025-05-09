@@ -32,6 +32,7 @@ services:
     restart: unless-stopped
     networks:
       - searxng
+      - traefik
     ports:
       - "9234:8080"
     volumes:
@@ -68,3 +69,5 @@ networks:
     name: searxng
     driver: bridge
     external: false
+  traefik:
+    external: true
