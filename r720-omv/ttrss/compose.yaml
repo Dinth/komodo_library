@@ -15,11 +15,11 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-    cap_drop:
-      - ALL
-    command: ['npm','run','start']
+#    cap_drop:
+#      - ALL
+#    command: ['npm','run','start']
     container_name: mercury-parser-api
-    entrypoint: ['dumb-init','--']
+#    entrypoint: ['dumb-init','--']
     hostname: mercury-parser-api
     image: wangqiru/mercury-parser-api:latest
     ipc: private
@@ -33,9 +33,9 @@ services:
     ports:
       - 3000:3000/tcp
     restart: unless-stopped
-    volumes:
-      - /opt/docker/ttrss/mercury-parser-api_appcustomizer:/app/customizer
-    working_dir: /app
+ #   volumes:
+ #     - /opt/docker/ttrss/mercury-parser-api_appcustomizer:/app/customizer
+ #   working_dir: /app
   ttrss:
     cap_add:
       - AUDIT_WRITE
@@ -86,13 +86,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('ttrss.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=2015"
     networks:
       - ttrss
     ports:
