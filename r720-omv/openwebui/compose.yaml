@@ -97,6 +97,7 @@ services:
         max-file: "3"
     networks:
       - openwebui
+      - traefik
     ports:
       - 3311:8080/tcp
     restart: unless-stopped
@@ -109,3 +110,5 @@ networks:
     name: openwebui
     driver: bridge
     external: false
+  traefik:
+    external: true
