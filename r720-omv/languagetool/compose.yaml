@@ -32,6 +32,7 @@ services:
         max-file: "3"
     networks:
       - languagetool
+      - traefik
     ports:
       - 8010:8010/tcp
     labels:  
@@ -56,3 +57,5 @@ networks:
     name: languagetool
     driver: bridge
     external: false
+  traefik:
+    external: true
