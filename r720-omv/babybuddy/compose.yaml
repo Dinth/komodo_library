@@ -54,3 +54,5 @@ networks:
     name: babybuddy
     driver: bridge
     external: false
+  traefik:
+    external: true
