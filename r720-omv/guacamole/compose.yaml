@@ -22,7 +22,7 @@ services:
     hostname: guacd
     image: guacamole/guacd:latest
     environment:
-      GUACD_LOG_LEVEL: "info"
+      GUACD_LOG_LEVEL: "debug"
     ipc: private
     logging:
       driver: json-file
