@@ -45,6 +45,7 @@ services:
       start_period: 60s
     networks:
       - tandoor
+      - traefik
     ports:
       - 1244:8080/tcp
     labels:
@@ -64,4 +65,6 @@ networks:
     external: false
     name: tandoor
     driver: bridge
+  traefik:
+    external: true
     
