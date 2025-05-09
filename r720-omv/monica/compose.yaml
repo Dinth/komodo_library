@@ -20,8 +20,11 @@ services:
     restart: always
     networks:
       - monica
+      - traefik
 networks:
   monica:
     name: monica
     driver: bridge
     external: false
+  traefik:
+    external: true
