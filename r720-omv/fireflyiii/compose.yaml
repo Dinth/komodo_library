@@ -74,7 +74,7 @@ services:
 #    entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
-      FIREFLY_III_URL: "http://fireflyiii:4747"
+      FIREFLY_III_URL: "http://fireflyiii:8080"
       NORDIGEN_ID: "${FIREFLYIII_PAULINA_NORD_ID}"
       NORDIGEN_KEY: "${FIREFLYIII_PAULINA_NORD_KEY}"
       CAN_POST_AUTOIMPORT: "true"
@@ -120,7 +120,7 @@ services:
     entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
-      FIREFLY_III_URL: "http://fireflyiii:4747"
+      FIREFLY_III_URL: "http://fireflyiii:8080"
       NORDIGEN_ID: "${FIREFLYIII_MICHAL_NORD_ID}"
       NORDIGEN_KEY: "${FIREFLYIII_MICHAL_NORD_KEY}"
       CAN_POST_AUTOIMPORT: "true"
