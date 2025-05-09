@@ -125,7 +125,7 @@ services:
     expose:
       - 3000/tcp
     hostname: dawarich-sidekiq
-    image: freikin/dawarich:0.25.4
+    image: freikin/dawarich:latest
     ipc: private
     healthcheck:
       test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
@@ -196,7 +196,7 @@ services:
       PHOTON_API_KEY: "${PHOTON_API_KEY}"
       SELF_HOSTED: "true"
     hostname: dawarich
-    image: freikin/dawarich:0.25.4
+    image: freikin/dawarich:latest
     ipc: private
     healthcheck:
       test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
