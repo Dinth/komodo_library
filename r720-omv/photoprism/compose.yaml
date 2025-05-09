@@ -83,6 +83,7 @@ services:
         max-file: "3"
     networks:
       - photoprism
+      - traefik
     ports:
       - 2342:2342/tcp
     restart: unless-stopped
@@ -104,3 +105,5 @@ networks:
     name: photoprism
     driver: bridge
     external: false
+  traefik:
+    external: true
