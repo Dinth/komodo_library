@@ -32,14 +32,14 @@ services:
       - navidrome
     ports:
       - 4533:4533/tcp
-    restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('music.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=2342"
+      traefik.enable: "true"
+      traefik.http.routers.whoami.entrypoints: websecure
+      traefik.http.routers.whoami.rule: Host('music.${DOMAIN_NAME}')
+      traefik.http.routers.whoami.tls: "true"
+      traefik.http.routers.whoami.tls.certresolver: letencrypt
+      traefik.http.services.whoami.loadbalancer.server.port: "4533"
+    restart: unless-stopped
     volumes:
       - /opt/docker/navidrome/navidrome_data:/data
       - /Data/Music:/music:ro
