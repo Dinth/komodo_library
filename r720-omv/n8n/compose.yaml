@@ -15,10 +15,8 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-    cap_drop:
-      - ALL
     container_name: n8n
-    entrypoint: ['tini','--','/docker-entrypoint.sh']
+#    entrypoint: ['tini','--','/docker-entrypoint.sh']
     environment:
       DB_TYPE: "postgresdb"
       DB_POSTGRESDB_DATABASE: "n8n"
@@ -27,6 +25,7 @@ services:
       DB_POSTGRESDB_USER: "n8n"
       DB_POSTGRESDB_PASSWORD: "${N8N_DB_PASS}"
       TZ: "${TZ}"
+      DEBUG: "true"
     hostname: n8n
     image: docker.n8n.io/n8nio/n8n:latest
     ipc: private
@@ -42,8 +41,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/n8n/n8n_data:/home/node/.n8n
-    working_dir: /home/node
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
 networks:
   n8n:
     name: n8n
