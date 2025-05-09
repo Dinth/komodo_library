@@ -21,9 +21,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/traefik/traefik.yml:/traefik.yml:ro
       - /opt/docker/traefik/traefik_certs:/certs
-
 networks:
   traefik:
     name: traefik
     driver: bridge
     external: false
+    ipam:
+      config:
+        - subnet: 10.55.0.0/16
+          ip_range: 10.55.0.0/24
