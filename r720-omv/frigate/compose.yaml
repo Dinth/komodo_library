@@ -80,6 +80,13 @@ services:
       - 8555:8555/udp
       - 8971:8971/tcp
     privileged: true
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.whoami.entrypoints: websecure
+      traefik.http.routers.whoami.rule: Host('cctv.<DOMAIN_NAME>')
+      traefik.http.routers.whoami.tls: "true"
+      traefik.http.routers.whoami.tls.certresolver: letencrypt
+      traefik.http.services.whoami.loadbalancer.server.port: "5000"
     restart: unless-stopped
     security_opt:
       - label=disable
