@@ -4,7 +4,7 @@ services:
     image: ghcr.io/vogler/free-games-claimer 
     build: .
     ports:
-      # - "5900:5900" # VNC server
+      - "5900:5900" # VNC server
       - "6080:6080" # noVNC (browser-based VNC client)
     volumes:
       - /opt/docker/fgc/fgc_data:/fgc/data
