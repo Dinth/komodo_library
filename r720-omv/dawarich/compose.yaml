@@ -219,9 +219,10 @@ services:
         max-file: "3"
     networks:
       - dawarich
+      - traefik
     ports:
       - 4745:3000/tcp
-      labels:
+    labels:
       traefik.enable: "true"
       traefik.http.routers.whoami.entrypoints: websecure
       traefik.http.routers.whoami.rule: Host('traces.<DOMAIN_NAME>')
@@ -240,3 +241,5 @@ networks:
     name: dawarich
     driver: bridge
     external: false
+  traefik:
+    external: true
