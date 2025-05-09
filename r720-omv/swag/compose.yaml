@@ -1,3 +1,4 @@
+services:
   swag:
     cap_add:
       - AUDIT_WRITE
@@ -23,11 +24,11 @@
       EMAIL: "${ADMIN_EMAIL}"
       MAXMINDDB_LICENSE_KEY: "${SWAG_MAXMINDB_KEY}"
       ONLY_SUBDOMAINS: "true"
-      SUBDOMAINS: "home,cctv,ttrss,calibre,grocery,avocado,books,photos,projects,spellcheck,filebrowser,finance,music,baby,monica,nc,id,edr,rss,ai,cdn,auto,traces,recipes,bookmarks,nc,fp,jf"
+      SUBDOMAINS: "home,cctv,ttrss,calibre,grocery,avocado,books,photos,projects,spellcheck,filebrowser,finance,music,baby,monica,nc,id,edr,rss,ai,cdn,auto,traces,recipes,bookmarks,nc,fp,jf,search,prices"
       TZ: "${TZ}"
       URL: "${DOMAIN_NAME}"
       VALIDATION: "dns"
-      PROPAGATION: "60"
+      PROPAGATION: "80"
       DOCKER_MODS: "linuxserver/mods:swag-dashboard"
     hostname: swag
     image: lscr.io/linuxserver/swag:latest
@@ -38,7 +39,7 @@
         max-size: "10m"
         max-file: "3"
     networks:
-      - bridge-dns
+      - swag
     ports:
       - 443:443/tcp
       - 80:80/tcp
@@ -48,3 +49,8 @@
       - /Data/IT/cdn:/cdn:ro
       - /opt/docker/swag/swag_config:/config
     working_dir: /
+networks:
+  swag:
+    name: swag
+    external: false
+    driver: bridge
