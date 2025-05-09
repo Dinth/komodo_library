@@ -31,6 +31,7 @@ services:
         max-file: "3"
     networks:
       - audiobookshelf
+      - traefik
     ports:
       - 3378:80/tcp
     restart: unless-stopped
