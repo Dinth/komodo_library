@@ -8,14 +8,15 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-
-    cap_drop:
-      - ALL
-    command:
-      - /init
+      - DAC_OVERRIDE
+      - FSETID
+      - FOWNER
+      - MKNOD
+      - KILL
+    command: ['/init']
     container_name: backblaze-personal-wine
     environment:
-      USER_ID: "1002"
+      USER_ID: "1003"
       GROUP_ID: "100"
       UMASK: "0022"
       LANG: "en_GB.UTF-8"
