@@ -1,16 +1,54 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  pricebuddy:
+    build:
+      context: .
+      dockerfile: docker/php.dockerfile
+    image: jez500/pricebuddy:latest
+    ports:
+      - 5757:80
+    volumes:
+      - /opt/docker/pricebuddy/pricebuddy_data:/app/storage
+    environment:
+      DB_HOST: "pricebuddy-db"
+      DB_USERNAME: "pricebuddy"
+      DB_PASSWORD: "${PRICEBUDDY_DB_PASS}"
+      DB_DATABASE: "pricebuddy"
+      APP_USER_EMAIL: "${ADMIN_EMAIL}"
+      APP_USER_PASSWORD: "${PRICEBUDDY_ADMIN_PASS}"
+      SCRAPER_BASE_URL: "http://scraper:3000"
+      AFFILIATE_ENABLED: "false"
+    depends_on:
+      - pricebuddy-db
+    labels:  
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host('prices.${DOMAIN_NAME}')"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
+      - "traefik.http.services.whoami.loadbalancer.server.port=5757"
+    networks:
+      - pricebuddy
 
-# networks:
-#   default: {}
+  pricebuddy-db:
+    image: mysql:8.2
+    environment:
+      MYSQL_DATABASE: "pricebuddy"
+      MYSQL_USER: "pricebuddy"
+      MYSQL_PASSWORD: "${PRICEBUDDY_DB_PASS}"
+      MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_ADMIN_PASS}"
+    volumes:
+      - /opt/docker/pricebuddy/pricebuddy_mysql:/var/lib/mysql
+    networks:
+      - pricebuddy
 
-# volumes:
-#   data:
+  pricebuddy-scraper:
+    image: amerkurev/scrapper:latest
+    networks:
+      - pricebuddy
+#    ports:
+#      - 3030:3000
+networks:
+  pricebuddy:
+    name: pricebuddy
+    driver: bridge
+    external: false
