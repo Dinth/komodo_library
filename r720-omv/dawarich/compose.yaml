@@ -63,12 +63,13 @@ services:
     entrypoint: ['docker-entrypoint.sh']
     environment:
       POSTGRES_USER: "dawarich"
+      PGUSER: "dawarich"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     hostname: dawarich-postgis
     image: postgis/postgis:17-3.5-alpine
     ipc: private
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready" ]
+      test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -107,7 +108,7 @@ services:
     container_name: dawarich-sidekiq
     entrypoint: ['bundle','exec']
     environment:
-      DATABASE_HOST: "dawarich_postgis"
+      DATABASE_HOST: "dawarich-postgis"
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
@@ -151,13 +152,6 @@ services:
     networks:
       - dawarich
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('traces.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=2342"
     volumes:
       - /opt/docker/dawarich/dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
       - /opt/docker/dawarich/dawarich_public:/var/app/public
@@ -227,6 +221,13 @@ services:
       - dawarich
     ports:
       - 4745:3000/tcp
+      labels:
+      traefik.enable: "true"
+      traefik.http.routers.whoami.entrypoints: websecure
+      traefik.http.routers.whoami.rule: Host('traces.<DOMAIN_NAME>')
+      traefik.http.routers.whoami.tls: "true"
+      traefik.http.routers.whoami.tls.certresolver: letencrypt
+      traefik.http.services.whoami.loadbalancer.server.port: "4745"
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
