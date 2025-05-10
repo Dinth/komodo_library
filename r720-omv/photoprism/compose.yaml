@@ -89,7 +89,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.photoprism.rule=Host('photos.${DOMAIN_NAME}')"
+      - "traefik.http.routers.photoprism.rule=Host(`photos.${DOMAIN_NAME}`)"
       - "traefik.http.routers.photoprism.entrypoints=websecure"
       - "traefik.http.routers.photoprism.tls=true"
       - "traefik.http.routers.photoprism.tls.certresolver=letencrypt"
