@@ -51,9 +51,9 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.tandoor.entrypoints: websecure
-      traefik.http.routers.randoor.rule: Host('recipes.<DOMAIN_NAME>')
+      traefik.http.routers.randoor.rule: Host('recipes.${DOMAIN_NAME}')
       traefik.http.routers.tandoor.tls: "true"
-      traefik.http.routers.tandoor.tls.certresolver: letencrypt
+      traefik.http.routers.tandoor.tls.certresolver: letsencrypt
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
     restart: unless-stopped
     volumes:
