@@ -40,11 +40,13 @@ services:
       - ALL
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nextcloud.rule=Host(`cards.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.nextcloud.entrypoints=websecure"
-      - "traefik.http.routers.nextcloud.tls=true"
-      - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
-      - "traefik.http.services.nextcloud.loadbalancer.server.port=8000"
+      - "traefik.http.routers.vouchervault.rule=Host(`cards.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.vouchervault.entrypoints=websecure"
+      - "traefik.http.routers.vouchervault.tls=true"
+      - "traefik.http.routers.vouchervault.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vouchervault.loadbalancer.server.port=8000"
+      - "traefik.http.routers.vouchervault.tls.domains[0].main=${DOMAIN_NAME}"
+      - "traefik.http.routers.vouchervault.tls.domains[0].sans=*.${DOMAIN_NAME}"
     depends_on:
       vouchervault-redis:
         condition: service_healthy
