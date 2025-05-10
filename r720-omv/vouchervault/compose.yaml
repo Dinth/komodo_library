@@ -40,6 +40,13 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`cards.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls=true"
+      - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=8000"
   vouchervault-redis:
     image: redis:7-alpine
     container_name: vouchervault-redis
