@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       DOMAIN: "cards.${DOMAIN_NAME},10.10.1.13"
-      SECURE_COOKIES: "True"
+#     SECURE_COOKIES: "True"
       EXPIRY_THRESHOLD_DAYS: "90"
       TZ: "${TZ}"
     ports:
