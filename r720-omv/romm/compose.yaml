@@ -49,11 +49,11 @@ services:
       - traefik
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('emu.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=4040"
+      - "traefik.http.routers.romm.rule=Host('emu.${DOMAIN_NAME}')"
+      - "traefik.http.routers.romm.entrypoints=websecure"
+      - "traefik.http.routers.romm.tls=true"
+      - "traefik.http.routers.romm.tls.certresolver=letencrypt"
+      - "traefik.http.services.romm.loadbalancer.server.port=8080"
     ports:
       - 4040:8080/tcp
     restart: unless-stopped
