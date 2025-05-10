@@ -21,11 +21,11 @@ services:
       - pricebuddy-db
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('prices.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=5757"
+      - "traefik.http.routers.pricebuddy.rule=Host('prices.${DOMAIN_NAME}')"
+      - "traefik.http.routers.pricebuddy.entrypoints=websecure"
+      - "traefik.http.routers.pricebuddy.tls=true"
+      - "traefik.http.routers.pricebuddy.tls.certresolver=letencrypt"
+      - "traefik.http.services.pricebuddy.loadbalancer.server.port=80"
     networks:
       - pricebuddy
       - traefik
