@@ -3,7 +3,6 @@ services:
     image: l4rm4nd/vouchervault:1.15.x
     container_name: vouchervault
     restart: unless-stopped
-    user: "1003:100"
     environment:
       DOMAIN: "cards.${DOMAIN_NAME},10.10.1.13"
       SECURE_COOKIES: "True"
@@ -50,6 +49,7 @@ services:
       - "traefik.http.services.nextcloud.loadbalancer.server.port=8000"
   vouchervault-redis:
     image: redis:7-alpine
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: vouchervault-redis
     restart: unless-stopped
     expose:
