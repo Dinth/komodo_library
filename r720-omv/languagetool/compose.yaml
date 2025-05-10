@@ -37,7 +37,7 @@ services:
       - 8010:8010/tcp
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.languagetool.rule=Host('spellcheck.${DOMAIN_NAME}')"
+      - "traefik.http.routers.languagetool.rule=Host(`spellcheck.${DOMAIN_NAME}`)"
       - "traefik.http.routers.languagetool.entrypoints=websecure"
       - "traefik.http.routers.languagetool.tls=true"
       - "traefik.http.routers.languagetool.tls.certresolver=letencrypt"
