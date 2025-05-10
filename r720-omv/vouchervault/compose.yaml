@@ -47,7 +47,7 @@ services:
       - "traefik.http.services.nextcloud.loadbalancer.server.port=8000"
     depends_on:
       vouchervault-redis:
-        condition: healthy
+        condition: service_healthy
   vouchervault-redis:
     image: redis:7-alpine
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
