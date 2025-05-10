@@ -3,6 +3,7 @@ services:
     image: l4rm4nd/vouchervault:1.15.x
     container_name: vouchervault
     restart: unless-stopped
+    user: "1003:100"
     environment:
       DOMAIN: "cards.${DOMAIN_NAME},10.10.1.13"
       SECURE_COOKIES: "True"
