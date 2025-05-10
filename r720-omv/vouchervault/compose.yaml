@@ -1,6 +1,5 @@
 services:
-
-  app:
+  vouchervault:
     image: l4rm4nd/vouchervault:1.15.x
     container_name: vouchervault
     restart: unless-stopped
@@ -18,7 +17,7 @@ services:
     networks:
       - vouchervault
       - traefik
-  redis:
+  vouchervault-redis:
     image: redis:7-alpine
     container_name: vouchervault-redis
     restart: unless-stopped
