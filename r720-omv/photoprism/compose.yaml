@@ -89,11 +89,11 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('photos.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=2342"
+      - "traefik.http.routers.photoprism.rule=Host('photos.${DOMAIN_NAME}')"
+      - "traefik.http.routers.photoprism.entrypoints=websecure"
+      - "traefik.http.routers.photoprism.tls=true"
+      - "traefik.http.routers.photoprism.tls.certresolver=letencrypt"
+      - "traefik.http.services.photoprism.loadbalancer.server.port=2342"
     volumes:
       - /opt/docker/photoprism/photoprism_data:/photoprism/storage
       - /Data/IT/photoprism-cache:/photoprism/storage/cache
