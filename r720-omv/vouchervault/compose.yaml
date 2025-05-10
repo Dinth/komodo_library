@@ -8,8 +8,6 @@ services:
       SECURE_COOKIES: "True"
       EXPIRY_THRESHOLD_DAYS: "90"
       TZ: "${TZ}"
-    expose:
-      - 8000
     ports:
       - 8077:8000
     volumes:
@@ -47,13 +45,14 @@ services:
       - "traefik.http.routers.nextcloud.tls=true"
       - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
       - "traefik.http.services.nextcloud.loadbalancer.server.port=8000"
+    depends-on:
+      vouchervault-redis:
+        condition: healthy
   vouchervault-redis:
     image: redis:7-alpine
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: vouchervault-redis
     restart: unless-stopped
-    expose:
-      - 6379
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 10s
