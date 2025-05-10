@@ -50,11 +50,11 @@ services:
       - 1244:8080/tcp
     labels:
       traefik.enable: "true"
-      traefik.http.routers.whoami.entrypoints: websecure
-      traefik.http.routers.whoami.rule: Host('recipes.<DOMAIN_NAME>')
-      traefik.http.routers.whoami.tls: "true"
-      traefik.http.routers.whoami.tls.certresolver: letencrypt
-      traefik.http.services.whoami.loadbalancer.server.port: "1244"
+      traefik.http.routers.tandoor.entrypoints: websecure
+      traefik.http.routers.randoor.rule: Host('recipes.<DOMAIN_NAME>')
+      traefik.http.routers.tandoor.tls: "true"
+      traefik.http.routers.tandoor.tls.certresolver: letencrypt
+      traefik.http.services.tandoor.loadbalancer.server.port: "8080"
     restart: unless-stopped
     volumes:
       - /opt/docker/tandoor/tandoor_static:/opt/recipes/staticfiles
