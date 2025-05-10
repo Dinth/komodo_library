@@ -49,7 +49,7 @@ services:
       - traefik
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.romm.rule=Host('emu.${DOMAIN_NAME}')"
+      - "traefik.http.routers.romm.rule=Host(`emu.${DOMAIN_NAME}`)"
       - "traefik.http.routers.romm.entrypoints=websecure"
       - "traefik.http.routers.romm.tls=true"
       - "traefik.http.routers.romm.tls.certresolver=letencrypt"
