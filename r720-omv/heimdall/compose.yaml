@@ -35,6 +35,7 @@ services:
         max-file: "3"
     networks:
       - heimdall
+      - traefik
     ports:
       - 3838:80/tcp
       labels:  
@@ -43,7 +44,7 @@ services:
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls=true"
       - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=3838"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
     restart: unless-stopped
     volumes:
       - /opt/docker/heimdall/heimdall_config:/config
@@ -53,3 +54,5 @@ networks:
     name: heimdall
     driver: bridge
     external: false
+  traefik:
+    external: true
