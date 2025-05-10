@@ -56,6 +56,7 @@ services:
       - "traefik.http.middlewares.nextcloud-securityheaders.headers.stsSeconds=15552000"
       - "traefik.http.middlewares.nextcloud-securityheaders.headers.stsIncludeSubdomains=true"
       - "traefik.http.middlewares.nextcloud-securityheaders.headers.stsPreload=true"
+      - "traefik.docker.network=traefik"
     restart: unless-stopped
     volumes:
       - /opt/docker/nextcloud/nextcloud_config:/config
