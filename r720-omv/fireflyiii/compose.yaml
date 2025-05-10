@@ -48,7 +48,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.fireflyiii.entrypoints: websecure
-      traefik.http.routers.fireflyiii.rule: Host('finance.${DOMAIN_NAME}')
+      traefik.http.routers.fireflyiii.rule: Host(`finance.${DOMAIN_NAME}`)
       traefik.http.routers.fireflyiii.tls: "true"
       traefik.http.routers.fireflyiii.tls.certresolver: letencrypt
       traefik.http.services.fireflyiii.loadbalancer.server.port: "8080"
