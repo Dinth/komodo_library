@@ -1,16 +1,24 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
 
-# networks:
-#   default: {}
+  app:
+    image: l4rm4nd/vouchervault:1.15.x
+    container_name: vouchervault
+    restart: unless-stopped
+    environment:
+      DOMAIN: "cards.${DOMAIN_NAME},10.10.1.13"
+      SECURE_COOKIES: "True"
+      EXPIRY_THRESHOLD_DAYS: "90"
+      TZ: "${TZ}"
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    volumes:
+      - /opt/docker/vouchervault/vouchervault_db:/opt/app/database
 
-# volumes:
-#   data:
+  redis:
+    image: redis:7-alpine
+    container_name: vouchervault-redis
+    restart: unless-stopped
+    expose:
+      - 6379
