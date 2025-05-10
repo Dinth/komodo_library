@@ -10,7 +10,7 @@ services:
       DB_PASSWORD: "${MONICA_DB_PASS}"
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.monica.rule=Host('monica.${DOMAIN_NAME}')"
+      - "traefik.http.routers.monica.rule=Host(`monica.${DOMAIN_NAME}`)"
       - "traefik.http.routers.monica.entrypoints=websecure"
       - "traefik.http.routers.monica.tls=true"
       - "traefik.http.routers.monica.tls.certresolver=letencrypt"
