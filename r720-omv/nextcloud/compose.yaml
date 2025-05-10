@@ -42,7 +42,7 @@ services:
       - "traefik.http.routers.nextcloud.rule=Host(`nc.${DOMAIN_NAME}`)"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
       - "traefik.http.routers.nextcloud.tls=true"
-      - "traefik.http.routers.nextcloud.tls.certresolver=letencrypt"
+      - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
       - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
     restart: unless-stopped
     volumes:
