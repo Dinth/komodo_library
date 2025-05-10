@@ -40,7 +40,7 @@ services:
       - 3838:80/tcp
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host('fp.${DOMAIN_NAME}')"
+      - "traefik.http.routers.heimdall.rule=Host(`fp.${DOMAIN_NAME}`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
       - "traefik.http.routers.heimdall.tls=true"
       - "traefik.http.routers.heimdall.tls.certresolver=letencrypt"
