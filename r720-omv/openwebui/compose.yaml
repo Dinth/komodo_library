@@ -98,7 +98,7 @@ services:
       - "traefik.http.routers.openwebai.rule=Host(`ai.${DOMAIN_NAME}`)"
       - "traefik.http.routers.openwebai.entrypoints=websecure"
       - "traefik.http.routers.openwebai.tls=true"
-      - "traefik.http.routers.openwebai.tls.certresolver=letencrypt"
+      - "traefik.http.routers.openwebai.tls.certresolver=letsencrypt"
       - "traefik.http.services.openwebai.loadbalancer.server.port=8080"  
     restart: unless-stopped
     user: 0:0
