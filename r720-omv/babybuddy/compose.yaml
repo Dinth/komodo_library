@@ -43,7 +43,7 @@ services:
       - "traefik.http.routers.babybuddy.rule=Host(`baby.${DOMAIN_NAME}`)"
       - "traefik.http.routers.babybuddy.entrypoints=websecure"
       - "traefik.http.routers.babybuddy.tls=true"
-      - "traefik.http.routers.babybuddy.tls.certresolver=letencrypt"
+      - "traefik.http.routers.babybuddy.tls.certresolver=letsencrypt"
       - "traefik.http.services.babybuddy.loadbalancer.server.port=8000"
     restart: unless-stopped
     volumes:
