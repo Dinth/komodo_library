@@ -82,6 +82,8 @@ services:
         max-size: "10m"
         max-file: "3"
     ipc: private
+    volumes:
+      - /opt/docker/vouchervault/redis_data:/data
 networks: 
   vouchervault:
     name: vouchervault
