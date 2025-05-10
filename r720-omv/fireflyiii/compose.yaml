@@ -47,11 +47,11 @@ services:
       - traefik
     labels:
       traefik.enable: "true"
-      traefik.http.routers.whoami.entrypoints: websecure
-      traefik.http.routers.whoami.rule: Host('finance.<DOMAIN_NAME>')
-      traefik.http.routers.whoami.tls: "true"
-      traefik.http.routers.whoami.tls.certresolver: letencrypt
-      traefik.http.services.whoami.loadbalancer.server.port: "8080"
+      traefik.http.routers.fireflyiii.entrypoints: websecure
+      traefik.http.routers.fireflyiii.rule: Host('finance.<DOMAIN_NAME>')
+      traefik.http.routers.fireflyiii.tls: "true"
+      traefik.http.routers.fireflyiii.tls.certresolver: letencrypt
+      traefik.http.services.fireflyiii.loadbalancer.server.port: "8080"
     ports:
       - 4747:8080/tcp
     restart: unless-stopped
