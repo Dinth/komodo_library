@@ -38,7 +38,7 @@ services:
       - traefik
     ports:
       - 3838:80/tcp
-      labels:  
+    labels:  
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host('fp.${DOMAIN_NAME}')"
       - "traefik.http.routers.whoami.entrypoints=websecure"
