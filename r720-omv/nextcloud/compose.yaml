@@ -39,11 +39,11 @@ services:
       - 1357:80/tcp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('nc.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=1357"
+      - "traefik.http.routers.nextcloud.rule=Host('nc.${DOMAIN_NAME}')"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls=true"
+      - "traefik.http.routers.nextcloud.tls.certresolver=letencrypt"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
     restart: unless-stopped
     volumes:
       - /opt/docker/nextcloud/nextcloud_config:/config
