@@ -91,6 +91,13 @@ services:
       - traefik
     ports:
       - 2015:80/tcp
+        labels:
+    traefik.enable: "true"
+      traefik.http.routers.ttrss.entrypoints: websecure
+      traefik.http.routers.ttrss.rule: Host('ttrss.<DOMAIN_NAME>')
+      traefik.http.routers.ttrss.tls: "true"
+      traefik.http.routers.ttrss.tls.certresolver: letencrypt
+      traefik.http.services.ttrss.loadbalancer.server.port: "80"
     restart: always
     volumes:
       - /opt/docker/ttrss/ttrss_fever:/var/www/plugins/fever
