@@ -92,7 +92,7 @@ services:
       - "traefik.http.routers.photoprism.rule=Host(`photos.${DOMAIN_NAME}`)"
       - "traefik.http.routers.photoprism.entrypoints=websecure"
       - "traefik.http.routers.photoprism.tls=true"
-      - "traefik.http.routers.photoprism.tls.certresolver=letencrypt"
+      - "traefik.http.routers.photoprism.tls.certresolver=letsencrypt"
       - "traefik.http.services.photoprism.loadbalancer.server.port=2342"
     volumes:
       - /opt/docker/photoprism/photoprism_data:/photoprism/storage
