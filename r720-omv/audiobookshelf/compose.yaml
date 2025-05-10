@@ -40,7 +40,7 @@ services:
       - "traefik.http.routers.audiobookshelf.rule=Host(`audiobooks.${DOMAIN_NAME}`)"
       - "traefik.http.routers.audiobookshelf.entrypoints=websecure"
       - "traefik.http.routers.audiobookshelf.tls=true"
-      - "traefik.http.routers.audiobookshelf.tls.certresolver=letencrypt"
+      - "traefik.http.routers.audiobookshelf.tls.certresolver=letsencrypt"
       - "traefik.http.services.audiobookshelf.loadbalancer.server.port=80"
     volumes:
       - /Data/Ebooks/Audiobooks:/audiobooks:ro
