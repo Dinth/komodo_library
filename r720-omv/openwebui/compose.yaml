@@ -95,7 +95,7 @@ services:
       - 3311:8080/tcp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.openwebai.rule=Host('ai.${DOMAIN_NAME}')"
+      - "traefik.http.routers.openwebai.rule=Host(`ai.${DOMAIN_NAME}`)"
       - "traefik.http.routers.openwebai.entrypoints=websecure"
       - "traefik.http.routers.openwebai.tls=true"
       - "traefik.http.routers.openwebai.tls.certresolver=letencrypt"
