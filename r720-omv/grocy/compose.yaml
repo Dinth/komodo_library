@@ -38,11 +38,11 @@ services:
       - 9283:80/tcp
     labels:  
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('grocery.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+      - "traefik.http.routers.grocy.rule=Host('grocery.${DOMAIN_NAME}')"
+      - "traefik.http.routers.grocy.entrypoints=websecure"
+      - "traefik.http.routers.grocy.tls=true"
+      - "traefik.http.routers.grocy.tls.certresolver=letencrypt"
+      - "traefik.http.services.grocy.loadbalancer.server.port=80"
     restart: unless-stopped
     volumes:
       - /opt/docker/grocy/grocy_data:/config
