@@ -40,7 +40,7 @@ services:
       - "traefik.http.routers.languagetool.rule=Host(`spellcheck.${DOMAIN_NAME}`)"
       - "traefik.http.routers.languagetool.entrypoints=websecure"
       - "traefik.http.routers.languagetool.tls=true"
-      - "traefik.http.routers.languagetool.tls.certresolver=letencrypt"
+      - "traefik.http.routers.languagetool.tls.certresolver=letsencrypt"
       - "traefik.http.services.languagetool.loadbalancer.server.port=8010"
     restart: unless-stopped
     user: nobody
