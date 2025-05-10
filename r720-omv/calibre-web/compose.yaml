@@ -40,7 +40,7 @@ services:
       - 8083:8083/tcp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.calibre-web.rule=Host('calibre.${DOMAIN_NAME}')"
+      - "traefik.http.routers.calibre-web.rule=Host(`calibre.${DOMAIN_NAME}`)"
       - "traefik.http.routers.calibre-web.entrypoints=websecure"
       - "traefik.http.routers.calibre-web.tls=true"
       - "traefik.http.routers.calibre-web.tls.certresolver=letencrypt"
