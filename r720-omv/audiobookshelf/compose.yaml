@@ -37,11 +37,11 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host('audiobooks.${DOMAIN_NAME}')"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letencrypt"
-      - "traefik.http.services.whoami.loadbalancer.server.port=3378"
+      - "traefik.http.routers.audiobookshelf.rule=Host('audiobooks.${DOMAIN_NAME}')"
+      - "traefik.http.routers.audiobookshelf.entrypoints=websecure"
+      - "traefik.http.routers.audiobookshelf.tls=true"
+      - "traefik.http.routers.audiobookshelf.tls.certresolver=letencrypt"
+      - "traefik.http.services.audiobookshelf.loadbalancer.server.port=80"
     volumes:
       - /Data/Ebooks/Audiobooks:/audiobooks:ro
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
