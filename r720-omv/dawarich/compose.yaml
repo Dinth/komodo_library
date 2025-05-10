@@ -225,7 +225,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.dawarich.entrypoints: websecure
-      traefik.http.routers.dawarich.rule: Host('traces.${DOMAIN_NAME}')
+      traefik.http.routers.dawarich.rule: Host(`traces.<DOMAIN_NAME>`)
       traefik.http.routers.dawarich.tls: "true"
       traefik.http.routers.dawarich.tls.certresolver: letencrypt
       traefik.http.services.dawarich.loadbalancer.server.port: "3000"
