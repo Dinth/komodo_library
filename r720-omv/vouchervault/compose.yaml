@@ -12,7 +12,7 @@ services:
     expose:
       - 8000
     ports:
-      - 8000:8000
+      - 8000:8077
     volumes:
       - /opt/docker/vouchervault/vouchervault_db:/opt/app/database
 
