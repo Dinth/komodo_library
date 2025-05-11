@@ -10,8 +10,10 @@ services:
       - "18443:8443"
       - "19000:9000"
     volumes:
-      - deceptifeed_data:/data/
+      - /opt/docker/deceptifeed/deceptifeed_data:/data/
     restart: unless-stopped
 networks:
   deceptifeed:
+    name: deceptifeed
+    driver: bridge
     external: false
