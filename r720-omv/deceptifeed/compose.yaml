@@ -4,6 +4,9 @@ services:
     container_name: deceptifeed
     environment:
       TZ: "${TZ}"
+    networks:
+      - deceptifeed
+      - traefik
     ports:
       - "12222:2222"
       - "18080:8080"
@@ -35,3 +38,5 @@ networks:
     name: deceptifeed
     driver: bridge
     external: false
+  traefik:
+    external: true
