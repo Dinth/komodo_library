@@ -76,7 +76,7 @@ services:
     image: wangqiru/ttrss:latest
     ipc: private
     healthcheck:
-      test: curl --fail http://localhost:3000/ || exit 1
+      test: curl --fail http://localhost:80/ || exit 1
       interval: 40s
       timeout: 30s
       retries: 3
