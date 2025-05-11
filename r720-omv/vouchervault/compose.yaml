@@ -1,5 +1,23 @@
 services:
   vouchervault:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL 
+    ipc: private
     image: l4rm4nd/vouchervault:1.15.x
     container_name: vouchervault
     restart: unless-stopped
@@ -20,33 +38,15 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    ipc: private
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.vouchervault.rule=Host(`cards.${DOMAIN_NAME}`)"
       - "traefik.http.routers.vouchervault.entrypoints=websecure"
       - "traefik.http.routers.vouchervault.tls=true"
       - "traefik.http.routers.vouchervault.tls.certresolver=letsencrypt"
-      - "traefik.http.services.vouchervault.loadbalancer.server.port=8000"
       - "traefik.http.routers.vouchervault.tls.domains[0].main=${DOMAIN_NAME}"
       - "traefik.http.routers.vouchervault.tls.domains[0].sans=*.${DOMAIN_NAME}"
+      - "traefik.http.services.vouchervault.loadbalancer.server.port=8000"
     depends_on:
       vouchervault-redis:
         condition: service_healthy
