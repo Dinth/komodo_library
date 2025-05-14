@@ -45,6 +45,11 @@ services:
       - "traefik.http.routers.calibre-web.tls=true"
       - "traefik.http.routers.calibre-web.tls.certresolver=letsencrypt"
       - "traefik.http.services.calibre-web.loadbalancer.server.port=8083"
+      - "homepage.group=Media"
+      - "homepage.name=Calibre-web"
+      - "homepage.icon=calibre-web.png"
+      - "homepage.href=https://calibre.${DOMAIN_NAME}""
+      - "homepage.description=E-book catalogue"
     restart: unless-stopped
     volumes:
       - /Data/Ebooks:/books
