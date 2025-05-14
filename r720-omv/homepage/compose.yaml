@@ -4,7 +4,7 @@ services:
     container_name: homepage-socket-proxy
     restart: unless-stopped
     networks:
-      - traefik-internal
+      - homepage
     environment:
       CONTAINERS: "1"
     volumes:
@@ -21,6 +21,9 @@ services:
     volumes:
       - /opt/docker/homepage/homepage_config:/app/config
     restart: unless-stopped
+    networks:
+      - homepage
+      - traefik
 networks:
   homepage:
     name: homepage
