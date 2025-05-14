@@ -19,8 +19,7 @@ services:
     ports:
       - 3008:3000
     volumes:
-      - /opt/docker/homepage/homepage_config:/app/config # Make sure your local config directory exists
-      - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
+      - /opt/docker/homepage/homepage_config:/app/config
     restart: unless-stopped
 networks:
   homepage:
