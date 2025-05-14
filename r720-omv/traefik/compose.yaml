@@ -33,13 +33,13 @@ services:
       - "homepage.group=Infrastructure"
       - "homepage.name=Traefik"
       - "homepage.icon=traefik"
-      - "homepage.href=http://10.10.1.13:9120/"
+      - "homepage.internal.href=http://10.10.1.13:8281/"
       - "homepage.description=HTTP reverse proxy"
       - "homepage.statusStyle=dot"
       - "homepage.widget.type=traefik"
-      - "homepage.widget.url=http://10.10.1.13:9120/"
-      - "homepage.widget.username:dave"
-      - "homepage.widget.password:passwordhere"
+      - "homepage.widget.url=http://10.10.1.13:8281/"
+#      - "homepage.widget.username:username"
+#      - "homepage.widget.password:password"
     restart: unless-stopped
     networks:
       - traefik-internal
