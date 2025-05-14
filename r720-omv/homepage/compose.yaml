@@ -1,4 +1,14 @@
 services:
+  homepage-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: homepage-socket-proxy
+    restart: unless-stopped
+    networks:
+      - traefik-internal
+    environment:
+      CONTAINERS: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
