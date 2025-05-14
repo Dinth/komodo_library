@@ -48,7 +48,9 @@ services:
       - "homepage.group=Media"
       - "homepage.name=Calibre-web"
       - "homepage.icon=calibre-web.png"
-      - "homepage.href=https://calibre.${DOMAIN_NAME}"
+      - "homepage.instance.internal.href=http://10.10.1.13:8083"
+      - "homepage.instance.public.href=https://calibre.${DOMAIN_NAME}"
+#      - "homepage.href=https://calibre.${DOMAIN_NAME}"
       - "homepage.description=E-book catalogue"
     restart: unless-stopped
     volumes:
