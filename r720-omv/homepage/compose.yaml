@@ -28,4 +28,6 @@ networks:
   homepage:
     name: homepage
     driver: bridge
-    external: false    
+    external: false
+  traefik:
+    external: true
