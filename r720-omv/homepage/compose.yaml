@@ -13,7 +13,7 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: gethomepage.dev
+      HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
     ports:
