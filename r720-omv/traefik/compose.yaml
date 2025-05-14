@@ -40,7 +40,6 @@ services:
       - "homepage.widget.url=http://10.10.1.13:8281/"
 #      - "homepage.widget.username:username"
 #      - "homepage.widget.password:password"
-    restart: unless-stopped
     networks:
       - traefik-internal
       - traefik
