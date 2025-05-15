@@ -54,6 +54,8 @@ services:
 #      homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
       homepage.widget.type: "calibre-web"
       homepage.widget.url: "http://10.10.1.13:8083"
+      homepage.widget.username: "${HOMEPAGE_CALIBREWEB_USER}"
+      homepage.widget.password: "${HOMEPAGE_CALIBREWEB_PASS}"
     restart: unless-stopped
     volumes:
       - /Data/Ebooks:/books
