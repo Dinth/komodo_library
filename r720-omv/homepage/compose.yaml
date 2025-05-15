@@ -10,7 +10,7 @@ services:
       CONTAINERS: "1"
     #read_only: true # needs binding for /usr/local/etc/haproxy.cfg
     mem_limit: 64M
-    cap_drop:
+    #cap_drop:
       - ALL
     security_opt:
       - no-new-privileges
