@@ -39,19 +39,19 @@ services:
     ports:
       - 8083:8083/tcp
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.calibre-web.rule=Host(`calibre.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.calibre-web.entrypoints=websecure"
-      - "traefik.http.routers.calibre-web.tls=true"
-      - "traefik.http.routers.calibre-web.tls.certresolver=letsencrypt"
-      - "traefik.http.services.calibre-web.loadbalancer.server.port=8083"
-      - "homepage.group=Media"
-      - "homepage.name=Calibre-web"
-      - "homepage.icon=calibre-web.png"
-      - "homepage.instance.internal.href=http://10.10.1.13:8083"
-      - "homepage.instance.public.href=https://calibre.${DOMAIN_NAME}"
-      - "homepage.description=E-book catalogue"
-      - "homepage.widget.fields=['books', 'authors', 'categories', 'series']"
+      traefik.enable: "true"
+      traefik.http.routers.calibre-web.rule: "Host(`calibre.${DOMAIN_NAME}`)"
+      traefik.http.routers.calibre-web.entrypoints: "websecure"
+      traefik.http.routers.calibre-web.tls: "true"
+      traefik.http.routers.calibre-web.tls.certresolver: "letsencrypt"
+      traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
+      homepage.group: "Media"
+      homepage.name: "Calibre-web"
+      homepage.icon: "calibre-web.png"
+      homepage.instance.internal.href: "http://10.10.1.13:8083"
+      homepage.instance.public.href: "https://calibre.${DOMAIN_NAME}"
+      homepage.description: "E-book catalogue"
+      homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
     restart: unless-stopped
     volumes:
       - /Data/Ebooks:/books
