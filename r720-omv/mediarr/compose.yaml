@@ -515,6 +515,17 @@ services:
     hostname: sonarr
     image: linuxserver/sonarr:latest
     ipc: private
+    labels:
+      - "homepage.group=Media"
+      - "homepage.name=Sonarr"
+      - "homepage.icon=sonarr.png"
+      - "homepage.instance.internal.href=http://10.10.1.13:8989"
+      - "homepage.description=TV Shows catalogue"
+      - "homepage.widget.type=sonarr"
+      - "homepage.widget.url=http://10.10.1.13:8989"
+      - "homepage.widget.key=${SONARR__INSTANCES__0__APIKEY}"
+      - "homepage.widget.enableQueue=true"
+      - "homepage.widget.fields=['books', 'authors', 'categories', 'series']"
     logging:
       driver: json-file
       options:
