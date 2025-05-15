@@ -88,6 +88,15 @@ services:
       traefik.http.routers.frigate.tls: "true"
       traefik.http.routers.frigate.tls.certresolver: letsencrypt
       traefik.http.services.frigate.loadbalancer.server.port: "5000"
+      homepage.group: "Home"
+      homepage.name: "Frigate"
+      homepage.icon: "frigate.png"
+      homepage.instance.internal.href: "http://10.10.1.13:5000"
+      homepage.instance.public.href: "https://cctv.${DOMAIN_NAME}"
+      homepage.description: "CCTV NVR"
+      homepage.widget.type: "frigate"
+      homepage.widget.url: "http://10.10.1.13"
+      homepage.widget.enableRecentEvents: "true"
     restart: unless-stopped
     security_opt:
       - label=disable
