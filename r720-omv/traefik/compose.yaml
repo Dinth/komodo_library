@@ -38,6 +38,7 @@ services:
       - "homepage.statusStyle=dot"
       - "homepage.widget.type=traefik"
       - "homepage.widget.url=http://10.10.1.13:8281/"
+      - "homepage.showStats=true"
 #      - "homepage.widget.username:username"
 #      - "homepage.widget.password:password"
     networks:
