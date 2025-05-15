@@ -52,7 +52,7 @@ services:
       homepage.instance.public.href: "https://calibre.${DOMAIN_NAME}"
       homepage.description: "E-book catalogue"
 #      homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
-      homepage.widget.type: "calibre-web"
+      homepage.widget.type: "calibreweb"
       homepage.widget.url: "http://10.10.1.13:8083"
       homepage.widget.username: "${HOMEPAGE_CALIBREWEB_USER}"
       homepage.widget.password: "${HOMEPAGE_CALIBREWEB_PASS}"
