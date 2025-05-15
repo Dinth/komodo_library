@@ -15,8 +15,8 @@ services:
     ipc: private
     environment:
       HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+#      PUID: "${DOCKER_PUID}"
+#      PGID: "${DOCKER_PGID}"
     ports:
       - 3008:3000
     volumes:
