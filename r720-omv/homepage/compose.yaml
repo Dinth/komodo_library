@@ -14,7 +14,7 @@ services:
     #  - ALL
     security_opt:
       - no-new-privileges
-    user: ${DOCKER_PUID}:${DOCKER_PGID}
+    #user: ${DOCKER_PUID}:${DOCKER_PGID}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   homepage:
