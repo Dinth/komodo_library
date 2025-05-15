@@ -91,7 +91,7 @@ services:
       homepage.group: "Home"
       homepage.name: "Frigate"
       homepage.icon: "frigate.png"
-      homepage.instance.public.href: "https://cctv.${DOMAIN_NAME}"
+      homepage.href: "https://cctv.${DOMAIN_NAME}"
       homepage.description: "CCTV NVR"
       homepage.widget.type: "frigate"
       homepage.widget.url: "http://10.10.1.13"
