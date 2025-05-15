@@ -525,7 +525,11 @@ services:
       - "homepage.widget.url=http://10.10.1.13:8989"
       - "homepage.widget.key=${SONARR__INSTANCES__0__APIKEY}"
       - "homepage.widget.enableQueue=true"
-      - "homepage.widget.fields=['books', 'authors', 'categories', 'series']"
+#      - "homepage.widget.fields=['books', 'authors', 'categories', 'series']"
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8989/sonarr/ping", "https://google.com" ]
+      interval: 30s
+      retries: 10
     logging:
       driver: json-file
       options:
