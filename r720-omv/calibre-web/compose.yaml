@@ -52,6 +52,8 @@ services:
       homepage.instance.public.href: "https://calibre.${DOMAIN_NAME}"
       homepage.description: "E-book catalogue"
       homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
+      homepage.widget.type: "calibre-web"
+      homepage.widget.url: "http://10.10.1.13:8083"
     restart: unless-stopped
     volumes:
       - /Data/Ebooks:/books
