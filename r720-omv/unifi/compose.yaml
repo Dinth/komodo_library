@@ -28,6 +28,16 @@ services:
       MONGO_DBNAME: "unifi"
       MEM_LIMIT: "1024" #optional
       MEM_STARTUP: "1024" #optional
+    labels:
+      homepage.description: "WiFi management"
+      homepage.group: "Infrastructure"
+      homepage.href: "http://10.10.1.13:8443"
+      homepage.icon: "unifi.png"
+      homepage.name: "unifi"
+      homepage.widget.type: "unifi"
+      homepage.widget.url: "http://10.10.1.13:8443"
+      homepage.widget.username: "${HOMEPAGE_UNIFI_USER}"
+      homepage.widget.password: "${HOMEPAGE_UNIFI_PASS}"
     volumes:
       - ./config:/config
     ports:
