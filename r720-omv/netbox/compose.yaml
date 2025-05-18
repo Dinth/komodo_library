@@ -56,6 +56,10 @@ services:
       timeout: 30s
       interval: 10s
       retries: 5
+    environment:
+      POSTGRES_DB: "netbox"
+      POSTGRES_PASSWORD: "${NETBOX_POSTGRES_PASS}"
+      POSTGRES_USER: "netbox"
     volumes:
       - /opt/docker/netbox/netbox_postgres-data:/var/lib/postgresql/data
     networks:
@@ -74,6 +78,8 @@ services:
       timeout: 3s
       interval: 1s
       retries: 5
+    environment: 
+      REDIS_PASSWORD: "${NETBOX_REDIS_PASS}"
     volumes:
       - /opt/docker/netbox/netbox_redis-data:/data
     networks:
