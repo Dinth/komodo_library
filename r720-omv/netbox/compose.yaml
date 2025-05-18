@@ -56,7 +56,6 @@ services:
       timeout: 30s
       interval: 10s
       retries: 5
-    env_file: env/postgres.env
     volumes:
       - /opt/docker/netbox/netbox_postgres-data:/var/lib/postgresql/data
     networks:
