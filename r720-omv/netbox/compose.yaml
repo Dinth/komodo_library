@@ -63,7 +63,7 @@ services:
 
   netbox-redis:
     image: docker.io/valkey/valkey:8.1-alpine
-    user: "{DOCKER_PUID}:${DOCKER_PGID}"
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
