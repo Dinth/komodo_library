@@ -18,9 +18,7 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    command: ['node','index.js']
     container_name: audiobookshelf
-    entrypoint: ['tini','--']
     hostname: audiobookshelf
     image: advplyr/audiobookshelf:latest
     ipc: private
