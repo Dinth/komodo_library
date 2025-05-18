@@ -11,6 +11,11 @@ services:
     environment:
       TZ: "${TZ}"
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       - authelia_redis
     networks:
@@ -38,6 +43,18 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+        ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     expose:
       - 6379
     command: "redis-server --requirepass $(cat ./authelia/secrets/REDIS_PASSWORD)"
