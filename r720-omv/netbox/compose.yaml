@@ -49,6 +49,7 @@ services:
 
   netbox-postgres:
     image: docker.io/postgres:17-alpine
+    user: "{DOCKER_PUID}:${DOCKER_PGID}"
     healthcheck:
       test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
       start_period: 20s
@@ -63,6 +64,7 @@ services:
 
   redis:
     image: docker.io/valkey/valkey:8.1-alpine
+    user: "{DOCKER_PUID}:${DOCKER_PGID}"
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
@@ -79,6 +81,7 @@ services:
       - netbox
   redis-cache:
     image: docker.io/valkey/valkey:8.1-alpine
+    user: "{DOCKER_PUID}:${DOCKER_PGID}"
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
