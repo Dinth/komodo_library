@@ -1,16 +1,96 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  netbox: &netbox
+    image: docker.io/netboxcommunity/netbox:${VERSION-v4.3-3.3.0}
+    depends_on:
+      - netbox-postgres
+      - netbox-redis
+      - netbox-redis-cache
+    user: "{DOCKER_PUID}:${DOCKER_PGID}"
+    healthcheck:
+      test: curl -f http://localhost:8080/login/ || exit 1
+      start_period: 90s
+      timeout: 3s
+      interval: 15s
+    volumes:
+      - /opt/docker/netbox/config:/etc/netbox/config:z,ro
+      - /opt/docker/netbox/netbox_media-files:/opt/netbox/netbox/media:rw
+      - /opt/docker/netbox/netbox_reports-files:/opt/netbox/netbox/reports:rw
+      - /opt/docker/netbox/netbox_scripts-files:/opt/netbox/netbox/scripts:rw
+    networks:
+      - netbox
+  netbox-worker:
+    <<: *netbox
+    depends_on:
+      netbox:
+        condition: service_healthy
+    command:
+      - /opt/netbox/venv/bin/python
+      - /opt/netbox/netbox/manage.py
+      - rqworker
+    healthcheck:
+      test: ps -aux | grep -v grep | grep -q rqworker || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+  netbox-housekeeping:
+    <<: *netbox
+    depends_on:
+      netbox:
+        condition: service_healthy
+    command:
+      - /opt/netbox/housekeeping.sh
+    healthcheck:
+      test: ps -aux | grep -v grep | grep -q housekeeping || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+    networks:
+      - netbox
 
-# networks:
-#   default: {}
+  netbox-postgres:
+    image: docker.io/postgres:17-alpine
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    env_file: env/postgres.env
+    volumes:
+      - /opt/docker/netbox/netbox_postgres-data:/var/lib/postgresql/data
+    networks:
+      - netbox
 
-# volumes:
-#   data:
+  redis:
+    image: docker.io/valkey/valkey:8.1-alpine
+    command:
+      - sh
+      - -c # this is to evaluate the $REDIS_PASSWORD from the env
+      - valkey-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    healthcheck: &redis-healthcheck
+      test: '[ $$(valkey-cli --pass "$${REDIS_PASSWORD}" ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    volumes:
+      - /opt/docker/netbox/netbox_redis-data:/data
+    networks:
+      - netbox
+  redis-cache:
+    image: docker.io/valkey/valkey:8.1-alpine
+    command:
+      - sh
+      - -c # this is to evaluate the $REDIS_PASSWORD from the env
+      - valkey-server --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    healthcheck: *redis-healthcheck
+    env_file: env/redis-cache.env
+    volumes:
+      - /opt/docker/netbox/netbox_redis-cache-data:/data
+    networks:
+      - netbox
+networks:
+  netbox:
+    name: netbox
+    driver: bridge
+    external: false
