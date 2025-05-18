@@ -7,19 +7,11 @@ services:
       - 9091
     volumes:
       - /opt/docker/authelia/authelia_config:/config:ro
-      - /opt/docker/authelia/authelia_secrets:/secrets:ro
     environment:
       TZ: "${TZ}"
-      # Use Docker secrets for sensitive env vars if supported by your orchestrator
-      AUTHELIA_JWT_SECRET_FILE=/secrets/JWT_SECRET
-      AUTHELIA_SESSION_SECRET_FILE=/secrets/SESSION_SECRET
-      AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/secrets/STORAGE_ENCRYPTION_KEY
-      AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE=/secrets/STORAGE_PASSWORD
-      AUTHELIA_SESSION_REDIS_PASSWORD_FILE=/secrets/REDIS_PASSWORD
-      AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE=/secrets/SMTP_PASSWORD
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     depends_on:
-      - redis
+      - authelia-redis
     networks:
       - authelia
 
@@ -31,7 +23,7 @@ services:
       - 6379
     command: "redis-server --requirepass $(cat ./authelia/secrets/REDIS_PASSWORD)"
     volumes:
-      - ./redis/data:/bitnami
+      #- /opt/docker/authelia/authelia_redis/data:/bitnami
     user: "8001:8001"
     networks:
       - authelia
