@@ -57,7 +57,7 @@ services:
         max-file: "3"
     expose:
       - 6379
-    command: "redis-server --requirepass $(cat ./authelia/secrets/REDIS_PASSWORD)"
+    command: "redis-server --requirepass ${AUTHELIA_REDIS_PASS}"
     volumes:
       - ./redis/data:/bitnami
     user: "8001:8001"
