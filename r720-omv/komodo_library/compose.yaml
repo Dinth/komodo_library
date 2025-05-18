@@ -10,6 +10,7 @@ services:
       - /opt/docker/authelia/authelia_config:/config:ro
     environment:
       TZ: "${TZ}"
+      AUTHELIA_SESSION_REDIS_PASSWORD_FILE: "${AUTHELIA_REDIS_PASS}"
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     logging:
       driver: json-file
