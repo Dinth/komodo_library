@@ -6,6 +6,21 @@ services:
       - netbox-redis
       - netbox-redis-cache
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    environment:
+      DB_HOST: "netbox-postgres"
+      DB_NAME: "netbox"
+      DB_PASSWORD: "${NETBOX_POSTGRES_PASS}""
+      DB_USER: "netbox"
+      REDIS_CACHE_DATABASE: 1
+      REDIS_CACHE_HOST: "netbox-redis-cache"
+      REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY: "false"
+      REDIS_CACHE_PASSWORD: "${NETBOX_REDIS_CACHE_PASS}""
+      REDIS_CACHE_SSL: "false"
+      REDIS_DATABASE: 0
+      REDIS_HOST: "netbox-redis"
+      REDIS_INSECURE_SKIP_TLS_VERIFY: "false"
+      REDIS_PASSWORD: "${NETBOX_REDIS_PASS}"
+      REDIS_SSL: "false"
     healthcheck:
       test: curl -f http://localhost:8080/login/ || exit 1
       start_period: 90s
@@ -71,15 +86,13 @@ services:
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
-      - valkey-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+      - valkey-server --appendonly yes --requirepass $$NETBOX_REDIS_PASSWORD ## $$ because of docker-compose
     healthcheck: &redis-healthcheck
-      test: '[ $$(valkey-cli --pass "$${REDIS_PASSWORD}" ping) = ''PONG'' ]'
+      test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_PASSWORD}" ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
-    environment: 
-      REDIS_PASSWORD: "${NETBOX_REDIS_PASS}"
     volumes:
       - /opt/docker/netbox/netbox_redis-data:/data
     networks:
@@ -89,8 +102,13 @@ services:
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
-      - valkey-server --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
-    healthcheck: *redis-healthcheck
+      - valkey-server --requirepass $$NETBOX_REDIS_CACHE_PASSWORD ## $$ because of docker-compose
+    healthcheck: &redis-healthcheck
+      test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_CACHE_PASSWORD}" ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
     volumes:
       - /opt/docker/netbox/netbox_redis-cache-data:/data
     networks:
