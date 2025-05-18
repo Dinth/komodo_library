@@ -62,7 +62,7 @@ services:
     networks:
       - netbox
 
-  redis:
+  netbox-redis:
     image: docker.io/valkey/valkey:8.1-alpine
     user: "{DOCKER_PUID}:${DOCKER_PGID}"
     command:
@@ -79,7 +79,7 @@ services:
       - /opt/docker/netbox/netbox_redis-data:/data
     networks:
       - netbox
-  redis-cache:
+  netbox-redis-cache:
     image: docker.io/valkey/valkey:8.1-alpine
     user: "{DOCKER_PUID}:${DOCKER_PGID}"
     command:
