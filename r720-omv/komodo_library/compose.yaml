@@ -3,6 +3,7 @@ services:
     image: authelia/authelia:latest
     container_name: authelia
     restart: unless-stopped
+    ipc: private
     expose:
       - 9091
     volumes:
@@ -11,7 +12,7 @@ services:
       TZ: "${TZ}"
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     depends_on:
-      - authelia-redis
+      - authelia_redis
     networks:
       - authelia
 
@@ -19,11 +20,29 @@ services:
     image: bitnami/redis:latest
     container_name: authelia-redis
     restart: unless-stopped
+    ipc: private
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
     expose:
       - 6379
     command: "redis-server --requirepass $(cat ./authelia/secrets/REDIS_PASSWORD)"
     volumes:
-      #- /opt/docker/authelia/authelia_redis/data:/bitnami
+      - ./redis/data:/bitnami
     user: "8001:8001"
     networks:
       - authelia
