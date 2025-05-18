@@ -11,6 +11,7 @@ services:
     environment:
       TZ: "${TZ}"
       AUTHELIA_SESSION_REDIS_PASSWORD_FILE: "${AUTHELIA_REDIS_PASS}"
+      AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     logging:
       driver: json-file
