@@ -85,7 +85,7 @@ services:
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
-      - valkey-server --appendonly yes --requirepass ${NETBOX_REDIS_PASSWORD} ## $$ because of docker-compose
+      - valkey-server --appendonly yes --requirepass "$${NETBOX_REDIS_PASSWORD}" ## $$ because of docker-compose
     healthcheck: &redis-healthcheck
       test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_PASSWORD}" ping) = ''PONG'' ]'
       start_period: 5s
@@ -101,7 +101,7 @@ services:
     command:
       - sh
       - -c # this is to evaluate the $REDIS_PASSWORD from the env
-      - valkey-server --requirepass $$NETBOX_REDIS_CACHE_PASSWORD ## $$ because of docker-compose
+      - valkey-server --requirepass "$${NETBOX_REDIS_CACHE_PASSWORD}" ## $$ because of docker-compose
     healthcheck: &redis-healthcheck
       test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_CACHE_PASSWORD}" ping) = ''PONG'' ]'
       start_period: 5s
