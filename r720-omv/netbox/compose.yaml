@@ -27,7 +27,7 @@ services:
       timeout: 3s
       interval: 15s
     volumes:
-      - /opt/docker/netbox/config:/etc/netbox/config:z,ro
+      - /opt/docker/netbox/netbox_config:/etc/netbox/config:z,ro
       - /opt/docker/netbox/netbox_media-files:/opt/netbox/netbox/media:rw
       - /opt/docker/netbox/netbox_reports-files:/opt/netbox/netbox/reports:rw
       - /opt/docker/netbox/netbox_scripts-files:/opt/netbox/netbox/scripts:rw
