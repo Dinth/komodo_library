@@ -45,7 +45,6 @@ services:
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
       - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
       - /Data/Ebooks/Podcasts:/podcasts:ro
-    working_dir: /
 networks:
   audiobookshelf:
     name: audiobookshelf
