@@ -1,6 +1,7 @@
 services:
   netbox: &netbox
     image: docker.io/netboxcommunity/netbox:latest
+    depends_on:
       - netbox-postgres
       - netbox-redis
       - netbox-redis-cache
