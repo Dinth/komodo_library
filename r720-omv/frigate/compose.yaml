@@ -75,11 +75,11 @@ services:
       - frigate
       - traefik
     ports:
-      - 5000:5000/tcp
+      - 5000:5000/tcp ## NO AUTH!!!!!
       - 8554:8554/tcp
       - 8555:8555/tcp
       - 8555:8555/udp
-      - 8971:8971/tcp
+      - 8971:8971/tcp #authentication
     privileged: true
     labels:
       traefik.enable: "true"
