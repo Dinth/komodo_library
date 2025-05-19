@@ -9,12 +9,12 @@ services:
     environment:
       DB_HOST: "netbox-postgres"
       DB_NAME: "netbox"
-      DB_PASSWORD: "${NETBOX_POSTGRES_PASS}""
+      DB_PASSWORD: "${NETBOX_POSTGRES_PASS}"
       DB_USER: "netbox"
       REDIS_CACHE_DATABASE: 1
       REDIS_CACHE_HOST: "netbox-redis-cache"
       REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY: "false"
-      REDIS_CACHE_PASSWORD: "${NETBOX_REDIS_CACHE_PASS}""
+      REDIS_CACHE_PASSWORD: "${NETBOX_REDIS_CACHE_PASS}"
       REDIS_CACHE_SSL: "false"
       REDIS_DATABASE: 0
       REDIS_HOST: "netbox-redis"
