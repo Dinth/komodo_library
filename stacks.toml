@@ -93,6 +93,8 @@ MEDIA_PGID=[[MEDIA_PGID]]
 MEDIA_PUID=[[MEDIA_PUID]]
 TZ=[[TZ]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+HOMEPAGE_CALIBREWEB_USER=[[HOMEPAGE_CALIBREWEB_USER]]
+HOMEPAGE_CALIBREWEB_PASS=[[HOMEPAGE_CALIBREWEB_PASS]]
 """
 
 ##
@@ -144,6 +146,7 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/deceptifeed"
 environment = """
 TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -234,6 +237,7 @@ environment = """
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -270,6 +274,7 @@ environment = """
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -292,6 +297,7 @@ TZ=[[TZ]]
 ADMIN_EMAIL=[[ADMIN_EMAIL]]
 HORTUSFOX_DB_PASS=[[HORTUSFOX_DB_PASS]]
 HORTUSFOX_ADMIN_PASS=[[HORTUSFOX_ADMIN_PASS]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -309,6 +315,7 @@ environment = """
 TZ=[[TZ]]
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -341,6 +348,9 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/languagetool"
+environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
 
 ##
 
@@ -398,6 +408,7 @@ run_directory = "r720-omv/monica"
 environment = """
 MONICA_DB_PASS=[[MONICA_DB_PASS]]
 MONICA_APP_KEY=[[MONICA_APP_KEY]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -436,6 +447,7 @@ run_directory = "r720-omv/navidrome"
 environment = """
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -451,6 +463,7 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/nextcloud"
 environment = """
 TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -464,12 +477,15 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/omnitools"
+environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
 
 ##
 
 [[stack]]
 name = "openttd"
-tags = ["stacks", "needs-improvement"]
+tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
@@ -511,6 +527,7 @@ environment = """
 PHOTOPRISM_DB_PASS=[[PHOTOPRISM_DB_PASS]]
 PHOTOPRISM_ADMIN_NAME=[[PHOTOPRISM_ADMIN_NAME]]
 PHOTOPRISM_ADMIN_PASS=[[PHOTOPRISM_ADMIN_PASS]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -546,6 +563,7 @@ ADMIN_EMAIL=[[ADMIN_EMAIL]]
 PRICEBUDDY_ADMIN_PASS=[[PRICEBUDDY_ADMIN_PASS]]
 PRICEBUDDY_DB_PASS=[[PRICEBUDDY_DB_PASS]]
 PRICEBUDDY_DB_ADMIN_PASS=[[PRICEBUDDY_DB_ADMIN_PASS]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -564,6 +582,7 @@ ROMM_DB_PASS=[[ROMM_DB_PASS]]
 ROMM_AUTH_SECRET_KEY=[[ROMM_AUTH_SECRET_KEY]]
 IGDB_CLIENT_ID=[[IGDB_CLIENT_ID]]
 IGDB_CLIENT_SECRET=[[IGDB_CLIENT_SECRET]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -710,3 +729,21 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/uptime-kuma"
+
+##
+
+[[stack]]
+name = "vouchervault"
+tags = ["needs-improvement", "stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/vouchervault"
+environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+"""
