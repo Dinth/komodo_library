@@ -87,7 +87,7 @@ services:
       traefik.http.routers.frigate.rule: Host(`cctv.${DOMAIN_NAME}`)
       traefik.http.routers.frigate.tls: "true"
       traefik.http.routers.frigate.tls.certresolver: letsencrypt
-      traefik.http.services.frigate.loadbalancer.server.port: "5000"
+      traefik.http.services.frigate.loadbalancer.server.port: "8971"
       homepage.group: "Home"
       homepage.name: "Frigate"
       homepage.icon: "frigate.png"
