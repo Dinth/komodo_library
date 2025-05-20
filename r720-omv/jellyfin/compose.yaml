@@ -60,7 +60,7 @@ services:
       homepage.description: "Media streaming"
       homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
       homepage.widget.type: "jellyfin"
-      homepage.widget.url: "http://10.10.1.13:8086"
+      homepage.widget.url: "http://10.10.1.13:8096"
       homepage.widget.key: "${HOMEPAGE_JELLYFIN_API}"
       homepage.widget.enableBlocks: true
       homepage.widget.enableNowPlaying: true
