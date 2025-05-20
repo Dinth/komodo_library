@@ -30,6 +30,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      homepage.group: "Home"
+      homepage.name: "Bricktracker"
+      homepage.icon: "sh-bricktracker.png"
+      homepage.href: "http://10.10.1.13:3333"
+      homepage.description: "Lego inventory"
     ipc: private
     networks: 
       - bricktracker
