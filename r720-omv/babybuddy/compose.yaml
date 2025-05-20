@@ -47,7 +47,7 @@ services:
       traefik.http.services.babybuddy.loadbalancer.server.port: "8000"
       homepage.description: Baby journal
       homepage.group: Home
-      homepage.href: https://baby.<DOMAIN_NAME>
+      homepage.href: https://baby.${DOMAIN_NAME}
       homepage.icon: baby-buddy.png
       homepage.name: Babybuddy
     restart: unless-stopped
