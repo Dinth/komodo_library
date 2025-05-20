@@ -48,7 +48,7 @@ services:
       homepage.widget.fields: "['podcasts', 'podcastsDuration', 'books', 'booksDuration']"
       homepage.widget.type: "audiobookshelf"
       homepage.widget.url: "http://10.10.1.13:3378"
-      homepage.widget.username: "${HOMEPAGE_AUDIOBOOKSHELF_API}"
+      homepage.widget.key: "${HOMEPAGE_AUDIOBOOKSHELF_API}"
     volumes:
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
       - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
