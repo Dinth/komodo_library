@@ -20,7 +20,7 @@ services:
     depends_on:
       - pricebuddy-db
     labels:  
-      traefik.enable=true"
+      traefik.enable: "true"
       traefik.http.routers.pricebuddy.rule: "Host(`prices.${DOMAIN_NAME}`)"
       traefik.http.routers.pricebuddy.entrypoints: "websecure"
       traefik.http.routers.pricebuddy.tls: "true"
