@@ -57,7 +57,7 @@ services:
       homepage.name: "Jellyfin"
       homepage.icon: "jellyfin.png"
       homepage.href: "https://jf.${DOMAIN_NAME}"
-      homepage.description: "E-book catalogue"
+      homepage.description: "Media streaming"
       homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
       homepage.widget.type: "jellyfin"
       homepage.widget.url: "http://10.10.1.13:8086"
