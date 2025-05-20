@@ -39,12 +39,17 @@ services:
     ports:
       - 3938:8000/tcp
     labels:  
-      - "traefik.enable=true"
-      - "traefik.http.routers.babybuddy.rule=Host(`baby.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.babybuddy.entrypoints=websecure"
-      - "traefik.http.routers.babybuddy.tls=true"
-      - "traefik.http.routers.babybuddy.tls.certresolver=letsencrypt"
-      - "traefik.http.services.babybuddy.loadbalancer.server.port=8000"
+      traefik.enable: "true"
+      traefik.http.routers.babybuddy.rule: "Host(`baby.${DOMAIN_NAME}`)"
+      traefik.http.routers.babybuddy.entrypoints: "websecure"
+      traefik.http.routers.babybuddy.tls: "true"
+      traefik.http.routers.babybuddy.tls.certresolver: "letsencrypt"
+      traefik.http.services.babybuddy.loadbalancer.server.port: "8000"
+      homepage.description: Baby journal
+      homepage.group: Home
+      homepage.href: https://baby.<DOMAIN_NAME>
+      homepage.icon: baby.png
+      homepage.name: Babybuddy
     restart: unless-stopped
     volumes:
       - /opt/docker/babybuddy/babybuddy_data:/config
