@@ -188,7 +188,7 @@ services:
       homepage.widget.fields: "['missingEpisodes', 'missingMovies']"
       homepage.widget.type: "bazarr"
       homepage.widget.url: "http://10.10.1.13:6767"
-      homepage.widget.username: "${HOMEPAGE_BAZARR_API}"
+      homepage.widget.key: "${HOMEPAGE_BAZARR_API}"
     logging:
       driver: json-file
       options:
