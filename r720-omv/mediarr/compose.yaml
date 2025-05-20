@@ -179,6 +179,16 @@ services:
     hostname: bazarr
     image: linuxserver/bazarr:latest
     ipc: private
+    labels:
+      homepage.group: "Media"
+      homepage.name: "Bazarr"
+      homepage.icon: "bazarr.png"
+      homepage.href: "http://10.10.1.13:6767"
+      homepage.description: "Subtitle downloader"
+      homepage.widget.fields: "['missingEpisodes', 'missingMovies']"
+      homepage.widget.type: "bazarr"
+      homepage.widget.url: "http://10.10.1.13:6767"
+      homepage.widget.username: "${HOMEPAGE_BAZARR_API}"
     logging:
       driver: json-file
       options:
