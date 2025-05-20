@@ -61,7 +61,7 @@ services:
       homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
       homepage.widget.type: "jellyfin"
       homepage.widget.url: "http://10.10.1.13:8086"
-      homepage.widget.key: "${HOMEPAGE_JELLYFIN_API}"
+      homepage.widget.key: "${HOMEPAGE_JELLYFIN_API	}"
       homepage.widget.enableBlocks: true
       homepage.widget.enableNowPlaying: true
       homepage.widget.enableUser: true 
