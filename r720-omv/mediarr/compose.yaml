@@ -99,6 +99,15 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      homepage.group: "Media"
+      homepage.name: "Jackett"
+      homepage.icon: "jackett.png"
+      homepage.instance.internal.href: "http://10.10.1.13:9117"
+      homepage.description: "Torrent indexer"
+      homepage.widget.type: "jackett"
+      homepage.widget.url: "http://10.10.1.13:9117"
+      homepage.widget.fields: "['configured', 'errored']"
     networks:
       - mediarr
     ports:
