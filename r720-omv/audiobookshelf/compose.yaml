@@ -34,16 +34,25 @@ services:
       - 3378:80/tcp
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.audiobookshelf.rule=Host(`audiobooks.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.audiobookshelf.entrypoints=websecure"
-      - "traefik.http.routers.audiobookshelf.tls=true"
-      - "traefik.http.routers.audiobookshelf.tls.certresolver=letsencrypt"
-      - "traefik.http.services.audiobookshelf.loadbalancer.server.port=80"
+      traefik.enable: "true"
+      traefik.http.routers.audiobookshelf.rule: "Host(`audiobooks.${DOMAIN_NAME}`)"
+      traefik.http.routers.audiobookshelf.entrypoints: "websecure"
+      traefik.http.routers.audiobookshelf.tls: "true"
+      traefik.http.routers.audiobookshelf.tls.certresolver: "letsencrypt"
+      traefik.http.services.audiobookshelf.loadbalancer.server.port: "80"
+      homepage.group: "Media"
+      homepage.name: "Audiobookshelf"
+      homepage.icon: "audiobookshelf.png"
+      homepage.href: "https://audiobooks.${DOMAIN_NAME}"
+      homepage.description: "E-book catalogue"
+#      homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
+      homepage.widget.type: "audiobookshelf"
+      homepage.widget.url: "http://10.10.1.13:3378"
+      homepage.widget.username: "${HOMEPAGE_CALIBREWEB_USER}"
     volumes:
-      - /Data/Ebooks/Audiobooks:/audiobooks:ro
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
       - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
+      - /Data/Ebooks/Audiobooks:/audiobooks:ro
       - /Data/Ebooks/Podcasts:/podcasts:ro
 networks:
   audiobookshelf:
