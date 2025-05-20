@@ -45,7 +45,7 @@ services:
       homepage.icon: "audiobookshelf.png"
       homepage.href: "https://audiobooks.${DOMAIN_NAME}"
       homepage.description: "E-book catalogue"
-      homepage.widget.fields: ["podcasts", "podcastsDuration", "books", "booksDuration"]
+      homepage.widget.fields: "['podcasts', 'podcastsDuration', 'books', 'booksDuration']"
       homepage.widget.type: "audiobookshelf"
       homepage.widget.url: "http://10.10.1.13:3378"
       homepage.widget.username: "${HOMEPAGE_AUDIOBOOKSHELF_API}"
