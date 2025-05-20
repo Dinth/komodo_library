@@ -55,6 +55,11 @@ services:
       traefik.http.routers.tandoor.tls: "true"
       traefik.http.routers.tandoor.tls.certresolver: letsencrypt
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
+      homepage.group: "Home"
+      homepage.name: "Tandoor"
+      homepage.icon: "tandoor.png"
+      homepage.href: "https://recipes.${DOMAIN_NAME}"
+      homepage.description: "Recipe manager"
     restart: unless-stopped
     volumes:
       - /opt/docker/tandoor/tandoor_static:/opt/recipes/staticfiles
