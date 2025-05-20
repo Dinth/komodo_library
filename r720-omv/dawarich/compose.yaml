@@ -200,8 +200,7 @@ services:
     image: freikin/dawarich:latest
     ipc: private
     healthcheck:
-#      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
-      test: [ "CMD-SHELL", "exit 0" ]
+      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
       interval: 10s
       retries: 30
       start_period: 30s
