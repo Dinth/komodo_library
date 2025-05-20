@@ -20,12 +20,17 @@ services:
     depends_on:
       - pricebuddy-db
     labels:  
-      - "traefik.enable=true"
-      - "traefik.http.routers.pricebuddy.rule=Host(`prices.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.pricebuddy.entrypoints=websecure"
-      - "traefik.http.routers.pricebuddy.tls=true"
-      - "traefik.http.routers.pricebuddy.tls.certresolver=letsencrypt"
-      - "traefik.http.services.pricebuddy.loadbalancer.server.port=80"
+      traefik.enable=true"
+      traefik.http.routers.pricebuddy.rule: "Host(`prices.${DOMAIN_NAME}`)"
+      traefik.http.routers.pricebuddy.entrypoints: "websecure"
+      traefik.http.routers.pricebuddy.tls: "true"
+      traefik.http.routers.pricebuddy.tls.certresolver: "letsencrypt"
+      traefik.http.services.pricebuddy.loadbalancer.server.port: "80"
+      homepage.group: "Home"
+      homepage.name: "Pricebuddy"
+      homepage.icon: "sh-pricebuddy.png"
+      homepage.href: "https://prices.${DOMAIN_NAME}"
+      homepage.description: "Price tracker"
     networks:
       - pricebuddy
       - traefik
