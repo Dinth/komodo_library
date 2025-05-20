@@ -22,8 +22,8 @@ services:
     container_name: vouchervault
     restart: unless-stopped
     environment:
-      DOMAIN: "cards.${DOMAIN_NAME},10.10.1.13"
-#     SECURE_COOKIES: "True"
+      DOMAIN: "cards.${DOMAIN_NAME}"
+      SECURE_COOKIES: "True"
       EXPIRY_THRESHOLD_DAYS: "90"
       TZ: "${TZ}"
     ports:
@@ -39,14 +39,19 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.vouchervault.rule=Host(`cards.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.vouchervault.entrypoints=websecure"
-      - "traefik.http.routers.vouchervault.tls=true"
-      - "traefik.http.routers.vouchervault.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.vouchervault.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.vouchervault.tls.domains[0].sans=*.${DOMAIN_NAME}"
-      - "traefik.http.services.vouchervault.loadbalancer.server.port=8000"
+      traefik.enable: "true"
+      traefik.http.routers.vouchervault.rule: "Host(`cards.${DOMAIN_NAME}`)"
+      traefik.http.routers.vouchervault.entrypoints: "websecure"
+      traefik.http.routers.vouchervault.tls: "true"
+      traefik.http.routers.vouchervault.tls.certresolver: "letsencrypt"
+      traefik.http.routers.vouchervault.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.vouchervault.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.services.vouchervault.loadbalancer.server.port: "8000"
+      homepage.group: "Home"
+      homepage.name: "Vouchervault"
+      homepage.icon: "sh-vouchervault.png"
+      homepage.href: "https://cards.${DOMAIN_NAME}"
+      homepage.description: "Loyalty cards manager"
     depends_on:
       vouchervault-redis:
         condition: service_healthy
