@@ -47,12 +47,21 @@ services:
       - 8096:8096/tcp
       - 8920:8920/tcp
     labels:  
-      - "traefik.enable=true"
-      - "traefik.http.routers.jellyfin.rule=Host(`jf.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.jellyfin.entrypoints=websecure"
-      - "traefik.http.routers.jellyfin.tls=true"
-      - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
-      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      traefik.enable: "true"
+      traefik.http.routers.jellyfin.rule: "Host(`jf.${DOMAIN_NAME}`)"
+      traefik.http.routers.jellyfin.entrypoints: "websecure"
+      traefik.http.routers.jellyfin.tls: "true"
+      traefik.http.routers.jellyfin.tls.certresolver: "letsencrypt"
+      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
+      homepage.group: "Media"
+      homepage.name: "Jellyfin"
+      homepage.icon: "jellyfin.png"
+      homepage.href: "https://jf.${DOMAIN_NAME}"
+      homepage.description: "E-book catalogue"
+      homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
+      homepage.widget.type: "jellyfin"
+      homepage.widget.url: "http://10.10.1.13:8086"
+      homepage.widget.key: "${HOMEPAGE_JELLYFIN_API}"
     restart: unless-stopped
     volumes:
       - /opt/docker/jellyfin/jellyfin_config:/config
