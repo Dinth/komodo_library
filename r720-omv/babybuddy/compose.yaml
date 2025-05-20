@@ -48,7 +48,7 @@ services:
       homepage.description: Baby journal
       homepage.group: Home
       homepage.href: https://baby.<DOMAIN_NAME>
-      homepage.icon: baby.png
+      homepage.icon: baby-buddy.png
       homepage.name: Babybuddy
     restart: unless-stopped
     volumes:
