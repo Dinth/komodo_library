@@ -98,6 +98,9 @@ services:
         limits:
           cpus: '1.0'
           memory: '2G'
+    depends_on:
+      ollama:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9099/health"]
       interval: 30s
