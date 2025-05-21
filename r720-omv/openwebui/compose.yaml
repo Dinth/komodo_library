@@ -17,6 +17,8 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges: true
     command: ['serve']
     container_name: ollama
     entrypoint: ['/bin/ollama']
@@ -34,11 +36,20 @@ services:
     ipc: private
     deploy:
       resources:
+        limits:
+          cpus: '2.0'
+          memory: '8G'
         reservations:
           devices:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     logging:
       driver: json-file
       options:
@@ -74,6 +85,8 @@ services:
       USE_OLLAMA_DOCKER: "true"
       PORT: "8080"
       OLLAMA_BASE_URL: "http://ollama:11434"
+      PIPELINES_URL: "http://pipelines:9099"
+      ENABLE_SIGNUP: "false"
       WEBUI_SECRET_KEY: ""
       SCARF_NO_ANALYTICS: "true"
       DO_NOT_TRACK: "true"
@@ -86,25 +99,35 @@ services:
     hostname: openwebui
     image: ghcr.io/open-webui/open-webui:main
     ipc: private
+    healthcheck: 
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+    tmpfs:
+      - /tmp
     networks:
       - openwebui
       - traefik
     ports:
       - 3311:8080/tcp
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.openwebai.rule=Host(`ai.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.openwebai.entrypoints=websecure"
-      - "traefik.http.routers.openwebai.tls=true"
-      - "traefik.http.routers.openwebai.tls.certresolver=letsencrypt"
-      - "traefik.http.services.openwebai.loadbalancer.server.port=8080"  
+      traefik.enable: "true"
+      traefik.http.routers.openwebai.rule: "Host(`ai.${DOMAIN_NAME}`)"
+      traefik.http.routers.openwebai.entrypoints: "websecure"
+      traefik.http.routers.openwebai.tls: "true"
+      traefik.http.routers.openwebai.tls.certresolver: "letsencrypt"
+      traefik.http.services.openwebai.loadbalancer.server.port: "8080"
+
     restart: unless-stopped
     user: 0:0
     volumes:
