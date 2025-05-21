@@ -18,7 +18,7 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      no-new-privileges: true
+      - no-new-privileges:true
     command: ['serve']
     container_name: ollama
     entrypoint: ['/bin/ollama']
