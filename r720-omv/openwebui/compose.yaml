@@ -26,8 +26,8 @@ services:
       - OLLAMA_HOST=0.0.0.0
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
       - NVIDIA_VISIBLE_DEVICES=all
-      - OLLAMA_NUM_PARALLEL=1
-      - OLLAMA_MAX_LOADED_MODELS=3
+      - OLLAMA_NUM_PARALLEL=2
+      - OLLAMA_MAX_LOADED_MODELS=1
       - OLLAMA_KEEP_ALIVE=24h
       - OLLAMA_DEBUG=true
       - OLLAMA_FLASH_ATTENTION=1
@@ -45,7 +45,7 @@ services:
               count: all
               capabilities: [compute,utility]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: "ollama --version && ollama ps || exit 1"
       interval: 30s
       timeout: 10s
       retries: 3
