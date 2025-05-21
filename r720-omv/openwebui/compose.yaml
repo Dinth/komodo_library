@@ -45,7 +45,7 @@ services:
               count: all
               capabilities: [compute,utility]
     healthcheck:
-      test: "ollama --version && ollama ps || exit 1"
+      test: "ollama --version && ollama ps && bash -c 'cat < /dev/null > /dev/tcp/localhost/11434'|| exit 1"
       interval: 30s
       timeout: 10s
       retries: 3
