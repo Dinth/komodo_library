@@ -87,7 +87,7 @@ services:
       OLLAMA_BASE_URL: "http://ollama:11434"
       DATABASE_URL: "sqlite:///app/data/pipelines.db"  
     hostname: openwebui-pipelines
-    image: ghcr.io/open-webui/open-webui-pipelines:main
+    image: ghcr.io/open-webui/pipelines:main
     ipc: private
     security_opt:
       - no-new-privileges:true
