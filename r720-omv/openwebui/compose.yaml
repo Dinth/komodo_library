@@ -91,6 +91,7 @@ services:
     ipc: private
     security_opt:
       - no-new-privileges:true
+    restart: unless-stopped
     tmpfs:
       - /tmp
     deploy:
