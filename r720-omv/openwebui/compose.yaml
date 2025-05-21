@@ -63,6 +63,51 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/ollama_data:/root/.ollama
+  openwebui-pipelines:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: openwebui-pipelines
+    environment:
+      PIPELINES_PORT: "9099"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      DATABASE_URL: "sqlite:///app/data/pipelines.db"  
+    hostname: openwebui-pipelines
+    image: ghcr.io/open-webui/open-webui-pipelines:main
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '2G'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9099/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - openwebui
+    volumes:
+      - /opt/docker/openwebui/openwebui-pipelines_data:/app/data
   openwebui:
     cap_add:
       - AUDIT_WRITE
@@ -88,6 +133,7 @@ services:
       OLLAMA_BASE_URL: "http://ollama:11434"
       PIPELINES_URL: "http://pipelines:9099"
       ENABLE_SIGNUP: "false"
+      WEBUI_AUTH: "true"
       WEBUI_SECRET_KEY: "${OPENWEBUI_SECRET_KEY}"
       SCARF_NO_ANALYTICS: "true"
       DO_NOT_TRACK: "true"
