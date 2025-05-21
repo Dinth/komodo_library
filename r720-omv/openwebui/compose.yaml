@@ -88,7 +88,7 @@ services:
       OLLAMA_BASE_URL: "http://ollama:11434"
       PIPELINES_URL: "http://pipelines:9099"
       ENABLE_SIGNUP: "false"
-      WEBUI_SECRET_KEY: ""
+      WEBUI_SECRET_KEY: "${OPENWEBUI_SECRET_KEY}"
       SCARF_NO_ANALYTICS: "true"
       DO_NOT_TRACK: "true"
       ANONYMIZED_TELEMETRY: "true"
