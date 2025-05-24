@@ -13,8 +13,9 @@ services:
     volumes:
       - /opt/docker/immich/immich_upload:/usr/src/app/upload
       - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
+    environment:
+      REDIS_HOSTNAME: "immich-redis"
+      REDIS_PORT: "2379"
     ports:
       - '2283:2283'
     depends_on:
