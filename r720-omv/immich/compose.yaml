@@ -33,7 +33,7 @@ services:
       - /opt/docker/immich/immich_encoded-video:/usr/src/app/upload/encoded-video
       - /opt/docker/immich/immich_profile:/usr/src/app/upload/profile
       - /opt/docker/immich/immich_thumbs:/usr/src/app/upload/thumbs
-      - /opt/docker/immich/immich_uploads:/usr/src/app/upload/uploads
+      - /opt/docker/immich/immich_upload:/usr/src/app/upload/upload
       - /etc/localtime:/etc/localtime:ro
     networks:
       - immich
