@@ -13,8 +13,8 @@ services:
     ports:
       - '2283:2283'
     depends_on:
-      - redis
-      - database
+      - immich-redis
+      - immich-postgres
     restart: unless-stopped
     healthcheck:
       disable: false
@@ -48,9 +48,9 @@ services:
     container_name: immich-postgres
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_PASSWORD: ${IMMICH_POSTGRES_PASS}
+      POSTGRES_USER: immich
+      POSTGRES_DB: immich
       POSTGRES_INITDB_ARGS: '--data-checksums'
     volumes:
       - /opt/docker/immich/immich_postgres_data:/var/lib/postgresql/data
