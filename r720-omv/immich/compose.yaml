@@ -54,7 +54,7 @@ services:
     network:
       - immich
 
-  immich-database:
+  immich-postgres:
     container_name: immich-postgres
     image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
     environment:
