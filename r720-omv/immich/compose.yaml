@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     healthcheck:
       disable: false
-    olumes:
+    volumes:
       - /Data/IT/immich-library:/usr/src/app/upload
       - /etc/localtime:/etc/localtime:ro
       - /Data/Photos:/photos
