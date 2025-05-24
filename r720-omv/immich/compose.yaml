@@ -27,11 +27,12 @@ services:
     healthcheck:
       disable: false
     olumes:
-      - /opt/docker/immich/immich_upload:/usr/src/app/upload
+      - /Data/IT/immich-library:/usr/src/app/upload
       - /etc/localtime:/etc/localtime:ro
       - /Data/Photos:/photos
     networks:
       - immich
+      - traefik
 
   immich-machine-learning:
     container_name: immich-machine-learning
