@@ -2,6 +2,7 @@ services:
   immich-server:
     container_name: immich-server
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
     deploy:
       resources:
         reservations:
