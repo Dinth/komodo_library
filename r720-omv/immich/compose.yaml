@@ -68,5 +68,8 @@ services:
     network:
       - immich
 
-volumes:
-  model-cache:
+networks:
+  immich:
+    name: immich
+    driver: bridge
+    external: false
