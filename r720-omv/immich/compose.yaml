@@ -27,7 +27,7 @@ services:
       - immich
 
   immich-machine-learning:
-    container_name: immich_machine_learning
+    container_name: immich-machine-learning
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}-cuda
     deploy:
       resources:
