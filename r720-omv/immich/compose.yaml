@@ -16,6 +16,11 @@ services:
     environment:
       REDIS_HOSTNAME: "immich-redis"
       REDIS_PORT: "2379"
+      DB_HOSTNAME: "immich-postgres"
+      DB_PORT: "5432"
+      DB_USERNAME: "immich"
+      DB_PASSWORD: "${IMMICH_POSTGRES_PASS}"
+      DB_DATABASE_NAME: "immich"
     ports:
       - '2283:2283'
     depends_on:
