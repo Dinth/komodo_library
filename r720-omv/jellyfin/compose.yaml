@@ -58,6 +58,7 @@ services:
       traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains: "true" 
       traefik.http.middlewares.jellyfin-mw.headers.STSPreload: "true"
       traefik.http.middlewares.jellyfin-mw.headers.customrequestheaders.X-Forwarded-Proto: "https"
+      traefik.docker.network: "traefik"
       homepage.group: "Media"
       homepage.name: "Jellyfin"
       homepage.icon: "jellyfin.png"
