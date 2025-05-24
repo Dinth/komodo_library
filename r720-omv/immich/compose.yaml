@@ -28,9 +28,8 @@ services:
     healthcheck:
       disable: false
     volumes:
-      - /Data/IT/immich-library:/usr/src/app/upload
+      - /Data/Photos:/usr/src/app/upload
       - /etc/localtime:/etc/localtime:ro
-      - /Data/Photos:/photos
     networks:
       - immich
       - traefik
