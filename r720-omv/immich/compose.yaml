@@ -81,3 +81,5 @@ networks:
     name: immich
     driver: bridge
     external: false
+  traefik:
+    external: true
