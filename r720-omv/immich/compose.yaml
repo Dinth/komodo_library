@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
     healthcheck:
       disable: false
-    network:
+    networks:
       - immich
 
   immich-machine-learning:
@@ -42,7 +42,7 @@ services:
     restart: unless-stopped
     healthcheck:
       disable: false
-    network:
+    networks:
       - immich
 
   immich-redis:
@@ -51,7 +51,7 @@ services:
     healthcheck:
       test: redis-cli ping || exit 1
     restart: unless-stopped
-    network:
+    networks:
       - immich
 
   immich-postgres:
@@ -65,7 +65,7 @@ services:
     volumes:
       - /opt/docker/immich/immich_postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
-    network:
+    networks:
       - immich
 
 networks:
