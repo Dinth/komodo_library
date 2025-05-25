@@ -23,6 +23,7 @@ environment = """
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+HOMEPAGE_AUDIOBOOKSHELF_API=[[HOMEPAGE_AUDIOBOOKSHELF_API]]
 """
 
 ##
@@ -316,6 +317,7 @@ TZ=[[TZ]]
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+HOMEPAGE_JELLYFIN_API=[[HOMEPAGE_JELLYFIN_API]]
 """
 
 ##
@@ -388,6 +390,8 @@ QBITTORRENT__PASSWORD=[[QBITTORRENT_PASS]]
 SONARR__INSTANCES__0__APIKEY=[[SONARR_APIKEY]]
 RADARR__INSTANCES__0__APIKEY=[[RADARR_APIKEY]]
 LIDARR__INSTANCES__0__APIKEY=[[LIDARR_APIKEY]]
+HOMEPAGE_BAZARR_API=[[HOMEPAGE_BAZARR_API]]
+HOMEPAGE_LIDARR_API=[[HOMEPAGE_LIDARR_API]]
 """
 
 ##
@@ -506,6 +510,8 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/openwebui"
 environment = """
 DOMAIN_NAME=[[DOMAIN_NAME]]
+TZ=[[TZ]]
+OPENWEBUI_SECRET_KEY=[[OPENWEBUI_SECRET_KEY]]
 """
 
 ##
@@ -617,24 +623,6 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/searxng"
 environment = """
 DOMAIN_NAME=[[DOMAIN_NAME]]
-"""
-
-##
-
-[[stack]]
-name = "swag"
-tags = ["stacks", "needs-improvement"]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/swag"
-environment = """
-TZ=[[TZ]]
-DOMAIN_NAME=[[DOMAIN_NAME]]
-ADMIN_EMAIL=[[ADMIN_EMAIL]]
-SWAG_MAXMINDB_KEY=[[SWAG_MAXMINDB_KEY]]
 """
 
 ##
