@@ -27,6 +27,13 @@ services:
     restart: unless-stopped
     healthcheck:
       disable: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.immich.rule=Host(`photos.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.immich.entrypoints=websecure"
+      - "traefik.http.routers.immich.tls=true"
+      - "traefik.http.routers.immich.tls.certresolver=letsencrypt"
+      - "traefik.http.services.immich.loadbalancer.server.port=2283"
     volumes:
       - /Data/Photos:/usr/src/app/upload/library
       - /opt/docker/immich/immich_backups:/usr/src/app/upload/backups
