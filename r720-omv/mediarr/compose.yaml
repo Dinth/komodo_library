@@ -514,6 +514,7 @@ services:
     volumes:
       - /Data/Unsorted:/downloads
       - /Data/Movies:/movies
+      - /Data/CartoonMovies:/cartoon_movies
       - /opt/docker/mediarr/radarr_config:/config
     working_dir: /
   sonarr:
