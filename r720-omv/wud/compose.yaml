@@ -20,7 +20,7 @@ services:
     environment:
       TZ: "${TZ}"
     ports:
-      - 3000:3000
+      - 3009:3009
     networks:
       - wud
 networks:
