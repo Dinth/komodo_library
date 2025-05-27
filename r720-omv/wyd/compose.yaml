@@ -9,6 +9,8 @@ services:
       CONTAINERS: "1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - wyd
   whatsupdocker:
     image: getwud/wud
     container_name: wud
@@ -19,3 +21,10 @@ services:
     - wyd-socket-proxy
     ports:
       - 3000:3000
+    networks:
+      - wyd
+networks:
+  wyd:
+    name: wyd
+    driver: bridge
+    external: false
