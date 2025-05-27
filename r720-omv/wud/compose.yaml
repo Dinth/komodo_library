@@ -3,10 +3,14 @@ services:
     image: tecnativa/docker-socket-proxy
     container_name: wud-socket-proxy
     restart: unless-stopped
+    private: ipc
+    security_opt:
+      - no-new-privileges:true
     networks:
       - wud
     environment:
       CONTAINERS: "1"
+      IMAGES: "1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   wud:
@@ -17,6 +21,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
     - wud-socket-proxy
+    private: ipc
+    security_opt:
+      - no-new-privileges:true
     environment:
       TZ: "${TZ}"
       WUD_WATCHER_R720OMV_HOST: wud-socket-proxy	
