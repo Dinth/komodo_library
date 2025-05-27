@@ -16,8 +16,8 @@ services:
     command: ['/init']
     container_name: backblaze-personal-wine
     environment:
-      USER_ID: "1003"
-      GROUP_ID: "100"
+#      USER_ID: "1003"
+#      GROUP_ID: "100"
       UMASK: "0022"
       LANG: "en_GB.UTF-8"
       KEEP_APP_RUNNING: "0"
@@ -32,7 +32,7 @@ services:
     image: tessypowder/backblaze-personal-wine:ubuntu22
     ipc: private
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5800"]
+      test: ["CMD", "curl", "-f", "http://localhost:3333"]
       interval: 10s
       timeout: 5s
       retries: 3
