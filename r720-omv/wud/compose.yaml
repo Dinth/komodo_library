@@ -1,16 +1,30 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  wud-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: wud-socket-proxy
+    restart: unless-stopped
+    networks:
+      - wud
+    environment:
+      CONTAINERS: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  wud:
+    image: getwud/wud
+    container_name: wud
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+    - wud-socket-proxy
+    environment:
+      TZ: "${TZ}"
+    ports:
+      - 3000:3000
+    networks:
+      - wud
+networks:
+  wud:
+    name: wud
+    driver: bridge
+    external: false
