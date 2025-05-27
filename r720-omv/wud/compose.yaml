@@ -13,12 +13,13 @@ services:
     image: getwud/wud
     container_name: wud
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+#      - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
     depends_on:
     - wud-socket-proxy
     environment:
       TZ: "${TZ}"
+      WUD_WATCHER_R720OMV_HOST: wud-socket-proxy	
     ports:
       - 3009:3009
     networks:
