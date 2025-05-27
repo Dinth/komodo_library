@@ -3,7 +3,7 @@ services:
     image: tecnativa/docker-socket-proxy
     container_name: wud-socket-proxy
     restart: unless-stopped
-    private: ipc
+    ipc: private
     security_opt:
       - no-new-privileges:true
     networks:
@@ -21,7 +21,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
     - wud-socket-proxy
-    private: ipc
+    ipc: private
     security_opt:
       - no-new-privileges:true
     environment:
