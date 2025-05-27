@@ -1,16 +1,21 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  wyd-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: traefik-socket-proxy
+    restart: unless-stopped
+    networks:
+      - wyd
+    environment:
+      CONTAINERS: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+  whatsupdocker:
+    image: getwud/wud
+    container_name: wud
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+    - wyd-socket-proxy
+    ports:
+      - 3000:3000
