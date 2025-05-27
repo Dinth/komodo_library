@@ -17,6 +17,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
     - wyd-socket-proxy
+    environment:
+      TZ: "${TZ}"
     ports:
       - 3000:3000
     networks:
