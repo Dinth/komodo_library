@@ -26,9 +26,17 @@ services:
       - no-new-privileges:true
     environment:
       TZ: "${TZ}"
-      WUD_WATCHER_R720OMV_HOST: wud-socket-proxy	
+      WUD_WATCHER_R720OMV_HOST: tcp://wud-socket-proxy
+      WUD_WATCHER_DOCKER_PORT: "2375"
+      WUD_WATCHER_DOCKER_WATCHALL: "true"
     ports:
-      - 3009:3009
+      - 3000:3009
+    healthcheck:
+      test: curl --fail http://localhost:${WUD_SERVER_PORT:-3000}/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s 
     networks:
       - wud
 networks:
