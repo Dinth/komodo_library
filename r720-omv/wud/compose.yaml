@@ -36,6 +36,8 @@ services:
       WUD_WATCHER_R720OMV_WATCHALL: "true"
       WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
       WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
+      WUD_REGISTRY_GHCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
+      WUD_REGISTRY_GHCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
     labels:
       - 'wud.watch=true'
       - 'wud.display.name=${SERVICE}'
