@@ -12,10 +12,11 @@ services:
       CONTAINERS: "1"
       IMAGES: "1"
     labels:
-      - 'wud.watch=true'
-      - 'wud.display.name=${SERVICE}'
-      - 'wud.tag.include=^\d+\.\d+\.\d+$$'
-      - 'wud.link.template=https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.watch: "true"
+      wud.tag.include: "^\d+\.\d+\.\d+$$"
+      wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy'
+      wud.display.icon: 'mdi:connection'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   wud:
