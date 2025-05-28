@@ -30,7 +30,7 @@ services:
       WUD_WATCHER_DOCKER_PORT: "2375"
       WUD_WATCHER_DOCKER_WATCHALL: "true"
     ports:
-      - 3000:3009
+      - 3009:3000
     healthcheck:
       test: curl --fail http://localhost:3000/health || exit 1
       interval: 10s
