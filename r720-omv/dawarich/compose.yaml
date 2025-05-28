@@ -228,6 +228,8 @@ services:
       traefik.http.routers.dawarich.rule: Host(`traces.${DOMAIN_NAME}`)
       traefik.http.routers.dawarich.tls: "true"
       traefik.http.routers.dawarich.tls.certresolver: letsencrypt
+      traefik.http.routers.dawarich.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.dawarich.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.dawarich.loadbalancer.server.port: "3000"
     restart: unless-stopped
     volumes:
