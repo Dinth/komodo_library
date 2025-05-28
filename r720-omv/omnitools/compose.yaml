@@ -4,12 +4,14 @@ services:
     container_name: omnitools
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.omnitools.rule=Host(`omnitools.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.omnitools.entrypoints=websecure"
-      - "traefik.http.routers.omnitools.tls=true"
-      - "traefik.http.routers.omnitools.tls.certresolver=letsencrypt"
-      - "traefik.http.services.omnitools.loadbalancer.server.port=80"
+      traefik.enable: "true"
+      traefik.http.routers.omnitools.rule: "Host(`omnitools.${DOMAIN_NAME}`)"
+      traefik.http.routers.omnitools.entrypoints: "websecure"
+      traefik.http.routers.omnitools.tls: "true"
+      traefik.http.routers.omnitools.tls.certresolver: "letsencrypt"
+      traefik.http.routers.omnitools.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.omnitools.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.services.omnitools.loadbalancer.server.port: "80"
     ports:
       - "8586:80"
     networks:
