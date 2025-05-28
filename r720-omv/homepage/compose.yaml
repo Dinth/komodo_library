@@ -27,6 +27,8 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     ipc: private
+    depends_on:
+      homepage-socket-proxy: service_healthy
     environment:
       HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
       PUID: "${DOCKER_PUID}"
