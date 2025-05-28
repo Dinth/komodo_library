@@ -177,6 +177,8 @@ services:
       traefik.http.routers.openwebai.entrypoints: "websecure"
       traefik.http.routers.openwebai.tls: "true"
       traefik.http.routers.openwebai.tls.certresolver: "letsencrypt"
+      traefik.http.routers.openwebai.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.openwebai.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.openwebai.loadbalancer.server.port: "8080"
       homepage.group: "Home"
       homepage.name: "OpenWebUI"
