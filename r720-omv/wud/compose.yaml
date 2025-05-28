@@ -29,7 +29,7 @@ services:
       #WUD_WATCHER_R720OMV_HOST: tcp://wud-socket-proxy
       #WUD_WATCHER_R720OMV_PORT: "2375"
       WUD_WATCHER_R720OMV_WATCHALL: "true"
-      WUD_WATCHER_DOCKER_SOCKET: "tcp://docker-socket-proxy"
+      WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy"
     ports:
       - 3009:3000
     healthcheck:
