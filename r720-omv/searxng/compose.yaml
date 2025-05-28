@@ -52,12 +52,14 @@ services:
       - SETGID
       - SETUID
     labels:  
-      - "traefik.enable=true"
-      - "traefik.http.routers.searxng.rule=Host(`search.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.searxng.entrypoints=websecure"
-      - "traefik.http.routers.searxng.tls=true"
-      - "traefik.http.routers.searxng.tls.certresolver=letsencrypt"
-      - "traefik.http.services.searxng.loadbalancer.server.port=8080"
+      traefik.enable: "true"
+      traefik.http.routers.searxng.rule: "Host(`search.${DOMAIN_NAME}`)"
+      traefik.http.routers.searxng.entrypoints: "websecure"
+      traefik.http.routers.searxng.tls: "true"
+      traefik.http.routers.searxng.tls.certresolver: "letsencrypt"
+      traefik.http.routers.fireflyiii.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.fireflyiii.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.services.searxng.loadbalancer.server.port: "8080"
     logging:
       driver: "json-file"
       options:
