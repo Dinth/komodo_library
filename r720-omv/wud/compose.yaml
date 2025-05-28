@@ -37,15 +37,17 @@ services:
       WUD_WATCHER_R720OMV_WATCHALL: "true"
       WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
       WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
+      WUD_WATCHER_LOCAL_CRON: '0 1 * * *'
       WUD_REGISTRY_GHCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_GHCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
     labels:
-      - 'wud.watch=true'
-      - 'wud.display.name=${SERVICE}'
-      - 'wud.tag.include=^\d+\.\d+\.\d+$$'
-      - 'wud.link.template=https://github.com/getwud/wud/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.watch: "true"
+      wud.tag.include: "^\d+\.\d+\.\d+$$"
+      wud.link.template: "https://github.com/getwud/wud/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: "Whats Up Docker?"
+      wud.display.icon: "sh:whats-up-docker-light"
     ports:
       - 3009:3000
     healthcheck:
