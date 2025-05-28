@@ -31,6 +31,9 @@ services:
       WUD_WATCHER_R720OMV_WATCHALL: "true"
       WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
       WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
+    labels:
+      - 'wud.tag.include=^\d+\.\d+\.\d+$$'
+      - 'wud.link.template=https://github.com/getwud/wud/releases/tag/$${major}.$${minor}.$${patch}'
     ports:
       - 3009:3000
     healthcheck:
