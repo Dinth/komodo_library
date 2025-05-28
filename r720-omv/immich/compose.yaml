@@ -28,12 +28,18 @@ services:
     healthcheck:
       disable: false
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.immich.rule=Host(`photos.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.immich.entrypoints=websecure"
-      - "traefik.http.routers.immich.tls=true"
-      - "traefik.http.routers.immich.tls.certresolver=letsencrypt"
-      - "traefik.http.services.immich.loadbalancer.server.port=2283"
+      traefik.enable: "true"
+      traefik.http.routers.immich.rule: "Host(`photos.${DOMAIN_NAME}`)"
+      traefik.http.routers.immich.entrypoints: "websecure"
+      traefik.http.routers.immich.tls: "true"
+      traefik.http.routers.immich.tls.certresolver: "letsencrypt"
+      traefik.http.services.immich.loadbalancer.server.port: "2283"
+      wud.watch: "true"
+      wud.display.icon: "sh-immich"
+      wud.display.name: "Immich Server"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/immich-app/immich/releases/tag/v$${major}.$${minor}.$${patch}"
+
     volumes:
       - /Data/Photos:/usr/src/app/upload/library
       - /opt/docker/immich/immich_backups:/usr/src/app/upload/backups
@@ -57,6 +63,12 @@ services:
               count: 1
               capabilities:
                 - gpu
+    labels:
+      wud.watch: "true"
+      wud.display.icon: "sh-immich"
+      wud.display.name: "Immich Machine Learning"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/immich-app/immich/releases/tag/v$${major}.$${minor}.$${patch}"
     volumes:
       - /opt/docker/immich/immich_model-cache:/cache
     restart: unless-stopped
