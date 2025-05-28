@@ -57,8 +57,8 @@ services:
       traefik.http.routers.searxng.entrypoints: "websecure"
       traefik.http.routers.searxng.tls: "true"
       traefik.http.routers.searxng.tls.certresolver: "letsencrypt"
-      traefik.http.routers.fireflyiii.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.fireflyiii.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.searxng.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.searxng.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
     logging:
       driver: "json-file"
