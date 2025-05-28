@@ -37,7 +37,7 @@ services:
     ports:
       - 9283:80/tcp
     labels:  
-      traefik.enable=true"
+      traefik.enable: "true"
       traefik.http.routers.grocy.rule: "Host(`grocery.${DOMAIN_NAME}`)"
       traefik.http.routers.grocy.entrypoints: "websecure"
       traefik.http.routers.grocy.tls: "true"
