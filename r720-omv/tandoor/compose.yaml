@@ -1,6 +1,5 @@
 services:
   tandoor:
-    user: "1003:100"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
