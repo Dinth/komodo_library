@@ -9,6 +9,12 @@ services:
     environment:
       CONTAINERS: "1"
     #read_only: true # needs binding for /usr/local/etc/haproxy.cfg
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy'
+      wud.display.icon: 'mdi:connection'
     mem_limit: 64M
     cap_drop:
       - ALL
@@ -25,6 +31,11 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
+    labels:
+      wud.watch: "true"
+      wud.link.template: 'https://github.com/gethomepage/homepage/releases'
+      wud.display.name: 'Homepage'
+      wud.display.icon: 'sh:homepage'
     ports:
       - 3008:3000
     volumes:
