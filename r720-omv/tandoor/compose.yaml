@@ -51,9 +51,11 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.tandoor.entrypoints: websecure
-      traefik.http.routers.randoor.rule: Host('recipes.${DOMAIN_NAME}')
+      traefik.http.routers.tandoor.rule: Host('recipes.${DOMAIN_NAME}')
       traefik.http.routers.tandoor.tls: "true"
       traefik.http.routers.tandoor.tls.certresolver: letsencrypt
+      traefik.http.routers.tandoor.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.tandoor.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
       homepage.group: "Home"
       homepage.name: "Tandoor"
