@@ -39,6 +39,8 @@ services:
       traefik.http.routers.navidrome.rule: Host(`music.${DOMAIN_NAME}`)
       traefik.http.routers.navidrome.tls: "true"
       traefik.http.routers.navidrome.tls.certresolver: letsencrypt
+      traefik.http.routers.navidrome.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.navidrome.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.navidrome.loadbalancer.server.port: "4533"
     restart: unless-stopped
     volumes:
