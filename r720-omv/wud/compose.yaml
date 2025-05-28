@@ -6,6 +6,9 @@ services:
     ipc: private
     security_opt:
       - no-new-privileges:true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
     networks:
       - wud
     environment:
