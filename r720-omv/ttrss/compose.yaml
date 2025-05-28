@@ -97,6 +97,8 @@ services:
       traefik.http.routers.ttrss.rule: Host(`ttrss.${DOMAIN_NAME}`)
       traefik.http.routers.ttrss.tls: "true"
       traefik.http.routers.ttrss.tls.certresolver: letsencrypt
+      traefik.http.routers.ttrss.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.ttrss.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.ttrss.loadbalancer.server.port: "80"
     restart: always
     volumes:
