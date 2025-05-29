@@ -1,7 +1,7 @@
 services:
   fgc:
     container_name: fgc
-    image: ghcr.io/vogler/free-games-claimer 
+    image: ghcr.io/vogler/free-games-claimer:dev
     build: .
     restart: unless-stopped
     command: bash -c "node epic-games; node prime-gaming; node gog; echo sleeping; sleep 1d"
