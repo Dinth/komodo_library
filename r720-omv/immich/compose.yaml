@@ -52,7 +52,7 @@ services:
     volumes:
       - /Data/Photos:/usr/src/app/upload/library
       - /opt/docker/immich/immich_backups:/usr/src/app/upload/backups
-      - /opt/docker/immich/immich_encoded-video:/usr/src/app/upload/encoded-video
+      - /Data/IT/immich_encoded-video:/usr/src/app/upload/encoded-video
       - /opt/docker/immich/immich_profile:/usr/src/app/upload/profile
       - /opt/docker/immich/immich_thumbs:/usr/src/app/upload/thumbs
       - /Data/IT/immich_upload:/usr/src/app/upload/upload
