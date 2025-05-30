@@ -21,7 +21,7 @@ services:
       wud.display.name: 'Docker Socket Proxy'
       wud.display.icon: 'mdi:connection'
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
   wud:
     image: getwud/wud
     container_name: wud
@@ -39,7 +39,7 @@ services:
       WUD_WATCHER_R720OMV_HOST: wud-socket-proxy
       WUD_WATCHER_R720OMV_PORT: "2375"
       WUD_WATCHER_R720OMV_WATCHALL: "true"
-      WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
+      WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy"
       WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
       WUD_WATCHER_R720OMV_CRON: '0 1 * * *'
 #      WUD_REGISTRY_GHCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
