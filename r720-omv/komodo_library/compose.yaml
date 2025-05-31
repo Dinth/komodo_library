@@ -12,6 +12,13 @@ services:
       TZ: "${TZ}"
       AUTHELIA_SESSION_REDIS_PASSWORD_FILE: "${AUTHELIA_REDIS_PASS}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "Authelia"
+      wud.display.icon: sh-authelia
+      wud.tag.include: ^4\.\d+\.\d+$$
+      wud.link.template: https://github.com/authelia/authelia/releases/tag/v$${major}.$${minor}.$${patch}
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     logging:
       driver: json-file
