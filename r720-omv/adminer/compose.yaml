@@ -30,7 +30,6 @@ services:
         max-file: "3"
     labels:
       - 'wud.watch=true'
-      - 'wud.display.name=${SERVICE}'
       - 'wud.tag.include=^\d+\.\d+\.\d+$$'
       - 'wud.link.template=https://github.com/vrana/adminer/releases/tag/v$${major}.$${minor}.$${patch}'
     networks:
