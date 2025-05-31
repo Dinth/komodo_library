@@ -75,6 +75,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    depends_on:
+      wud-socket-proxy:
+        condition: service_healthy
     ports:
       - 3009:3000
     networks:
