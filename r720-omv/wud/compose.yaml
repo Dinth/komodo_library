@@ -20,6 +20,12 @@ services:
       wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: 'Docker Socket Proxy'
       wud.display.icon: 'mdi:connection'
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "2375"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      start_interval: 5s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   wud:
@@ -63,12 +69,6 @@ services:
       start_period: 10s
     ports:
       - 3009:3000
-    healthcheck:
-      test: curl --fail http://localhost:3000/health || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 10s 
     networks:
       - wud
 networks:
