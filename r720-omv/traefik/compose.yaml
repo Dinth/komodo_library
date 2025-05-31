@@ -61,6 +61,12 @@ services:
       homepage.widget.fields: "['routers', 'services', 'middleware']"
 #      - "homepage.widget.username:username"
 #      - "homepage.widget.password:password"
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "Traefik"
+      wud.display.icon: "sh:traefik.png"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://getwud.github.io/wud/#/changelog/?id=_$${major}$${minor}$${patch}"
     networks:
       - traefik-internal
       - traefik
