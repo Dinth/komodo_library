@@ -45,6 +45,13 @@ services:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "Ollama"
+      wud.display.icon: "sh:ollama"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/ollama/ollama/releases/tag/v$${major}.$${minor}.$${patch}"
     healthcheck:
       test: "ollama --version && ollama ps && bash -c 'cat < /dev/null > /dev/tcp/localhost/11434'|| exit 1"
       interval: 30s
