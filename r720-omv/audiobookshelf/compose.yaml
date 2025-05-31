@@ -51,6 +51,12 @@ services:
       homepage.widget.type: "audiobookshelf"
       homepage.widget.url: "http://10.10.1.13:3378"
       homepage.widget.key: "${HOMEPAGE_AUDIOBOOKSHELF_API}"
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.display.name: "Audiobookshelf"
+      wud.display.icon: "sh:audiobookshelf"
+      wud.link.template: "https://github.com/advplyr/audiobookshelf/releases/$${major}.$${minor}.$${patch}"
     volumes:
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
       - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
