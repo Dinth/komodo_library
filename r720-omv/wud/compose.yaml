@@ -35,8 +35,6 @@ services:
 #      - /var/run/docker.sock:/var/run/docker.sock
       - /opt/docker/wud/wud_store:/store
       - /etc/localtime:/etc/localtime:ro
-    depends_on:
-    - wud-socket-proxy
     ipc: private
     security_opt:
       - no-new-privileges:true
