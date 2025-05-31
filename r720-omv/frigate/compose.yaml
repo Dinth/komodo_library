@@ -103,7 +103,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/blakeblackshear/frigate/releases/tag/v${major}.${minor}.${patch}"
       wud.display.name: "Frigate"
-      wud.display.icon: "sh:frigate"
+      wud.display.icon: "mdi:cctv"
     restart: unless-stopped
     security_opt:
       - label=disable
