@@ -55,6 +55,12 @@ services:
       wud.link.template: "https://getwud.github.io/wud/#/changelog/?id=_$${major}$${minor}$${patch}"
       wud.display.name: "Whats Up Docker?"
       wud.display.icon: "sh:wud"
+    healthcheck:
+      test: curl --fail http://localhost:3000}/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     ports:
       - 3009:3000
     healthcheck:
