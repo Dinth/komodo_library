@@ -9,7 +9,7 @@ services:
     volumes:
       - /opt/docker/pricebuddy/pricebuddy_data:/app/storage
     environment:
-      DB_HOST: "pricebuddy-db"
+      DB_HOST: "pricebuddy-mysql"
       DB_USERNAME: "pricebuddy"
       DB_PASSWORD: "${PRICEBUDDY_DB_PASS}"
       DB_DATABASE: "pricebuddy"
@@ -18,7 +18,7 @@ services:
       SCRAPER_BASE_URL: "http://scraper:3000"
       AFFILIATE_ENABLED: "false"
     depends_on:
-      - pricebuddy-db
+      - pricebuddy-mysql
     labels:  
       traefik.enable: "true"
       traefik.http.routers.pricebuddy.rule: "Host(`prices.${DOMAIN_NAME}`)"
@@ -37,7 +37,7 @@ services:
       - pricebuddy
       - traefik
 
-  pricebuddy-db:
+  pricebuddy-mysql:
     image: mysql:8.2
     environment:
       MYSQL_DATABASE: "pricebuddy"
