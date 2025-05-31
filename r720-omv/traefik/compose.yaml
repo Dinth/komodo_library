@@ -3,12 +3,30 @@ services:
     image: tecnativa/docker-socket-proxy
     container_name: traefik-socket-proxy
     restart: unless-stopped
-    networks:
-      - traefik-internal
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
     environment:
       CONTAINERS: "1"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Whats Up Docker?'
+      wud.display.icon: 'mdi:connection'
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "2375"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      start_interval: 5s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik-internal
   traefik:
     image: traefik
     container_name: traefik
