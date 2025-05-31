@@ -29,6 +29,11 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
+      homepage.group: "Infrastructure"
+      homepage.name: "Adminer"
+      homepage.icon: "sh-adminer.png"
+      homepage.href: "http://10.10.1.13:9009/"
+      homepage.description: "Database management via UI"
       wud.display.name: "Adminer"
       wud.display.icon: "sh:adminer"
       wud.watch: "true"
