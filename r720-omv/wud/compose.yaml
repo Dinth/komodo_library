@@ -32,7 +32,7 @@ services:
     image: getwud/wud
     container_name: wud
     volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
       - /opt/docker/wud/wud_store:/store
       - /etc/localtime:/etc/localtime:ro
     ipc: private
