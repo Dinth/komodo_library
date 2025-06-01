@@ -32,7 +32,7 @@ services:
     image: tessypowder/backblaze-personal-wine:ubuntu22
     ipc: private
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3333"]
+      test: ["CMD", "curl", "-f", "http://localhost:5800"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -40,7 +40,7 @@ services:
       homepage.group: "Instrastructure"
       homepage.name: "Backblaze Backup"
       homepage.icon: "sh-backblaze.png"
-      homepage.href: "http://10.10.1.13:3333"
+      homepage.href: "http://10.10.1.13:5800"
       homepage.description: "Backblaze external backups"
       wud.watch: "true"
       wud.watch.digest: "true"
