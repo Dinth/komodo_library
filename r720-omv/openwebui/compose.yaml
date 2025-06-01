@@ -189,12 +189,12 @@ services:
       traefik.http.services.openwebai.loadbalancer.server.port: "8080"
       homepage.group: "Home"
       homepage.name: "OpenWebUI"
-      homepage.icon: "sh-open-webui"
+      homepage.icon: "sh-open-webui.png"
       homepage.instance.internal.href: "https://ai.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "OpenWebUI Server"
-      wud.display.icon: "sh:openwebui"
+      wud.display.icon: "sh:open-webui"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/open-webui/open-webui/releases/tag/v$${major}.$${minor}.$${patch}"
     restart: unless-stopped
