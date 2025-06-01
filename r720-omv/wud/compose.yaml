@@ -40,12 +40,12 @@ services:
       - no-new-privileges:true
     environment:
       TZ: "${TZ}"
-      WUD_WATCHER_R720OMV_HOST: wud-socket-proxy
-      WUD_WATCHER_R720OMV_PORT: "2375"
-      WUD_WATCHER_R720OMV_WATCHALL: "true"
-      WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
-      WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
-      WUD_WATCHER_R720OMV_CRON: '0 1 * * *'
+#      WUD_WATCHER_R720OMV_HOST: wud-socket-proxy
+#      WUD_WATCHER_R720OMV_PORT: "2375"
+#      WUD_WATCHER_R720OMV_WATCHALL: "true"
+#      WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
+#      WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
+#      WUD_WATCHER_R720OMV_CRON: '0 1 * * *'
       WUD_WATCHER_LOCAL_SOCKET: '/var/run/docker.sock'
       WUD_SERVER_FEATURE_DELETE: "false"
       WUD_LOG_LEVEL: "debug"
