@@ -15,7 +15,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - Whats Up Docker?'
+      wud.display.name: 'Docker Socket Proxy - Traefik'
       wud.display.icon: 'mdi:connection'
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "2375"]
@@ -67,6 +67,9 @@ services:
       wud.display.icon: "sh:traefik.png"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://getwud.github.io/wud/#/changelog/?id=_$${major}$${minor}$${patch}"
+    depends_on:
+      traefik-socket-proxy:
+        condition: service_healthy
     networks:
       - traefik-internal
       - traefik
