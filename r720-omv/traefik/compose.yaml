@@ -64,7 +64,7 @@ services:
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "Traefik"
-      wud.display.icon: "sh:traefik.png"
+      wud.display.icon: "sh:traefik"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://getwud.github.io/wud/#/changelog/?id=_$${major}$${minor}$${patch}"
     depends_on:
