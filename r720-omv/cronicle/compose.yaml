@@ -18,6 +18,11 @@ services:
     networks:
       cronicle: null
     labels:
+      homepage.group: "Infrastructure"
+      homepage.name: "Cronicle"
+      homepage.icon: "sh-cronicle.png"
+      homepage.href: "http://10.10.1.13:3012"
+      homepage.description: "Web cron"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
