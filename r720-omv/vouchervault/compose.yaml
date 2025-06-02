@@ -52,6 +52,12 @@ services:
       homepage.icon: "sh-vouchervault.png"
       homepage.href: "https://cards.${DOMAIN_NAME}"
       homepage.description: "Loyalty cards manager"
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/l4rm4nd/VoucherVault/releases/tag/v${major}.${minor}.${patch}"
+      wud.display.name: "VoucherVault"
+      wud.display.icon: "sh-vouchervault"
     depends_on:
       vouchervault-redis:
         condition: service_healthy
