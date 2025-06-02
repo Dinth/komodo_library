@@ -21,7 +21,7 @@ services:
       start_period: 5s
       
   core:
-    image: ghcr.io/moghtech/komodo-core:${COMPOSE_KOMODO_IMAGE_TAG:-latest}
+    image: ghcr.io/moghtech/komodo-core:latest
     labels:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
     restart: unless-stopped
