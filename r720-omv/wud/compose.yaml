@@ -53,6 +53,7 @@ services:
       WUD_REGISTRY_GHCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
+      WUD_REGISTRY_GITEA_BRICKTRACKER_URL: "https://gitea.baerentsen.space/"
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
