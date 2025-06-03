@@ -1,4 +1,33 @@
 services:
+  uptime-kuma-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: uptime-kuma-socket-proxy
+    restart: unless-stopped
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    networks:
+      - wud
+    environment:
+      CONTAINERS: "1"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Uptime Kuma'
+      wud.display.icon: 'mdi:connection'
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "2375"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      start_interval: 5s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      
   uptime-kuma:
     user: "1003:100"
     cap_add:
