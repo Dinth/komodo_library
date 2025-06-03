@@ -60,7 +60,7 @@ services:
       homepage.siteMonitor: "http://10.10.1.13:3001"
       homepage.widget.type: "uptimekuma"
       homepage.widget.url: "http://uptime-kuma:3001"
-      homepage.widget.slug: "beannet"
+      homepage.widget.slug: "dashboard"
       homepage.widget.fields: "['up', 'down', 'uptime', 'incident']"
       wud.watch: 'true'
       wud.display.icon: 'sh-uptime-kuma'
