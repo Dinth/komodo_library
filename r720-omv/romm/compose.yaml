@@ -56,6 +56,15 @@ services:
       traefik.http.routers.romm.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.romm.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.romm.loadbalancer.server.port: "8080"
+      homepage.group: "Main"
+      homepage.name: "Romm"
+      homepage.icon: "romm"
+      homepage.href: "https://emu.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://emu.${DOMAIN_NAME}"
+      homepage.widget.type: "romm"
+      homepage.widget.url: "https://emu.${DOMAIN_NAME}"
+      homepage.widget.username: "michal"
+      homepage.widget.password: "{{HOMEPAGE_ROMM_PASS}}"
     ports:
       - 4040:8080/tcp
     restart: unless-stopped
