@@ -56,7 +56,7 @@ services:
       traefik.http.routers.romm.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.romm.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.romm.loadbalancer.server.port: "8080"
-      homepage.group: "Main"
+      homepage.group: "Media"
       homepage.name: "Romm"
       homepage.icon: "romm"
       homepage.href: "https://emu.${DOMAIN_NAME}"
