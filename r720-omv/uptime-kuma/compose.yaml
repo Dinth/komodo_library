@@ -58,6 +58,7 @@ services:
       homepage.widget.type: "uptimekuma"
       homepage.widget.url: "http://uptime-kuma:3001"
       homepage.widget.slug: "beannet"
+      homepage.widget.fields: "['up', 'down', 'uptime', 'incident']"
     logging:
       driver: json-file
       options:
