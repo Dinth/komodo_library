@@ -29,7 +29,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       
   uptime-kuma:
-    user: "1003:100"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
