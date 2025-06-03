@@ -37,7 +37,7 @@ services:
       timeout: 5s
       retries: 3
     labels:
-      homepage.group: "Instrastructure"
+      homepage.group: "Infrastructure"
       homepage.name: "Backblaze Backup"
       homepage.icon: "sh-backblaze.png"
       homepage.href: "http://10.10.1.13:5800"
