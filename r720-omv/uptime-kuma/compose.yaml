@@ -1,5 +1,5 @@
 services:
-    uptime-kuma-socket-proxy:
+  uptime-kuma-socket-proxy:
     image: tecnativa/docker-socket-proxy
     container_name: uptime-kuma-socket-proxy
     restart: unless-stopped
