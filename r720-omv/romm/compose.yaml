@@ -65,6 +65,11 @@ services:
       homepage.widget.url: "https://emu.${DOMAIN_NAME}"
       homepage.widget.username: "michal"
       homepage.widget.password: "{{HOMEPAGE_ROMM_PASS}}"
+      wud.watch: 'true'
+      wud.display.icon: 'sh-romm'
+      wud.display.name: 'Romm'
+      wud.tag.include: '^v\\d+\\.\\d+\\.\\d+$$$$'
+      wud.link.template: 'https://github.com/rommapp/romm/releases/tag/$${major}.$${minor}.$${patch}'
     ports:
       - 4040:8080/tcp
     restart: unless-stopped
