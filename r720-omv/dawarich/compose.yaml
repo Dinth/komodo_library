@@ -138,12 +138,12 @@ services:
       dawarich-postgis:
         condition: service_healthy
         restart: true
-      dawarich-redis:
-        condition: service_healthy
-        restart: true
-      dawarich:
-        condition: service_healthy
-        restart: true
+#      dawarich-redis:
+#        condition: service_healthy
+#        restart: true
+#      dawarich:
+#        condition: service_healthy
+#        restart: true
     logging:
       driver: json-file
       options:
