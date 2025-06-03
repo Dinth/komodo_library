@@ -196,6 +196,9 @@ services:
       PHOTON_API_HOST: "photon.dawarich.app"
       PHOTON_API_KEY: "${PHOTON_API_KEY}"
       SELF_HOSTED: "true"
+      QUEUE_DATABASE_PATH: /dawarich_db_data/dawarich_development_queue.sqlite3
+      CACHE_DATABASE_PATH: /dawarich_db_data/dawarich_development_cache.sqlite3
+      CABLE_DATABASE_PATH: /dawarich_db_data/dawarich_development_cable.sqlite3
     hostname: dawarich
     image: freikin/dawarich:latest
     ipc: private
@@ -237,6 +240,7 @@ services:
       - /opt/docker/dawarich/dawarich_gem_cache_app:/usr/local/bundle/gems_app
       - /opt/docker/dawarich/dawarich_public:/var/app/public
       - /opt/docker/dawarich/dawarich_storage:/var/app/storage
+      - /opt/docker/dawarich/dawarich_db_data:/dawarich_db_data
     working_dir: /var/app
 networks:
   dawarich:
