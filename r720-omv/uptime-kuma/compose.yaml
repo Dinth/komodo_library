@@ -1,33 +1,4 @@
 services:
-  uptime-kuma-socket-proxy:
-    image: tecnativa/docker-socket-proxy
-    container_name: uptime-kuma-socket-proxy
-    restart: unless-stopped
-    ipc: private
-    security_opt:
-      - no-new-privileges:true
-    mem_limit: 64M
-    cap_drop:
-      - ALL
-    networks:
-      - wud
-    environment:
-      CONTAINERS: "1"
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - Uptime Kuma'
-      wud.display.icon: 'mdi:connection'
-    healthcheck:
-      test: ["CMD", "nc", "-z", "127.0.0.1", "2375"]
-      interval: 5s
-      retries: 5
-      start_period: 5s
-      start_interval: 5s
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      
   uptime-kuma:
     user: "1003:100"
     cap_add:
@@ -50,11 +21,22 @@ services:
     hostname: uptime-kuma
     image: louislam/uptime-kuma:1
     ipc: private
+    labels:
+      homepage.group: Infrastructure
+      homepage.name: Uptime-Kuma
+      homepage.icon: uptime-kuma
+      homepage.href: https://uptime-kuma.beannet.app
+      homepage.siteMonitor: https://uptime-kuma.beannet.app
+      homepage.widget.type: uptimekuma
+      homepage.widget.url: http://uptime-kuma:3001
+      homepage.widget.slug: beannet
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: curl -f http://localhost:3001 || exit 1
     networks:
       - uptime-kuma
     ports:
