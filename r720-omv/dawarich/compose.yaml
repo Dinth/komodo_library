@@ -202,12 +202,12 @@ services:
     hostname: dawarich
     image: freikin/dawarich:latest
     ipc: private
-    healthcheck:
-      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
-      interval: 10s
-      retries: 30
-      start_period: 30s
-      timeout: 10s
+#    healthcheck:
+#      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
+#      interval: 10s
+#      retries: 30
+#      start_period: 30s
+#      timeout: 10s
     depends_on:
       dawarich-postgis:
         condition: service_healthy
