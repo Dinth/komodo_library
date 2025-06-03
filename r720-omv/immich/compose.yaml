@@ -49,6 +49,8 @@ services:
       homepage.widget.type: "immich"
       homepage.widget.url: "https://photos.${DOMAIN_NAME}"
       homepage.widget.key: "${HOMEPAGE_IMMICH_KEY}"
+      homepage.widget.version: "2"
+      homepage.widget.fields: "['users' ,'photos', 'videos', 'storage']"
     volumes:
       - /Data/Photos:/usr/src/app/upload/library
       - /opt/docker/immich/immich_backups:/usr/src/app/upload/backups
