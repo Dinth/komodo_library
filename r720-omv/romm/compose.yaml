@@ -30,6 +30,7 @@ services:
       ROMM_AUTH_SECRET_KEY: "${ROMM_AUTH_SECRET_KEY}"
       IGDB_CLIENT_ID: "${IGDB_CLIENT_ID}"
       IGDB_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
+      RETROACHIEVEMENTS_API_KEY: "${ROMM_RETROARCHIEVEMENTS_API_KEY}"
     hostname: romm
     image: rommapp/romm:latest
     ipc: private
