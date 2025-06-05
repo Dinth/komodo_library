@@ -86,78 +86,78 @@ services:
       - /opt/docker/dawarich/postgis_data:/var/lib/postgresql/data
     working_dir: /
 
-  dawarich-sidekiq:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
-    command: ['sidekiq']
-    container_name: dawarich-sidekiq
-    entrypoint: ['bundle','exec']
-    environment:
-      DATABASE_HOST: "dawarich-postgis"
-      DATABASE_USERNAME: "dawarich"
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-      DATABASE_NAME: "dawarich"
-      APPLICATION_HOST: "localhost"
-      APPLICATION_HOSTS: "localhost"
-      DISTANCE_UNIT: "km"
-      REDIS_URL: "redis://dawarich-redis:6379/0"
-      BACKGROUND_PROCESSING_CONCURRENCY: "10"
-      APPLICATION_PROTOCOL: "http"
-      PHOTON_API_USE_HTTPS: "true"
-      REVERSE_GEOCODING_ENABLED: "true"
-      PHOTON_API_HOST: "photon.dawarich.app"
-      PHOTON_API_KEY: "${PHOTON_API_KEY}"
-      SELF_HOSTED: "true"
-    expose:
-      - 3000/tcp
-    hostname: dawarich-sidekiq
-    image: freikin/dawarich:latest
-    ipc: private
-    healthcheck:
-      test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
-      interval: 10s
-      retries: 30
-      start_period: 30s
-      timeout: 10s
-    depends_on:
-      dawarich-postgis:
-        condition: service_healthy
-        restart: true
+#  dawarich-sidekiq:
+#    cap_add:
+#      - AUDIT_WRITE
+#      - CHOWN
+#      - DAC_OVERRIDE
+#      - FOWNER
+#      - FSETID
+#      - KILL
+#      - MKNOD
+#      - NET_BIND_SERVICE
+#      - NET_RAW
+#      - SETFCAP
+#      - SETGID
+#      - SETPCAP
+#      - SETUID
+#      - SYS_CHROOT
+#    cap_drop:
+#      - ALL
+#    command: ['sidekiq']
+#    container_name: dawarich-sidekiq
+#    entrypoint: ['bundle','exec']
+#    environment:
+#      DATABASE_HOST: "dawarich-postgis"
+#      DATABASE_USERNAME: "dawarich"
+#      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+#      DATABASE_NAME: "dawarich"
+#      APPLICATION_HOST: "localhost"
+#      APPLICATION_HOSTS: "localhost"
+#      DISTANCE_UNIT: "km"
+#      REDIS_URL: "redis://dawarich-redis:6379/0"
+#      BACKGROUND_PROCESSING_CONCURRENCY: "10"
+#      APPLICATION_PROTOCOL: "http"
+#      PHOTON_API_USE_HTTPS: "true"
+#      REVERSE_GEOCODING_ENABLED: "true"
+#      PHOTON_API_HOST: "photon.dawarich.app"
+#      PHOTON_API_KEY: "${PHOTON_API_KEY}"
+#      SELF_HOSTED: "true"
+#    expose:
+#      - 3000/tcp
+#    hostname: dawarich-sidekiq
+#    image: freikin/dawarich:latest
+#    ipc: private
+#    healthcheck:
+#      test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
+#      interval: 10s
+#      retries: 30
+#      start_period: 30s
+#      timeout: 10s
+#    depends_on:
+#      dawarich-postgis:
+#        condition: service_healthy
+#        restart: true
 #      dawarich-redis:
 #        condition: service_healthy
 #        restart: true
 #      dawarich:
 #        condition: service_healthy
 #        restart: true
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - dawarich
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/dawarich/dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
-      - /opt/docker/dawarich/dawarich_public:/var/app/public
-      - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
-      - /opt/docker/dawarich/dawarich_storage:/var/app/storage
-    working_dir: /var/app
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
+#    networks:
+#      - dawarich
+#    restart: unless-stopped
+#    volumes:
+#      - /opt/docker/dawarich/dawarich_gem_cache_sidekiq:/usr/local/bundle/gems_sidekiq
+#      - /opt/docker/dawarich/dawarich_public:/var/app/public
+#      - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
+#      - /opt/docker/dawarich/dawarich_storage:/var/app/storage
+#    working_dir: /var/app
   dawarich:
     cap_add:
       - AUDIT_WRITE
