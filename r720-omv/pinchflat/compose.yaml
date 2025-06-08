@@ -9,8 +9,5 @@ services:
     # volumes:
     #   - data:/data
 
-# networks:
-#   default: {}
-
 # volumes:
 #   data:
