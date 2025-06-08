@@ -46,7 +46,6 @@ services:
     volumes:
       - /opt/docker/navidrome/navidrome_data:/data
       - /Data/Music:/music:ro
-    working_dir: /app
 networks:
   navidrome:
     name: navidrome
