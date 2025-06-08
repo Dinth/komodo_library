@@ -1,13 +1,43 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# volumes:
-#   data:
+  pinchflat:
+    container_name: pinchflat
+    image: ghcr.io/kieraneglin/pinchflat:latest
+    hostname: pinchflat
+    logging:
+      driver: json-file
+      options:
+        max-file: "3"
+        max-size: 10m
+    networks:
+      - pinchflat
+    restart: unless-stopped
+    ipc: private
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    environment:
+      - TZ: "${TZ}"
+    ports:
+      - '8945:8945'
+    volumes:
+      - /opt/docker/pinchflat/pinchflat_config:/config
+      - /Data/IT/pinchflat_downloads:/downloads
+networks:
+  pinchflat:
+    name: pinchflat
+    driver: bridge
+    external: false
