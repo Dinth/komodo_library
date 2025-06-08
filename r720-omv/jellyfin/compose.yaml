@@ -66,7 +66,7 @@ services:
       homepage.icon: "jellyfin.png"
       homepage.href: "https://jf.${DOMAIN_NAME}"
       homepage.description: "Media streaming"
-      homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
+      homepage.widget.fields: "['movies', 'series', 'episodes', 'songs']"
       homepage.widget.type: "jellyfin"
       homepage.widget.url: "http://10.10.1.13:8096"
       homepage.widget.key: "${HOMEPAGE_JELLYFIN_API}"
