@@ -188,7 +188,7 @@ services:
       QUEUE_DATABASE_PORT: "5432"
       QUEUE_DATABASE_USERNAME: "dawarich"
       QUEUE_DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-      QUEUE_DATABASE_NAME: "dawarich_development_queue"
+      QUEUE_DATABASE_NAME: "dawarich_queue"
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost,traces.${DOMAIN_NAME}"
       DISTANCE_UNIT: "km"
