@@ -30,7 +30,7 @@ services:
     cap_drop:
       - ALL
     environment:
-      - TZ: "${TZ}"
+      TZ: "${TZ}"
     ports:
       - '8945:8945'
     volumes:
