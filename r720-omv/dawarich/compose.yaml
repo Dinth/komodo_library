@@ -1,45 +1,45 @@
 services:
-  dawarich-redis:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
-    command: ['redis-server']
-    container_name: dawarich-redis
-    entrypoint: ['docker-entrypoint.sh']
-    hostname: dawarich-redis
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
-    image: redis:latest
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - dawarich
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/dawarich/redis_data:/data
-    working_dir: /data
+#  dawarich-redis:
+#    cap_add:
+#      - AUDIT_WRITE
+#      - CHOWN
+#      - DAC_OVERRIDE
+#      - FOWNER
+#      - FSETID
+##      - KILL
+#     - MKNOD
+#      - NET_BIND_SERVICE
+#      - NET_RAW
+#      - SETFCAP
+#      - SETGID
+#      - SETPCAP
+#      - SETUID
+#      - SYS_CHROOT
+#    cap_drop:
+#      - ALL
+#    command: ['redis-server']
+#    container_name: dawarich-redis
+#    entrypoint: ['docker-entrypoint.sh']
+#    hostname: dawarich-redis
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+#      interval: 10s
+#      retries: 5
+#      start_period: 30s
+#      timeout: 10s
+#    image: redis:latest
+#    ipc: private
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
+#    networks:
+#      - dawarich
+#    restart: unless-stopped
+#    volumes:
+#      - /opt/docker/dawarich/redis_data:/data
+#    working_dir: /data
   dawarich-postgis:
     cap_add:
       - AUDIT_WRITE
@@ -174,8 +174,8 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-    cap_drop:
-      - ALL
+#    cap_drop:
+#      - ALL
     command: ['bin/rails','server','-p','3000','-b','::']
     container_name: dawarich
     entrypoint: ['bundle','exec']
@@ -192,7 +192,7 @@ services:
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost,traces.${DOMAIN_NAME}"
       DISTANCE_UNIT: "km"
-      REDIS_URL: "redis://dawarich-redis:6379/0"
+#      REDIS_URL: "redis://dawarich-redis:6379/0"
       MIN_MINUTES_SPENT_IN_CITY: "120"
       TIME_ZONE: "${TZ}"
       PHOTON_API_USE_HTTP: "true"
