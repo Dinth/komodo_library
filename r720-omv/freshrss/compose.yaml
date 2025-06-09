@@ -38,6 +38,8 @@ services:
       DB_USER: "freshrss"
       DB_BASE: "freshrss"
       DB_PASS: "${FRESHRSS_POSTGRES_PASS}"
+    ports:
+      - "8083:80"
     volumes:
       - /opt/docker/freshrss/freshrss_data:/var/www/FreshRSS/data
       - /opt/docker/freshrss/freshrss_extensions:/var/www/FreshRSS/extensions
