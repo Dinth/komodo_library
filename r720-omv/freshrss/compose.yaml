@@ -60,7 +60,7 @@ services:
       wud.link.template: "https://github.com/FreshRSS/FreshRSS/releases/$${major}.$${minor}.$${patch}"
     depends_on:
       freshrss-postgres:
-        condition: service-healthy
+        condition: service_healthy
     ports:
       - "8020:80"
     volumes:
