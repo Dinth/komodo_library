@@ -58,6 +58,9 @@ services:
       wud.display.name: "FreshRSS"
       wud.display.icon: "sh:freshrss"
       wud.link.template: "https://github.com/FreshRSS/FreshRSS/releases/$${major}.$${minor}.$${patch}"
+    depends_on:
+      freshrss-postgres:
+        status: service-healthy
     ports:
       - "8020:80"
     volumes:
