@@ -1,16 +1,17 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  freshrss:
+    image: freshrss/freshrss:1
+    container_name: freshrss
+    restart: unless-stopped
+    environment: 
+      TRUSTED_PROXIES: "traefik"
+      TZ: "${TZ}"
+      BASE_URL: "rss.${DOMAIN_NAME}"
+      CRON_MIN: "*/10"
+    volumes:
+      - /opt/docker/freshrss/freshrss_data:/var/www/FreshRSS/data
+      - /opt/docker/freshrss/freshrss_extensions:/var/www/FreshRSS/extensions
+    networks:
+      - freshrss
+      - traefik
+      
