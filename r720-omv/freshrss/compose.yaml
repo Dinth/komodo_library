@@ -33,6 +33,8 @@ services:
       TZ: "${TZ}"
       BASE_URL: "rss.${DOMAIN_NAME}"
       CRON_MIN: "*/10"
+      ADMIN_PASSWORD: "freshrss"
+      ADMIN_API_PASSWORD: "freshrss"
       DB_TYPE: "pgsql"
       DB_HOST: ""
       DB_USER: "freshrss"
