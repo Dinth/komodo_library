@@ -96,7 +96,7 @@ services:
       - /Data/DocumentaryMovies:/documentary_movies
       - /Data/DocumentaryShows:/documentary_shows
       - /Data/Movies:/movies
-    working_dir: /
+      - /Data/IT/pinchflat_downloads:/youtube
 networks:
   jellyfin:
     name: jellyfin
