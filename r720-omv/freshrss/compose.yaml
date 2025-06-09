@@ -27,6 +27,7 @@ services:
     image: freshrss/freshrss:latest
     container_name: freshrss
     restart: unless-stopped
+    ipc: private
     environment: 
       TRUSTED_PROXIES: "traefik"
       TZ: "${TZ}"
