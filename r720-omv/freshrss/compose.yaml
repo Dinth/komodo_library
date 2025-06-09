@@ -59,7 +59,7 @@ services:
       wud.display.icon: "sh:freshrss"
       wud.link.template: "https://github.com/FreshRSS/FreshRSS/releases/$${major}.$${minor}.$${patch}"
     ports:
-      - "8083:80"
+      - "8020:80"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/freshrss/freshrss_data:/var/www/FreshRSS/data
