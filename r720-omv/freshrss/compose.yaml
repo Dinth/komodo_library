@@ -14,4 +14,10 @@ services:
     networks:
       - freshrss
       - traefik
-      
+networks:
+  freshrss:
+    name: freshrss
+    driver: bridge
+  traefik:
+    name: traefik
+    external: true    
