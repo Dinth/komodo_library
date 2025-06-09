@@ -67,7 +67,6 @@ services:
     volumes:
       - /Data/Ebooks:/books
       - /opt/docker/calibre-web/calibre-web_config:/config
-    working_dir: /
 networks:
   calibre-web:
     name: calibre-web
