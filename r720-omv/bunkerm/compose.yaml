@@ -1,16 +1,39 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  bunkerm:
+    image: bunkeriot/bunkerm
+    container_name: bunkerm
+    restart: unless-stopped
+    ipc: private
+    environment: 
+      HOST_ADDRESS: "10.10.1.13"
+    labels:
+      homepage.group: "Infrastructure"
+      homepage.name: "BunkerM"
+      homepage.icon: "sh-bunkerm.png"
+      homepage.href: "http://10.10.1.13:2000"
+      homepage.description: "MQTT broker and interface"
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: '^?v\d+\.\d+\.\d+$$'
+      wud.display.name: "FreshRSS"
+      wud.display.icon: "sh:freshrss"
+      wud.link.template: "https://github.com/bunkeriot/BunkerM/releases/v$${major}.$${minor}.$${patch}"
+    ports:
+      - "1900:1900"
+      - "2000:2000"
+    volumes:
+      - "/opt/docker/bunkerm/bunkerm_data:/var/lib/mosquitto"
+      - "/opt/docker/bunkerm/bunkerm_config:/etc/mosquitto"
+      - "/opt/docker/bunkerm/bunkerm_auth:/data"
+    networks:
+      - bunkerm
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        
+networks:
+  bunkerm:
+    name: bunkerm
+    driver: bridge
