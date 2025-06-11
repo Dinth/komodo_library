@@ -1,5 +1,6 @@
 services:
   pinchflat:
+    user:  "1001:100"
     container_name: pinchflat
     image: ghcr.io/kieraneglin/pinchflat:latest
     hostname: pinchflat
@@ -31,6 +32,17 @@ services:
       - ALL
     environment:
       TZ: "${TZ}"
+    labels:
+      homepage.group: "Media"
+      homepage.name: "Pinchflat"
+      homepage.icon: "sh-pinchflat.png"
+      homepage.href: "http://10.10.1.13:8945"
+      homepage.siteMonitor: "http://10.10.1.13:8945"
+      wud.watch: 'true'
+      wud.display.icon: 'sh-pinchflat'
+      wud.display.name: 'Pinchflat'
+      wud.tag.include: '^v\\d+\\.\\d+\\.\\d+$$$$'
+      wud.link.template: 'https://github.com/rommapp/romm/releases/tag/$${major}.$${minor}.$${patch}'
     ports:
       - '8945:8945'
     volumes:
