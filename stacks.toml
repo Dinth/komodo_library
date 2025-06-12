@@ -205,6 +205,9 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/fgc"
 environment = """
 ADMIN_EMAIL=[[ADMIN_EMAIL]]
+FGC_GOG_PASS=[[FGC_GOG_PASS]]
+FGC_EG_PASS=[[FGC_EG_PASS]]
+FGC_PG_PASS=[[FGC_PG_PASS]]
 """
 
 ##
@@ -258,24 +261,6 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/guacamole"
 environment = """
 GUACAMOLE_DB_PASS=[[GUACAMOLE_DB_PASS]]
-"""
-
-##
-
-[[stack]]
-name = "heimdall"
-tags = ["needs-improvement", "stacks"]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/heimdall"
-environment = """
-TZ=[[TZ]]
-DOCKER_PUID=[[DOCKER_PUID]]
-DOCKER_PGID=[[DOCKER_PGID]]
-DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -517,28 +502,6 @@ OPENWEBUI_SECRET_KEY=[[OPENWEBUI_SECRET_KEY]]
 ##
 
 [[stack]]
-name = "photoprism"
-tags = [
-  "stacks",
-  "needs-improvement",
-  "database-to-migrate"
-]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/photoprism"
-environment = """
-PHOTOPRISM_DB_PASS=[[PHOTOPRISM_DB_PASS]]
-PHOTOPRISM_ADMIN_NAME=[[PHOTOPRISM_ADMIN_NAME]]
-PHOTOPRISM_ADMIN_PASS=[[PHOTOPRISM_ADMIN_PASS]]
-DOMAIN_NAME=[[DOMAIN_NAME]]
-"""
-
-##
-
-[[stack]]
 name = "postgresql"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
@@ -588,7 +551,9 @@ ROMM_DB_PASS=[[ROMM_DB_PASS]]
 ROMM_AUTH_SECRET_KEY=[[ROMM_AUTH_SECRET_KEY]]
 IGDB_CLIENT_ID=[[IGDB_CLIENT_ID]]
 IGDB_CLIENT_SECRET=[[IGDB_CLIENT_SECRET]]
+ROMM_RETROARCHIEVEMENTS_API_KEY=[[ROMM_RETROARCHIEVEMENTS_API_KEY]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+HOMEPAGE_ROMM_PASS=[[HOMEPAGE_ROMM_PASS]]
 """
 
 ##
@@ -717,6 +682,9 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/uptime-kuma"
+environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
 
 ##
 
