@@ -184,11 +184,6 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
-      QUEUE_DATABASE_HOST: "dawarich-postgis"
-      QUEUE_DATABASE_PORT: "5432"
-      QUEUE_DATABASE_USERNAME: "dawarich"
-      QUEUE_DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-      QUEUE_DATABASE_NAME: "dawarich_queue"
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost,traces.${DOMAIN_NAME}"
       DISTANCE_UNIT: "km"
@@ -201,9 +196,6 @@ services:
       PHOTON_API_HOST: "photon.dawarich.app"
       PHOTON_API_KEY: "${PHOTON_API_KEY}"
       SELF_HOSTED: "true"
- #     QUEUE_DATABASE_PATH: /dawarich_db_data/dawarich_development_queue.sqlite3
-      CACHE_DATABASE_PATH: /dawarich_sqlite_data/dawarich_development_cache.sqlite3
-      CABLE_DATABASE_PATH: /dawarich_sqlite_data/dawarich_development_cable.sqlite3
     hostname: dawarich
     image: freikin/dawarich:latest
     ipc: private
