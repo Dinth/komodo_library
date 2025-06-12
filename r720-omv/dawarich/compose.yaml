@@ -106,7 +106,7 @@ services:
       - ALL
     command: ['sidekiq']
     container_name: dawarich-sidekiq
-    entrypoint: ['bundle','exec']
+    entrypoint: 'sidekiq-entrypoint.sh'
     environment:
       DATABASE_HOST: "dawarich-postgis"
       DATABASE_USERNAME: "dawarich"
@@ -178,7 +178,7 @@ services:
 #      - ALL
     command: ['bin/rails','server','-p','3000','-b','::']
     container_name: dawarich
-    entrypoint: ['bundle','exec']
+    entrypoint: 'web-entrypoint.sh'
     environment:
       DATABASE_HOST: "dawarich-postgis"
       DATABASE_USERNAME: "dawarich"
