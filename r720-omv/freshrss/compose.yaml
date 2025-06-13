@@ -49,7 +49,7 @@ services:
         --db-password ${FRESHRSS_POSTGRES_PASS}
         --db-type pgsql
         --db-user freshrss
-        --default-user michal
+        --default-user admin
         --language en
       FRESHRSS_USER: |-
         --api-password ${FRESHRSS_ADMIN_API_PASS}
