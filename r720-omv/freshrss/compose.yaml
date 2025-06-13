@@ -31,7 +31,7 @@ services:
     environment: 
       TRUSTED_PROXIES: "traefik"
       TZ: "${TZ}"
-      BASE_URL: "rss.${DOMAIN_NAME}"
+      BASE_URL: "https://rss.${DOMAIN_NAME}"
       CRON_MIN: "*/10"
       ADMIN_EMAIL : "ddd@ddd.pl"
       ADMIN_PASSWORD: "freshrss"
@@ -43,7 +43,7 @@ services:
       DB_PASS: "${FRESHRSS_POSTGRES_PASS}"
       FRESHRSS_INSTALL: |-
         --api-enabled
-        --base-url rss.${DOMAIN_NAME}
+        --base-url https://rss.${DOMAIN_NAME}
         --db-base freshrss
         --db-host freshrss-postgres
         --db-password ${FRESHRSS_POSTGRES_PASS}
