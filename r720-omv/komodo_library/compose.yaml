@@ -12,6 +12,7 @@ services:
       TZ: "${TZ}"
       REDIS_PASSWORD: "${AUTHELIA_REDIS_PASS}"
       DOMAIN_NAME: "${DOMAIN_NAME}"
+      SESSION_SECRET: "${AUTHELIA_SESSION_KEY}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
       X_AUTHELIA_CONFIG: /config.yaml
     labels:
