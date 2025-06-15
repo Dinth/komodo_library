@@ -1,6 +1,6 @@
 services:
   authelia:
-    image: authelia/authelia:latest
+    image: authelia/authelia:4.39.4
     container_name: authelia
     restart: unless-stopped
     ipc: private
@@ -17,7 +17,7 @@ services:
       wud.watch.digest: "true"
       wud.display.name: "Authelia"
       wud.display.icon: sh-authelia
-      wud.tag.include: ^4\.\d+\.\d+$$
+      wud.tag.include: ^$v\d+.\d+\.\d+$$
       wud.link.template: https://github.com/authelia/authelia/releases/tag/v$${major}.$${minor}.$${patch}
     user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     logging:
