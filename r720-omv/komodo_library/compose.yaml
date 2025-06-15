@@ -10,7 +10,7 @@ services:
       - /opt/docker/authelia/authelia_config:/config:ro
     environment:
       TZ: "${TZ}"
-      AUTHELIA_SESSION_REDIS_PASSWORD_FILE: "${AUTHELIA_REDIS_PASS}"
+      REDIS_PASSWORD: "${AUTHELIA_REDIS_PASS}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
     labels:
       wud.watch: "true"
