@@ -15,7 +15,7 @@ services:
       SESSION_ENCRYPTION_KEY: "${AUTHELIA_SESSION_KEY}"
       STORAGE_ENCRYPTION_KEY: "${AUTHELIA_STORAGE_KEY}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
-      X_AUTHELIA_CONFIG: /configuration.yml
+#      X_AUTHELIA_CONFIG: /configuration.yml
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
