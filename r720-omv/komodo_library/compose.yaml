@@ -11,7 +11,9 @@ services:
     environment:
       TZ: "${TZ}"
       REDIS_PASSWORD: "${AUTHELIA_REDIS_PASS}"
+      DOMAIN_NAME: "${DOMAIN_NAME}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
+      X_AUTHELIA_CONFIG: /config.yaml
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
