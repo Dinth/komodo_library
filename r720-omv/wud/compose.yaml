@@ -47,6 +47,8 @@ services:
 #      WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
 #      WUD_WATCHER_R720OMV_CRON: '0 1 * * *'
       WUD_WATCHER_LOCAL_SOCKET: '/var/run/docker.sock'
+      WUD_WATCHER_LOCAL_WATCHALL: "true"
+      WUD_WATCHER_LOCAL_CRON: '0 1 * * *'
       WUD_SERVER_FEATURE_DELETE: "false"
       WUD_LOG_LEVEL: "debug"
       WUD_REGISTRY_GHCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
