@@ -9,6 +9,7 @@ services:
       DB_USERNAME: "monica"
       DB_PASSWORD: "${MONICA_DB_PASS}"
       APP_URL: "https://monica.${DOMAIN_NAME}"
+      APP_TRUSTED_PROXIES: "traefik"
     labels:  
       - "traefik.enable=true"
       - "traefik.http.routers.monica.rule=Host(`monica.${DOMAIN_NAME}`)"
