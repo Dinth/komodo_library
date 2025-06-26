@@ -61,6 +61,13 @@ services:
       homepage.icon: "tandoor.png"
       homepage.href: "https://recipes.${DOMAIN_NAME}"
       homepage.description: "Recipe manager"
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "Tandoor"
+      wud.display.icon: "sh:tandoor"
+      wud.tag.include: '^\d+\.\d+\.\d+$'
+      wud.link.template: "https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}"
+    restart: unless-stopped
     restart: unless-stopped
     volumes:
       - /opt/docker/tandoor/tandoor_static:/opt/recipes/staticfiles
