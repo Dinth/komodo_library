@@ -15,7 +15,7 @@ services:
       DB_DATABASE: "pricebuddy"
       APP_USER_EMAIL: "${ADMIN_EMAIL}"
       APP_USER_PASSWORD: "${PRICEBUDDY_ADMIN_PASS}"
-      SCRAPER_BASE_URL: "http://scraper:3000"
+      SCRAPER_BASE_URL: "http://pricebuddy-scraper:3000"
       AFFILIATE_ENABLED: "false"
     depends_on:
       - pricebuddy-mysql
