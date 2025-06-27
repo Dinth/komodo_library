@@ -15,8 +15,8 @@ services:
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^?v\d+\.\d+\.\d+$$'
-      wud.display.name: "FreshRSS"
-      wud.display.icon: "sh:freshrss"
+      wud.display.name: "BunkerM"
+      wud.display.icon: "sh:bunkerm"
       wud.link.template: "https://github.com/bunkeriot/BunkerM/releases/v$${major}.$${minor}.$${patch}"
     ports:
       - "1900:1900"
