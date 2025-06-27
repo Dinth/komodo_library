@@ -474,7 +474,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/Cleanuparr/Cleanuparr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Cleanuperr"
       wud.display.icon: "sh-cleanuperr"
     networks:
