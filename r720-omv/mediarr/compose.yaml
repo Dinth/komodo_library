@@ -414,8 +414,6 @@ services:
     cap_drop:
       - ALL
     container_name: cleanuperr
-    entrypoint:
-      - ./cleanuperr
     environment:
       TZ: "${TZ}"
       TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?'"
