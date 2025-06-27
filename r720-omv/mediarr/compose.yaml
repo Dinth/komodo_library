@@ -62,7 +62,6 @@ services:
       - /opt/docker/mediarr/qbittorrentvpn_config:/config
       - /Data/Unsorted:/data
       - /etc/localtime:/etc/localtime:ro
-    working_dir: /
   jackettvpn:
     cap_add:
       - AUDIT_WRITE
@@ -129,7 +128,6 @@ services:
     volumes:
       - /opt/docker/mediarr/jackettvpn_blackhole:/blackhole
       - /opt/docker/mediarr/jackettvpn_config:/config
-    working_dir: /opt
   recommendarr:
     cap_add:
       - AUDIT_WRITE
@@ -175,7 +173,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/mediarr/recommendarr_data:/app/server/data
-    working_dir: /app
   bazarr:
     cap_add:
       - AUDIT_WRITE
@@ -233,7 +230,6 @@ services:
       - /opt/docker/mediarr/bazarr_config:/config
       - /Data/Movies:/movies
       - /Data/TVShows:/tv
-    working_dir: /   
   lidarr:
     cap_add:
       - AUDIT_WRITE
@@ -290,8 +286,7 @@ services:
     volumes:
       - /Data/Music:/music
       - /opt/docker/mediarr/lidarr_config:/config
-      - /Data/Unsorted:/downloads
-    working_dir: /    
+      - /Data/Unsorted:/downloads 
   iplayarr-redis:
     cap_add:
       - AUDIT_WRITE
@@ -338,7 +333,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/iplayarr/redis_data:/data
-    working_dir: /data
   iplayarr:
     cap_add:
       - AUDIT_WRITE
@@ -394,7 +388,6 @@ services:
       - /Data/Unsorted:/mnt/media
       - /opt/docker/mediarr/iplayarr_config:/config
       - /opt/docker/mediarr/iplayarr_data:/data
-    working_dir: /app
   cleanuperr:
     cap_add:
       - AUDIT_WRITE
@@ -478,7 +471,6 @@ services:
     networks:
       - mediarr
     restart: unless-stopped
-    working_dir: /app
   flaresolverr:
     cap_add:
       - AUDIT_WRITE
@@ -520,7 +512,6 @@ services:
       - 8191:8191/tcp
     restart: unless-stopped
     user: flaresolverr
-    working_dir: /app
   radarr:
     cap_add:
       - AUDIT_WRITE
@@ -570,7 +561,6 @@ services:
       - /Data/Movies:/movies
       - /Data/CartoonMovies:/cartoon_movies
       - /opt/docker/mediarr/radarr_config:/config
-    working_dir: /
   sonarr:
     cap_add:
       - AUDIT_WRITE
