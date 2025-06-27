@@ -464,7 +464,7 @@ services:
       LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
       LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
     hostname: cleanuperr
-    image: ghcr.io/flmorg/cleanuperr:latest
+    image: ghcr.io/cleanuparr/cleanuparr:2.0.2
     ipc: private
     logging:
       driver: json-file
