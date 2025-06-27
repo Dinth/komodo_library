@@ -1,28 +1,28 @@
 services:
 
-  neolink:
-    command: ['/usr/local/bin/neolink','rtsp','--config','/etc/neolink.toml']
-    container_name: neolink
-    environment:
-      NEO_LINK_MODE: "mqtt-rtsp"
-      NEO_LINK_PORT: "8554"
-      RUST_LOG: "debug"
-    hostname: neolink
-    image: quantumentangledandy/neolink:v0.5.9
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - frigate
-    ports:
-      - 8654:8554/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/frigate/neolink_valgrind:/valgrind
-      - /opt/docker/frigate/neolink.toml:/etc/neolink.toml
+#  neolink:
+#    command: ['/usr/local/bin/neolink','rtsp','--config','/etc/neolink.toml']
+#    container_name: neolink
+#    environment:
+#      NEO_LINK_MODE: "mqtt-rtsp"
+#      NEO_LINK_PORT: "8554"
+#      RUST_LOG: "debug"
+#    hostname: neolink
+#    image: quantumentangledandy/neolink:v0.5.9
+#    ipc: private
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
+#    networks:
+#      - frigate
+#    ports:
+#      - 8654:8554/tcp
+#    restart: unless-stopped
+#    volumes:
+#      - /opt/docker/frigate/neolink_valgrind:/valgrind
+#      - /opt/docker/frigate/neolink.toml:/etc/neolink.toml
   frigate:
     cap_add:
       - AUDIT_WRITE
