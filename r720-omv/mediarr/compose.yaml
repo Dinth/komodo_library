@@ -635,7 +635,6 @@ services:
       - /opt/docker/mediarr/sonarr_config:/config
       - /Data/Unsorted:/downloads
       - /Data/TVShows:/tv
-    working_dir: /
     
 networks:
   mediarr:
