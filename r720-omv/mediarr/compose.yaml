@@ -41,6 +41,11 @@ services:
     ipc: private
     labels:
       com.centurylinklabs.watchtower.enable: true
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "QBittorrent VPN"
+      wud.display.icon: "sh-qbittorrent"
     logging:
       driver: json-file
       options:
@@ -108,6 +113,11 @@ services:
       homepage.widget.type: "jackett"
       homepage.widget.url: "http://10.10.1.13:9117"
       homepage.widget.fields: "['configured', 'errored']"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Jackett VPN"
+      wud.display.icon: "sh-jackett"
     networks:
       - mediarr
     ports:
@@ -152,6 +162,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Recommendarr"
+      wud.display.icon: "sh-recommendarr"
     networks:
       - mediarr
     ports:
@@ -198,6 +214,11 @@ services:
       homepage.widget.type: "bazarr"
       homepage.widget.url: "http://10.10.1.13:6767"
       homepage.widget.key: "${HOMEPAGE_BAZARR_API}"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Bazarr"
+      wud.display.icon: "sh-bazarr"
     logging:
       driver: json-file
       options:
@@ -251,6 +272,11 @@ services:
       homepage.widget.type: "lidarr"
       homepage.widget.url: "http://10.10.1.13:8686"
       homepage.widget.key: "${HOMEPAGE_LIDARR_API}"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Lidarr"
+      wud.display.icon: "sh-lidarr"
     logging:
       driver: json-file
       options:
@@ -296,6 +322,12 @@ services:
       timeout: 10s
     image: redis:latest
     ipc: private
+    labels:       
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Iplayarr Redis"
+      wud.display.icon: "sh-iplayarr"
     logging:
       driver: json-file
       options:
@@ -347,6 +379,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Iplayarr"
+      wud.display.icon: "sh-iplayarr"
     networks:
       - mediarr
     ports:
@@ -433,6 +471,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Cleanuperr"
+      wud.display.icon: "sh-cleanuperr"
     networks:
       - mediarr
     restart: unless-stopped
@@ -461,6 +505,12 @@ services:
     hostname: flareresolverr
     image: flaresolverr/flaresolverr:latest
     ipc: private
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Flaresolverr"
+      wud.display.icon: "sh-flaresolverr"
     logging:
       driver: json-file
       options:
@@ -501,6 +551,12 @@ services:
     hostname: radarr
     image: linuxserver/radarr:latest
     ipc: private
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Radarr"
+      wud.display.icon: "sh-radarr"
     logging:
       driver: json-file
       options:
@@ -546,16 +602,21 @@ services:
     image: linuxserver/sonarr:latest
     ipc: private
     labels:
-      - "homepage.group=Media"
-      - "homepage.name=Sonarr"
-      - "homepage.icon=sonarr.png"
-      - "homepage.instance.internal.href=http://10.10.1.13:8989"
-      - "homepage.description=TV Shows catalogue"
-      - "homepage.widget.type=sonarr"
-      - "homepage.widget.url=http://10.10.1.13:8989"
-      - "homepage.widget.key=${SONARR__INSTANCES__0__APIKEY}"
-      - "homepage.widget.enableQueue=true"
+      homepage.group: "Media"
+      homepage.name: "Sonarr"
+      homepage.icon: "sonarr.png"
+      homepage.instance.internal.href: "http://10.10.1.13:8989"
+      homepage.description: "TV Shows catalogue"
+      homepage.widget.type: "sonarr"
+      homepage.widget.url: "http://10.10.1.13:8989"
+      homepage.widget.key: "${SONARR__INSTANCES__0__APIKEY}"
+      homepage.widget.enableQueue: "true"
 #      - "homepage.widget.fields=['books', 'authors', 'categories', 'series']"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Babybuddy"
+      wud.display.icon: "sh-baby-buddy"
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8989/sonarr/ping", "https://google.com" ]
       interval: 30s
