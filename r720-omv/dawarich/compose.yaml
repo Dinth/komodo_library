@@ -143,10 +143,10 @@ services:
 #        condition: service_healthy
 #        restart: true
     labels:
-      wud.display.icon: sh:dawarich
-      wud.display.name: Dawarich Sidekiq
-      wud.link.template: https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}
-      wud.tag.include: ^\d+\.\d+\.\d+$$
+      wud.display.icon: "sh:dawarich"
+      wud.display.name: "Dawarich Sidekiq"
+      wud.link.template: 'https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.watch: "true"
     logging:
       driver: json-file
@@ -236,8 +236,8 @@ services:
       traefik.http.services.dawarich.loadbalancer.server.port: "3000"
       wud.display.icon: sh:dawarich
       wud.display.name: Dawarich
-      wud.link.template: https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}
-      wud.tag.include: ^\d+\.\d+\.\d+$$
+      wud.link.template: 'https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.watch: "true"
     restart: unless-stopped
     volumes:
