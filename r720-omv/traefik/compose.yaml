@@ -1,6 +1,6 @@
 services:
   traefik-socket-proxy:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:0.3.0
     container_name: traefik-socket-proxy
     restart: unless-stopped
     ipc: private
