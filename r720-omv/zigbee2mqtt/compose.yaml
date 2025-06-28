@@ -1,16 +1,13 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+    zigbee2mqtt:
+        container_name: zigbee2mqtt
+        image: ghcr.io/koenkk/zigbee2mqtt
+        restart: unless-stopped
+        volumes:
+            - /opt/docker/zigbee2mqtt:/app/data
+#            - /run/udev:/run/udev:ro
+        ports:
+            # Frontend port
+            - 4080:8080
+        environment:
+            TZ: "${TZ}"
