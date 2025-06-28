@@ -39,7 +39,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/redis_data:/data
-    working_dir: /data
   dawarich-postgis:
     cap_add:
       - AUDIT_WRITE
@@ -84,7 +83,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/postgis_data:/var/lib/postgresql/data
-    working_dir: /
 
   dawarich-sidekiq:
     cap_add:
@@ -157,7 +155,6 @@ services:
       - /opt/docker/dawarich/dawarich_public:/var/app/public
       - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
       - /opt/docker/dawarich/dawarich_storage:/var/app/storage
-    working_dir: /var/app
   dawarich:
     cap_add:
       - AUDIT_WRITE
@@ -238,7 +235,6 @@ services:
       - /opt/docker/dawarich/dawarich_public:/var/app/public
       - /opt/docker/dawarich/dawarich_storage:/var/app/storage
       - /opt/docker/dawarich/dawarich_sqlite_data:/dawarich_sqlite_data
-    working_dir: /var/app
 networks:
   dawarich:
     name: dawarich
