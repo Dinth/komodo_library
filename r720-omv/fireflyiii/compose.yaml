@@ -91,7 +91,7 @@ services:
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_PAULINA_AUTOIMPORT_KEY}"
     hostname: fireflyiii_paulina_dataimporter
-    image: fireflyiii/data-importer:latest
+    image: fireflyiii/data-importer:version-1.7.0
     ipc: private
     logging:
       driver: json-file
@@ -136,7 +136,7 @@ services:
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
     hostname: fireflyiii_michal_dataimporter
-    image: fireflyiii/data-importer:latest
+    image: fireflyiii/data-importer:version-1.7.0
     ipc: private
     logging:
       driver: json-file
