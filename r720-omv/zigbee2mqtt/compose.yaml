@@ -6,7 +6,7 @@ services:
         user: "${DOCKER_PUID}:${DOCKER_PGID}"
         restart: unless-stopped
         volumes:
-            - /opt/docker/zigbee2mqtt:/app/data
+            - /opt/docker/zigbee2mqtt/zigbee2mqtt_data:/app/data
 #            - /run/udev:/run/udev:ro
         ports:
             # Frontend port
