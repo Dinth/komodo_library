@@ -29,7 +29,7 @@ services:
       POSTGRES_DB: "tandoor"
       ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},127.0.0.1"
     hostname: tandoor
-    image: vabene1111/recipes:latest
+    image: vabene1111/recipes:1.5.35
     ipc: private
     logging:
       driver: json-file
@@ -66,7 +66,7 @@ services:
       wud.display.name: "Tandoor"
       wud.display.icon: "sh:tandoor"
       wud.tag.include: '^\d+\.\d+\.\d+$'
-      wud.link.template: "https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.template: 'https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}'
     restart: unless-stopped
     restart: unless-stopped
     volumes:
