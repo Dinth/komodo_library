@@ -54,6 +54,11 @@ services:
       traefik.http.routers.fireflyiii.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.fireflyiii.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.fireflyiii.loadbalancer.server.port: "8080"
+      wud.watch: "true"
+      wud.tag.include: '^version-\d+\.\d+\.\d+$$'
+      wud.display.name: "Firefly III"
+      wud.display.icon: "sh:firefly-iii"
+      wud.link.template: "https://github.com/firefly-iii/firefly-iii/releases/v$${major}.$${minor}.$${patch}"
     ports:
       - 4747:8080/tcp
     restart: unless-stopped
@@ -93,6 +98,12 @@ services:
     hostname: fireflyiii_paulina_dataimporter
     image: fireflyiii/data-importer:version-1.7.0
     ipc: private
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^version-\d+\.\d+\.\d+$$'
+      wud.display.name: "Firefly III Data importer"
+      wud.display.icon: "sh:firefly-iii"
+      wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
     logging:
       driver: json-file
       options:
@@ -138,6 +149,12 @@ services:
     hostname: fireflyiii_michal_dataimporter
     image: fireflyiii/data-importer:version-1.7.0
     ipc: private
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^version-\d+\.\d+\.\d+$$'
+      wud.display.name: "Firefly III Data importer"
+      wud.display.icon: "sh:firefly-iii"
+      wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
     logging:
       driver: json-file
       options:
