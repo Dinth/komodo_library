@@ -2,6 +2,8 @@ services:
     zigbee2mqtt:
         container_name: zigbee2mqtt
         image: ghcr.io/koenkk/zigbee2mqtt
+        ipc: private
+        user: "${DOCKER_PUID}:${DOCKER_PGID}"
         restart: unless-stopped
         volumes:
             - /opt/docker/zigbee2mqtt:/app/data
