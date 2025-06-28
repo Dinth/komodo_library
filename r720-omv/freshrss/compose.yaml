@@ -72,7 +72,6 @@ services:
       homepage.href: "https://rss.${DOMAIN_NAME}"
       homepage.description: "RSS news reader and aggregator"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "FreshRSS"
       wud.display.icon: "sh:freshrss"
