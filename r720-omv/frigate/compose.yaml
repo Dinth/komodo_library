@@ -53,7 +53,7 @@ services:
       TRANSFORMERS_NO_ADVISORY_WARNINGS: "1"
       OPENCV_FFMPEG_LOGLEVEL: "8"
     hostname: frigate
-    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
+    image: ghcr.io/blakeblackshear/frigate:0.15.1-tensorrt
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ipc: private
@@ -100,7 +100,7 @@ services:
       homepage.widget.enableRecentEvents: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+\.\d+\-tensorrt$$'
       wud.link.template: "https://github.com/blakeblackshear/frigate/releases/tag/v${major}.${minor}.${patch}"
       wud.display.name: "Frigate"
       wud.display.icon: "mdi:cctv"
