@@ -1,7 +1,7 @@
 services:
     zigbee2mqtt:
         container_name: zigbee2mqtt
-        image: ghcr.io/koenkk/zigbee2mqtt
+        image: ghcr.io/koenkk/zigbee2mqtt:2.4.0
         ipc: private
         user: "${DOCKER_PUID}:${DOCKER_PGID}"
         restart: unless-stopped
