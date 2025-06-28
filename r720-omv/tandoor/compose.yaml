@@ -68,7 +68,6 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: 'https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}'
     restart: unless-stopped
-    restart: unless-stopped
     volumes:
       - /opt/docker/tandoor/tandoor_static:/opt/recipes/staticfiles
       - /opt/docker/tandoor/tandoor_media:/opt/recipes/mediafiles
