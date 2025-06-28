@@ -24,7 +24,7 @@ services:
     networks:
       - freshrss
   freshrss:
-    image: freshrss/freshrss:latest
+    image: freshrss/freshrss:1.26.3
     container_name: freshrss
     restart: unless-stopped
     ipc: private
