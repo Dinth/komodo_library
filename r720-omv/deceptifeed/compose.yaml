@@ -1,6 +1,6 @@
 services:
   deceptifeed:
-    image: deceptifeed/server:latest
+    image: deceptifeed/server:0.65.0
     container_name: deceptifeed
     environment:
       TZ: "${TZ}"
@@ -13,23 +13,28 @@ services:
       - "18443:8443"
       - "19000:9000"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.deceptifeed-https.rule=Host(`/`)"
-      - "traefik.http.routers.deceptifeed-https.entrypoints=websecure"
-      - "traefik.http.routers.deceptifeed-https.priority=1"
-      - "traefik.http.routers.deceptifeed-https.tls=true"
-      - "traefik.http.routers.deceptifeed-https.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.deceptifeed-https.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.deceptifeed-https.tls.domains[0].sans=*.${DOMAIN_NAME}"
-      - "traefik.http.services.deceptifeed-https.loadbalancer.server.port=8443"
-      - "traefik.http.routers.deceptifeed-https.rule=Host(`/`)"
-      - "traefik.http.routers.deceptifeed-https.entrypoints=web"
-      - "traefik.http.routers.deceptifeed-https.priority=1"
-      - "traefik.http.routers.deceptifeed-https.tls=true"
-      - "traefik.http.routers.deceptifeed-https.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.deceptifeed-https.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.deceptifeed-https.tls.domains[0].sans=*.${DOMAIN_NAME}"
-      - "traefik.http.services.deceptifeed-https.loadbalancer.server.port=8080"
+      traefik.enable: "true"
+      traefik.http.routers.deceptifeed-https.rule: "Host(`/`)"
+      traefik.http.routers.deceptifeed-https.entrypoints: "websecure"
+      traefik.http.routers.deceptifeed-https.priority: "1"
+      traefik.http.routers.deceptifeed-https.tls: "true"
+      traefik.http.routers.deceptifeed-https.tls.certresolver: "letsencrypt"
+      traefik.http.routers.deceptifeed-https.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.deceptifeed-https.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.services.deceptifeed-https.loadbalancer.server.port: "8443"
+      traefik.http.routers.deceptifeed-https.rule: "Host(`/`)"
+      traefik.http.routers.deceptifeed-https.entrypoints: "web"
+      traefik.http.routers.deceptifeed-https.priority: "1"
+      traefik.http.routers.deceptifeed-https.tls: "true"
+      traefik.http.routers.deceptifeed-https.tls.certresolver: "letsencrypt"
+      traefik.http.routers.deceptifeed-https.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.deceptifeed-https.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.services.deceptifeed-https.loadbalancer.server.port: "8080"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/r-smith/deceptifeed/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Deceptifeed"
+      wud.display.icon: "sh-deceptifeed"
     volumes:
       - /opt/docker/deceptifeed/deceptifeed_data:/data/
     restart: unless-stopped
