@@ -5,7 +5,7 @@ services:
       - ALL
     container_name: bricktracker
     restart: unless-stopped
-    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
+    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:v1.2.0
     ports:
       - "3333:3333"
     volumes:
@@ -36,6 +36,11 @@ services:
       homepage.icon: "sh-bricktracker.png"
       homepage.href: "http://10.10.1.13:3333"
       homepage.description: "Lego inventory"
+      wud.watch: "true"
+      wud.tag.include: '^v-\d+\.\d+\.\d+$$'
+      wud.display.name: "Bricktracker"
+      wud.display.icon: "sh:bricktracker"
+      wud.link.template: "https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker/releases/tag/v$${major}.$${minor}.$${patch}"
     ipc: private
     networks: 
       - bricktracker
