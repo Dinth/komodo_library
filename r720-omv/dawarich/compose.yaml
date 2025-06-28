@@ -124,7 +124,7 @@ services:
     expose:
       - 3000/tcp
     hostname: dawarich-sidekiq
-    image: freikin/dawarich:latest
+    image: freikin/dawarich:0.28.1
     ipc: private
     healthcheck:
       test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
@@ -142,6 +142,12 @@ services:
 #      dawarich:
 #        condition: service_healthy
 #        restart: true
+    labels:
+      wud.display.icon: sh:dawarich
+      wud.display.name: Dawarich Sidekiq
+      wud.link.template: https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}
+      wud.tag.include: ^\d+\.\d+\.\d+$$
+      wud.watch: "true"
     logging:
       driver: json-file
       options:
@@ -194,7 +200,7 @@ services:
       PHOTON_API_KEY: "${PHOTON_API_KEY}"
       SELF_HOSTED: "true"
     hostname: dawarich
-    image: freikin/dawarich:latest
+    image: freikin/dawarich:0.28.1
     ipc: private
 #    healthcheck:
 #      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
