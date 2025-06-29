@@ -33,7 +33,7 @@ services:
       OLLAMA_FLASH_ATTENTION: "1"
       TZ: "${TZ}"
     hostname: ollama
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.9.3
     ipc: private
     deploy:
       resources:
