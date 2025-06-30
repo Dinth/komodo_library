@@ -65,7 +65,7 @@ services:
       wud.watch: 'true'
       wud.display.icon: 'sh-uptime-kuma'
       wud.display.name: 'Uptime Kuma'
-      wud.tag.include: '^\\d+\\.\\d+\\.\\d+$$$$'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/louislam/uptime-kuma/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: json-file
