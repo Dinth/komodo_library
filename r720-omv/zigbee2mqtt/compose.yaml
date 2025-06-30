@@ -5,6 +5,7 @@ services:
         ipc: private
         user: "${DOCKER_PUID}:${DOCKER_PGID}"
         restart: unless-stopped
+        user: "${DOCKER_PUID}:${DOCKER_PGID}"
         networks:
             - zigbee2mqtt
         volumes:
@@ -15,6 +16,12 @@ services:
             - 4080:8080
         environment:
             TZ: "${TZ}"
+        labels:
+            wud.watch: "true"
+            wud.tag.include: '^\\d+\\.\\d+\\.\\d+$$$$'
+            wud.link.template: 'https://github.com/Koenkk/zigbee2mqtt/releases/tag/v$${major}.$${minor}.$${patch}'
+            wud.display.name: 'Zigbee2MQTT'
+            wud.display.icon: 'sh:zigbee2mqtt'
 networks:
     zigbee2mqtt:
         driver: bridge
