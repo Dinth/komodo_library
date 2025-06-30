@@ -12,6 +12,17 @@ services:
       traefik.http.routers.omnitools.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.omnitools.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.omnitools.loadbalancer.server.port: "80"
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.icon: "sh-omnitools"
+      wud.display.name: "Omni Tools"
+      wud.tag.include: '^v\d+\.\d+\.\d+$'
+      wud.link.template: "https://github.com/iib0011/omni-tools/releases/tag/v$${major}.$${minor}.$${patch}"
+      homepage.group: "Infrastructure"
+      homepage.name: "Omni Tools"
+      homepage.icon: "sm-omnitools"
+      homepage.href: "https://omnitools.${DOMAIN_NAME}"
+      homepage.description: "Set of different IT tools"
     ports:
       - "8586:80"
     networks:
