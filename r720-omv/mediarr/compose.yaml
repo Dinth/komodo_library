@@ -37,13 +37,13 @@ services:
       VPN_USERNAME: "${VPN_USERNAME}"
       VPN_PASSWORD: "${VPN_PASSWORD}"
     hostname: qbittorrentvpn
-    image: binhex/arch-qbittorrentvpn:latest
+    image: binhex/arch-qbittorrentvpn:5.1.1-1-01
     ipc: private
     labels:
       com.centurylinklabs.watchtower.enable: true
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^v?\d+\.\d+\.\d+\-\d\-\d+\d$$'
+      wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
       wud.display.name: "QBittorrent VPN"
       wud.display.icon: "sh-qbittorrent"
     logging:
