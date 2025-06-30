@@ -26,6 +26,8 @@ services:
             options:
                 max-size: "10m"
                 max-file: "3"
+        healthcheck:
+            test: curl -f http://localhost:8080 || exit 1
 networks:
     zigbee2mqtt:
         driver: bridge
