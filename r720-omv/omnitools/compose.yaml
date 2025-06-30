@@ -1,6 +1,6 @@
 services:
   omnitools:
-    image: iib0011/omni-tools:latest
+    image: iib0011/omni-tools:0.4.0
     container_name: omnitools
     restart: unless-stopped
     labels:
