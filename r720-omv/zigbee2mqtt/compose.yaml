@@ -3,6 +3,20 @@ services:
         container_name: zigbee2mqtt
         image: ghcr.io/koenkk/zigbee2mqtt:2.4.0
         ipc: private
+        cap_add:
+            - AUDIT_WRITE
+            - CHOWN
+            - DAC_OVERRIDE
+            - FOWNER
+            - FSETID
+            - MKNOD
+            - SETFCAP
+            - SETGID
+            - SETPCAP
+            - SETUID
+            - SYS_CHROOT
+        cap_drop:
+            - ALL
         user: "${DOCKER_PUID}:${DOCKER_PGID}"
         restart: unless-stopped
         networks:
