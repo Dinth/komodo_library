@@ -314,12 +314,12 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    image: redis:latest
+    image: redis:8.0.2
     ipc: private
     labels:       
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/redis/redis/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Iplayarr Redis"
       wud.display.icon: "sh-iplayarr"
     logging:
@@ -365,7 +365,7 @@ services:
       REDIS_HOST: "iplayarr-redis"
       REDIS_PORT: "6379"
     hostname: iplayarr
-    image: nikorag/iplayarr:latest
+    image: nikorag/iplayarr:0.7.3
     ipc: private
     logging:
       driver: json-file
@@ -375,7 +375,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/Nikorag/iplayarr/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Iplayarr"
       wud.display.icon: "sh-iplayarr"
     networks:
