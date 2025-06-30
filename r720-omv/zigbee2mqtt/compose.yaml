@@ -21,6 +21,11 @@ services:
             wud.link.template: 'https://github.com/Koenkk/zigbee2mqtt/releases/tag/v$${major}.$${minor}.$${patch}'
             wud.display.name: 'Zigbee2MQTT'
             wud.display.icon: 'sh:zigbee2mqtt'
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
 networks:
     zigbee2mqtt:
         driver: bridge
