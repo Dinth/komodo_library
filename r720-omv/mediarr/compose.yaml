@@ -152,7 +152,7 @@ services:
     environment:
       PORT: "8282"
     hostname: recommendarr
-    image: tannermiddleton/recommendarr:v1.4.4
+    image: tannermiddleton/recommendarr:latest
     ipc: private
     logging:
       driver: json-file
@@ -162,7 +162,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Recommendarr"
       wud.display.icon: "sh-recommendarr"
     networks:
@@ -198,7 +198,7 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: bazarr
-    image: linuxserver/bazarr:latest
+    image: linuxserver/bazarr:1.5.2
     ipc: private
     labels:
       homepage.group: "Media"
@@ -212,7 +212,7 @@ services:
       homepage.widget.key: "${HOMEPAGE_BAZARR_API}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Bazarr"
       wud.display.icon: "sh-bazarr"
     logging:
