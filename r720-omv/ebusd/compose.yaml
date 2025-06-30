@@ -2,7 +2,7 @@ services:
   ebusd:
     container_name: ebusd
     hostname: ebusd
-    image: john30/ebusd:latest
+    image: john30/ebusd:v25.1
     ipc: private
     environment:
       EBUSD_MQTTINT: "/etc/ebusd/mqtt-hassio.cfg"
@@ -18,6 +18,12 @@ services:
       EBUSD_DEVICE: "ens:10.10.25.8:9999"
       EBUSD_MQTTUSER: "${EBUSD_MQTTUSER}"
       EBUSD_MQTTPASS: "${EBUSD_MQTTPASS}"
+    labels:
+      wud.watch: "true"
+      wud.display.icon: "sh-ebusd"
+      wud.display.name: "Ebusd"
+      wud.tag.include: '^v\d+\.\d+\$$'
+      wud.link.template: "https://github.com/john30/ebusd/releases/tag/v$${major}.$${minor}"
     logging:
       driver: json-file
       options:
