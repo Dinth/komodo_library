@@ -5,6 +5,8 @@ services:
         ipc: private
         user: "${DOCKER_PUID}:${DOCKER_PGID}"
         restart: unless-stopped
+        networks:
+            - zigbee2mqtt
         volumes:
             - /opt/docker/zigbee2mqtt/zigbee2mqtt_data:/app/data
 #            - /run/udev:/run/udev:ro
@@ -13,3 +15,6 @@ services:
             - 4080:8080
         environment:
             TZ: "${TZ}"
+networks:
+    zigbee2mqtt:
+        external: false
