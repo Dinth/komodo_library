@@ -492,12 +492,12 @@ services:
     container_name: flaresolverr
     entrypoint: ["/usr/bin/dumb-init","--"]
     hostname: flareresolverr
-    image: flaresolverr/flaresolverr:latest
+    image: flaresolverr/flaresolverr:v3.3.25
     ipc: private
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/FlareSolverr/FlareSolverr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Flaresolverr"
       wud.display.icon: "sh-flaresolverr"
     logging:
