@@ -17,4 +17,6 @@ services:
             TZ: "${TZ}"
 networks:
     zigbee2mqtt:
+        driver: bridge
         external: false
+        name: zigbee2mqtt
