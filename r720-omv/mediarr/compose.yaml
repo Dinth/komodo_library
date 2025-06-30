@@ -537,12 +537,12 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: radarr
-    image: linuxserver/radarr:latest
+    image: linuxserver/radarr:5.26.2
     ipc: private
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'hhttps://github.com/Radarr/Radarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Radarr"
       wud.display.icon: "sh-radarr"
     logging:
@@ -586,7 +586,7 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: sonarr
-    image: linuxserver/sonarr:latest
+    image: linuxserver/sonarr:4.0.15
     ipc: private
     labels:
       homepage.group: "Media"
@@ -601,7 +601,7 @@ services:
 #      - "homepage.widget.fields=['books', 'authors', 'categories', 'series']"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/sonarr/sonarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Sonarr"
       wud.display.icon: "sh-sonarr"
     healthcheck:
