@@ -365,7 +365,7 @@ services:
       REDIS_HOST: "iplayarr-redis"
       REDIS_PORT: "6379"
     hostname: iplayarr
-    image: nikorag/iplayarr:0.7.3
+    image: nikorag/iplayarr:0.7.3a
     ipc: private
     logging:
       driver: json-file
