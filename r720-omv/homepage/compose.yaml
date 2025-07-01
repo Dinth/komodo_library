@@ -44,7 +44,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Homepage'
-      wud.display.icon: 'mdi:homepage'
+      wud.display.icon: 'sh:homepage'
     volumes:
       - /opt/docker/homepage/homepage_config:/app/config
     restart: unless-stopped
