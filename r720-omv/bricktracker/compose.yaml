@@ -38,9 +38,9 @@ services:
       homepage.description: "Lego inventory"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.display.name: "Monica"
-      wud.display.icon: "sh:monica"
-      wud.link.template: "https://github.com/monicahq/monica/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: "Bricktracker"
+      wud.display.icon: "sh:bricktracker"
+      wud.link.template: "https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker/releases/tag/v$${major}.$${minor}.$${patch}"
     ipc: private
     networks: 
       - bricktracker
