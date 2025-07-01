@@ -23,7 +23,7 @@ services:
       LANGUAGE: "en_GB:en"
       EXTRAOPTIONS: "-Xmx382M"
     hostname: languagetool
-    image: silviof/docker-languagetool:latest
+    image: silviof/docker-languagetool:6.6
     ipc: private
     logging:
       driver: json-file
@@ -44,6 +44,11 @@ services:
       traefik.http.routers.languagetool.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.languagetool.tls.certresolver: "letsencrypt"
       traefik.http.services.languagetool.loadbalancer.server.port: "8010"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/languagetool-org/languagetool/releases/tag/v$${major}.$${minor}'
+      wud.display.name: 'Languagetool'
+      wud.display.icon: 'mdi:languagetool'
     restart: unless-stopped
     user: nobody
     volumes:
