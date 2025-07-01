@@ -56,8 +56,8 @@ services:
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_GITEA_BRICKTRACKER_URL: "https://gitea.baerentsen.space/"
-      WUD_TRIGGER_TELEGRAM_1_BOTTOKEN: "$telegrambottoken"
-      WUD_TRIGGER_TELEGRAM_1_CHATID: "$telegramchatid"
+      WUD_TRIGGER_TELEGRAM_TELEGRAM_BOTTOKEN: "${TELEGRAM_API_KEY}"
+      WUD_TRIGGER_TELEGRAM_TELEGRAM_CHATID: "${TELEGRAM_TECH_ID}"
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
