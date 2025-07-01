@@ -37,7 +37,7 @@ services:
       homepage.href: "http://10.10.1.13:3333"
       homepage.description: "Lego inventory"
       wud.watch: "true"
-      wud.tag.include: '^v-\d+\.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Bricktracker"
       wud.display.icon: "sh:bricktracker"
       wud.link.template: "https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker/releases/tag/v$${major}.$${minor}.$${patch}"
