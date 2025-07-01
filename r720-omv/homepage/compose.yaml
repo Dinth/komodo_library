@@ -18,7 +18,7 @@ services:
       POST: "0"
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\\d+\\.\\d+\\.\\d+$$$$'
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Docker Socket Proxy - Homepage'
       wud.display.icon: 'mdi:connection'
@@ -31,7 +31,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   homepage:
-    image: ghcr.io/gethomepage/homepage:latest
+    image: ghcr.io/gethomepage/homepage:v1.3.2
     container_name: homepage
     environment:
       HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
@@ -39,6 +39,12 @@ services:
       PGID: "${DOCKER_PGID}"
     ports:
       - 3008:3000
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: 'Homepage'
+      wud.display.icon: 'mdi:homepage'
     volumes:
       - /opt/docker/homepage/homepage_config:/app/config
     restart: unless-stopped
