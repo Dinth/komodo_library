@@ -27,7 +27,7 @@ services:
       start_period: 5s
       
   core:
-    image: ghcr.io/moghtech/komodo-core:latest
+    image: ghcr.io/moghtech/komodo-core:1.18.4
     labels:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
     restart: unless-stopped
@@ -62,6 +62,12 @@ services:
       KOMODO_AWS_ACCESS_KEY_ID: ""
       KOMODO_AWS_SECRET_ACCESS_KEY: ""
       KOMODO_HETZNER_TOKEN: ""
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: 'Komodo'
+      wud.display.icon: 'sh:komodo'
 
     volumes:
       ## Core cache for repos for latest commit hash / contents
