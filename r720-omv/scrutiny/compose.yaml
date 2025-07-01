@@ -44,8 +44,14 @@ services:
     environment:
       COLLECTOR_API_ENDPOINT: "http://10.10.1.13:93"
     hostname: scrutiny-collector
-    image: ghcr.io/analogj/scrutiny:master-collector
+    image: ghcr.io/analogj/scrutiny:v0.8.1-collector
     ipc: private
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+\-collector$$'
+      wud.display.name: "Scrutiny Collector"
+      wud.display.icon: "sh:scrutiny"
+      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
     logging:
       driver: json-file
       options:
@@ -76,7 +82,7 @@ services:
       SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
       SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
     hostname: scrutiny-web
-    image: ghcr.io/analogj/scrutiny:master-web
+    image: ghcr.io/analogj/scrutiny:v0.8.1-web
     ipc: private
     healthcheck:
       test: curl -ILfSs http://localhost:8080/api/health  || exit 1
@@ -84,6 +90,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+\-web$$'
+      wud.display.name: "Scrutiny"
+      wud.display.icon: "sh:scrutiny"
+      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
     logging:
       driver: json-file
       options:
