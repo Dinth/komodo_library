@@ -48,7 +48,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/languagetool-org/languagetool/releases/tag/v$${major}.$${minor}'
       wud.display.name: 'Languagetool'
-      wud.display.icon: 'mdi:languagetool'
+      wud.display.icon: 'sh:languagetool'
     restart: unless-stopped
     user: nobody
     volumes:
