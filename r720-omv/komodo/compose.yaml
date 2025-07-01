@@ -28,8 +28,6 @@ services:
       
   core:
     image: ghcr.io/moghtech/komodo-core:1.18.4
-    labels:
-      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
     restart: unless-stopped
     depends_on:
       - mongo
@@ -63,6 +61,7 @@ services:
       KOMODO_AWS_SECRET_ACCESS_KEY: ""
       KOMODO_HETZNER_TOKEN: ""
     labels:
+      komodo.skip: # Prevent Komodo from stopping with StopAllContainers
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
