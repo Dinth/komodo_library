@@ -58,13 +58,13 @@ services:
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
       homepage.group: "Home"
       homepage.name: "Tandoor"
-      homepage.icon: "tandoor.png"
+      homepage.icon: "tandoor-recipes.png"
       homepage.href: "https://recipes.${DOMAIN_NAME}"
       homepage.description: "Recipe manager"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "Tandoor"
-      wud.display.icon: "sh:tandoor"
+      wud.display.icon: "sh:tandoor-recipes"
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: 'https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}'
     restart: unless-stopped
