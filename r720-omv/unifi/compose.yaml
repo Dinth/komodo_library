@@ -1,8 +1,14 @@
 services:
   unifi-db:
-    image: docker.io/mongo:8
+    image: docker.io/mongo:8.0.11
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: unifi-db
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
+      wud.display.name: 'Unifi Mongo DB'
+      wud.display.icon: 'sh:unifi'
     volumes:
       - /opt/docker/unifi/unifi_db:/data/db
       - /opt/docker/unifi/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
@@ -15,7 +21,7 @@ services:
       start_period: 5s
 
   unifi-network-application:
-    image: lscr.io/linuxserver/unifi-network-application:latest
+    image: lscr.io/linuxserver/unifi-network-application:9.2.87
     container_name: unifi-network-application
     environment:
       PUID: "${DOCKER_PUID}"
@@ -33,11 +39,16 @@ services:
       homepage.group: "Infrastructure"
       homepage.href: "https://10.10.1.13:8443"
       homepage.icon: "unifi.png"
-      homepage.name: "unifi"
+      homepage.name: "Unifi Network Application"
       homepage.widget.type: "unifi"
       homepage.widget.url: "https://10.10.1.13:8443"
       homepage.widget.username: "${HOMEPAGE_UNIFI_USER}"
       homepage.widget.password: "${HOMEPAGE_UNIFI_PASS}"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/linuxserver/docker-unifi-network-application/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.display.name: 'Unifi Network Application'
+      wud.display.icon: 'sh:unifi'
     volumes:
       - ./config:/config
     ports:
