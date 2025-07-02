@@ -1,4 +1,12 @@
 services:
+  signal-cli-rest-api:
+    image: bbernhard/signal-cli-rest-api:0.93
+    environment:
+      - MODE=normal #supported modes: json-rpc, native, normal
+      #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
+    volumes:
+      - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
+
   uptime-kuma-socket-proxy:
     image: tecnativa/docker-socket-proxy:0.3.0
     container_name: uptime-kuma-socket-proxy
