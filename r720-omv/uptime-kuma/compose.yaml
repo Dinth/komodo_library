@@ -25,7 +25,9 @@ services:
     networks:
       - uptime-kuma
     environment:
-      - MODE=normal #supported modes: json-rpc, native, normal
+      MODE: "normal" #supported modes: json-rpc, native, normal
+      SIGNAL_CLI_UID: "${DOCKER_PUID}"
+      SIGNAL_CLI_GID: "${DOCKER_PGID}"
       #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
     volumes:
       - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
