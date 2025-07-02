@@ -1,6 +1,7 @@
 services:
   uptime-kuma-signal-api-bridge:
     image: bbernhard/signal-cli-rest-api:0.93
+    container_name: uptime-kuma-signal-api-bridge
     environment:
       - MODE=normal #supported modes: json-rpc, native, normal
       #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
