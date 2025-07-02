@@ -32,7 +32,7 @@ services:
     volumes:
       - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
     ports:
-      - 3001:3001/tcp
+      - 3002:8080/tcp
   uptime-kuma-socket-proxy:
     image: tecnativa/docker-socket-proxy:0.3.0
     container_name: uptime-kuma-socket-proxy
