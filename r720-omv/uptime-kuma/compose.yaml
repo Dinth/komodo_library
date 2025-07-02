@@ -2,6 +2,7 @@ services:
   uptime-kuma-signal-api-bridge:
     image: bbernhard/signal-cli-rest-api:0.93
     container_name: uptime-kuma-signal-api-bridge
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     ipc: private
     security_opt:
       - no-new-privileges:true
