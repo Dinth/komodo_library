@@ -1,5 +1,5 @@
 services:
-  uptime-kuma_signal-api-bridge:
+  uptime-kuma-signal-api-bridge:
     image: bbernhard/signal-cli-rest-api:0.93
     environment:
       - MODE=normal #supported modes: json-rpc, native, normal
