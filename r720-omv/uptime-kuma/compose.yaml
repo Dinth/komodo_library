@@ -1,38 +1,4 @@
 services:
-  uptime-kuma-signal-api-bridge:
-    image: bbernhard/signal-cli-rest-api:0.93
-    container_name: uptime-kuma-signal-api-bridge
-    ipc: private
-    security_opt:
-      - no-new-privileges:true
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
-    networks:
-      - uptime-kuma
-    environment:
-      MODE: "normal" #supported modes: json-rpc, native, normal
-      SIGNAL_CLI_UID: "${DOCKER_PUID}"
-      SIGNAL_CLI_GID: "${DOCKER_PGID}"
-      #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
-    volumes:
-      - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
-    ports:
-      - 3002:8080/tcp
   uptime-kuma-socket-proxy:
     image: tecnativa/docker-socket-proxy:0.3.0
     container_name: uptime-kuma-socket-proxy
@@ -110,6 +76,7 @@ services:
       test: curl -f http://localhost:3001 || exit 1
     networks:
       - uptime-kuma
+      - signal-rest-api
     ports:
       - 3001:3001/tcp
     restart: unless-stopped
@@ -121,3 +88,5 @@ networks:
     name: uptime-kuma
     driver: bridge
     external: false
+  signal-rest-api:
+    external: true
