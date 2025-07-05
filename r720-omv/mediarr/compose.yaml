@@ -1,4 +1,19 @@
 services:
+  gluetun:
+    image: qmcgaw/gluetun:v3.40.0
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      TZ: "${TZ}"
+      VPN_SERVICE_PROVIDER: "protonvpn""
+      VPN_TYPE: "wireshark"
+    volumes:
+      - /opt/docker/mediarr/gluetun_data:/gluetun
+    restart: unless-stopped
+    network:
+      - mediarr
   qbittorrentvpn:
     cap_add:
       - AUDIT_WRITE
