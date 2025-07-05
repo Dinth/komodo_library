@@ -16,7 +16,7 @@ services:
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     restart: unless-stopped
-    network:
+    networks:
       - mediarr
   qbittorrentvpn:
     cap_add:
