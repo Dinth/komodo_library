@@ -9,6 +9,7 @@ services:
       TZ: "${TZ}"
       VPN_SERVICE_PROVIDER: "protonvpn""
       VPN_TYPE: "wireshark"
+      WIREGUARD_PRIVATE_KEY: "COGgC9GOOBge6gmf+q+FnWqXjK6ZMUO0bHTOUouJ/kA="
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     restart: unless-stopped
