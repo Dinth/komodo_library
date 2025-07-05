@@ -32,7 +32,7 @@ services:
     volumes:
       - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
     ports:
-      - 3002:8080/tcp
+      - 3162:8080/tcp
 networks:
   signal-rest-api:
     name: signal-rest-api
