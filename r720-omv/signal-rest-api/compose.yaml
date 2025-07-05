@@ -1,16 +1,40 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  signal_rest_api:
+    image: bbernhard/signal-cli-rest-api:0.93
+    container_name: signal-rest-api
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    networks:
+      - signal-rest-api
+    environment:
+      MODE: "normal" #supported modes: json-rpc, native, normal
+      SIGNAL_CLI_UID: "${DOCKER_PUID}"
+      SIGNAL_CLI_GID: "${DOCKER_PGID}"
+      #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
+    volumes:
+      - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
+    ports:
+      - 3002:8080/tcp
+networks:
+  signal-rest-api:
+    name: signal-rest-api
+    driver: bridge
+    external: false
