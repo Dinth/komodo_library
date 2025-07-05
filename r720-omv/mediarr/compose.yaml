@@ -11,6 +11,7 @@ services:
       VPN_TYPE: "wireshark"
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       PORT_FORWARD_ONLY: "yes"
+      VPN_PORT_FORWARDING: "yes"
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     restart: unless-stopped
