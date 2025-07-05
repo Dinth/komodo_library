@@ -30,7 +30,7 @@ services:
       SIGNAL_CLI_GID: "${DOCKER_PGID}"
       #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
     volumes:
-      - "/opt/docker/uptime-kuma/uptime-kuma_signal:/home/.local/share/signal-cli"
+      - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
     ports:
       - 3162:8080/tcp
 networks:
