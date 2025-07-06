@@ -223,11 +223,9 @@ services:
     hostname: prowlarr
     restart: unless-stopped
     ipc: private
-    networks:
-      - mediarr
+    network_mode: "service:gluetun"
     ports:
       - "9696:9696"
-    network_mode: "service:gluetun"
     environment:
       PUID: ${PUID:-1001}
       PGID: ${PGID:-100}
