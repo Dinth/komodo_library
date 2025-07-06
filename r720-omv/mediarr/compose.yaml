@@ -19,6 +19,12 @@ services:
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       PORT_FORWARD_ONLY: "yes"
       VPN_PORT_FORWARDING: "yes"
+    healthcheck:
+      interval: 10s
+      timeout: 60s
+      start_period: 10s
+      retries: 3
+      test: [ "CMD", "/gluetun-entrypoint", "healthcheck" ]
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
