@@ -10,7 +10,7 @@ services:
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
+
  
 
 
