@@ -1,42 +1,49 @@
 services:
-  gluetun:
+  #############################################################################
+  # SECTION: VPN Gateway
+  # All privacy-sensitive traffic is routed through this container.
+  #############################################################################
+   gluetun:
     image: qmcgaw/gluetun:v3.40.0
     container_name: gluetun
-    cap_add:
-      - NET_ADMIN
+    hostname: gluetun
+    restart: unless-stopped
+    ipc: private
+    networks:
+      - mediarr
+    environment:
+      TZ: "${TZ}"
+      VPN_SERVICE_PROVIDER: protonvpn"
+      VPN_TYPE: "wireguard"
+      WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
+      VPN_PORT_FORWARDING: "yes"
+      PORT_FORWARD_ONLY: "yes"
+    volumes:
+      - /opt/docker/mediarr/gluetun_data:/gluetun
     devices:
       - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      interval: 10s
+      timeout: 60s
+      start_period: 10s
+      retries: 3
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-    ipc: private
-    environment:
-      TZ: "${TZ}"
-      VPN_SERVICE_PROVIDER: "protonvpn"
-      VPN_TYPE: "wireguard"
-      WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
-      PORT_FORWARD_ONLY: "yes"
-      VPN_PORT_FORWARDING: "yes"
-    healthcheck:
-      interval: 10s
-      timeout: 60s
-      start_period: 10s
-      retries: 3
-      test: [ "CMD", "/gluetun-entrypoint", "healthcheck" ]
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/qdm12/gluetun/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Gluetun"
       wud.display.icon: "sh-gluetun"
-   
-    volumes:
-      - /opt/docker/mediarr/gluetun_data:/gluetun
-    restart: unless-stopped
-    networks:
-      - mediarr
+
   qbittorrentvpn:
     cap_add:
       - AUDIT_WRITE
