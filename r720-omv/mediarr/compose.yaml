@@ -46,6 +46,7 @@ services:
 
   #############################################################################
   # Qbittorrent (Networked via Gluetun)
+  # Torrent client
   #############################################################################
   qbittorrentvpn:
     cap_add:
@@ -119,10 +120,10 @@ services:
     # This is a major simplification and security improvement.
 #    network_mode: service:gluetun
 #    environment:
-#      - PUID=${PUID:-1001}
-#      - PGID=${PGID:-100}
-#      - TZ=${TZ}
-#      - WEBUI_PORT=8080
+#      PUID: "${MEDIA_PUID}"
+#      PGID: "${MEDIA_PGID}"
+#      TZ: "${TZ}"
+#      WEBUI_PORT: "8008"
 #    volumes:
 #      - /opt/docker/mediarr/qbittorrent_config:/config
 #      - /Data/Unsorted:/downloads
@@ -141,17 +142,17 @@ services:
 #        max-size: "10m"
 #        max-file: "3"
 #    labels:
-#      - "wud.display.icon=sh-qbittorrent"
-#      - "wud.display.name=QBittorrent"
-#      - "wud.link.template=https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}"
-#      - "wud.tag.include=^v?\\d+\\.\\d+\\.\\d+$$"
-#      - "wud.watch=true"
+#      wud.display.icon: "sh-qbittorrent"
+#      wud.display.name: "QBittorrent"
+#      wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
+#      wud.tag.include: '^v?\\d+\\.\\d+\\.\\d+$$'
+#      wud.watch: "true"
 
   #############################################################################
-  # Prowlarr - Indexer Management
+  # Prowlarr (Networked via Gluetun)
+  # Torrent index manager
   #############################################################################
 
-  
   jackettvpn:
     cap_add:
       - AUDIT_WRITE
@@ -226,9 +227,9 @@ services:
     ports:
       - "9696:9696"
     environment:
-      PUID: ${PUID:-1001}
-      PGID: ${PGID:-100}
-      TZ: ${TZ}
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+      TZ: "${TZ}"
     volumes:
       - /opt/docker/mediarr/prowlarr_config:/config
     healthcheck:
@@ -256,7 +257,10 @@ services:
       wud.link.template: "https://github.com/Prowlarr/Prowlarr/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.tag.include: "^v?\\d+\\.\\d+\\.\\d+$$"
       wud.watch: "true"
-      
+  #############################################################################
+  # Recommendarr
+  # AI powered media recommendation engine
+  #############################################################################      
   recommendarr:
     cap_add:
       - AUDIT_WRITE
@@ -302,6 +306,10 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/mediarr/recommendarr_data:/app/server/data
+  #############################################################################
+  # Bazarr
+  # Subtitle manager and downloader
+  #############################################################################      
   bazarr:
     cap_add:
       - AUDIT_WRITE
@@ -341,7 +349,8 @@ services:
       homepage.widget.url: "http://10.10.1.13:6767"
       homepage.widget.key: "${HOMEPAGE_BAZARR_API}"
       wud.watch: "true"
-      wud.tag.include: '^vhttps://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Bazarr"
       wud.display.icon: "sh-bazarr"
     logging:
@@ -358,6 +367,10 @@ services:
       - /opt/docker/mediarr/bazarr_config:/config
       - /Data/Movies:/movies
       - /Data/TVShows:/tv
+  #############################################################################
+  # Lidarr
+  # Music collection manager
+  #############################################################################
   lidarr:
     cap_add:
       - AUDIT_WRITE
@@ -414,7 +427,11 @@ services:
     volumes:
       - /Data/Music:/music
       - /opt/docker/mediarr/lidarr_config:/config
-      - /Data/Unsorted:/downloads 
+      - /Data/Unsorted:/downloads
+  #############################################################################
+  # Iplayarr-Redis
+  # Redis server for Iplayarr
+  #############################################################################      
   iplayarr-redis:
     cap_add:
       - AUDIT_WRITE
@@ -461,6 +478,10 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/iplayarr/redis_data:/data
+  #############################################################################
+  # Iplayarr
+  # BBC Iplayer downloader
+  #############################################################################
   iplayarr:
     cap_add:
       - AUDIT_WRITE
@@ -516,6 +537,10 @@ services:
       - /Data/Unsorted:/mnt/media
       - /opt/docker/mediarr/iplayarr_config:/config
       - /opt/docker/mediarr/iplayarr_data:/data
+  #############################################################################
+  # Cleanuperr
+  # Automatic cleanups of media collection
+  #############################################################################
   cleanuperr:
     cap_add:
       - AUDIT_WRITE
@@ -599,6 +624,10 @@ services:
     networks:
       - mediarr
     restart: unless-stopped
+  #############################################################################
+  # Flareresolverr
+  # CAPTCHA resolver for Prowlarr
+  #############################################################################    
   flaresolverr:
     cap_add:
       - AUDIT_WRITE
@@ -640,6 +669,10 @@ services:
       - 8191:8191/tcp
     restart: unless-stopped
     user: flaresolverr
+  #############################################################################
+  # Radarr
+  # Movie collection manager
+  #############################################################################
   radarr:
     cap_add:
       - AUDIT_WRITE
@@ -689,6 +722,10 @@ services:
       - /Data/Movies:/movies
       - /Data/CartoonMovies:/cartoon_movies
       - /opt/docker/mediarr/radarr_config:/config
+  #############################################################################
+  # Sonarr
+  # TV series collection manager
+  #############################################################################
   sonarr:
     cap_add:
       - AUDIT_WRITE
