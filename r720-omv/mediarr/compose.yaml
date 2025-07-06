@@ -3,7 +3,7 @@ services:
   # Gluetun VPN Gateway
   # All privacy-sensitive traffic is routed through this container.
   #############################################################################
-   gluetun:
+  gluetun:
     image: qmcgaw/gluetun:v3.40.0
     container_name: gluetun
     hostname: gluetun
