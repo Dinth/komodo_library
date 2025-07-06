@@ -11,8 +11,11 @@ services:
       - DAC_OVERRIDE
       - FOWNER
       - FSETID
+ 
+
+      - SETGID
       - SETUID
-      - SYS_CHROOT
+
     cap_drop:
       - ALL
     networks:
