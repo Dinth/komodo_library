@@ -164,6 +164,41 @@ services:
     volumes:
       - /opt/docker/mediarr/jackettvpn_blackhole:/blackhole
       - /opt/docker/mediarr/jackettvpn_config:/config
+  prowlarr:
+    container_name: prowlarr
+    image: docker.io/linuxserver/prowlarr:release-1.37.0
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/mediarr/prowlarr_config:/config
+    ipc: private
+    environment:
+      TZ: "${TZ}"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+    labels:
+      homepage.group: Media
+      homepage.name: Prowlarr
+      homepage.icon: prowlarr
+      homepage.href: http://10.10.1.13:9696
+      homepage.siteMonitor: http://10.10.1.13:9696
+      homepage.widget.type: prowlarr
+      homepage.widget.url: http://10.10.1.13:9696
+      homepage.widget.key: "{{HOMEPAGE_PROWLARR_API}}"
+      wud.watch: "true"
+      wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.display.name: "Prowlarr"
+      wud.display.icon: "sh-prowlarr"
+      wud.tag.include: "^release-\d+\.\d+\.\d+\.\d+$$"
+      wud.tag.transform: "^release-(\d+\.\d+\.\d+)\.(\d+)$$ => $$1-$$2"
+    ports: 
+      - 9696:9696
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9696 || exit 1
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
   recommendarr:
     cap_add:
       - AUDIT_WRITE
