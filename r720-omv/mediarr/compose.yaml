@@ -27,6 +27,19 @@ services:
       - /dev/net/tun:/dev/net/tun
     cap_add:
       - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
       - NET_ADMIN
     cap_drop:
       - ALL
