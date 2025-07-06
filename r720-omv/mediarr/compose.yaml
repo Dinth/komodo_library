@@ -1,6 +1,6 @@
 services:
   #############################################################################
-  # SECTION: VPN Gateway
+  # Gluetun VPN Gateway
   # All privacy-sensitive traffic is routed through this container.
   #############################################################################
    gluetun:
@@ -43,7 +43,9 @@ services:
       wud.link.template: 'https://github.com/qdm12/gluetun/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Gluetun"
       wud.display.icon: "sh-gluetun"
-
+  #############################################################################
+  # Qbittorrent (Networked via Gluetun)
+  #############################################################################
   qbittorrentvpn:
     cap_add:
       - AUDIT_WRITE
@@ -106,6 +108,43 @@ services:
       - /opt/docker/mediarr/qbittorrentvpn_config:/config
       - /Data/Unsorted:/data
       - /etc/localtime:/etc/localtime:ro
+#      qbittorrent:
+#    image: lscr.io/linuxserver/qbittorrent:latest
+#    container_name: qbittorrent
+#    hostname: qbittorrent
+#    restart: unless-stopped
+#    ipc: private
+    # This container's network is entirely handled by the 'gluetun' service.
+    # This is a major simplification and security improvement.
+#    network_mode: service:gluetun
+#    environment:
+#      - PUID=${PUID:-1001}
+#      - PGID=${PGID:-100}
+#      - TZ=${TZ}
+#      - WEBUI_PORT=8080
+#    volumes:
+#      - /opt/docker/mediarr/qbittorrent_config:/config
+#      - /Data/Unsorted:/downloads
+#    depends_on:
+#      gluetun:
+#        condition: service_healthy
+#    healthcheck:
+      # Tests if the web UI is accessible inside the container network stack.
+#     test: ["CMD", "curl", "-f", "http://localhost:8080"]
+#     interval: 30s
+#     timeout: 10s
+#      retries: 5
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
+#    labels:
+#      - "wud.display.icon=sh-qbittorrent"
+#      - "wud.display.name=QBittorrent"
+#      - "wud.link.template=https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}"
+#      - "wud.tag.include=^v?\\d+\\.\\d+\\.\\d+$$"
+#      - "wud.watch=true"
   jackettvpn:
     cap_add:
       - AUDIT_WRITE
