@@ -12,7 +12,6 @@ services:
       - FOWNER
       - FSETID
       - MKNOD
-      - NET_BIND_SERVICE
 
       - SETFCAP
       - SETGID
