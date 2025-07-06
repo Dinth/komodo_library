@@ -148,7 +148,7 @@ services:
 #      - "wud.watch=true"
 
   #############################################################################
-  # Indexer Management
+  # Prowlarr - Indexer Management
   #############################################################################
 
   
@@ -227,6 +227,7 @@ services:
       - mediarr
     ports:
       - "9696:9696"
+    network_mode: "service:gluetun"
     environment:
       PUID: ${PUID:-1001}
       PGID: ${PGID:-100}
@@ -258,9 +259,7 @@ services:
       wud.link.template: "https://github.com/Prowlarr/Prowlarr/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.tag.include: "^v?\\d+\\.\\d+\\.\\d+$$"
       wud.watch: "true"
-  #############################################################################
-  # Recommendarr - AI powered media recommendation
-  #############################################################################
+      
   recommendarr:
     cap_add:
       - AUDIT_WRITE
@@ -306,9 +305,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/mediarr/recommendarr_data:/app/server/data
-  #############################################################################
-  # Bazarr - automatic subtitle downloads
-  #############################################################################      
   bazarr:
     cap_add:
       - AUDIT_WRITE
@@ -365,9 +361,6 @@ services:
       - /opt/docker/mediarr/bazarr_config:/config
       - /Data/Movies:/movies
       - /Data/TVShows:/tv
-  #############################################################################
-  # Lidarr - music collection manager
-  #############################################################################
   lidarr:
     cap_add:
       - AUDIT_WRITE
@@ -526,10 +519,6 @@ services:
       - /Data/Unsorted:/mnt/media
       - /opt/docker/mediarr/iplayarr_config:/config
       - /opt/docker/mediarr/iplayarr_data:/data
-  #############################################################################
-  # Cleanuperr - cleaning up media collections
-  #############################################################################
-
   cleanuperr:
     cap_add:
       - AUDIT_WRITE
@@ -613,9 +602,6 @@ services:
     networks:
       - mediarr
     restart: unless-stopped
-  #############################################################################
-  # Flaresolverr - CAPTCHa workaround for index manager
-  #############################################################################
   flaresolverr:
     cap_add:
       - AUDIT_WRITE
@@ -657,9 +643,6 @@ services:
       - 8191:8191/tcp
     restart: unless-stopped
     user: flaresolverr
-  #############################################################################
-  # Radarr - Movie collection manager
-  #############################################################################
   radarr:
     cap_add:
       - AUDIT_WRITE
@@ -709,9 +692,6 @@ services:
       - /Data/Movies:/movies
       - /Data/CartoonMovies:/cartoon_movies
       - /opt/docker/mediarr/radarr_config:/config
-  #############################################################################
-  # Sonarr - TV Show collection manager
-  #############################################################################
   sonarr:
     cap_add:
       - AUDIT_WRITE
