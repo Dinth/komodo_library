@@ -21,6 +21,7 @@ services:
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       VPN_PORT_FORWARDING: "yes"
       PORT_FORWARD_ONLY: "yes"
+      FIREWALL_OUTBOUND_SUBNETS: "10.10.0.0/16"
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     devices:
