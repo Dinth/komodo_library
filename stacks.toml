@@ -284,6 +284,8 @@ ADMIN_EMAIL=[[ADMIN_EMAIL]]
 HORTUSFOX_DB_PASS=[[HORTUSFOX_DB_PASS]]
 HORTUSFOX_ADMIN_PASS=[[HORTUSFOX_ADMIN_PASS]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -294,6 +296,7 @@ tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/jellyfin"
@@ -377,6 +380,10 @@ RADARR__INSTANCES__0__APIKEY=[[RADARR_APIKEY]]
 LIDARR__INSTANCES__0__APIKEY=[[LIDARR_APIKEY]]
 HOMEPAGE_BAZARR_API=[[HOMEPAGE_BAZARR_API]]
 HOMEPAGE_LIDARR_API=[[HOMEPAGE_LIDARR_API]]
+HOMEPAGE_PROWLARR_API=[[HOMEPAGE_PROWLARR_API]]
+HOMEPAGE_SONARR_API=[[HOMEPAGE_SONARR_API]]
+HOMEPAGE_RADARR_API=[[HOMEPAGE_RADARR_API]]
+WIREGUARD_PRIVATE_KEY=[[WIREGUARD_PRIVATE_KEY]]
 """
 
 ##
@@ -684,6 +691,8 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/uptime-kuma"
 environment = """
 DOMAIN_NAME=[[DOMAIN_NAME]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
