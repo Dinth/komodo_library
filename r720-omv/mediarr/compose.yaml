@@ -29,11 +29,11 @@ services:
       - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - SETFCAP
+#      - FOWNER
+#      - FSETID
+#      - SETFCAP
       - SETGID
-      - SETPCAP
+#      - SETPCAP
       - SETUID
       - SYS_CHROOT
       - NET_ADMIN
