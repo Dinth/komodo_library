@@ -9,10 +9,6 @@ services:
     hostname: gluetun
     restart: unless-stopped
     ipc: private
-    cap_add:
-      - NET_ADMIN
-    cap_drop:
-      - ALL
     networks:
       - mediarr
     ports:
@@ -30,9 +26,12 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     cap_add:
+      - AUDIT_WRITE
       - NET_ADMIN
     cap_drop:
       - ALL
+    security_opt:
+      - "no-new-privileges"
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
       interval: 10s
