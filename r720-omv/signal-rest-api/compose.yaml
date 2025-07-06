@@ -13,7 +13,7 @@ services:
       - FSETID
  
 
-      - SETGID
+
 
 
     cap_drop:
