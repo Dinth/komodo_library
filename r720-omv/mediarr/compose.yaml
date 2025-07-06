@@ -218,7 +218,7 @@ services:
       - /opt/docker/mediarr/jackettvpn_blackhole:/blackhole
       - /opt/docker/mediarr/jackettvpn_config:/config
 prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
+    image: lscr.io/linuxserver/prowlarr:1.37.0
     container_name: prowlarr
     hostname: prowlarr
     restart: unless-stopped
