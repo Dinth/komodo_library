@@ -166,7 +166,7 @@ services:
       - /opt/docker/mediarr/jackettvpn_config:/config
   prowlarr:
     container_name: prowlarr
-    image: docker.io/linuxserver/prowlarr:release-1.37.0
+    image: docker.io/linuxserver/prowlarr:1.37.0
     restart: unless-stopped
     volumes:
       - /opt/docker/mediarr/prowlarr_config:/config
@@ -188,8 +188,7 @@ services:
       wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Prowlarr"
       wud.display.icon: "sh-prowlarr"
-      wud.tag.include: "^release-\d+\.\d+\.\d+\.\d+$$"
-      wud.tag.transform: "^release-(\d+\.\d+\.\d+)\.(\d+)$$ => $$1-$$2"
+      wud.tag.include: "^\d+\.\d+\.\d+$$"
     ports: 
       - 9696:9696
     healthcheck:
