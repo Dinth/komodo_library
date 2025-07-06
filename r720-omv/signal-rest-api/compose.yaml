@@ -12,7 +12,8 @@ services:
       - FOWNER
       - FSETID
  
-      - SETPCAP
+
+      - SETGID
       - SETUID
       - SYS_CHROOT
     cap_drop:
