@@ -43,6 +43,7 @@ services:
       wud.link.template: 'https://github.com/qdm12/gluetun/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Gluetun"
       wud.display.icon: "sh-gluetun"
+
   #############################################################################
   # Qbittorrent (Networked via Gluetun)
   #############################################################################
@@ -216,40 +217,48 @@ services:
     volumes:
       - /opt/docker/mediarr/jackettvpn_blackhole:/blackhole
       - /opt/docker/mediarr/jackettvpn_config:/config
-  prowlarr:
+prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
-    image: docker.io/linuxserver/prowlarr:1.37.0
+    hostname: prowlarr
     restart: unless-stopped
+    ipc: private
+    networks:
+      - mediarr
+    ports:
+      - "9696:9696"
+    environment:
+      PUID: ${PUID:-1001}
+      PGID: ${PGID:-100}
+      TZ: ${TZ}
     volumes:
       - /opt/docker/mediarr/prowlarr_config:/config
-    ipc: private
-    environment:
-      TZ: "${TZ}"
-      PUID: "${MEDIA_PUID}"
-      PGID: "${MEDIA_PGID}"
-    labels:
-      homepage.group: Media
-      homepage.name: Prowlarr
-      homepage.icon: prowlarr
-      homepage.href: http://10.10.1.13:9696
-      homepage.siteMonitor: http://10.10.1.13:9696
-      homepage.widget.type: prowlarr
-      homepage.widget.url: http://10.10.1.13:9696
-      homepage.widget.key: "{{HOMEPAGE_PROWLARR_API}}"
-      wud.watch: "true"
-      wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
-      wud.display.name: "Prowlarr"
-      wud.display.icon: "sh-prowlarr"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-    ports: 
-      - 9696:9696
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:9696 || exit 1
+      test: ["CMD", "curl", "-f", "http://localhost:9696/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      homepage.description: "Indexer Manager"
+      homepage.group: "Media"
+      homepage.href: "http://10.10.1.13:9696"
+      homepage.icon: "prowlarr.svg"
+      homepage.name: "Prowlarr"
+      homepage.siteMonitor: "http://10.10.1.13:9696"
+      homepage.widget.key: "{{HOMEPAGE_PROWLARR_API}}"
+      homepage.widget.type: "prowlarr"
+      homepage.widget.url: "http://10.10.1.13:9696"
+      wud.display.icon: "sh-prowlarr"
+      wud.display.name: "Prowlarr"
+      wud.link.template: "https://github.com/Prowlarr/Prowlarr/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.tag.include: "^v?\\d+\\.\\d+\\.\\d+$$"
+      wud.watch: "true"
+      
   recommendarr:
     cap_add:
       - AUDIT_WRITE
