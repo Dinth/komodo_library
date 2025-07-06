@@ -13,7 +13,7 @@ services:
       - mediarr
     environment:
       TZ: "${TZ}"
-      VPN_SERVICE_PROVIDER: protonvpn"
+      VPN_SERVICE_PROVIDER: "protonvpn"
       VPN_TYPE: "wireguard"
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       VPN_PORT_FORWARDING: "yes"
