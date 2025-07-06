@@ -14,7 +14,7 @@ services:
  
 
       - SETGID
-      - SETUID
+
 
     cap_drop:
       - ALL
