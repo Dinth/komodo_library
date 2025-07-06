@@ -12,7 +12,8 @@ services:
     networks:
       - mediarr
     ports:
-      - 9696:9696
+      - 9696:9696/tcp # Prowlarr
+      - 8191:8191/tcp # Flaresolverr
     environment:
       TZ: "${TZ}"
       VPN_SERVICE_PROVIDER: "protonvpn"
@@ -625,7 +626,7 @@ services:
       - mediarr
     restart: unless-stopped
   #############################################################################
-  # Flareresolverr
+  # Flareresolverr (Networked via Gluetun)
   # CAPTCHA resolver for Prowlarr
   #############################################################################    
   flaresolverr:
@@ -663,10 +664,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    networks:
-      - mediarr
-    ports:
-      - 8191:8191/tcp
+    network_mode: "service:gluetun"
     restart: unless-stopped
     user: flaresolverr
   #############################################################################
