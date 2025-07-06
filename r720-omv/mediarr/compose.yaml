@@ -11,6 +11,8 @@ services:
     ipc: private
     networks:
       - mediarr
+    ports:
+      - 9696:9696
     environment:
       TZ: "${TZ}"
       VPN_SERVICE_PROVIDER: "protonvpn"
@@ -224,8 +226,6 @@ services:
     restart: unless-stopped
     ipc: private
     network_mode: "service:gluetun"
-    ports:
-      - "9696:9696"
     environment:
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
