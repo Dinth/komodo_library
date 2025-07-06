@@ -1,4 +1,8 @@
 services:
+  #############################################################################
+  # Audiobookshelf
+  # Audiobook library manager
+  #############################################################################  
   audiobookshelf:
     user: "${MEDIA_PUID}:${MEDIA_PGID}"
     cap_add:
