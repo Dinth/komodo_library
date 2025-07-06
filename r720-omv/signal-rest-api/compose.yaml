@@ -13,7 +13,6 @@ services:
       - FSETID
  
 
-      - SETFCAP
       - SETGID
       - SETPCAP
       - SETUID
