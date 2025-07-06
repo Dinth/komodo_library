@@ -145,6 +145,12 @@ services:
 #      - "wud.link.template=https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}"
 #      - "wud.tag.include=^v?\\d+\\.\\d+\\.\\d+$$"
 #      - "wud.watch=true"
+
+  #############################################################################
+  # SECTION: Indexer Management
+  #############################################################################
+
+  
   jackettvpn:
     cap_add:
       - AUDIT_WRITE
