@@ -9,6 +9,10 @@ services:
     hostname: gluetun
     restart: unless-stopped
     ipc: private
+    cap_add:
+      - NET_ADMIN
+    cap_drop:
+      - ALL
     networks:
       - mediarr
     ports:
