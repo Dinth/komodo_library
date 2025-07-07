@@ -29,6 +29,7 @@ services:
       - /dev/net/tun:/dev/net/tun
     cap_add:
       - DAC_OVERRIDE
+      - CHOWN
       - NET_ADMIN
     cap_drop:
       - ALL
