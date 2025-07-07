@@ -23,6 +23,8 @@ services:
       VPN_PORT_FORWARDING: "yes"
       PORT_FORWARD_ONLY: "yes"
       FIREWALL_OUTBOUND_SUBNETS: "10.10.0.0/16"
+      VPN_PORT_FORWARDING_UP_COMMAND: "/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8008/api/v2/app/setPreferences 2>&1'"
+
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     devices:
@@ -141,7 +143,6 @@ services:
       wud.link.template: "https://github.com/Prowlarr/Prowlarr/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.tag.include: "^v?\\d+\\.\\d+\\.\\d+$$"
       wud.watch: "true"
-
   #############################################################################
   # Recommendarr
   # AI powered media recommendation engine
@@ -191,7 +192,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/mediarr/recommendarr_data:/app/server/data
-
   #############################################################################
   # Bazarr
   # Subtitle manager and downloader
@@ -253,7 +253,6 @@ services:
       - /opt/docker/mediarr/bazarr_config:/config
       - /Data/Movies:/movies
       - /Data/TVShows:/tv
-
   #############################################################################
   # Lidarr
   # Music collection manager
@@ -315,7 +314,6 @@ services:
       - /Data/Music:/music
       - /opt/docker/mediarr/lidarr_config:/config
       - /Data/Unsorted:/downloads
-
   #############################################################################
   # Iplayarr-Redis
   # Redis server for Iplayarr
@@ -366,7 +364,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/iplayarr/redis_data:/data
-
   #############################################################################
   # Iplayarr
   # BBC Iplayer downloader
@@ -426,7 +423,6 @@ services:
       - /Data/Unsorted:/mnt/media
       - /opt/docker/mediarr/iplayarr_config:/config
       - /opt/docker/mediarr/iplayarr_data:/data
-
   #############################################################################
   # Cleanuperr
   # Automatic cleanups of media collection
@@ -514,7 +510,6 @@ services:
     networks:
       - mediarr
     restart: unless-stopped
-
   #############################################################################
   # Flareresolverr (Networked via Gluetun)
   # CAPTCHA resolver for Prowlarr
@@ -556,7 +551,6 @@ services:
     network_mode: "service:gluetun"
     restart: unless-stopped
     user: flaresolverr
-
   #############################################################################
   # Radarr
   # Movie collection manager
@@ -610,7 +604,6 @@ services:
       - /Data/Movies:/movies
       - /Data/CartoonMovies:/cartoon_movies
       - /opt/docker/mediarr/radarr_config:/config
-      
   #############################################################################
   # Sonarr
   # TV series collection manager
