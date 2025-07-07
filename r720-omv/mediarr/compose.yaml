@@ -73,6 +73,7 @@ services:
       - /Data/Unsorted:/data
     cap_add:
       - DAC_OVERRIDE
+      - CHOWN
       - FOWNER
       - FSETID
       - SETUID
