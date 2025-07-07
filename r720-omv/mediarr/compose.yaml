@@ -56,50 +56,6 @@ services:
   # Qbittorrent (Networked via Gluetun)
   # Torrent client
   #############################################################################
-  qbittorrentvpn:
-    command: ['/bin/bash','/usr/local/bin/init.sh']
-    container_name: qbittorrentvpn
-    devices:
-      - /dev/net/tun
-    entrypoint:
-      - /usr/bin/dumb-init
-      - --
-    environment:
-      VPN_ENABLED: "1"
-      LAN_NETWORK: "10.10.0.0/16"
-      PUID: "1001"
-      GUID: "100"
-      WEBUI_PORT: "8008"
-      VPN_PROV: "custom"
-      NAME_SERVERS: "1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4,10.10.0.1"
-      ENABLE_PRIVOXY: "no"
-      VPN_USERNAME: "${VPN_USERNAME}"
-      VPN_PASSWORD: "${VPN_PASSWORD}"
-    hostname: qbittorrentvpn
-    image: binhex/arch-qbittorrentvpn:5.1.1-1-01
-    ipc: private
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+\-\d\-\d+\d$$'
-      wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
-      wud.display.name: "QBittorrent VPN"
-      wud.display.icon: "sh-qbittorrent"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - mediarr
-    ports:
-      - 31408:31408/tcp
-      - 31408:31408/udp
-      - 8008:8008/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/mediarr/qbittorrentvpn_config:/config
-      - /Data/Unsorted:/data
-      - /etc/localtime:/etc/localtime:ro
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
