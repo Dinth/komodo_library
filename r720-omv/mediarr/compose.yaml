@@ -73,6 +73,8 @@ services:
       - /Data/Unsorted:/data
     cap_add:
       - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
       - SETUID
       - SETGID
     cap_drop:
