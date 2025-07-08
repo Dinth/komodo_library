@@ -7,7 +7,7 @@ services:
     expose:
       - 9091
     volumes:
-      - /opt/docker/authelia/authelia_config:/config:ro
+      - /opt/docker/authelia/authelia_config:/config
     environment:
       TZ: "${TZ}"
       REDIS_PASSWORD: "${AUTHELIA_REDIS_PASS}"
