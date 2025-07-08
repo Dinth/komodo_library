@@ -4,8 +4,6 @@ services:
     container_name: authelia
     restart: unless-stopped
     ipc: private
-    ports:
-      - 9091:9091
     volumes:
       - /opt/docker/authelia/authelia_config:/config
     environment:
@@ -41,6 +39,7 @@ services:
       - authelia-redis
     networks:
       - authelia
+      - traefik
 
   authelia-redis:
     image: redis:8.0.2
