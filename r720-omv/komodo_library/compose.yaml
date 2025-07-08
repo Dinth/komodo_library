@@ -93,3 +93,5 @@ networks:
     name: authelia
     driver: bridge
     external: false
+  traefik:
+    external: true
