@@ -13,7 +13,6 @@ services:
       SESSION_ENCRYPTION_KEY: "${AUTHELIA_SESSION_KEY}"
       STORAGE_ENCRYPTION_KEY: "${AUTHELIA_STORAGE_KEY}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
-#      X_AUTHELIA_CONFIG: /configuration.yml
     labels:
       traefik.enable: "true"
       traefik.http.routers.authelia.rule: "Host(`id.${DOMAIN_NAME}`)"
