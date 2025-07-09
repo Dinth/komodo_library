@@ -55,7 +55,7 @@ services:
       traefik.http.routers.jellyfin.tls.certresolver: "letsencrypt"
       traefik.http.routers.jellyfin.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.jellyfin.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.jellyfin.middlewares: "secHeaders,jellyfin-mw"
+      traefik.http.routers.jellyfin.middlewares: "secHeaders@file,jellyfin-mw"
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
       traefik.http.middlewares.jellyfin-mw.headers.SSLRedirect: "true"
       traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains: "true" 
