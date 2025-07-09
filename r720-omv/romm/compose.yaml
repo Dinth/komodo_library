@@ -56,6 +56,7 @@ services:
       traefik.http.routers.romm.tls.certresolver: "letsencrypt"
       traefik.http.routers.romm.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.romm.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.romm.middlewares: "secHeaders@file"
       traefik.http.services.romm.loadbalancer.server.port: "8080"
       homepage.group: "Media"
       homepage.name: "Romm"
