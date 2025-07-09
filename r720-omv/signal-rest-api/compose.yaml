@@ -10,6 +10,7 @@ services:
       - AUDIT_WRITE
       - DAC_OVERRIDE
       - CHOWN
+      - FOWNER
     cap_drop:
       - ALL
     networks:
