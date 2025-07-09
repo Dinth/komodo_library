@@ -53,6 +53,7 @@ services:
       traefik.http.routers.fireflyiii.tls.certresolver: letsencrypt
       traefik.http.routers.fireflyiii.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.fireflyiii.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.fireflyiii.middlewares: "secHeaders@file"
       traefik.http.services.fireflyiii.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
