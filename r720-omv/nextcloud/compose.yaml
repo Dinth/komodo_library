@@ -47,7 +47,7 @@ services:
       traefik.http.routers.nextcloud.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.nextcloud.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.nextcloud.loadbalancer.passhostheader: "true"
-      traefik.http.routers.nextcloud.middlewares: "nextcloud-redirectregex1,nextcloud-redirectregex2,compresstraefik,nextcloud-securityheaders"
+      traefik.http.routers.nextcloud.middlewares: "secHeaders,nextcloud-redirectregex1,nextcloud-redirectregex2,compresstraefik,nextcloud-securityheaders"
       traefik.http.middlewares.compresstraefik.compress: "true"
       traefik.http.middlewares.nextcloud-redirectregex1.redirectregex.permanent: "true"
       traefik.http.middlewares.nextcloud-redirectregex1.redirectregex.regex: "https?://([^/]*)/.well-known/(card|cal)dav"
