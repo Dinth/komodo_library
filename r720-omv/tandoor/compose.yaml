@@ -55,6 +55,7 @@ services:
       traefik.http.routers.tandoor.tls.certresolver: letsencrypt
       traefik.http.routers.tandoor.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.tandoor.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.tandoor.middlewares: "secHeaders@file"
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
       homepage.group: "Home"
       homepage.name: "Tandoor"
