@@ -2,6 +2,7 @@ services:
   signal_rest_api:
     image: bbernhard/signal-cli-rest-api:0.93
     container_name: signal-rest-api
+    restart: unless-stopped
     ipc: private
     security_opt:
       - no-new-privileges:true
