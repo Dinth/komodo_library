@@ -101,6 +101,7 @@ services:
     restart: unless-stopped
     environment:
       PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
+      PIPELINES_URLS: "https://github.com/open-webui/pipelines/blob/main/examples/pipelines/providers/google_manifold_pipeline.py"
     tmpfs:
       - /tmp
     deploy:
