@@ -21,6 +21,7 @@ services:
       traefik.http.routers.authelia.tls.certresolver: "letsencrypt"
       traefik.http.routers.authelia.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.authelia.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.authelia.middlewares: "secHeaders@file"
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
       wud.watch: "true"
       wud.watch.digest: "true"
