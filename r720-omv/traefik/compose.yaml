@@ -6,7 +6,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=traefik' # allow only the dozzle container
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{2}/(containers/.*|events|info)'
+      - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=3600'
       - '-stoponwatchdog'
