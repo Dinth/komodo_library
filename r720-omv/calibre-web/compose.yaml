@@ -46,6 +46,7 @@ services:
       traefik.http.routers.calibre-web.tls.certresolver: "letsencrypt"
       traefik.http.routers.calibre-web.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.calibre-web.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.calibre-web.middlewares: "secHeaders@file"
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
       homepage.group: "Media"
       homepage.name: "Calibre-web"
