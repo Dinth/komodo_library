@@ -59,6 +59,7 @@ services:
       traefik.http.routers.searxng.tls.certresolver: "letsencrypt"
       traefik.http.routers.searxng.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.searxng.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.searxng.middlewares: "secHeaders@file"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
     logging:
       driver: "json-file"
