@@ -43,6 +43,7 @@ services:
       traefik.http.routers.languagetool.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.languagetool.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.languagetool.tls.certresolver: "letsencrypt"
+      traefik.http.routers.languagetool.middlewares: "secHeaders@file"
       traefik.http.services.languagetool.loadbalancer.server.port: "8010"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
