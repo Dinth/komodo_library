@@ -99,6 +99,8 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    environment:
+      PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
     tmpfs:
       - /tmp
     deploy:
@@ -118,7 +120,7 @@ services:
     networks:
       - openwebui
     volumes:
-      - /opt/docker/openwebui/openwebui-pipelines_data:/app/data
+      - /opt/docker/openwebui/openwebui-pipelines_data:/app/pipelines
   openwebui:
     cap_add:
       - AUDIT_WRITE
