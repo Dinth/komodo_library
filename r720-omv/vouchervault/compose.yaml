@@ -46,6 +46,7 @@ services:
       traefik.http.routers.vouchervault.tls.certresolver: "letsencrypt"
       traefik.http.routers.vouchervault.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.vouchervault.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.vouchervault.middlewares: "secHeaders@file"
       traefik.http.services.vouchervault.loadbalancer.server.port: "8000"
       homepage.group: "Home"
       homepage.name: "Vouchervault"
