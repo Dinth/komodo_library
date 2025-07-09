@@ -10,10 +10,7 @@ services:
       - AUDIT_WRITE
       - DAC_OVERRIDE
       - CHOWN
-      - FOWNER
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
     cap_drop:
       - ALL
