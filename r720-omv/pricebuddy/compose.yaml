@@ -27,6 +27,7 @@ services:
       traefik.http.routers.pricebuddy.tls.certresolver: "letsencrypt"
       traefik.http.routers.pricebuddy.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.pricebuddy.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.pricebuddy.middlewares: "secHeaders@file"
       traefik.http.services.pricebuddy.loadbalancer.server.port: "80"
       homepage.group: "Home"
       homepage.name: "Pricebuddy"
