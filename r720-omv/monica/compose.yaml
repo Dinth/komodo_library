@@ -16,6 +16,9 @@ services:
       traefik.http.routers.monica.entrypoints: "websecure"
       traefik.http.routers.monica.tls: "true"
       traefik.http.routers.monica.tls.certresolver: "letsencrypt"
+      traefik.http.routers.monica.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.monica.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.monica.middlewares: "secHeaders@file"
       traefik.http.services.monica.loadbalancer.server.port: "80"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
