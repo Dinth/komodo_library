@@ -92,16 +92,15 @@ services:
     environment:
       PIPELINES_PORT: "9099"
       OLLAMA_BASE_URL: "http://ollama:11434"
-      DATABASE_URL: "sqlite:///app/data/pipelines.db"  
+      DATABASE_URL: "sqlite:///app/pipelines/pipelines.db"  
+      PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
+      PIPELINES_URLS: "https://github.com/open-webui/pipelines/blob/main/examples/pipelines/providers/google_manifold_pipeline.py"
     hostname: openwebui-pipelines
     image: ghcr.io/open-webui/pipelines:main
     ipc: private
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
-    environment:
-      PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
-      PIPELINES_URLS: "https://github.com/open-webui/pipelines/blob/main/examples/pipelines/providers/google_manifold_pipeline.py"
     tmpfs:
       - /tmp
     deploy:
