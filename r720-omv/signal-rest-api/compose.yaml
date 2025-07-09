@@ -11,6 +11,7 @@ services:
       - DAC_OVERRIDE
       - CHOWN
       - FOWNER
+      - FSETID
     cap_drop:
       - ALL
     networks:
