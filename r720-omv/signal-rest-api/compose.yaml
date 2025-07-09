@@ -9,6 +9,7 @@ services:
     cap_add:
       - AUDIT_WRITE
       - DAC_OVERRIDE
+      - CHOWN
     cap_drop:
       - ALL
     networks:
