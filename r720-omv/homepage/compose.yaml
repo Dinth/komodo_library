@@ -55,6 +55,8 @@ services:
     volumes:
       - /opt/docker/homepage/homepage_config:/app/config
     restart: unless-stopped
+    depends_on:
+      - homepage-socket-proxy
     networks:
       - homepage
       - traefik
