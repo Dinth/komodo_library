@@ -18,7 +18,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges
-    user: "65534:${DOCKER_SOCKET_PROXY}"
+    user: "65534:${DOCKER_SOCKET_GID}"
     environment: 
       
     labels:
