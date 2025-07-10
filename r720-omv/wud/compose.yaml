@@ -20,7 +20,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges
-    user: 65534:993
+    user: "65534:${DOCKER_SOCKET_GID}"
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
