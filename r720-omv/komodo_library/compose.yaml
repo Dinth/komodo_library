@@ -15,6 +15,7 @@ services:
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
     labels:
       traefik.enable: "true"
+  # --- Router for the Authelia Portal ---
       traefik.http.routers.authelia.rule: "Host(`id.${DOMAIN_NAME}`)"
       traefik.http.routers.authelia.entrypoints: "websecure"
       traefik.http.routers.authelia.tls: "true"
@@ -23,6 +24,10 @@ services:
       traefik.http.routers.authelia.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.authelia.middlewares: "secHeaders@file"
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
+  # --- Middleware for other services to use for authentication ---
+      traefik.http.middlewares.authelia-auth.forwardauth.address: "http://authelia:9091/api/verify?rd=https://id.${DOMAIN_NAME}/"
+      traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader: "true"
+      traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "Authelia"
