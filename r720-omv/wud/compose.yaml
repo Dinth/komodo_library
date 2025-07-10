@@ -66,8 +66,6 @@ services:
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_GITEA_BRICKTRACKER_URL: "https://gitea.baerentsen.space/"
       WUD_NOTIFIER_TELEGRAM_ENABLED: "true"
-      WUD_NOTIFIER_TELEGRAM_TOKEN: "${TELEGRAM_API_KEY}"
-      WUD_NOTIFIER_TELEGRAM_CHATID: "${TELEGRAM_TECH_ID}"
       WUD_NOTIFIER_TELEGRAM_TEMPLATE_MARKDOWN: "*Container Update Available!* 🐳\n\n*Container:* `{{result.name}}`\n*Image:* `{{result.image.name}}`\n*Current Tag:* `{{result.image.tag.value}}`\n*New Tag:* `{{result.result.tag}}`\n\n*Changelog:*\n```\n{{result.changelog}}\n```\n[View on GitHub]({{result.link}})"
     labels:
       homepage.group: "Infrastructure"
