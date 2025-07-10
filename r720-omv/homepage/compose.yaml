@@ -45,7 +45,7 @@ services:
       traefik.http.routers.homepage.tls.certresolver: "letsencrypt"
       traefik.http.routers.homepage.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.homepage.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.homepage.middlewares: "secHeaders@file,authelia@docker"
+      traefik.http.routers.homepage.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.homepage.loadbalancer.server.port: "3000"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
