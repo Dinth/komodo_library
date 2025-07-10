@@ -1,33 +1,42 @@
 services:
   wud-socket-proxy:
-    image: tecnativa/docker-socket-proxy:0.3.0
-    container_name: wud-socket-proxy
-    restart: unless-stopped
+    image: wollomatic/socket-proxy:1.7.0
     ipc: private
-    security_opt:
-      - no-new-privileges:true
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=wud' # allow only the dozzle container
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/v1\..{2}/(containers/.*|images/.*|volumes/.*|networks|networks/.*|events|info|version)'
+      - '-allowPOST=/v1\..{2}/(containers/.*|images/.*|volumes/.*|networks|networks/.*)'
+      - '-allowDELETE=/v1\..{2}/(containers/.*|images/.*|volumes/.*|networks|networks/.*)'
+      - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+    restart: unless-stopped
+    read_only: true
     mem_limit: 64M
     cap_drop:
       - ALL
-    networks:
-      - wud
-    environment:
-      CONTAINERS: "1"
-      IMAGES: "1"
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/Tecnativa/docker-socket-proxy/releases/tag/v$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - Whats Up Docker?'
-      wud.display.icon: 'mdi:connection'
+    security_opt:
+      - no-new-privileges
+    user: 65534:993
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "2375"]
       interval: 5s
       retries: 5
       start_period: 5s
       start_interval: 5s
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Traefik'
+      wud.display.icon: 'mdi:connection'
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - wud
   wud:
     image: getwud/wud:8.0.1
     container_name: wud
