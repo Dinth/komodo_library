@@ -6,9 +6,9 @@ services:
       - '-loglevel=info'
       - '-allowfrom=wud' # allow only the dozzle container
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{2}/(containers/.*|images/.*|volumes/.*|networks|networks/.*|events|info|version)'
-      - '-allowPOST=/v1\..{2}/(containers/.*|images/.*|volumes/.*|networks|networks/.*)'
-      - '-allowDELETE=/v1\..{2}/(containers/.*|images/.*|volumes/.*|networks|networks/.*)'
+      - '-allowGET=/v1\..{2}/(containers/.*|images/.*|events|info|version)'
+      - '-allowPOST=/v1\..{2}/(containers/.*|images/.*)'
+      - '-allowDELETE=/v1\..{2}/(containers/.*|images/.*)'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
