@@ -83,8 +83,7 @@ services:
       retries: 3
       start_period: 10s
     depends_on:
-      wud-socket-proxy:
-        condition: service_healthy
+      - wud-socket-proxy
     ports:
       - 3009:3000
     networks:
