@@ -38,6 +38,15 @@ services:
     ports:
       - 3008:3000
     labels:
+      traefik.enable: "true"
+      traefik.http.routers.babybuddy.rule: "Host(`fp.${DOMAIN_NAME}`)"
+      traefik.http.routers.babybuddy.entrypoints: "websecure"
+      traefik.http.routers.babybuddy.tls: "true"
+      traefik.http.routers.babybuddy.tls.certresolver: "letsencrypt"
+      traefik.http.routers.babybuddy.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.babybuddy.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.babybuddy.middlewares: "secHeaders@file"
+      traefik.http.services.babybuddy.loadbalancer.server.port: "3008"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
