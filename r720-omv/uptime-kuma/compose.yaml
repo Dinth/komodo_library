@@ -6,7 +6,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=uptime-kuma' # allow only the dozzle container
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
+      - '-allowGET=/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
