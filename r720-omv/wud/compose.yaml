@@ -3,7 +3,7 @@ services:
     image: wollomatic/socket-proxy:1.7.0
     ipc: private
     command:
-      - '-loglevel=debug'
+      - '-loglevel=info'
       - '-allowfrom=wud'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(containers/.*|images/.*|events|info|version)'
