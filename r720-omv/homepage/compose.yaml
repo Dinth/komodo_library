@@ -4,7 +4,7 @@ services:
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=homepage' # allow only the dozzle container
+      - '-allowfrom=homepage'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(version|containers/.*)'
       - '-watchdoginterval=1200'
