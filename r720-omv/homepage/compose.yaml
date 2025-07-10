@@ -6,7 +6,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=homepage' # allow only the dozzle container
       - '-listenip=0.0.0.0'
-      - '-allowGET=/(version|containers/.*)'
+      - '-allowGET=/v1\..{1,2}/(version|containers/.*)'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
@@ -22,7 +22,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - Traefik'
+      wud.display.name: 'Docker Socket Proxy - Homepage'
       wud.display.icon: 'mdi:connection'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
