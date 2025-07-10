@@ -42,6 +42,7 @@ services:
       TRAEFIK_API_INSECURE: "true" # Be careful with this in production!
       TRAEFIK_API_DEBUG: "false"
       TRAEFIK_LOG_LEVEL: "INFO"
+      TZ: "${TZ}"
   # --- EntryPoints Configuration ---
     # Web (HTTP) EntryPoint on port 80 with a global redirect to websecure
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
@@ -58,9 +59,6 @@ services:
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
       TRAEFIK_PROVIDERS_DOCKER_NETWORK: "traefik"
-      TRAEFIK_API_DASHBOARD: "true"
-      TRAEFIK_API_INSECURE: "true"
-      TZ: "${TZ}"
       CF_API_EMAIL: "${ADMIN_EMAIL}"
       CF_DNS_API_TOKEN: "${TRAEFIK_CF_DNS_API_TOKEN}"
       LOCAL_IPS: "127.0.0.1/32,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
