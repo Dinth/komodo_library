@@ -6,7 +6,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=homepage' # allow only the dozzle container
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{1,2}/(version|containers/.*)'
+      - '-allowGET=/(version|containers/.*)'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
