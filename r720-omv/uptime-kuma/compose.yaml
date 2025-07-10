@@ -4,7 +4,7 @@ services:
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=traefik' # allow only the dozzle container
+      - '-allowfrom=uptime-kuma' # allow only the dozzle container
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
@@ -18,7 +18,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges
-    user: 65534:993
+    user: "65534:${DOCKER_SOCKET_GID}"
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -28,7 +28,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - traefik
+      - uptime-kuma
       
   uptime-kuma:
     cap_add:
