@@ -19,8 +19,6 @@ services:
     security_opt:
       - no-new-privileges
     user: "65534:${DOCKER_SOCKET_GID}"
-    environment: 
-      
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
