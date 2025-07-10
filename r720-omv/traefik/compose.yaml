@@ -101,7 +101,7 @@ services:
       wud.link.template: "https://getwud.github.io/wud/#/changelog/?id=_$${major}$${minor}$${patch}"
     depends_on:
       traefik-socket-proxy:
-        condition: service_healthy
+        condition: running
     networks:
       - traefik-internal
       - traefik
