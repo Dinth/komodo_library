@@ -36,10 +36,6 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.endpoint=tcp://traefik-socket-proxy:2375"
-      - "--providers.docker.exposedbydefault=false"
     environment:
       TRAEFIK_PROVIDERS_DOCKER: "true"
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
