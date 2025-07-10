@@ -3,7 +3,7 @@ services:
     image: wollomatic/socket-proxy:1.7.0
     ipc: private
     command:
-      - '-loglevel=info'
+      - '-loglevel=debug'
       - '-allowfrom=wud' # allow only the dozzle container
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)'
