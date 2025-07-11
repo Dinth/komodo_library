@@ -61,7 +61,7 @@ services:
       POSTGRESQL_DATABASE: "guacamole"
       POSTGRESQL_USER: "guacamole"
       POSTGRESQL_PASSWORD: "${GUACAMOLE_DB_PASS}"
-      GUACD_HOSTNAME: "10.10.1.13"
+      GUACD_HOSTNAME: "guacd"
       GUACD_PORT: "4822"
       POSTGRESQL_HOSTNAME: "10.10.1.13"
       TOTP_ENABLED: "true"
