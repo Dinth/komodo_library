@@ -5,7 +5,6 @@ services:
     image: guacamole/guacd:1.6.0
     environment:
       GUACD_LOG_LEVEL: "debug"
-    ipc: private
     logging:
       driver: json-file
       options:
@@ -41,7 +40,6 @@ services:
       CATALINA_OPTS: "-Djava.net.preferIPv4Stack=true"
     hostname: guacamole
     image: guacamole/guacamole:1.6.0
-    ipc: private
     depends_on:
       - guacd
     logging:
