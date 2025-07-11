@@ -32,6 +32,12 @@ services:
       - guacamole
     restart: unless-stopped
     user: guacd
+    labels:
+      wud.watch: 'true'
+      wud.display.icon: 'sh-apache-guacamole-dark'
+      wud.display.name: 'Guacamole daemon'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
   guacamole:
     cap_add:
       - AUDIT_WRITE
@@ -74,6 +80,12 @@ services:
       - 8080:8080/tcp
     restart: unless-stopped
     user: guacamole
+    labels:
+      wud.watch: 'true'
+      wud.display.icon: 'sh-apache-guacamole-dark'
+      wud.display.name: 'Guacamole'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
 networks:
   guacamole:
     name: guacamole
