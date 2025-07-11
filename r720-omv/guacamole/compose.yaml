@@ -1,6 +1,6 @@
 services:
   guacamole-guacd:
-    container_name: guacamole-guacd
+    container_name: guacamole-guacd 
     hostname: guacamole-guacd
     image: guacamole/guacd:1.6.0
     environment:
