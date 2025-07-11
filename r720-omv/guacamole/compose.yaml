@@ -31,10 +31,10 @@ services:
     security_opt:
       - seccomp:unconfined #optional
     environment:
-      PUID=[[DOCKER_PUID]]
-      PGID=[[DOCKER_PGID]]
-      TZ=[[TZ]]
-      CHROME_CLI=https://www.linuxserver.io/ #optional
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+      CHROME_CLI: "https://fp.${DOMAIN_NAME}/"
     volumes:
       - /opt/docker/guacamole/guacamole-chromium_config:/config
     ports:
