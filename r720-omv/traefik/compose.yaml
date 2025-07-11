@@ -63,7 +63,7 @@ services:
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
       TRAEFIK_PROVIDERS_DOCKER_NETWORK: "traefik"
     # File Provider
-      TRAEFIK_PROVIDERS_FILE_FILENAME: "/traefik_dynamic.yml"
+     # TRAEFIK_PROVIDERS_FILE_FILENAME: "/traefik_dynamic.yml"
       TRAEFIK_PROVIDERS_FILE_WATCH: "true"    
   # --- Certificate Resolver (Let's Encrypt with Cloudflare DNS Challenge) ---
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ADMIN_EMAIL}"
