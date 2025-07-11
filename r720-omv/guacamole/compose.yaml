@@ -76,11 +76,23 @@ services:
         max-file: "3"
     networks:
       - guacamole
-    ports:
-      - 8080:8080/tcp
     restart: unless-stopped
     user: guacamole
     labels:
+      traefik.enable: "true"
+      traefik.http.routers.guacamole.rule: "Host(`avocado.${DOMAIN_NAME}`)"
+      traefik.http.routers.guacamole.entrypoints: "websecure"
+      traefik.http.routers.guacamole.tls: "true"
+      traefik.http.routers.guacamole.tls.certresolver: "letsencrypt"
+      traefik.http.routers.guacamole.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.guacamole.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.guacamole.middlewares: "secHeaders@file"
+      traefik.http.services.guacamole.loadbalancer.server.port: "8080"
+      homepage.group: Home
+      homepage.name: Guacamole
+      homepage.description: Remote access
+      homepage.href: https://avocado.${DOMAIN_NAME}
+      homepage.icon: sh-baby-buddy.png
       wud.watch: 'true'
       wud.display.icon: 'sh-apache-guacamole-dark'
       wud.display.name: 'Guacamole'
