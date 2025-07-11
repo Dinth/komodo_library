@@ -13,7 +13,6 @@ services:
     networks:
       - guacamole
     restart: unless-stopped
-    user: guacd
     healthcheck:
       test: "nc -z 127.0.0.1 4822 || exit 1"
       interval: 10s
@@ -51,7 +50,6 @@ services:
       - guacamole
       - traefik
     restart: unless-stopped
-    user: guacamole
     ports:
       - 8080:8080
     labels:
