@@ -42,6 +42,8 @@ services:
       - 3001:3001
     shm_size: "1gb"
     restart: unless-stopped
+    networks: 
+      - guacamole
   guacamole:
     container_name: guacamole
     environment:
@@ -68,8 +70,6 @@ services:
       - guacamole
       - traefik
     restart: unless-stopped
-    ports:
-      - 8080:8080
     labels:
       traefik.enable: "true"
       traefik.http.routers.guacamole.rule: "Host(`avocado.${DOMAIN_NAME}`)"
