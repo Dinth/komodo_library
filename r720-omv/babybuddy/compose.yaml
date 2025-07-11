@@ -46,7 +46,7 @@ services:
       traefik.http.routers.babybuddy.tls.certresolver: "letsencrypt"
       traefik.http.routers.babybuddy.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.babybuddy.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.babybuddy.middlewares: "secHeaders@docker"
+      traefik.http.routers.babybuddy.middlewares: "secHeaders@file"
       traefik.http.services.babybuddy.loadbalancer.server.port: "8000"
       homepage.group: Home
       homepage.name: Babybuddy
