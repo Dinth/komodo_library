@@ -1,7 +1,7 @@
 services:
   guacamole-guacd:
-    container_name: guacd
-    hostname: guacd
+    container_name: guacamole-guacd
+    hostname: guacamole-guacd
     image: guacamole/guacd:1.6.0
     environment:
       GUACD_LOG_LEVEL: "debug"
@@ -25,6 +25,23 @@ services:
       wud.display.name: 'Guacamole daemon'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
+  guacamole-chromium:
+        image: lscr.io/linuxserver/chromium:latest
+    container_name: chromium
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      PUID=[[DOCKER_PUID]]
+      PGID=[[DOCKER_PGID]]
+      TZ=[[TZ]]
+      CHROME_CLI=https://www.linuxserver.io/ #optional
+    volumes:
+      - /opt/docker/guacamole/guacamole-chromium_config:/config
+    ports:
+      - 3000:3000
+      - 3001:3001
+    shm_size: "1gb"
+    restart: unless-stopped
   guacamole:
     container_name: guacamole
     environment:
@@ -40,7 +57,8 @@ services:
     hostname: guacamole
     image: guacamole/guacamole:1.6.0
     depends_on:
-      - guacd
+      guacamole-guacd:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
