@@ -53,7 +53,7 @@ services:
 #      homepage.widget.username: "${HOMEPAGE_CALIBREWEB_USER}"
 #      homepage.widget.password: "${HOMEPAGE_CALIBREWEB_PASS}"
       wud.watch: "true"
-      wud.tag.include: '^?v\d+\.\d+\.\d+$$'
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Navidrome"
       wud.display.icon: "sh:navidrome"
       wud.link.template: "https://github.com/navidrome/navidrome/releases/v$${major}.$${minor}.$${patch}"
