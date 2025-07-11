@@ -38,6 +38,7 @@ services:
       POSTGRESQL_HOSTNAME: "10.10.1.13"
       TOTP_ENABLED: "true"
       WEBAPP_CONTEXT: "ROOT"
+      CATALINA_OPTS: "-Djava.net.preferIPv4Stack=true"
     hostname: guacamole
     image: guacamole/guacamole:1.6.0
     ipc: private
