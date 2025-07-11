@@ -15,7 +15,7 @@ services:
       - guacamole
     restart: unless-stopped
     user: guacd
-      healthcheck:
+    healthcheck:
       test: "nc -z 127.0.0.1 4822 || exit 1"
       interval: 10s
       timeout: 5s
