@@ -76,6 +76,7 @@ services:
         max-file: "3"
     networks:
       - guacamole
+      - traefik
     restart: unless-stopped
     user: guacamole
     labels:
@@ -103,3 +104,5 @@ networks:
     name: guacamole
     driver: bridge
     external: false
+  traefik:
+    external: true
