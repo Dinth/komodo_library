@@ -79,6 +79,7 @@ services:
       - traefik
     restart: unless-stopped
     user: guacamole
+    ports: 8080:8080
     labels:
       traefik.enable: "true"
       traefik.http.routers.guacamole.rule: "Host(`avocado.${DOMAIN_NAME}`)"
