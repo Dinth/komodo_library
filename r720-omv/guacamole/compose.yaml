@@ -26,7 +26,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
   guacamole-chromium:
-        image: lscr.io/linuxserver/chromium:latest
+    image: lscr.io/linuxserver/chromium:latest
     container_name: chromium
     security_opt:
       - seccomp:unconfined #optional
