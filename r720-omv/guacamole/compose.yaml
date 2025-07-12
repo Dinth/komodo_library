@@ -25,24 +25,27 @@ services:
       wud.display.name: 'Guacamole daemon'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
-  guacamole-chromium:
-    image: lscr.io/linuxserver/chromium:kasm
-    container_name: chromium
-    security_opt:
-      - seccomp:unconfined #optional
-    environment:
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
-      TZ: "${TZ}"
-      CHROME_CLI: "https://fp.${DOMAIN_NAME}/"
-    volumes:
-      - /opt/docker/guacamole/guacamole-chromium_config:/config
+  guacamole-firefox:
+    image: jlesage/firefox:latest
+    shm_size: 2G
     ports:
-      - 3005:3000
-      - 3006:3001
-      - 5900:5900
-    shm_size: "1gb"
-    restart: unless-stopped
+      - "127.0.0.1:5800:5800"
+    environment:
+      USER_ID: "${DOCKER_PUID}"
+      GROUP_ID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+      KEEP_APP_RUNNING: 1
+      DARK_MODE: 1
+      WEB_LISTENING_PORT: 5800
+      VNC_LISTENING_PORT: 5900
+      SECURE_CONNECTION: 0
+      SECURE_CONNECTION_VNC_METHOD: "SSL"
+      SECURE_CONNECTION_CERTS_CHECK_INTERVAL: 60
+      FF_OPEN_URL: "https://fp.${DOMAIN_NAME}"
+    volumes:
+      # create ./docker/appdata/firefox/.vncpass_clear pre-startup
+      # see https://github.com/jlesage/docker-firefox#vnc-password
+      - /opt/docker/guacamole/guacamole-firefox_config:/config:rw
     networks: 
       - guacamole
   guacamole:
