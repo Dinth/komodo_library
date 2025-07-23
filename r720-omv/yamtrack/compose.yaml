@@ -45,4 +45,4 @@ networks:
   yamtrack:
     external: false
     name: yamtrack
-    mode: bridge
+    driver: bridge
