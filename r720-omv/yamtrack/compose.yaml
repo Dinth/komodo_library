@@ -1,16 +1,39 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  yamtrack:
+    container_name: yamtrack
+    image: ghcr.io/fuzzygrim/yamtrack:0.24.6
+    restart: unless-stopped
+    depends_on:
+      - yamtrack-postgres
+      - yamtrack-redis
+    environment:
+      TZ: "${TZ}"
+      SECRET: "longstring"
+      REDIS_URL: "redis://yamtrack-redis:6379"
+      DB_HOST: "yamtrack-postgres"
+      DB_NAME: "yamtrack"
+      DB_USER: "yamtrack"
+      DB_PASSWORD: "yamtrack"
+      DB_PORT: "5432"
+    ports:
+      - "8000:8000"
 
-# networks:
-#   default: {}
+  yamtrack-postgres:
+    image: postgres:16-alpine
+    container_name: yamtrack-postgres
+    environment:
+      POSTGRES_DB: "yamtrack"
+      POSTGRES_USER: "yamtrack"
+      POSTGRES_PASSWORD: "yamtrack"
+    volumes:
+      - /opt/docker/yamtrack/yamtrack-postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
-# volumes:
-#   data:
+  yamtrack-redis:
+    container_name: yamtrack-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/yamtrack/yamtrack-redis_data:/data
+    networks:
+      - yamtrack
