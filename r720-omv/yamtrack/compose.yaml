@@ -16,7 +16,7 @@ services:
       DB_PASSWORD: "${YAMTRACK_DB_PASS}"
       DB_PORT: "5432"
     ports:
-      - "8000:8000"
+      - "5743:8000"
     networks:
       - yamtrack
 
