@@ -65,8 +65,7 @@ services:
       WUD_TRIGGER_HTTP_SIGNAL_TYPE: "http"
       WUD_TRIGGER_HTTP_SIGNAL_METHOD: "GET"
       WUD_TRIGGER_HTTP_SIGNAL_ON: "update"
-      WUD_TRIGGER_HTTP_SIGNAL_URL: >-
-        http://signal-cli-rest-api:8080/v2/send?number=YOUR_SIGNAL_SENDER_NUMBER&recipients=YOUR_SIGNAL_RECIPIENT_NUMBER&message={{ urlencode "🐳 Docker Update Available!\n\nContainer: {{result.name}}\nImage: {{result.image.name}}\nCurrent Tag: {{result.image.tag.value}}\nNew Tag: {{result.result.tag}}\n\nChangelog:\n{{result.changelog}}" }}
+      WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=YOUR_SIGNAL_SENDER_NUMBER&recipients=YOUR_SIGNAL_RECIPIENT_NUMBER&message={{ urlencode "🐳 Docker Update Available!\n\nContainer: {{result.name}}\nImage: {{result.image.name}}\nCurrent Tag: {{result.image.tag.value}}\nNew Tag: {{result.result.tag}}\n\nChangelog:\n{{result.changelog}}" }}'
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
