@@ -19,6 +19,7 @@ services:
       - "5743:8000"
     networks:
       - yamtrack
+      - traefik
 
   yamtrack-postgres:
     image: postgres:16-alpine
@@ -46,3 +47,5 @@ networks:
     external: false
     name: yamtrack
     driver: bridge
+  traefik:
+    external: true
