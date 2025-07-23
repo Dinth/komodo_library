@@ -63,6 +63,12 @@ services:
       - /opt/docker/yamtrack/yamtrack-redis_data:/data
     networks:
       - yamtrack
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
