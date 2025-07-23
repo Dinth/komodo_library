@@ -59,13 +59,13 @@ services:
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_GITEA_BRICKTRACKER_URL: "https://gitea.baerentsen.space/"
-      WUD_NOTIFIER_TELEGRAM_ENABLED: "true"
-      WUD_NOTIFIER_TELEGRAM_TEMPLATE_MARKDOWN: "*Container Update Available!* 🐳\n\n*Container:* `{{result.name}}`\n*Image:* `{{result.image.name}}`\n*Current Tag:* `{{result.image.tag.value}}`\n*New Tag:* `{{result.result.tag}}`\n\n*Changelog:*\n```\n{{result.changelog}}\n```\n[View on GitHub]({{result.link}})"
-      WUD_NOTIFIER_SIGNAL_ENABLED: "true"
-      WUD_NOTIFIER_SIGNAL_TYPE: "http"
-      WUD_NOTIFIER_SIGNAL_METHOD: "GET"
-      WUD_NOTIFIER_SIGNAL_ON: "update"
-      WUD_NOTIFIER_SIGNAL_URL: >-
+      WUD_TRIGGER_NOTIFIER_TELEGRAM_ENABLED: "true"
+      WUD_TRIGGER_NOTIFIER_TELEGRAM_TEMPLATE_MARKDOWN: "*Container Update Available!* 🐳\n\n*Container:* `{{result.name}}`\n*Image:* `{{result.image.name}}`\n*Current Tag:* `{{result.image.tag.value}}`\n*New Tag:* `{{result.result.tag}}`\n\n*Changelog:*\n```\n{{result.changelog}}\n```\n[View on GitHub]({{result.link}})"
+      WUD_TRIGGER_NOTIFIER_SIGNAL_ENABLED: "true"
+      WUD_TRIGGER_NOTIFIER_SIGNAL_TYPE: "http"
+      WUD_TRIGGER_NOTIFIER_SIGNAL_METHOD: "GET"
+      WUD_TRIGGER_NOTIFIER_SIGNAL_ON: "update"
+      WUD_TRIGGER_NOTIFIER_SIGNAL_URL: >-
         http://signal-cli-rest-api:8080/v2/send?number=YOUR_SIGNAL_SENDER_NUMBER&recipients=YOUR_SIGNAL_RECIPIENT_NUMBER&message={{ urlencode "🐳 Docker Update Available!\n\nContainer: {{result.name}}\nImage: {{result.image.name}}\nCurrent Tag: {{result.image.tag.value}}\nNew Tag: {{result.result.tag}}\n\nChangelog:\n{{result.changelog}}" }}    labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
