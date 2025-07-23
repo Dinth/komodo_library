@@ -17,6 +17,8 @@ services:
       DB_PORT: "5432"
     ports:
       - "8000:8000"
+    networks:
+      - yamtrack
 
   yamtrack-postgres:
     image: postgres:16-alpine
@@ -28,6 +30,8 @@ services:
     volumes:
       - /opt/docker/yamtrack/yamtrack-postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - yamtrack
 
   yamtrack-redis:
     container_name: yamtrack-redis
@@ -37,3 +41,8 @@ services:
       - /opt/docker/yamtrack/yamtrack-redis_data:/data
     networks:
       - yamtrack
+networks:
+  yamtrack:
+    external: false
+    name: yamtrack
+    mode: bridge
