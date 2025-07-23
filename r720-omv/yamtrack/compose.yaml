@@ -8,12 +8,12 @@ services:
       - yamtrack-redis
     environment:
       TZ: "${TZ}"
-      SECRET: "longstring"
+      SECRET: "${YAMTRACK_SECRET}"
       REDIS_URL: "redis://yamtrack-redis:6379"
       DB_HOST: "yamtrack-postgres"
       DB_NAME: "yamtrack"
       DB_USER: "yamtrack"
-      DB_PASSWORD: "yamtrack"
+      DB_PASSWORD: "${YAMTRACK_DB_PASS}"
       DB_PORT: "5432"
     ports:
       - "8000:8000"
@@ -24,7 +24,7 @@ services:
     environment:
       POSTGRES_DB: "yamtrack"
       POSTGRES_USER: "yamtrack"
-      POSTGRES_PASSWORD: "yamtrack"
+      POSTGRES_PASSWORD: "${YAMTRACK_DB_PASS}"
     volumes:
       - /opt/docker/yamtrack/yamtrack-postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
