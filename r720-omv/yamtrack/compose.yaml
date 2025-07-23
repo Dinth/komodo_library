@@ -15,7 +15,7 @@ services:
       DB_USER: "yamtrack"
       DB_PASSWORD: "${YAMTRACK_DB_PASS}"
       DB_PORT: "5432"
-      URLS: "mediatracker.${DOMAIN_NAME}"
+      URLS: "http://10.10.1.13:5743, https://mediatracker.${DOMAIN_NAME}"
       WEB_CONCURRENCY: "5"
       TMDB_NSFW: "1"
     labels:
