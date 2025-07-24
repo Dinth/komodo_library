@@ -33,6 +33,7 @@ services:
       homepage.icon: "yamtrack.png"
       homepage.href: "https://mediatracker.${DOMAIN_NAME}"
       homepage.description: "Media tracker"
+      homepage.siteMonitor: "https://mediatracker.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Yamtrack"
