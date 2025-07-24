@@ -42,7 +42,10 @@ services:
       DB_PORT: "5432"
       URLS: "http://10.10.1.13:5743, https://mediatracker.${DOMAIN_NAME}"
       WEB_CONCURRENCY: "5"
-      TMDB_NSFW: "1"
+      TMDB_NSFW: "true"
+      MAL_NSFW: "true"
+      IGDB_NSFW: "true"
+      MAL_API: "${MYANIMELIST_SECRET}"
     labels:
       traefik.enable: "true"
       traefik.http.routers.yamtrack.rule: "Host(`mediatracker.${DOMAIN_NAME}`)"
