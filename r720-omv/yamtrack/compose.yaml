@@ -1,149 +1,16 @@
+## Add your compose file here
 services:
-  yamtrack:
-    container_name: yamtrack
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
-    ipc: private
-    security_opt:
-      - no-new-privileges:true
-    image: ghcr.io/fuzzygrim/yamtrack:0.24.6
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      - yamtrack-postgres
-      - yamtrack-redis
-    environment:
-      TZ: "${TZ}"
-      SECRET: "${YAMTRACK_SECRET}"
-      REDIS_URL: "redis://yamtrack-redis:6379"
-      DB_HOST: "yamtrack-postgres"
-      DB_NAME: "yamtrack"
-      DB_USER: "yamtrack"
-      DB_PASSWORD: "${YAMTRACK_DB_PASS}"
-      DB_PORT: "5432"
-      URLS: "http://10.10.1.13:5743, https://mediatracker.${DOMAIN_NAME}"
-      WEB_CONCURRENCY: "5"
-      TMDB_NSFW: "true"
-      MAL_NSFW: "true"
-      IGDB_NSFW: "true"
-      MAL_API: "${MYANIMELIST_SECRET}"
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.yamtrack.rule: "Host(`mediatracker.${DOMAIN_NAME}`)"
-      traefik.http.routers.yamtrack.entrypoints: "websecure"
-      traefik.http.routers.yamtrack.tls: "true"
-      traefik.http.routers.yamtrack.tls.certresolver: "letsencrypt"
-      traefik.http.routers.yamtrack.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.yamtrack.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.yamtrack.middlewares: "secHeaders@file"
-      traefik.http.services.yamtrack.loadbalancer.server.port: "80"
-      homepage.group: "Media"
-      homepage.name: "Yamtrack"
-      homepage.icon: "yamtrack.png"
-      homepage.href: "https://mediatracker.${DOMAIN_NAME}"
-      homepage.description: "Media tracker"
-      homepage.siteMonitor: "https://mediatracker.${DOMAIN_NAME}"
-      wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.display.name: "Yamtrack"
-      wud.display.icon: "sh:yamtrack"
-      wud.link.template: "https://github.com/FuzzyGrim/Yamtrack/releases/tag/v$${major}.$${minor}.$${patch}"
-    ports:
-      - "5743:8000"
-    networks:
-      - yamtrack
-      - traefik
+  hello_world:
+    image: hello-world
+    # networks:
+    #   - default
+    # ports:
+    #   - 3000:3000
+    # volumes:
+    #   - data:/data
 
-  yamtrack-postgres:
-    image: postgres:16-alpine
-    container_name: yamtrack-postgres
-    ipc: private
-    security_opt:
-      - no-new-privileges:true
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    environment:
-      POSTGRES_DB: "yamtrack"
-      POSTGRES_USER: "yamtrack"
-      POSTGRES_PASSWORD: "${YAMTRACK_DB_PASS}"
-    volumes:
-      - /opt/docker/yamtrack/yamtrack-postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - yamtrack
+# networks:
+#   default: {}
 
-  yamtrack-redis:
-    container_name: yamtrack-redis
-    image: redis:8.0.3
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
-    ipc: private
-    security_opt:
-      - no-new-privileges:true
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/yamtrack/yamtrack-redis_data:/data
-    networks:
-      - yamtrack
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    labels:
-      wud.watch: "true"
-      wud.watch.digest: "true"
-      wud.display.name: "Yamtrack Redis"
-      wud.display.icon: "sh-yamtrack"
-      wud.tag.include: '^$v\d+.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/redis/redis/releases/tag/$${major}.$${minor}.$${patch}'
-networks:
-  yamtrack:
-    external: false
-    name: yamtrack
-    driver: bridge
-  traefik:
-    external: true
+# volumes:
+#   data:
