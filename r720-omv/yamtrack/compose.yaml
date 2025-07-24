@@ -1,6 +1,24 @@
 services:
   yamtrack:
     container_name: yamtrack
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    ipc: private
     image: ghcr.io/fuzzygrim/yamtrack:0.24.6
     restart: unless-stopped
     depends_on:
