@@ -19,8 +19,15 @@ services:
     cap_drop:
       - ALL
     ipc: private
+    security_opt:
+      - no-new-privileges:true
     image: ghcr.io/fuzzygrim/yamtrack:0.24.6
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       - yamtrack-postgres
       - yamtrack-redis
@@ -66,6 +73,14 @@ services:
   yamtrack-postgres:
     image: postgres:16-alpine
     container_name: yamtrack-postgres
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       POSTGRES_DB: "yamtrack"
       POSTGRES_USER: "yamtrack"
@@ -79,6 +94,26 @@ services:
   yamtrack-redis:
     container_name: yamtrack-redis
     image: redis:8.0.3
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
     volumes:
       - /opt/docker/yamtrack/yamtrack-redis_data:/data
@@ -90,6 +125,11 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
