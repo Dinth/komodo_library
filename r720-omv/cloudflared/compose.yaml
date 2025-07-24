@@ -1,16 +1,15 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  cloudflared:
+    image: cloudflare/cloudflared:2025.7.0
+    container_name: cloudflared-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: "${CLOUDFLARED_TOKEN}"
+    networks:
+      - cloudflared
+networks:
+  cloudflared:
+    external: false
+    driver: bridge
+    name: cloudflared
