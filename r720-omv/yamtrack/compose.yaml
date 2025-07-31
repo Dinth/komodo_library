@@ -20,7 +20,7 @@ services:
       - ALL
     ipc: private
     security_opt:
-      - no-new-privileges:true
+      - no-new-privileges=true
     image: ghcr.io/fuzzygrim/yamtrack:0.24.6
     restart: unless-stopped
     logging:
