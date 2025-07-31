@@ -32,9 +32,9 @@ services:
       - yamtrack-postgres
       - yamtrack-redis
     environment:
-#      TZ: "${TZ}"
-#      SECRET: "${YAMTRACK_SECRET}"
-#      REDIS_URL: "redis://yamtrack-redis:6379"
+      TZ: "${TZ}"
+      SECRET: "${YAMTRACK_SECRET}"
+      REDIS_URL: "redis://yamtrack-redis:6379"
       DB_HOST: "yamtrack-postgres"
       DB_NAME: "yamtrack"
       DB_USER: "yamtrack"
@@ -45,7 +45,7 @@ services:
       TMDB_NSFW: "true"
       MAL_NSFW: "true"
       IGDB_NSFW: "true"
-      MAL_API: "${MYANIMELIST_SECRET}"
+      #MAL_API: "${MYANIMELIST_SECRET}"
     labels:
       traefik.enable: "true"
       traefik.http.routers.yamtrack.rule: "Host(`mediatracker.${DOMAIN_NAME}`)"
