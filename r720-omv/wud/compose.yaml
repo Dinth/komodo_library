@@ -66,7 +66,7 @@ services:
       WUD_TRIGGER_TELEGRAM_TELEGRAM_SIMPLETITLE: "An update is available for: $${container.name}!"
       WUD_TRIGGER_HTTP_SIGNAL_AUTO: "true"
       WUD_TRIGGER_HTTP_SIGNAL_METHOD: "GET"
-      WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=${SIGNAL_PHONE_NUMBER}&recipients=${SINGAL_TECH_ID}&message=test'
+      WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=${SIGNAL_PHONE_NUMBER}&recipients=${SIGNAL_TECH_ID}&message=test'
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
