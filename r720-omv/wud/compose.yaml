@@ -37,6 +37,7 @@ services:
     volumes:
       - /opt/docker/wud/wud_store:/store
       - /etc/localtime:/etc/localtime:ro
+      - /etc/komodo/stacks:/docker
     ipc: private
     security_opt:
       - no-new-privileges:true
