@@ -261,6 +261,10 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/guacamole"
 environment = """
 GUACAMOLE_DB_PASS=[[GUACAMOLE_DB_PASS]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -370,6 +374,8 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/mediarr"
 environment = """
 TZ=[[TZ]]
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
 VPN_USERNAME=[[VPN_USERNAME]]
 VPN_PASSWORD=[[VPN_PASSWORD]]
 IPLAYARR_API_KEY=[[IPLAYARR_API_KEY]]
@@ -504,6 +510,7 @@ environment = """
 DOMAIN_NAME=[[DOMAIN_NAME]]
 TZ=[[TZ]]
 OPENWEBUI_SECRET_KEY=[[OPENWEBUI_SECRET_KEY]]
+OPENWEBUI_PIPELINES_PASS=[[OPENWEBUI_PIPELINES_PASS]]
 """
 
 ##
@@ -633,28 +640,10 @@ environment = """
 TZ=[[TZ]]
 ADMIN_EMAIL=[[ADMIN_EMAIL]]
 TRAEFIK_CF_DNS_API_TOKEN=[[TRAEFIK_CF_DNS_API_TOKEN]]
-"""
-
-##
-
-[[stack]]
-name = "ttrss"
-tags = [
-  "stacks",
-  "needs-improvement",
-  "database-to-migrate"
-]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/ttrss"
-environment = """
-TTRSS_DB_PASS=[[TTRSS_DB_PASS]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 """
 
 ##
@@ -693,6 +682,7 @@ environment = """
 DOMAIN_NAME=[[DOMAIN_NAME]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 """
 
 ##
