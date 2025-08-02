@@ -12,6 +12,7 @@ services:
       DOMAIN_NAME: "${DOMAIN_NAME}"
       SESSION_ENCRYPTION_KEY: "${AUTHELIA_SESSION_KEY}"
       STORAGE_ENCRYPTION_KEY: "${AUTHELIA_STORAGE_KEY}"
+      X_AUTHELIA_CONFIG_FILTERS: "template"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
     labels:
       traefik.enable: "true"
