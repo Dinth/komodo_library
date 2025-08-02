@@ -62,10 +62,10 @@ services:
       WUD_TRIGGER_TELEGRAM_TELEGRAM_AUTO: "true"
       WUD_TRIGGER_TELEGRAM_TELEGRAM_BOTTOKEN: "${TELEGRAM_API_KEY}"
       WUD_TRIGGER_TELEGRAM_TELEGRAM_CHATID: "${TELEGRAM_TECH_ID}"
-      WUD_TRIGGER_TELEGRAM_TELEGRAM_SIMPLEBODY: "*Container Update Available!*\n\n*Container:* `{{result.name}}`"
+      WUD_TRIGGER_TELEGRAM_TELEGRAM_SIMPLEBODY: "*Container Update Available!"
       WUD_TRIGGER_HTTP_SIGNAL_AUTO: "true"
       WUD_TRIGGER_HTTP_SIGNAL_METHOD: "GET"
-      WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=YOUR_SIGNAL_SENDER_NUMBER&recipients=YOUR_SIGNAL_RECIPIENT_NUMBER&message=test'
+      WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=${SIGNAL_PHONE_NUMBER}&recipients=${SINGAL_TECH_ID}&message=test'
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
