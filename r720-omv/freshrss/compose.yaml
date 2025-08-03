@@ -11,8 +11,9 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; r = requests.get('http://localhost:80'); print(r.status_code == 200)"]
-      interval: 10s
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      start_period: 60s
+      interval: 20s
       timeout: 5s
       retries: 3
     networks:
