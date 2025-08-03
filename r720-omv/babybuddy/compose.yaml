@@ -58,11 +58,12 @@ services:
       wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Babybuddy"
       wud.display.icon: "sh-baby-buddy"
-#    healthcheck:
-#      test: ["CMD", "python", "-c", "import requests; r = requests.get('http://localhost:8000'); print(r.status_code == 200)"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      start_period: 60s
+      interval: 20s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
     volumes:
       - /opt/docker/babybuddy/babybuddy_data:/config
