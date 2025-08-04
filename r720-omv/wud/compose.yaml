@@ -69,7 +69,7 @@ services:
       WUD_TRIGGER_HTTP_SIGNAL_METHOD: "GET"
       WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=${SIGNAL_PHONE_NUMBER}&recipients=${SIGNAL_TECH_ID}&message=test'
       WUD_AUTH_BASIC_BASIC_USER: "dinth"
-      WUD_AUTH_BASIC_BASIC_HASH: '${WUD_PASSWORD}'
+      WUD_AUTH_BASIC_BASIC_HASH: "${WUD_PASSWORD}"
 #      WUD_AUTH_OIDC_AUTHELIA_CLIENTID: "my-wud-client-id"
 #      WUD_AUTH_OIDC_AUTHELIA_CLIENTSECRET: "${WUD_AUTHELIA_SECRET}"
 #      WUD_AUTH_OIDC_AUTHELIA_DISCOVERY: "https://id.${DOMAIN_NAME}/.well-known/openid-configuration"
