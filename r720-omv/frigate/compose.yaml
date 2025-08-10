@@ -1,5 +1,4 @@
 services:
-
   frigate:
     cap_add:
       - AUDIT_WRITE
@@ -30,7 +29,7 @@ services:
       TRANSFORMERS_NO_ADVISORY_WARNINGS: "1"
       OPENCV_FFMPEG_LOGLEVEL: "8"
     hostname: frigate
-    image: ghcr.io/blakeblackshear/frigate:0.15.1-tensorrt
+    image: ghcr.io/blakeblackshear/frigate:0.15.2-tensorrt
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ipc: private
