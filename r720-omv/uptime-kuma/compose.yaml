@@ -1,6 +1,6 @@
 services:
   uptime-kuma-socket-proxy:
-    image: wollomatic/socket-proxy:1.7.0
+    image: wollomatic/socket-proxy:1.8.1
     ipc: private
     command:
       - '-loglevel=info'
