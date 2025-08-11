@@ -86,7 +86,7 @@ services:
       traefik.http.middlewares.secHeaders.headers.stsPreload: "true"
       traefik.http.middlewares.secHeaders.headers.stsSeconds: "31536000"
       traefik.http.middlewares.secHeaders.headers.customFrameOptionsValue: "SAMEORIGIN"
-      traefik.http.middlewares.secHeaders.headers.customResponseHeaders.Content-Security-Policy: 'default-src ''self''; script-src ''self'' ''unsafe-inline'' ''unsafe-eval''; style-src ''self'' ''unsafe-inline''; img-src ''self'' data: cdn.jsdelivr.net; font-src ''self'' data:; object-src ''none''; frame-ancestors ''self''; connect-src ''self''; media-src ''self'' blob:;'
+      traefik.http.middlewares.secHeaders.headers.customResponseHeaders.Content-Security-Policy: 'default-src ''self''; media-src ''self'' blob:; script-src ''self'' ''unsafe-inline'' ''unsafe-eval''; style-src ''self'' ''unsafe-inline''; img-src ''self'' data: cdn.jsdelivr.net; font-src ''self'' data:; object-src ''none''; frame-ancestors ''self''; connect-src ''self'';'
       traefik.http.middlewares.secHeaders.headers.customResponseHeaders.Referrer-Policy: 'strict-origin-when-cross-origin'
       traefik.http.middlewares.secHeaders.headers.customResponseHeaders.Permissions-Policy: 'microphone=(), geolocation=(), payment=(), usb=(), vr=(), camera=(), display-capture=(), accelerometer=(), gyroscope=(), magnetometer=(), midi=(), xr-spatial-tracking=(), screen-wake-lock=()'
       traefik.http.middlewares.secHeaders.headers.customResponseHeaders.X-Robots-Tag: 'noindex, nofollow, noarchive, nosnippet'
