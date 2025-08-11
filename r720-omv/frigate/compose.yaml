@@ -67,6 +67,7 @@ services:
       traefik.http.routers.frigate.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.frigate.middlewares: "secHeaders@docker"
       traefik.http.services.frigate.loadbalancer.server.port: "8971"
+      traefik.docker.network: "traefik"
       homepage.group: "Home"
       homepage.name: "Frigate"
       homepage.icon: "frigate.png"
