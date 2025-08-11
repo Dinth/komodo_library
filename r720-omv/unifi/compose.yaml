@@ -1,6 +1,6 @@
 services:
   unifi-db:
-    image: docker.io/mongo:8.0.11
+    image: docker.io/mongo:8.0.12
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: unifi-db
     labels:
@@ -21,7 +21,7 @@ services:
       start_period: 5s
 
   unifi-network-application:
-    image: lscr.io/linuxserver/unifi-network-application:9.2.87
+    image: lscr.io/linuxserver/unifi-network-application:9.3.45
     container_name: unifi-network-application
     environment:
       PUID: "${DOCKER_PUID}"
