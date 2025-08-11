@@ -65,7 +65,7 @@ services:
       traefik.http.routers.frigate.tls.certresolver: letsencrypt
       traefik.http.routers.frigate.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.frigate.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.frigate.middlewares: "securityHeaders@docker"
+      traefik.http.routers.frigate.middlewares: "securityHeaders@file"
       traefik.http.services.frigate.loadbalancer.server.port: "8971"
       traefik.docker.network: "traefik"
       homepage.group: "Home"
