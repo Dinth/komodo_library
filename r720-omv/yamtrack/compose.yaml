@@ -96,7 +96,7 @@ services:
 
   yamtrack-redis:
     container_name: yamtrack-redis
-    image: redis:8.0.3
+    image: redis:8.2.0
     cap_add:
       - AUDIT_WRITE
       - CHOWN
