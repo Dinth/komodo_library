@@ -43,6 +43,7 @@ services:
       TRAEFIK_API_DEBUG: "false"
       TRAEFIK_LOG_LEVEL: "DEBUG"
       TZ: "${TZ}"
+      TRAEFIK_PROVIDERS_DOCKER_NETWORK: "traefik"
   # --- EntryPoints Configuration ---
     # Web (HTTP) EntryPoint on port 80 with a global redirect to websecure
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
