@@ -345,7 +345,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    image: redis:8.0.2
+    image: redis:8.2.0
     ipc: private
     labels:       
       wud.watch: "true"
