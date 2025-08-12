@@ -82,9 +82,9 @@ services:
       timeout: 90s
     environment:
       - API_ENV=local
-      - PG_HOST=postgres
-      - PG_USER=app_user
-      - PG_PASSWORD=app_pass
+      - PG_HOST=omnivore-postgres
+      - PG_USER=omnivore
+      - PG_PASSWORD=${OMNIVORE_POSTGRES_PASS}
       - PG_DB=omnivore
       - PG_PORT=5432
       - PG_POOL_MAX=20
