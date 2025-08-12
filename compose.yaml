@@ -72,4 +72,8 @@ services:
 
 networks:
   omnivore:
-    
+    external: false
+    name: omnivore
+    driver: bridge
+  traefik:
+    external: true
