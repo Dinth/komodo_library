@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/freshrss/freshrss-rssbridge_config:/config
-    entrypoint: ["sh", "-c", "/app/docker-entrypoint.sh && /app/bin/cache-clear"]
+    entrypoint: ["sh", "-c", "/app/bin/cache-clear && exec /app/docker-entrypoint.sh"]
     logging:
       driver: json-file
       options:
