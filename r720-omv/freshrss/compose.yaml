@@ -6,7 +6,7 @@ services:
     volumes:
       - /opt/docker/freshrss/freshrss-rssbridge_config:/config
     post_start:
-      - command: ["/app/bin/cache-clear"]
+      - command: ["sh", "-c", "/app/bin/cache-clear && echo 'Cache cleared successfully'"]
     logging:
       driver: json-file
       options:
