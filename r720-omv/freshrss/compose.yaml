@@ -13,11 +13,11 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
-      start_period: 60s
-      interval: 20s
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/80 && echo HTTP OK || echo HTTP FAIL'"]
+      interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 10s
     networks:
       - freshrss
     ports: 
