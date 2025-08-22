@@ -27,7 +27,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    image: redis:latest
+    image: redis:8.2.1
     ipc: private
     logging:
       driver: json-file
@@ -124,7 +124,7 @@ services:
     expose:
       - 3000/tcp
     hostname: dawarich-sidekiq
-    image: freikin/dawarich:0.28.1
+    image: freikin/dawarich:0.29.1
     ipc: private
     healthcheck:
       test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
