@@ -62,7 +62,7 @@ services:
       vouchervault-redis:
         condition: service_healthy
   vouchervault-redis:
-    image: redis:7-alpine
+    image: redis:8.2.1
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     container_name: vouchervault-redis
     restart: unless-stopped
@@ -97,6 +97,13 @@ services:
     ipc: private
     volumes:
       - /opt/docker/vouchervault/redis_data:/data
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "VoucherVault Redis"
+      wud.display.icon: "sh-vouchervault"
+      wud.tag.include: '^$v\d+.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/redis/redis/releases/tag/$${major}.$${minor}.$${patch}'
 networks: 
   vouchervault:
     name: vouchervault
