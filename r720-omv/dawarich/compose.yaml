@@ -200,7 +200,7 @@ services:
       PHOTON_API_KEY: "${PHOTON_API_KEY}"
       SELF_HOSTED: "true"
     hostname: dawarich
-    image: freikin/dawarich:0.29.1
+    image: freikin/dawarich:0.30.1
     ipc: private
 #    healthcheck:
 #      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
