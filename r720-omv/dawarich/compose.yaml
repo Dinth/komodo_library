@@ -124,7 +124,7 @@ services:
     expose:
       - 3000/tcp
     hostname: dawarich-sidekiq
-    image: freikin/dawarich:0.30.1
+    image: freikin/dawarich:0.30.11
     ipc: private
     healthcheck:
       test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
