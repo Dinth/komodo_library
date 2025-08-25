@@ -37,7 +37,7 @@ services:
         max-size: 10m
         max-file: 3
     healthcheck:
-      test: curl --fail http://localhost:8080/ || exit 1
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080 | grep -q 'Login' || exit 1"]
       interval: 40s
       timeout: 30s
       retries: 3
