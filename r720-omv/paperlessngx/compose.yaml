@@ -86,7 +86,7 @@ services:
       - paperlessngx-postgres
       - paperlessngx-valkey
     ports:
-      - "8000:8583"
+      - "8583:8000"
     volumes:
       - /opt/docker/paperlessngx/paperlessngx_data:/usr/src/paperless/data
       - /opt/docker/paperlessngx/paperlessngx_media:/usr/src/paperless/media
