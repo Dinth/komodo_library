@@ -98,6 +98,8 @@ services:
       PAPERLESS_DBNAME: "paperlessngx"
       PAPERLESS_DBUSER: "paperlessngx"
       PAPERLESS_DBPASS: "${PAPERLESSNGX_POSTGRES_PASS}"
+    networks:
+      - paperlessngx
 networks:
   paperlessngx:
     name: paperlessngx-web
