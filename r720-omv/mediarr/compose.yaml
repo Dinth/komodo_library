@@ -59,7 +59,7 @@ services:
   # Torrent client
   #############################################################################
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: lscr.io/linuxserver/qbittorrent:5.1.2
     container_name: qbittorrent
     restart: unless-stopped
     ipc: private
