@@ -13,7 +13,8 @@ services:
       SESSION_ENCRYPTION_KEY: "${AUTHELIA_SESSION_KEY}"
       STORAGE_ENCRYPTION_KEY: "${AUTHELIA_STORAGE_KEY}"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
-#      AUTHELIA_SESSION_REDIS_HOST: "redis://dawarich-valkey:6379"
+      AUTHELIA_SESSION_REDIS_HOST: authelia-valkey
+      AUTHELIA_SESSION_REDIS_PORT: 6379
       X_AUTHELIA_CONFIG_FILTERS: "template"
     labels:
       traefik.enable: "true"
