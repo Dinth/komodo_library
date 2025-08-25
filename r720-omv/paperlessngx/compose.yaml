@@ -79,7 +79,22 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
-
+  paperlessngx:
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.18.2
+    restart: unless-stopped
+    depends_on:
+      - paperlessngx-postgres
+      - paperlessngx-valkey
+    ports:
+      - "8000:8583"
+    volumes:
+      - /opt/docker/paperlessngx/paperlessngx_data:/usr/src/paperless/data
+      - /opt/docker/paperlessngx/paperlessngx_media:/usr/src/paperless/media
+      - /opt/docker/paperlessngx/paperlessngx_export:/usr/src/paperless/export
+      - /opt/docker/paperlessngx/paperlessngx_consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperlessngx-valkey:6379
+      PAPERLESS_DBHOST: paperlessngx-postgres
 networks:
   paperlessngx:
     name: paperlessngx-web
