@@ -345,7 +345,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    image: redis:8.2.0
+    image: redis:8.2.1
     ipc: private
     labels:       
       wud.watch: "true"
@@ -493,7 +493,7 @@ services:
       LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
       LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
     hostname: cleanuperr
-    image: ghcr.io/cleanuparr/cleanuparr:2.1.5
+    image: ghcr.io/cleanuparr/cleanuparr:2.1.6
     ipc: private
     logging:
       driver: json-file
