@@ -1,6 +1,6 @@
 services:
   traefik-socket-proxy:
-    image: wollomatic/socket-proxy:1.8.1
+    image: wollomatic/socket-proxy:1.9.0
     ipc: private
     command:
       - '-loglevel=info'
