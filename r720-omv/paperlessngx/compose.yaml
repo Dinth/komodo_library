@@ -12,6 +12,7 @@ services:
       - SETGID
       - SETUID
       - DAC_OVERRIDE
+      - CHOWN
     cap_drop:
       - ALL
     labels:
