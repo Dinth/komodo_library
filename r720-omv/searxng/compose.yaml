@@ -19,7 +19,7 @@ services:
       wud.display.icon: "sh-searxng"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}''
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
     healthcheck: 
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
