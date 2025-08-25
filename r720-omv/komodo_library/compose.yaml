@@ -14,6 +14,7 @@ services:
       STORAGE_ENCRYPTION_KEY: "${AUTHELIA_STORAGE_KEY}"
       X_AUTHELIA_CONFIG_FILTERS: "template"
       AUTHELIA_STORAGE_LOCAL_PATH: "/config/db.sqlite3"
+      AUTHELIA_SESSION_REDIS_HOST: "redis://dawarich-valkey:6379"
     labels:
       traefik.enable: "true"
   # --- Router for the Authelia Portal ---
