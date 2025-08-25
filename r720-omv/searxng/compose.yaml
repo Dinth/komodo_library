@@ -14,6 +14,12 @@ services:
       - DAC_OVERRIDE
     cap_drop:
       - ALL
+    labels:
+      wud.display.name: "Searxng - Valkey"
+      wud.display.icon: "sh-searxng"
+      wud.watch: true
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}''
     healthcheck: 
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
@@ -62,7 +68,6 @@ services:
       traefik.http.routers.searxng.middlewares: "secHeaders@file"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/searxng/searxng/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Searxng"
