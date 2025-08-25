@@ -43,59 +43,46 @@ services:
         max-size: "10m"
         max-file: "3"
     depends_on:
-      - authelia-redis
+      - authelia-valkey
     networks:
       - authelia
       - traefik
 
-  authelia-redis:
-    image: redis:8.2.1
-    container_name: authelia-redis
-    restart: unless-stopped
+  authelia-valkey:
+    container_name: authelia-valkey
+    image: docker.io/valkey/valkey:8.1.3-alpine
     ipc: private
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
-    labels:
-      wud.watch: "true"
-      wud.watch.digest: "true"
-      wud.display.name: "Authelia Redis"
-      wud.display.icon: "sh-authelia"
-      wud.tag.include: '^$v\d+.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/redis/redis/releases/tag/$${major}.$${minor}.$${patch}'
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    expose:
-      - 6379
-    command: "redis-server --requirepass ${AUTHELIA_REDIS_PASS}"
-    volumes:
-      - ./redis/data:/data
-    user: "8001:8001"
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
+    restart: unless-stopped
     networks:
       - authelia
+    volumes:
+      - /opt/docker/authelia/valkey-data:/data
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - CHOWN
+    cap_drop:
+      - ALL
+    labels:
+      wud.display.name: "Authelia - Valkey"
+      wud.display.icon: "sh-authelia"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+    healthcheck: 
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
 networks:
   authelia:
     name: authelia
