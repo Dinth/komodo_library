@@ -69,7 +69,7 @@ services:
       wud.display.icon: "sh-searxng"
       homepage.group: "Infrastructure"
       homepage.name: "SearxNG"
-      homepage.icon: "emby.png"
+      homepage.icon: "searxng.png"
       homepage.href: "https://search.${DOMAIN_NAME}/"
       homepage.description: "Meta search engine"
       homepage.siteMonitor: "http://10.10.1.13:9234"
