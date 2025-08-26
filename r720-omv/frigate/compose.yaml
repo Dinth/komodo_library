@@ -56,7 +56,7 @@ services:
       - 8554:8554/tcp
       - 8555:8555/tcp
       - 8555:8555/udp
-      - 8971:8971/tcp #authentication
+#      - 8971:8971/tcp #authentication
     privileged: true
     labels:
       traefik.enable: "true"
