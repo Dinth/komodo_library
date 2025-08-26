@@ -52,6 +52,7 @@ services:
       - traefik
     ports:
       - 5000:5000/tcp ## NO AUTH!!!!!
+      - 1984:1984/tcp
       - 8554:8554/tcp
       - 8555:8555/tcp
       - 8555:8555/udp
