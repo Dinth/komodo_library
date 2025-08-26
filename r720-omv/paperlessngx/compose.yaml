@@ -114,7 +114,7 @@ services:
       homepage.group: "Media"
       homepage.name: "Paperless-ngx"
       homepage.icon: "paperlessngx.png"
-      homepage.href: "https://audiobooks.${DOMAIN_NAME}"
+      homepage.href: "https://papers.${DOMAIN_NAME}"
       homepage.description: "E-book catalogue"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
