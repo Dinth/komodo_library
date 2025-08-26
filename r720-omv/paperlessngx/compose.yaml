@@ -110,7 +110,7 @@ services:
       traefik.http.routers.paperlessngx.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.paperlessngx.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.paperlessngx.middlewares: "secHeaders@file"
-      traefik.http.services.paperlessngx.loadbalancer.server.port: "80"
+      traefik.http.services.paperlessngx.loadbalancer.server.port: "8000"
       homepage.group: "Media"
       homepage.name: "Paperless-ngx"
       homepage.icon: "paperlessngx.png"
