@@ -101,6 +101,7 @@ services:
       PAPERLESS_DBPASS: "${PAPERLESSNGX_POSTGRES_PASS}"
     networks:
       - paperlessngx
+      - traefik
     labels:
       traefik.enable: "true"
       traefik.http.routers.paperlessngx.rule: "Host(`papers.${DOMAIN_NAME}`)"
