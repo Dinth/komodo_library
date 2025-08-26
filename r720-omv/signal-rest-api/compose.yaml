@@ -1,6 +1,6 @@
 services:
   signal_rest_api:
-    image: bbernhard/signal-cli-rest-api:0.93
+    image: bbernhard/signal-cli-rest-api:0.94
     container_name: signal-rest-api
     restart: unless-stopped
     ipc: private
@@ -21,6 +21,12 @@ services:
       SIGNAL_CLI_UID: "${DOCKER_PUID}"
       SIGNAL_CLI_GID: "${DOCKER_PGID}"
       #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+$$'
+      wud.display.name: "Signal Rest API"
+      wud.display.icon: "sh:signal"
+      wud.link.template: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}.$${patch}"
     volumes:
       - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
     ports:
