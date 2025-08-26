@@ -82,6 +82,7 @@ services:
   paperlessngx:
     image: ghcr.io/paperless-ngx/paperless-ngx:2.18.2
     restart: unless-stopped
+    ipc: private
     depends_on:
       - paperlessngx-postgres
       - paperlessngx-valkey
@@ -100,6 +101,26 @@ services:
       PAPERLESS_DBPASS: "${PAPERLESSNGX_POSTGRES_PASS}"
     networks:
       - paperlessngx
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.paperlessngx.rule: "Host(`papers.${DOMAIN_NAME}`)"
+      traefik.http.routers.paperlessngx.entrypoints: "websecure"
+      traefik.http.routers.paperlessngx.tls: "true"
+      traefik.http.routers.paperlessngx.tls.certresolver: "letsencrypt"
+      traefik.http.routers.paperlessngx.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.paperlessngx.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.paperlessngx.middlewares: "secHeaders@file"
+      traefik.http.services.paperlessngx.loadbalancer.server.port: "80"
+      homepage.group: "Media"
+      homepage.name: "Paperless-ngx"
+      homepage.icon: "paperlessngx.png"
+      homepage.href: "https://audiobooks.${DOMAIN_NAME}"
+      homepage.description: "E-book catalogue"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.display.name: "Paperless-ngx"
+      wud.display.icon: "sh:paperlessngx"
+      wud.link.template: "https://github.com/paperless-ngx/paperless-ngx/releases/tag/v$${major}.$${minor}.$${patch}"
 networks:
   paperlessngx:
     name: paperlessngx-web
