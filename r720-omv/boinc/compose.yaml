@@ -2,8 +2,22 @@ services:
   boinc:
     image: lscr.io/linuxserver/boinc:latest
     container_name: boinc
+    ipc: private
     security_opt:
       - seccomp:unconfined #optional
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
     environment:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
@@ -17,3 +31,10 @@ services:
     devices:
       - /dev/dri:/dev/dri #optional
     restart: unless-stopped
+    networks:
+      - boinc
+networks:
+  boinc:
+    driver: bridge
+    name: boinc
+    external: false
