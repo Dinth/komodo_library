@@ -27,9 +27,12 @@ services:
       - /opt/docker/boinc/boinc_config:/config
     ports:
       - 8080:8080
-      - 8181:8181
-    devices:
-      - /dev/dri:/dev/dri #optional
+    resources:
+      limits:
+        cpus: "2"
+        memory: 1024M
+      reservations:
+        memory: 128M
     restart: unless-stopped
     networks:
       - boinc
