@@ -32,7 +32,7 @@ services:
       IGDB_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
       RETROACHIEVEMENTS_API_KEY: "${ROMM_RETROARCHIEVEMENTS_API_KEY}"
     hostname: romm
-    image: rommapp/romm:4.1.5
+    image: rommapp/romm:4.1.6
     ipc: private
     healthcheck:
       test: curl -ILfSs http://localhost:8080/  || exit 1
