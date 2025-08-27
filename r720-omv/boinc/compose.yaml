@@ -27,9 +27,6 @@ services:
       - /opt/docker/boinc/boinc_config:/config
     ports:
       - 8080:8080
-      - 8181:8181
-    devices:
-      - /dev/dri:/dev/dri #optional
     restart: unless-stopped
     networks:
       - boinc
