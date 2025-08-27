@@ -1,6 +1,6 @@
 services:
   boinc:
-    image: lscr.io/linuxserver/boinc:latest
+    image: lscr.io/linuxserver/boinc:8.2.5
     container_name: boinc
     ipc: private
     security_opt:
@@ -27,6 +27,9 @@ services:
       - /opt/docker/boinc/boinc_config:/config
     ports:
       - 8080:8080
+      - 8181:8181
+    devices:
+      - /dev/dri:/dev/dri #optional
     restart: unless-stopped
     networks:
       - boinc
