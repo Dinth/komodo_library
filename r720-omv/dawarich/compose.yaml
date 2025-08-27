@@ -120,7 +120,7 @@ services:
     image: freikin/dawarich:0.30.12
     ipc: private
     healthcheck:
-      test: [ "CMD-SHELL", "bundle exec sidekiqmon processes | grep $${HOSTNAME}" ]
+      test: [ "CMD-SHELL", "pgrep -f sidekiq" ]
       interval: 10s
       retries: 30
       start_period: 30s
