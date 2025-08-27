@@ -1,16 +1,19 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  boinc:
+    image: lscr.io/linuxserver/boinc:latest
+    container_name: boinc
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+      PASSWORD: #optional
+    volumes:
+      - /opt/docker/boinc/boinc_config:/config
+    ports:
+      - 8080:8080
+      - 8181:8181
+    devices:
+      - /dev/dri:/dev/dri #optional
+    restart: unless-stopped
