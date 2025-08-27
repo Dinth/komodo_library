@@ -34,7 +34,7 @@ services:
     environment:
       TZ: "${TZ}"
       SECRET: "${YAMTRACK_SECRET}"
-      REDIS_URL: "redis://yamtrack-redis:6379"
+      REDIS_URL: "redis://yamtrack-valkey:6379"
       DB_HOST: "yamtrack-postgres"
       DB_NAME: "yamtrack"
       DB_USER: "yamtrack"
