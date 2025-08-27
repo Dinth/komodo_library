@@ -41,7 +41,7 @@ services:
       traefik.http.routers.navidrome.tls.certresolver: letsencrypt
       traefik.http.routers.navidrome.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.navidrome.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.navidrome.middlewares: "secHeaders@docker"
+      traefik.http.routers.navidrome.middlewares: "secHeaders@file"
       traefik.http.services.navidrome.loadbalancer.server.port: "4533"
       homepage.group: "Home"
       homepage.name: "Media"
