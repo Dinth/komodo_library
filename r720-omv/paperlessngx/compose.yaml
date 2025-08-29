@@ -19,7 +19,7 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    image: docker.io/postgres:17-alpine
+    image: docker.io/postgres:17.6-alpine
     restart: unless-stopped
     healthcheck:
       test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
@@ -31,6 +31,12 @@ services:
       POSTGRES_DB: "paperlessngx"
       POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
       POSTGRES_USER: "paperlessngx"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Paperless-ngx - Postgres"
+      wud.display.icon: "sh-paperlessngx"  
     deploy:
       resources:
         limits:
