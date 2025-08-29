@@ -46,7 +46,7 @@ services:
       POSTGRES_USER: "freshrss"
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+$$'
+      wud.tag.include: '^17\.\d+-alipne$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "FreshRSS - Postgres"
       wud.display.icon: "sh-freshrss"  
