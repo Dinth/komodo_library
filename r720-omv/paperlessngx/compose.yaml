@@ -82,8 +82,10 @@ services:
     restart: unless-stopped
     ipc: private
     depends_on:
-      - paperlessngx-postgres
-      - paperlessngx-valkey
+      paperlessngx-valkey:
+        condition: service_healthy
+      paperlessngx-postgres:
+        condition: service_healthy
     ports:
       - "8583:8000"
     volumes:
