@@ -22,7 +22,7 @@ services:
     ports: 
       - "4746:80"
   freshrss-postgres:
-    image: docker.io/postgres:17-alpine
+    image: docker.io/postgres:17.6-alpine
     ipc: private
     restart: unless-stopped
     healthcheck:
@@ -35,12 +35,23 @@ services:
       POSTGRES_DB: "freshrss"
       POSTGRES_PASSWORD: "${FRESHRSS_POSTGRES_PASS}"
       POSTGRES_USER: "freshrss"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "FreshRSS - Postgres"
+      wud.display.icon: "sh-freshrss"  
     deploy:
       resources:
         limits:
           memory: 200m
         reservations:
           memory: 50m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - /opt/docker/freshrss/freshrss_postgres-data:/var/lib/postgresql/data
     networks:
