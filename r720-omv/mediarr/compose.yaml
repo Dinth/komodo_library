@@ -282,7 +282,7 @@ services:
       PGID: "100"
       TZ: "${TZ}"
     hostname: lidarr
-    image: linuxserver/lidarr:2.12.4
+    image: linuxserver/lidarr:2.13.3
     ipc: private
     labels:
       homepage.group: "Media"
