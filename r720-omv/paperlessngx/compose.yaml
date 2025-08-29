@@ -25,7 +25,7 @@ services:
       POSTGRES_USER: "paperlessngx"
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+$$'
+      wud.tag.include: '^v?\d+\.\d+-alpine$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Paperless-ngx - Postgres"
       wud.display.icon: "sh-paperlessngx"  
