@@ -24,6 +24,23 @@ services:
   freshrss-postgres:
     image: docker.io/postgres:17.6-alpine
     ipc: private
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
     restart: unless-stopped
     healthcheck:
       test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
