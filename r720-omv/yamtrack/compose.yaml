@@ -81,6 +81,7 @@ services:
     ipc: private
     cap_add:
       - CHOWN
+      - FOWNER
       - DAC_OVERRIDE
       - SETUID
       - SETGID
