@@ -102,7 +102,7 @@ services:
       retries: 5
     labels:
       wud.watch: "true"
-      wud.tag.include: '^16\.\d+$$'
+      wud.tag.include: '^16\.\d+-alpine$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Yamtrack - Postgres"
       wud.display.icon: "sh-yamtrack"  
