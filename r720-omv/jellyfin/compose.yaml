@@ -78,7 +78,7 @@ services:
       wud.watch: "true"
       wud.display.name: "Jellyfin Server"
       wud.display.icon: "sh:jellyfin"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.tag.include: ' ^v?(?:\d{1,2}.){2}\d{1,2}$'
       wud.link.template: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}.$${patch}"
     healthcheck:
       interval: 3m
