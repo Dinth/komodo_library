@@ -104,6 +104,9 @@ services:
       wud.link.template: 'https://github.com/danielbrendel/hortusfox-web/releases/tag/v$${major}.$${minor}'
       wud.display.name: "HortusFox"
       wud.display.icon: "sh-hortusfox"
+    depends_on:
+      hortusfox_mariadb:
+        condition: service_healthy
     logging:
       driver: json-file
       options:
