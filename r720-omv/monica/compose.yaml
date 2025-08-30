@@ -47,7 +47,6 @@ services:
       - monica
       - adminer
   monica:
-    
     image: monica:4.1.2
     ports:
       - 5435:80
