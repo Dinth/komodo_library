@@ -1,4 +1,53 @@
 services:
+  hortusfox-mariadb:
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - FOWNER
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    container_name: hortusfox-mariadb
+    environment:
+      MYSQL_DIR: "/config"
+      DATADIR: "/config/databases"
+      MYSQL_ROOT_PASSWORD: "${MONICA_DB_PASS}"
+      MYSQL_DATABASE: "monica"
+      MYSQL_USER: "monica"
+      MYSQL_PASSWORD: "${MONICA_DB_PASS}"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+    hostname: hortusfox-mariadb
+    image: linuxserver/mariadb:11.4.8
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
+    networks:
+      - hortusfox
+      - adminer
+    restart: unless-stopped
+    labels:
+      wud.display.name: "HortusFox - MariaDB"
+      wud.display.icon: "sh-hortusfox"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+    volumes:
+      - /opt/docker/hortusfox/mariadb_data:/config
   hortusfox:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
