@@ -101,7 +101,7 @@ services:
       PAPERLESS_DBPASS: "${PAPERLESSNGX_POSTGRES_PASS}"
       PAPERLESS_TIME_ZONE: "${TZ}"
       PAPERLESS_OCR_LANGUAGE: "eng+pol"
-      PAPERLESS_URL: "https://papers.${DOMAIN_NAME}"
+      PAPERLESS_URL: "https://papers.${DOMAIN_NAME},http://10.10.1.13:8583"
     networks:
       - paperlessngx
       - traefik
