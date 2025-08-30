@@ -17,6 +17,8 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges=true
     container_name: mariadb
     entrypoint: ['/init']
     environment:
