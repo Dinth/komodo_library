@@ -1,5 +1,52 @@
 services:
-  app:
+  monica-postgres:
+    image: postgres:16.10-alpine
+    container_name: monica-postgres
+    ipc: private
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^16\.\d+-alpine$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Monica - Postgres"
+      wud.display.icon: "sh-monica"  
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+        reservations:
+          memory: 50m
+    environment:
+      POSTGRES_DB: "monica"
+      POSTGRES_USER: "monica"
+      POSTGRES_PASSWORD: "${MONICA_DB_PASS}"
+    volumes:
+      - /opt/docker/monica/monica-postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - monica
+  monica:
+    
     image: monica:4.1.2
     ports:
       - 5435:80
