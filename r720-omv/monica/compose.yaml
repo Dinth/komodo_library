@@ -83,5 +83,7 @@ networks:
     name: monica
     driver: bridge
     external: false
+  adminer: 
+    external: true
   traefik:
     external: true
