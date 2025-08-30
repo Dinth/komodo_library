@@ -100,6 +100,7 @@ services:
       PAPERLESS_DBUSER: "paperlessngx"
       PAPERLESS_DBPASS: "${PAPERLESSNGX_POSTGRES_PASS}"
       PAPERLESS_TIME_ZONE: "${TZ}"
+      PAPERLESS_OCR_LANGUAGE: "eng+pol"
     networks:
       - paperlessngx
       - traefik
