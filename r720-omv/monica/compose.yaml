@@ -51,7 +51,8 @@ services:
   monica:
     image: monica:5.0.0-beta.5-fpm-alpine
     ports:
-      - 5435:80
+#      - 5435:80
+      - 5435:9000
     environment:
       APP_KEY: "${MONICA_APP_KEY}"
       DB_HOST: "monica-mariadb"
