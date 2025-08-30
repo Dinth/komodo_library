@@ -26,6 +26,13 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
     networks:
       - mariadb
     ports:
