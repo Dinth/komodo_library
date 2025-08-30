@@ -25,6 +25,7 @@ services:
       DATADIR: "/config/databases"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
     hostname: mariadb
     image: linuxserver/mariadb:10.11.10
     ipc: private
