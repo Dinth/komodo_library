@@ -156,7 +156,6 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Immich - Postgres"
       wud.display.icon: "sh-immich"  
     deploy:
