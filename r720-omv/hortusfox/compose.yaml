@@ -76,7 +76,7 @@ services:
       APP_ADMIN_EMAIL: "${ADMIN_EMAIL}"
       APP_ADMIN_PASSWORD: "${HORTUSFOX_ADMIN_PASS}"
       APP_TIMEZONE: "${TZ}"
-      DB_HOST: "10.10.1.13"
+      DB_HOST: "hortusfox-mariadb"
       DB_PORT: "3306"
       DB_DATABASE: "hortusfox"
       DB_USERNAME: "hortusfox"
