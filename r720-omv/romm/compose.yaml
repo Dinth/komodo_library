@@ -164,9 +164,9 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/rommapp/romm/releases/tag/$${major}.$${minor}.$${patch}'
     depends_on:
-      romm_valkey:
+      romm-valkey:
         condition: service_healthy
-      romm_mariadb:
+      romm-mariadb:
         condition: service_healthy
     ports:
       - 4040:8080/tcp
