@@ -1,20 +1,5 @@
 services:
   mariadb:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
