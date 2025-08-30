@@ -1,5 +1,7 @@
 services:
   mariadb:
+    cap_add:
+      - CHOWN
     cap_drop:
       - ALL
     security_opt:
