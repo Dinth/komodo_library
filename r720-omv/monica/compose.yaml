@@ -14,7 +14,7 @@ services:
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
-      MYSQL_ROOT_PASSWORDORD: "${MONICA_DB_PASS}"
+      MYSQL_ROOT_PASSWORD: "${MONICA_DB_PASS}"
       MYSQL_DATABASE: "monica"
       MYSQL_USER: "monica"
       MYSQL_PASSWORD: "${MONICA_DB_PASS}"
