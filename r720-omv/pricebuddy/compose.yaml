@@ -44,16 +44,50 @@ services:
       - traefik
 
   pricebuddy-mysql:
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - FOWNER
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    container_name: pricebuddy-mysql
     image: mysql:8.2
     environment:
       MYSQL_DATABASE: "pricebuddy"
       MYSQL_USER: "pricebuddy"
       MYSQL_PASSWORD: "${PRICEBUDDY_DB_PASS}"
       MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_ADMIN_PASS}"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
     volumes:
       - /opt/docker/pricebuddy/pricebuddy_mysql:/var/lib/mysql
     networks:
       - pricebuddy
+      - adminer
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 60s
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   pricebuddy-scraper:
     image: amerkurev/scrapper:latest
