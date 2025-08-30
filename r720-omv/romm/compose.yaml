@@ -1,4 +1,53 @@
 services:
+  romm-mariadb:
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - FOWNER
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    container_name: romm-mariadb
+    environment:
+      MYSQL_DIR: "/config"
+      DATADIR: "/config/databases"
+      MYSQL_ROOT_PASSWORD: "${HORTUSFOX_DB_PASS}"
+      MYSQL_DATABASE: "hortusfox"
+      MYSQL_USER: "hortusfox"
+      MYSQL_PASSWORD: "${HORTUSFOX_DB_PASS}"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+    hostname: romm-mariadb
+    image: linuxserver/mariadb:11.4.8
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
+    networks:
+      - romm
+      - adminer
+    restart: unless-stopped
+    labels:
+      wud.display.name: "Romm - MariaDB"
+      wud.display.icon: "sh-romm"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+    volumes:
+      - /opt/docker/romm/mariadb_data:/config
   romm:
     cap_add:
       - AUDIT_WRITE
@@ -87,4 +136,6 @@ networks:
     name: romm
     driver: bridge
   traefik:
+    external: true
+  adminer:
     external: true
