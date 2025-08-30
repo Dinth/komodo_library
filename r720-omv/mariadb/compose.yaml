@@ -27,7 +27,7 @@ services:
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
     hostname: mariadb
-    image: linuxserver/mariadb:10.11.10
+    image: linuxserver/mariadb:11.4.8
     ipc: private
     logging:
       driver: json-file
