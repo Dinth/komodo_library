@@ -120,3 +120,5 @@ networks:
     driver: bridge
     name: hortusfox
     external: false
+  adminer:
+    external: true
