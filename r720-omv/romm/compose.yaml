@@ -106,7 +106,7 @@ services:
     entrypoint:
       - /docker-entrypoint.sh
     environment:
-      DB_HOST: "10.10.1.13"
+      DB_HOST: "romm-mariadb"
       DB_NAME: "romm"
       DB_USER: "romm"
       DB_PASSWD: "${ROMM_DB_PASS}"
