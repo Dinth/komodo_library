@@ -94,12 +94,39 @@ services:
 
   immich-valkey:
     container_name: immich-valkey
-    image: docker.io/valkey/valkey:8-bookworm@sha256:ff21bc0f8194dc9c105b769aeabf9585fea6a8ed649c0781caeac5cb3c247884
-    healthcheck:
-      test: redis-cli ping || exit 1
+    image: docker.io/valkey/valkey:8.1.3-alpine
+    ipc: private
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
     networks:
       - immich
+    volumes:
+      - /opt/docker/yamtrack/valkey-data:/data
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - CHOWN
+    cap_drop:
+      - ALL
+    labels:
+      wud.display.name: "Yamtrack - Valkey"
+      wud.display.icon: "sh-searxng"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+    healthcheck: 
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
 
   immich-postgres:
     container_name: immich-postgres
