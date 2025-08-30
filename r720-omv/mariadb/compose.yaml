@@ -45,7 +45,6 @@ services:
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
     volumes:
       - /opt/docker/mariadb/mariadb_data:/config
-    working_dir: /
 networks:
   mariadb:
     name: mariadb
