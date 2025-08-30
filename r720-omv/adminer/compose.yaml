@@ -50,4 +50,4 @@ networks:
   adminer:
     name: adminer
     driver: bridge
-    external: true
+    external: false
