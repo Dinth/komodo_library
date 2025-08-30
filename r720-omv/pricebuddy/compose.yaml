@@ -55,7 +55,7 @@ services:
     security_opt:
       - no-new-privileges=true
     container_name: pricebuddy-mariadb
-    image: linuxserver/mariadb:11.4.8
+    image: mysql:8.2
     environment:
       MYSQL_DATABASE: "pricebuddy"
       MYSQL_USER: "pricebuddy"
