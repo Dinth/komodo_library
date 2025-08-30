@@ -49,7 +49,7 @@ services:
     volumes:
       - /opt/docker/monica/mariadb_data:/config
   monica:
-    image: monica:4.1.2
+    image: monica:5.0.0-beta.5-fpm-alpine
     ports:
       - 5435:80
     environment:
