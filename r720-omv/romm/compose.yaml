@@ -48,6 +48,40 @@ services:
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
     volumes:
       - /opt/docker/romm/mariadb_data:/config
+  authelia-valkey:
+    container_name: romm-valkey
+    image: docker.io/valkey/valkey:8.1.3-alpine
+    ipc: private
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
+    restart: unless-stopped
+    networks:
+      - romm
+    volumes:
+      - /opt/docker/authelia/valkey-data:/data
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - CHOWN
+    cap_drop:
+      - ALL
+    labels:
+      wud.display.name: "Romm - Valkey"
+      wud.display.icon: "sh-romm"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+    healthcheck: 
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
   romm:
     cap_add:
       - AUDIT_WRITE
