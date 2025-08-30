@@ -10,7 +10,6 @@ services:
     security_opt:
       - no-new-privileges=true
     container_name: mariadb
-    entrypoint: ['/init']
     environment:
       MYSQL_ROOT_PASSWORD: "${MARIADB_ADMIN_PASS}"
       MYSQL_DIR: "/config"
