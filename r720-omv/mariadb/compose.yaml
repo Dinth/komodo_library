@@ -23,6 +23,8 @@ services:
       MYSQL_ROOT_PASSWORD: "${MARIADB_ADMIN_PASS}"
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
     hostname: mariadb
     image: linuxserver/mariadb:10.11.10
     ipc: private
