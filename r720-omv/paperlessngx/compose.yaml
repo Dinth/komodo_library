@@ -102,6 +102,7 @@ services:
       PAPERLESS_TIME_ZONE: "${TZ}"
       PAPERLESS_OCR_LANGUAGE: "eng+pol"
       PAPERLESS_URL: "https://papers.${DOMAIN_NAME},http://10.10.1.13:8583"
+      PAPERLESS_SECRET_KEY: "${PAPERLESS_SECRET_KEY}"
     networks:
       - paperlessngx
       - traefik
