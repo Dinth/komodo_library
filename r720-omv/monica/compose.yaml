@@ -1,4 +1,49 @@
 services:
+  monica-mariadb:
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    container_name: monica-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MARIADB_ADMIN_PASS}"
+      MYSQL_DIR: "/config"
+      DATADIR: "/config/databases"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+    hostname: monica-mariadb
+    image: linuxserver/mariadb:11.4.8
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
+    networks:
+      - monica
+      - adminer
+    restart: unless-stopped
+    labels:
+      wud.display.name: "MariaDB"
+      wud.display.icon: "sh-mariadb"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+    volumes:
+      - /opt/docker/monica/mariadb_data:/config
   monica:
     image: monica:4.1.2
     ports:
