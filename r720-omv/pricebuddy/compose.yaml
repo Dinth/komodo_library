@@ -115,3 +115,5 @@ networks:
     external: false
   traefik:
     external: true
+  adminer:
+    external: true
