@@ -4,6 +4,7 @@ services:
       - CHOWN
       - SETGID
       - SETUID
+      - DAC_OVERRIDE
     cap_drop:
       - ALL
     security_opt:
