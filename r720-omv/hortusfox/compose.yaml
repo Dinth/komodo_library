@@ -40,6 +40,12 @@ services:
       - hortusfox
       - adminer
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 60s
+      interval: 30s
+      timeout: 5s
+      retries: 5
     labels:
       wud.display.name: "HortusFox - MariaDB"
       wud.display.icon: "sh-hortusfox"
