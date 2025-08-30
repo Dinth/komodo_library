@@ -105,7 +105,7 @@ services:
       wud.display.name: "HortusFox"
       wud.display.icon: "sh-hortusfox"
     depends_on:
-      hortusfox_mariadb:
+      hortusfox-mariadb:
         condition: service_healthy
     logging:
       driver: json-file
