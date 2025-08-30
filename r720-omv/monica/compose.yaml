@@ -54,7 +54,7 @@ services:
       - 5435:80
     environment:
       APP_KEY: "${MONICA_APP_KEY}"
-      DB_HOST: "10.10.1.13"
+      DB_HOST: "monica-mariadb"
       DB_USERNAME: "monica"
       DB_PASSWORD: "${MONICA_DB_PASS}"
       APP_URL: "https://monica.${DOMAIN_NAME}"
