@@ -45,6 +45,7 @@ services:
     restart: unless-stopped
     networks:
       - monica
+      - adminer
   monica:
     
     image: monica:4.1.2
