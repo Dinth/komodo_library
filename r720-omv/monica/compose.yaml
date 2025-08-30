@@ -82,6 +82,9 @@ services:
       wud.link.template: "https://github.com/monicahq/monica/releases/tag/v$${major}.$${minor}.$${patch}"
     volumes:
       - /opt/docker/monica/monica_data:/var/www/html/storage
+    depends_on:
+      monica-mariadb:
+        condition: service_healthy
     restart: always
     networks:
       - monica
