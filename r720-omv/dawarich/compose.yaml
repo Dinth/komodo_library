@@ -74,7 +74,6 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^17-\d+\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Dawarich - Postgis"
       wud.display.icon: "sh-dawarich"  
     networks:
