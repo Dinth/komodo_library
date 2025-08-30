@@ -130,7 +130,41 @@ services:
 
   immich-postgres:
     container_name: immich-postgres
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.2-pgvectors0.3.0
+    ipc: private
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Immich - Postgres"
+      wud.display.icon: "sh-immich"  
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+        reservations:
+          memory: 50m
     environment:
       POSTGRES_PASSWORD: ${IMMICH_POSTGRES_PASS}
       POSTGRES_USER: immich
