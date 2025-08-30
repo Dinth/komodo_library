@@ -24,7 +24,7 @@ services:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
     hostname: mariadb
-    image: linuxserver/mariadb:10.11.4-r0-ls107
+    image: linuxserver/mariadb:10.11.10
     ipc: private
     logging:
       driver: json-file
@@ -36,6 +36,12 @@ services:
     ports:
       - 3306:3306/tcp
     restart: unless-stopped
+    labels:
+      wud.display.name: "MariaDB"
+      wud.display.icon: "sh-mariadb"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
     volumes:
       - /opt/docker/mariadb/mariadb_data:/config
     working_dir: /
