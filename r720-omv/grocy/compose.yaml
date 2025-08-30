@@ -24,7 +24,7 @@ services:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
     hostname: grocy
-    image: linuxserver/grocy:v4.5.0
+    image: linuxserver/grocy:v4.5.0-ls301
     ipc: private
     logging:
       driver: json-file
