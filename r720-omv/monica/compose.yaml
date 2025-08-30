@@ -11,9 +11,9 @@ services:
       - no-new-privileges=true
     container_name: monica-mariadb
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: "true"
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "monica"
       MYSQL_USER: "monica"
       MYSQL_PASSWORD: "${MONICA_DB_PASS}"
