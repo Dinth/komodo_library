@@ -57,15 +57,18 @@ services:
     security_opt:
       - no-new-privileges=true
     container_name: pricebuddy-mariadb
-    image: mysql:8.2
     environment:
+      MYSQL_DIR: "/config"
+      DATADIR: "/config/databases"
+      MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_PASS}"
       MYSQL_DATABASE: "pricebuddy"
       MYSQL_USER: "pricebuddy"
       MYSQL_PASSWORD: "${PRICEBUDDY_DB_PASS}"
-      MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_ADMIN_PASS}"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
+    hostname: pricebuddy-mariadb
+    image: linuxserver/mariadb:11.4.8
     ipc: private
     logging:
       driver: json-file
@@ -79,11 +82,10 @@ services:
           memory: 1g
         reservations:
           memory: 512m
-    volumes:
-      - /opt/docker/pricebuddy/pricebuddy_mysql:/var/lib/mysql
     networks:
       - pricebuddy
       - adminer
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
       start_period: 60s
@@ -91,11 +93,13 @@ services:
       timeout: 5s
       retries: 5
     labels:
-      wud.display.name: "Romm - MariaDB"
+      wud.display.name: "Pricebuddy - MariaDB"
       wud.display.icon: "sh-pricebuddy"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+    volumes:
+      - /opt/docker/pricebuddy/mariadb_data:/config
 
   pricebuddy-scraper:
     image: amerkurev/scrapper:latest
