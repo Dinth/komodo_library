@@ -59,7 +59,7 @@ services:
       homepage.widget.password: "${HOMEPAGE_CALIBREWEB_PASS}"
       wud.watch: "true"
       wud.watch.digest: "true"
-      wud.tag.include: '^v?[0-4].\d+.\d+$'
+      wud.tag.include: '^v?[0-4]\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/janeczku/calibre-web/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Calibre-Web"
       wud.display.icon: "sh-calibre-web"
