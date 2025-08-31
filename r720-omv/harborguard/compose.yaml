@@ -1,4 +1,10 @@
 services:
+  harborguard:
+    image: ghcr.io/harborguard/harborguard:latest
+    depends_on:
+      harborguard-posgres:
+        condition: service_healthy
+        
   harborguard-postgres:
     image: postgres:16.10-alpine
     container_name: harborguard-postgres
