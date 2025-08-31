@@ -1,6 +1,7 @@
 services:
   harborguard:
     image: ghcr.io/harborguard/harborguard:latest
+    ipc: private
     depends_on:
       harborguard-postgres:
         condition: service_healthy
@@ -12,6 +13,9 @@ services:
     environment:
       MAX_CONCURRENT_SCANS: "5"
       PORT: "3005"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     logging:
       driver: "json-file"
       options:
