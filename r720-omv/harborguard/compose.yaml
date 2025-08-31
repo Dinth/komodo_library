@@ -1,6 +1,4 @@
 services:
-  harborguard:
-    image
   harborguard-postgres:
     image: postgres:16.10-alpine
     container_name: harborguard-postgres
