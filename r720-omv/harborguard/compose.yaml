@@ -2,7 +2,7 @@ services:
   harborguard:
     image: ghcr.io/harborguard/harborguard:latest
     depends_on:
-      harborguard-posgres:
+      harborguard-postgres:
         condition: service_healthy
     labels:
       wud.display.name: "HarbourGuard"
