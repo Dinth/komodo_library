@@ -121,6 +121,7 @@ services:
     restart: unless-stopped
     networks:
       - yamtrack
+      - adminer
 
   yamtrack-valkey:
     container_name: yamtrack-valkey
@@ -162,5 +163,7 @@ networks:
     external: false
     name: yamtrack
     driver: bridge
+  adminer:
+    external: true
   traefik:
     external: true
