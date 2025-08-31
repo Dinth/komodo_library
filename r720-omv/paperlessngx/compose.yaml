@@ -101,7 +101,9 @@ services:
       PAPERLESS_DBPASS: "${PAPERLESSNGX_POSTGRES_PASS}"
       PAPERLESS_TIME_ZONE: "${TZ}"
       PAPERLESS_OCR_LANGUAGE: "eng+pol"
-      PAPERLESS_URL: "https://papers.${DOMAIN_NAME},http://10.10.1.13:8583"
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://papers.${DOMAIN_NAME}"
+      PAPERLESS_ALLOWED_HOSTS: "papers.${DOMAIN_NAME},10.10.1.13"
+      PAPERLESS_CORS_ALLOWED_HOSTS: "https://papers.${DOMAIN_NAME},http://10.10.1.13:8583"
       PAPERLESS_SECRET_KEY: "${PAPERLESSNGX_SECRET_KEY}"
     networks:
       - paperlessngx
