@@ -4,7 +4,23 @@ services:
     depends_on:
       harborguard-posgres:
         condition: service_healthy
-        
+    labels:
+      wud.display.name: "HarbourGuard"
+      wud.display.icon: "sh-harbourguard" #no icon yet
+      wud.digest: "true"
+      wud.watch: "true"
+    environment:
+      MAX_CONCURRENT_SCANS: "5"
+      PORT: "3005"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"  
+    ports:
+      - "3005:3005"
+    networks:
+      - harborguard
   harborguard-postgres:
     image: postgres:16.10-alpine
     container_name: harborguard-postgres
