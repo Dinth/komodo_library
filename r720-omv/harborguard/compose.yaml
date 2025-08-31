@@ -14,6 +14,7 @@ services:
       MAX_CONCURRENT_SCANS: "5"
       PORT: "3005"
       DATABASE_URL: "postgresql://harborguard:${HARBORGUARD_DB_PASS}@harborguard-postgres:5432/harborguard"
+      HEALTH_CHECK_ENABLED: "true"
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
