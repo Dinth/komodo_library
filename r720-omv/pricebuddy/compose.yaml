@@ -17,6 +17,8 @@ services:
       APP_USER_PASSWORD: "${PRICEBUDDY_ADMIN_PASS}"
       SCRAPER_BASE_URL: "http://pricebuddy-scraper:3000"
       AFFILIATE_ENABLED: "false"
+      ASSET_URL: "https://prices.${DOMAIN_NAME}"
+      APP_URL: "https://prices.${DOMAIN_NAME}"
     depends_on:
       - pricebuddy-mariadb
     labels:  
