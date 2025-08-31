@@ -1,16 +1,56 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  harbourguard-postgres:
+    image: postgres:16.10-alpine
+    container_name: harbourguard-postgres
+    ipc: private
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^16\.\d+-alpine$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Harbourguard - Postgres"
+      wud.display.icon: "sh-harbourguard"  
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+        reservations:
+          memory: 50m
+    environment:
+      POSTGRES_DB: "harbourguard"
+      POSTGRES_USER: "harbourguard"
+      POSTGRES_PASSWORD: "${HARBOURGUARD_DB_PASS}"
+    volumes:
+      - /opt/docker/harbourguard/postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - harbourguard
+      - adminer
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+networks: 
+  harbourguard:
+    external: false
+    name: harbourguard
+    driver: bridge
+  adminer:
+    external: true
