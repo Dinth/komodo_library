@@ -1,7 +1,9 @@
 services:
-  harbourguard-postgres:
+  harborguard:
+    image
+  harborguard-postgres:
     image: postgres:16.10-alpine
-    container_name: harbourguard-postgres
+    container_name: harborguard-postgres
     ipc: private
     cap_add:
       - CHOWN
@@ -28,8 +30,8 @@ services:
       wud.watch: "true"
       wud.tag.include: '^16\.\d+-alpine$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
-      wud.display.name: "Harbourguard - Postgres"
-      wud.display.icon: "sh-harbourguard"  
+      wud.display.name: "Harborguard - Postgres"
+      wud.display.icon: "sh-harborguard"  
     deploy:
       resources:
         limits:
@@ -37,20 +39,20 @@ services:
         reservations:
           memory: 50m
     environment:
-      POSTGRES_DB: "harbourguard"
-      POSTGRES_USER: "harbourguard"
-      POSTGRES_PASSWORD: "${HARBOURGUARD_DB_PASS}"
+      POSTGRES_DB: "harborguard"
+      POSTGRES_USER: "harborguard"
+      POSTGRES_PASSWORD: "${HARBORGUARD_DB_PASS}"
     volumes:
-      - /opt/docker/harbourguard/postgres_data:/var/lib/postgresql/data
+      - /opt/docker/harborguard/postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
-      - harbourguard
+      - harborguard
       - adminer
 
 networks: 
-  harbourguard:
+  harborguard:
     external: false
-    name: harbourguard
+    name: harborguard
     driver: bridge
   adminer:
     external: true
