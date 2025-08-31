@@ -97,7 +97,7 @@ services:
       wud.display.icon: "sh-qbittorrent"
       wud.display.name: "QBittorrent"
       wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.tag.include: '^v?\d\.\d+\.\d+$$'
       wud.watch: "true"
 
   #############################################################################
