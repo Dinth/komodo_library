@@ -1,20 +1,11 @@
 services:
   adventurelog-postgis:
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
-      - DAC_OVERRIDE
       - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
+      - DAC_OVERRIDE
       - SETUID
-      - SYS_CHROOT
+      - SETGID
     cap_drop:
       - ALL
     command: ['postgres']
@@ -83,11 +74,7 @@ services:
     volumes:
       - adventurelog-media:/code/media
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.adventurelogserver.entrypoints=websecure"
-      - "traefik.http.routers.adventurelogserver.rule=Host(`yourdomain.com`) && (PathPrefix(`/media`) || PathPrefix(`/admin`) || PathPrefix(`/static`) || PathPrefix(`/accounts`))" # Replace with your domain
-      - "traefik.http.routers.adventurelogserver.tls=true"
-      - "traefik.http.routers.adventurelogserver.tls.certresolver=letsencrypt"
+
     depends_on:
       adventurelog-postgis:
         condition: service-healthy
