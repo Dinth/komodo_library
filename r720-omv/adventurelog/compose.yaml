@@ -21,14 +21,14 @@ services:
     container_name: adventurelog-postgis
     entrypoint: ['docker-entrypoint.sh']
     environment:
-      POSTGRES_USER: "dawarich"
-      PGUSER: "dawarich"
+      POSTGRES_USER: "adventurelog"
+      PGUSER: "adventurelog"
       POSTGRES_PASSWORD: "${ADVENTURELOG_DB_PASS}"
     hostname: adventurelog-postgis
     image: postgis/postgis:17-3.5-alpine
     ipc: private
     healthcheck:
-      test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]
+      test: [ 'CMD-SHELL','pg_isready','-U','adventurelog','-d','adventurelog' ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -50,7 +50,7 @@ services:
       - /opt/docker/adventurelog/postgis_data:/var/lib/postgresql/data
 
   web:
-    image: ghcr.io/seanmorley15/adventurelog-frontend:latest
+    image: ghcr.io/seanmorley15/adventurelog-frontend:v0.11.0
     restart: unless-stopped
     environment:
       PUBLIC_SERVER_URL: "http://server:8000"
@@ -65,21 +65,21 @@ services:
       - server
 
   server:
-    image: ghcr.io/seanmorley15/adventurelog-backend:latest
+    image: ghcr.io/seanmorley15/adventurelog-backend:v0.11.0
     restart: unless-stopped
     environment:
-      PGHOST: "db"
-      PGDATABASE: "database"
-      PGUSER: "adventure"
-      PGPASSWORD: your_postgres_password # Replace with the actual password
-      SECRET_KEY: your_secret_key # Replace with the actual secret key
+      PGHOST: "adventurelog-postgis"
+      PGDATABASE: "adventurelog"
+      PGUSER: "adventurelog"
+      PGPASSWORD: "${ADVENTURELOG_DB_PASS}"
+      SECRET_KEY: your_secret_key
       DJANGO_ADMIN_USERNAME: "admin"
-      DJANGO_ADMIN_PASSWORD: your_admin_password # Replace with the actual admin password
-      DJANGO_ADMIN_EMAIL: "adventurelog-admin@yourdomain.com" # Replace with your email
-      PUBLIC_URL: "https://yourdomain.com" # Replace with your domain
-      CSRF_TRUSTED_ORIGINS: "https://yourdomain.com" # Replace with your domain
+      DJANGO_ADMIN_PASSWORD: your_admin_password
+      DJANGO_ADMIN_EMAIL: "adventurelog-admin@yourdomain.com"
+      PUBLIC_URL: "https://adventure.${DOMAIN_NAME}"
+      CSRF_TRUSTED_ORIGINS: "https://adventure.${DOMAIN_NAME}" 
       DEBUG: "false"
-      FRONTEND_URL: "https://yourdomain.com" # Replace with your domain
+      FRONTEND_URL: "https://adventure.${DOMAIN_NAME}"
     volumes:
       - adventurelog-media:/code/media
     labels:
@@ -89,4 +89,5 @@ services:
       - "traefik.http.routers.adventurelogserver.tls=true"
       - "traefik.http.routers.adventurelogserver.tls.certresolver=letsencrypt"
     depends_on:
-      - db
+      adventurelog-postgis:
+        condition: service-healthy
