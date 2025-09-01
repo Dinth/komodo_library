@@ -40,22 +40,18 @@ services:
     volumes:
       - /opt/docker/adventurelog/postgis_data:/var/lib/postgresql/data
 
-  web:
+  adventurelog-web:
     image: ghcr.io/seanmorley15/adventurelog-frontend:v0.11.0
     restart: unless-stopped
     environment:
       PUBLIC_SERVER_URL: "http://server:8000"
       BODY_SIZE_LIMIT: "100000"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.adventurelogweb.entrypoints=websecure"
-      - "traefik.http.routers.adventurelogweb.rule=Host(`yourdomain.com`) && !(PathPrefix(`/media`) || PathPrefix(`/admin`) || PathPrefix(`/static`) || PathPrefix(`/accounts`))" # Replace with your domain
-      - "traefik.http.routers.adventurelogweb.tls=true"
-      - "traefik.http.routers.adventurelogweb.tls.certresolver=letsencrypt"
-    depends_on:
-      - server
 
-  server:
+    depends_on:
+      - adventurelog-server
+
+  adventurelog-server:
     image: ghcr.io/seanmorley15/adventurelog-backend:v0.11.0
     restart: unless-stopped
     environment:
@@ -63,10 +59,10 @@ services:
       PGDATABASE: "adventurelog"
       PGUSER: "adventurelog"
       PGPASSWORD: "${ADVENTURELOG_DB_PASS}"
-      SECRET_KEY: your_secret_key
+      SECRET_KEY: "${ADVENTURELOG_SECRET_KEY}"
       DJANGO_ADMIN_USERNAME: "admin"
-      DJANGO_ADMIN_PASSWORD: your_admin_password
-      DJANGO_ADMIN_EMAIL: "adventurelog-admin@yourdomain.com"
+      DJANGO_ADMIN_PASSWORD: "${ADVENTURELOG_ADMIN_PASS}"
+      DJANGO_ADMIN_EMAIL: "${ADMIN_EMAIL}"
       PUBLIC_URL: "https://adventure.${DOMAIN_NAME}"
       CSRF_TRUSTED_ORIGINS: "https://adventure.${DOMAIN_NAME}" 
       DEBUG: "false"
@@ -78,3 +74,12 @@ services:
     depends_on:
       adventurelog-postgis:
         condition: service-healthy
+networks:
+  adventurelog:
+    external: false
+    name: adventurelog
+    driver: bridge
+  adminer:
+    external: true
+  traefik:
+    external: true
