@@ -58,7 +58,8 @@ services:
       wud.display.icon: 'sh:grocy'
     restart: unless-stopped
     volumes:
-      - /opt/docker/grocy/grocy_data:/config
+#      - /opt/docker/grocy/grocy_data:/config
+      - /mnt/tmpfs/grocy_data:/config
 networks:
   grocy:  
     name: grocy
