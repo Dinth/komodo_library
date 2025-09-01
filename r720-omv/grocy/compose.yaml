@@ -53,13 +53,13 @@ services:
       homepage.description: "Home stock and inventory management"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/grocy/grocy/releases/tag/v${major}.${minor}.${patch}"
+      wud.link.template: "https://github.com/grocy/grocy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: 'Grocy'
       wud.display.icon: 'sh:grocy'
     restart: unless-stopped
     volumes:
 #      - /opt/docker/grocy/grocy_data:/config
-      - /mnt/tmpfs/grocy_data:/config
+      - /mnt/tmpfs:/config
 networks:
   grocy:  
     name: grocy
