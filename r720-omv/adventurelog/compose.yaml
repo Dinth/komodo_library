@@ -34,8 +34,6 @@ services:
       wud.tag.include: '^17-\d+\.\d+-alpine$$'
       wud.display.name: "AdventureLog - Postgis"
       wud.display.icon: "sh-dawarich"  
-    networks:
-      - adventurelog
     restart: unless-stopped
     volumes:
       - /opt/docker/adventurelog/postgis_data:/var/lib/postgresql/data
