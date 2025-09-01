@@ -1,13 +1,53 @@
 services:
-  db:
-    image: postgis/postgis:15-3.3
-    restart: unless-stopped
+  adventurelog-postgis:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+#    cap_drop:
+#      - ALL
+    command: ['postgres']
+    container_name: adventurelog-postgis
+    entrypoint: ['docker-entrypoint.sh']
     environment:
-      POSTGRES_DB: database
-      POSTGRES_USER: adventure
-      POSTGRES_PASSWORD: your_postgres_password # Replace with the actual password
+      POSTGRES_USER: "dawarich"
+      PGUSER: "dawarich"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    hostname: adventurelog-postgis
+    image: postgis/postgis:17-3.5-alpine
+    ipc: private
+    healthcheck:
+      test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^17-\d+\.\d+-alpine$$'
+      wud.display.name: "AdventureLog - Postgis"
+      wud.display.icon: "sh-dawarich"  
+    networks:
+      - adventurelog
+    restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data/
+      - /opt/docker/adventurelog/postgis_data:/var/lib/postgresql/data
 
   web:
     image: ghcr.io/seanmorley15/adventurelog-frontend:latest
