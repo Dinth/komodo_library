@@ -39,7 +39,9 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/adventurelog/postgis_data:/var/lib/postgresql/data
-
+    networks:
+      - adventurelog
+      - adminer
   adventurelog-web:
     image: ghcr.io/seanmorley15/adventurelog-frontend:v0.11.0
     restart: unless-stopped
@@ -50,7 +52,8 @@ services:
 
     depends_on:
       - adventurelog-server
-
+    networks:
+      - adventurelog
   adventurelog-server:
     image: ghcr.io/seanmorley15/adventurelog-backend:v0.11.0
     restart: unless-stopped
@@ -68,9 +71,11 @@ services:
       DEBUG: "false"
       FRONTEND_URL: "https://adventure.${DOMAIN_NAME}"
     volumes:
-      - adventurelog-media:/code/media
+      - /opt/docker/adventurelog/adventurelog-media:/code/media
     labels:
-
+    networks:
+      - adventurelog
+      - traefik
     depends_on:
       adventurelog-postgis:
         condition: service-healthy
