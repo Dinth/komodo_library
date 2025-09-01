@@ -91,7 +91,6 @@ services:
       FRONTEND_URL: "https://adventure.${DOMAIN_NAME}"
     volumes:
       - /opt/docker/adventurelog/adventurelog-media:/code/media
-    labels:
     networks:
       - adventurelog
       - traefik
