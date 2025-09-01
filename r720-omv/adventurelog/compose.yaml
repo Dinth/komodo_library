@@ -95,7 +95,7 @@ services:
       - traefik
     depends_on:
       adventurelog-postgis:
-        condition: service_started
+        condition: service_healthy
 networks:
   adventurelog:
     external: false
