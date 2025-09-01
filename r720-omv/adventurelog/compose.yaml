@@ -23,7 +23,7 @@ services:
     environment:
       POSTGRES_USER: "dawarich"
       PGUSER: "dawarich"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_PASSWORD: "${ADVENTURELOG_DB_PASS}"
     hostname: adventurelog-postgis
     image: postgis/postgis:17-3.5-alpine
     ipc: private
