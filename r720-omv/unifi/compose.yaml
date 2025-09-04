@@ -7,8 +7,8 @@ services:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
-      wud.display.name: 'Unifi Mongo DB'
-      wud.display.icon: 'sh:unifi'
+      wud.display.name: 'Unifi Network Application - Mongo DB'
+      wud.display.icon: 'sh:ubiquiti-unifi-dark'
     volumes:
       - /opt/docker/unifi/unifi_db:/data/db
       - /opt/docker/unifi/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
