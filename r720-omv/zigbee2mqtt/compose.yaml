@@ -32,7 +32,7 @@ services:
         labels:
             wud.watch: "true"
             wud.tag.include: '^\d+\.\d+\.\d+$$'
-            wud.link.template: 'https://github.com/Koenkk/zigbee2mqtt/releases/tag/v$${major}.$${minor}.$${patch}'
+            wud.link.template: 'https://github.com/Koenkk/zigbee2mqtt/releases/tag/$${major}.$${minor}.$${patch}'
             wud.display.name: 'Zigbee2MQTT'
             wud.display.icon: 'sh:zigbee2mqtt'
         logging:
