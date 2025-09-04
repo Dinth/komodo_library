@@ -48,7 +48,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/linuxserver/docker-unifi-network-application/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: 'Unifi Network Application'
-      wud.display.icon: 'sh:ubiquiti-unifi-dark.png'
+      wud.display.icon: 'sh:ubiquiti-unifi-dark'
     volumes:
       - ./config:/config
     ports:
