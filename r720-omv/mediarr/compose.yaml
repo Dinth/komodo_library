@@ -493,7 +493,7 @@ services:
       LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
       LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
     hostname: cleanuperr
-    image: ghcr.io/cleanuparr/cleanuparr:2.1.6
+    image: ghcr.io/cleanuparr/cleanuparr:2.2.2
     ipc: private
     logging:
       driver: json-file
@@ -580,7 +580,7 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: radarr
-    image: linuxserver/radarr:5.26.2
+    image: linuxserver/radarr:5.27.5
     ipc: private
     labels:
       wud.watch: "true"
