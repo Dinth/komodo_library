@@ -3,6 +3,16 @@ services:
     image: duplicati/duplicati:2.1.2.0
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - FOWNER
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
     ports:
       - "8200:8200/tcp"
     environment:
