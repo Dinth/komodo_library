@@ -8,6 +8,7 @@ services:
     environment:
       TZ: "${TZ}"
       DUPLICATI__DISABLE_DB_ENCRYPTION: "true"
+      DUPLICATI__WEBSERVICE_PASSWORD: "${DUPLICATI_ADMIN_PASS}"
     networks:
       - duplicati
     volumes:
