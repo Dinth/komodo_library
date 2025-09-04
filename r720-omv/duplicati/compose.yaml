@@ -1,16 +1,24 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  duplicati:
+    image: duplicati/duplicati:2.1.2.0
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    restart: unless-stopped
+    ports:
+      - "8200:8200/tcp"
+    environment:
+      TZ: "${TZ}"
+      DUPLICATI__DISABLE_DB_ENCRYPTION: "true"
+    networks:
+      - duplicati
+    volumes:
+      - /opt/docker/duplicati/duplicati_data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
+  duplicati:
+    external: false
+    name: "duplicati"
+    driver: bridge
