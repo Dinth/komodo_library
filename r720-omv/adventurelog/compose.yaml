@@ -64,7 +64,7 @@ services:
       homepage.siteMonitor: "https://mediatracker.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.display.name: "AdventureLog"
+      wud.display.name: "AdventureLog - Frontend"
       wud.display.icon: "sh:adventurelog"
       wud.link.template: "https://github.com/seanmorley15/AdventureLog/releases/tag/v$${major}.$${minor}.$${patch}"
     depends_on:
@@ -96,6 +96,12 @@ services:
     depends_on:
       adventurelog-postgis:
         condition: service_healthy
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.display.name: "AdventureLog - Backend"
+      wud.display.icon: "sh:adventurelog"
+      wud.link.template: "https://github.com/seanmorley15/AdventureLog/releases/tag/v$${major}.$${minor}.$${patch}"
 networks:
   adventurelog:
     external: false
