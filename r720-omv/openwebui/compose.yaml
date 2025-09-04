@@ -119,6 +119,12 @@ services:
       start_period: 30s
     networks:
       - openwebui
+    labels:  
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "OpenWebUI Pipelines"
+      wud.display.icon: "sh:open-webui"
+      wud.tag.include: '^v\d+\.\d+\.\d+$'
     volumes:
       - /opt/docker/openwebui/openwebui-pipelines_data:/app/pipelines
   openwebui:
@@ -195,7 +201,6 @@ services:
       homepage.icon: "sh-open-webui.png"
       homepage.instance.internal.href: "https://ai.${DOMAIN_NAME}"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.display.name: "OpenWebUI Server"
       wud.display.icon: "sh:open-webui"
       wud.tag.include: '^v\d+\.\d+\.\d+$'
