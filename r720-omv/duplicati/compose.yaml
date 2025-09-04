@@ -13,6 +13,7 @@ services:
       - duplicati
     volumes:
       - /opt/docker/duplicati/duplicati_data:/data
+      - /Data/IT/Backups:/backups
     logging:
       driver: json-file
       options:
