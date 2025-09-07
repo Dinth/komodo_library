@@ -39,6 +39,8 @@ services:
       - /opt/docker:/var/lib/docker/volumes:ro
     networks:
       - repliqate
+    depends_on:
+      - repiqate-socket-proxy
 networks:
   repliqate:
     external: false
