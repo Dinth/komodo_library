@@ -1,11 +1,44 @@
 services:
+    repliqate-socket-proxy:
+    image: wollomatic/socket-proxy:1.9.0
+    ipc: private
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=wud'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(containers/.*|images/.*|events|info|version)'
+      - '-allowPOST=/(containers/.*|images/.*)'
+      - '-allowDELETE=/(containers/.*|images/.*)'
+      - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    user: "65534:${DOCKER_SOCKET_GID}"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Repliqate'
+      wud.display.icon: 'mdi:connection'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - repliqate
   repliqate:
     image: lminlone/repliqate
     container_name: repliqate
     volumes:
       - /path/to/backups:/var/repliqate
       - /opt/docker:/var/lib/docker/volumes:ro
-
+    networks:
+      - repliqate
 networks:
   repliqate:
     external: false
