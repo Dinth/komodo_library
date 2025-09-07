@@ -1,6 +1,6 @@
 services:
   wud-socket-proxy:
-    image: wollomatic/socket-proxy:1.7.0
+    image: wollomatic/socket-proxy:1.9.0
     ipc: private
     command:
       - '-loglevel=info'
@@ -25,7 +25,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - Traefik'
+      wud.display.name: 'Docker Socket Proxy - WUD'
       wud.display.icon: 'mdi:connection'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
