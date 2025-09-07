@@ -1,16 +1,13 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  repliqate:
+    image: lminlone/repliqate
+    container_name: repliqate
+    volumes:
+      - /path/to/backups:/var/repliqate
+      - /opt/docker:/var/lib/docker/volumes:ro
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+networks:
+  repliqate:
+    external: false
+    driver: bridge
+    name: repliqate
