@@ -1,5 +1,5 @@
 services:
-    repliqate-socket-proxy:
+  repliqate-socket-proxy:
     image: wollomatic/socket-proxy:1.9.0
     ipc: private
     command:
@@ -31,6 +31,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - repliqate
+
   repliqate:
     image: lminlone/repliqate
     container_name: repliqate
