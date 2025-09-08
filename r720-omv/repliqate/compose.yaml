@@ -43,7 +43,7 @@ services:
     environment:
       DOCKER_SOCK_PATH: "tcp://wud-socket-proxy:2375"
     depends_on:
-      - repiqate-socket-proxy
+      - repliqate-socket-proxy
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
