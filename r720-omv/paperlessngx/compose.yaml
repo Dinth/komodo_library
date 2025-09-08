@@ -46,7 +46,7 @@ services:
       - paperlessngx
   paperlessngx-valkey:
     container_name: paperlessngx-valkey
-    image: docker.io/valkey/valkey:8.1.4-alpine
+    image: docker.io/valkey/valkey:8.1.3-alpine
     command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
     networks:
@@ -78,7 +78,7 @@ services:
         max-size: "1m"
         max-file: "1"
   paperlessngx:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.18.3
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.18.4
     restart: unless-stopped
     ipc: private
     depends_on:
