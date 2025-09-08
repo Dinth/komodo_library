@@ -200,6 +200,7 @@ tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/fgc"
@@ -271,11 +272,7 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "hortusfox"
-tags = [
-  "stacks",
-  "needs-improvement",
-  "database-to-migrate"
-]
+tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
@@ -359,6 +356,9 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/mariadb"
 environment = """
 MARIADB_ADMIN_PASS=[[MARIADB_ADMIN_PASS]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+TZ=[[TZ]]
 """
 
 ##
@@ -396,11 +396,7 @@ WIREGUARD_PRIVATE_KEY=[[WIREGUARD_PRIVATE_KEY]]
 
 [[stack]]
 name = "monica"
-tags = [
-  "stacks",
-  "needs-improvement",
-  "database-to-migrate"
-]
+tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
@@ -411,6 +407,9 @@ environment = """
 MONICA_DB_PASS=[[MONICA_DB_PASS]]
 MONICA_APP_KEY=[[MONICA_APP_KEY]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -547,6 +546,7 @@ PRICEBUDDY_ADMIN_PASS=[[PRICEBUDDY_ADMIN_PASS]]
 PRICEBUDDY_DB_PASS=[[PRICEBUDDY_DB_PASS]]
 PRICEBUDDY_DB_ADMIN_PASS=[[PRICEBUDDY_DB_ADMIN_PASS]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+TZ=[[TZ]]
 """
 
 ##
@@ -568,6 +568,9 @@ IGDB_CLIENT_SECRET=[[IGDB_CLIENT_SECRET]]
 ROMM_RETROARCHIEVEMENTS_API_KEY=[[ROMM_RETROARCHIEVEMENTS_API_KEY]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
 HOMEPAGE_ROMM_PASS=[[HOMEPAGE_ROMM_PASS]]
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
