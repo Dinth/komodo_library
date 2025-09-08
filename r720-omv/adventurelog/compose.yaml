@@ -16,7 +16,7 @@ services:
       PGUSER: "adventurelog"
       POSTGRES_PASSWORD: "${ADVENTURELOG_DB_PASS}"
     hostname: adventurelog-postgis
-    image: postgis/postgis:17-3.5-alpine
+    image: postgis/postgis:17-3.6-alpine
     ipc: private
     healthcheck:
       test: [ 'CMD-SHELL','pg_isready','-U','adventurelog','-d','adventurelog' ]
