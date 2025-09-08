@@ -41,7 +41,7 @@ services:
     networks:
       - repliqate
     environment:
-      DOCKER_SOCK_PATH: "tcp://wud-socket-proxy:2375"
+      DOCKER_SOCK_PATH: "tcp://repliqate-socket-proxy:2375"
     depends_on:
       - repliqate-socket-proxy
     labels:
