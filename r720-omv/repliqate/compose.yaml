@@ -36,7 +36,7 @@ services:
     image: lminlone/repliqate
     container_name: repliqate
     volumes:
-      - /path/to/backups:/var/repliqate
+      - /Data/IT/Docker_backups:/var/repliqate
       - /opt/docker:/var/lib/docker/volumes:ro
     networks:
       - repliqate
