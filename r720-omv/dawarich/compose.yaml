@@ -58,7 +58,7 @@ services:
       PGUSER: "dawarich"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     hostname: dawarich-postgis
-    image: postgis/postgis:17-3.5-alpine
+    image: postgis/postgis:17-3.6-alpine
     ipc: private
     healthcheck:
       test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]
