@@ -6,7 +6,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=repliqate'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/(containers/.*|images/.*|events|info|version)'
+      - '-allowGET=/(containers/.*|images/.*|events|info|version|_ping)'
       - '-allowPOST=/(containers/.*|images/.*)'
       - '-allowDELETE=/(containers/.*|images/.*)'
       - '-allowHEAD=/_ping'
