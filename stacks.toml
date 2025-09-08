@@ -201,6 +201,7 @@ tags = ["stacks", "needs-improvement"]
 server = "r720-omv"
 poll_for_updates = true
 auto_update = true
+auto_update_all_services = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/fgc"
