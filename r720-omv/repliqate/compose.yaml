@@ -4,7 +4,7 @@ services:
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=wud'
+      - '-allowfrom=repliqate'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(containers/.*|images/.*|events|info|version)'
       - '-allowPOST=/(containers/.*|images/.*)'
