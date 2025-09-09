@@ -123,6 +123,7 @@ services:
       REDIS_HOST: "romm-valkey"
       ENABLE_SCHEDULED_RETROACHIEVEMENTS_PROGRESS_SYNC: "true"
       ENABLE_SCHEDULED_CONVERT_IMAGES_TO_WEBP: "true"
+      TZ: "${TZ}"
     hostname: romm
     image: rommapp/romm:4.2.0
     ipc: private
