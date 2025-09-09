@@ -121,8 +121,10 @@ services:
       IGDB_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
       RETROACHIEVEMENTS_API_KEY: "${ROMM_RETROARCHIEVEMENTS_API_KEY}"
       REDIS_HOST: "romm-valkey"
+      ENABLE_SCHEDULED_RETROACHIEVEMENTS_PROGRESS_SYNC: "true"
+      ENABLE_SCHEDULED_CONVERT_IMAGES_TO_WEBP: "true"
     hostname: romm
-    image: rommapp/romm:4.1.6
+    image: rommapp/romm:4.2.0
     ipc: private
     healthcheck:
       test: curl -ILfSs http://localhost:8080/  || exit 1
