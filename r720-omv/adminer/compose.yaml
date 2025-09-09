@@ -21,7 +21,7 @@ services:
     container_name: adminer
     entrypoint: ['entrypoint.sh','docker-php-entrypoint']
     hostname: adminer
-    image: adminer:5.3.0
+    image: adminer:5.4.0
     ipc: private
     logging:
       driver: json-file
