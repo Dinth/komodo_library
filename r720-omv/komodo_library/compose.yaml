@@ -33,7 +33,6 @@ services:
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
   # --- Whats up Docker? config ---
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.display.name: "Authelia"
       wud.display.icon: sh-authelia
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
