@@ -29,7 +29,7 @@ services:
       POSTGRES_DB: "tandoor"
       ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},127.0.0.1"
     hostname: tandoor
-    image: vabene1111/recipes:2.1.2
+    image: vabene1111/recipes:2.2.0
     ipc: private
     logging:
       driver: json-file
