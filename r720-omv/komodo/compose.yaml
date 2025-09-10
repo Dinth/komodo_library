@@ -67,10 +67,7 @@ services:
       wud.link.template: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo'
       wud.display.icon: 'sh:komodo'
-
     volumes:
-      ## Core cache for repos for latest commit hash / contents
-      - /opt/docker/komodo/komodo_repo-cache:/repo-cache
       ## Store sync files on server
       - /opt/docker/komodo/komodo_syncs:/syncs
       ## Optionally mount a custom core.config.toml
