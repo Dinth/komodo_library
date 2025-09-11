@@ -25,7 +25,7 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: nextcloud
-    image: linuxserver/nextcloud:31.0.8
+    image: linuxserver/nextcloud:31.0.9
     ipc: private
     logging:
       driver: json-file
