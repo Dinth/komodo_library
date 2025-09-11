@@ -33,7 +33,7 @@ services:
       - repliqate
 
   repliqate:
-    image: lminlone/repliqate
+    image: lminlone/repliqate:v0.2.1
     container_name: repliqate
     volumes:
       - /Data/IT/Docker_backups:/var/repliqate
