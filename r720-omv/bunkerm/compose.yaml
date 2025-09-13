@@ -1,4 +1,20 @@
 services:
+  mqtt-explorer:
+    image: smeagolworms4/mqtt-explorer
+    container_name: mqtt-explorer
+    restart: unless-stopped
+    ipc: private
+    ports:
+      - "4000:4000/tcp"
+    volumes:
+      - "/opt/docker/bunkerm/mqtt-explorer_config:/mqtt-explorer/config"
+    networks:
+      - bunkerm
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
   bunkerm:
     image: bunkeriot/bunkerm
     container_name: bunkerm
