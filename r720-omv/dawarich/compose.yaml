@@ -122,7 +122,7 @@ services:
     expose:
       - 3000/tcp
     hostname: dawarich-sidekiq
-    image: freikin/dawarich:0.31.0
+    image: freikin/dawarich:0.32.0
     ipc: private
     healthcheck:
       test: [ "CMD-SHELL", "pgrep -f sidekiq" ]
@@ -198,7 +198,7 @@ services:
       PHOTON_API_KEY: "${PHOTON_API_KEY}"
       SELF_HOSTED: "true"
     hostname: dawarich
-    image: freikin/dawarich:0.31.0
+    image: freikin/dawarich:0.32.0
     ipc: private
 #    healthcheck:
 #      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
@@ -233,8 +233,8 @@ services:
       traefik.http.routers.dawarich.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.dawarich.middlewares: "secHeaders@file"
       traefik.http.services.dawarich.loadbalancer.server.port: "3000"
-      wud.display.icon: sh:dawarich
-      wud.display.name: Dawarich
+      wud.display.icon: "sh:dawarich"
+      wud.display.name: "Dawarich"
       wud.link.template: 'https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.watch: "true"
