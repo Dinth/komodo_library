@@ -26,7 +26,7 @@ services:
       start_period: 5s
       
   core:
-    image: ghcr.io/moghtech/komodo-core:1.19.3
+    image: ghcr.io/moghtech/komodo-core:1.19.4
     restart: unless-stopped
     depends_on:
       - mongo
