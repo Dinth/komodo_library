@@ -97,7 +97,7 @@ services:
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_PAULINA_AUTOIMPORT_KEY}"
     hostname: fireflyiii_paulina_dataimporter
-    image: fireflyiii/data-importer:version-1.7.10
+    image: fireflyiii/data-importer:version-1.8.0
     ipc: private
     labels:
       wud.watch: "true"
@@ -148,7 +148,7 @@ services:
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
     hostname: fireflyiii_michal_dataimporter
-    image: fireflyiii/data-importer:version-1.7.10
+    image: fireflyiii/data-importer:version-1.8.0
     ipc: private
     labels:
       wud.watch: "true"
