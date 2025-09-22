@@ -1,7 +1,7 @@
 services:
   immich-server:
     container_name: immich-server
-    image: ghcr.io/immich-app/immich-server:v1.142.1
+    image: ghcr.io/immich-app/immich-server:v1.143.0
     user: "${MEDIA_PUID}:${MEDIA_PGID}"
     deploy:
       resources:
@@ -69,7 +69,7 @@ services:
 
   immich-machine-learning:
     container_name: immich-machine-learning
-    image: ghcr.io/immich-app/immich-machine-learning:v1.142.1-cuda
+    image: ghcr.io/immich-app/immich-machine-learning:v1.143.0-cuda
     deploy:
       resources:
         reservations:
