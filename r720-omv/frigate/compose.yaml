@@ -15,6 +15,8 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
+    cap_drop:
+      - ALL
     container_name: frigate
     entrypoint: ['/init']
     environment:
@@ -27,7 +29,7 @@ services:
       OPENCV_FFMPEG_LOGLEVEL: "8"
       OPENCV_LOG_LEVEL: "FATAL"
     hostname: frigate
-    image: ghcr.io/blakeblackshear/frigate:0.16.1-tensorrt
+    image: ghcr.io/blakeblackshear/frigate:0.16.0-tensorrt
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ipc: private
@@ -90,6 +92,10 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/frigate/frigate_config:/config
+      - /opt/docker/frigate/frigate_storage/frigate.db:/media/frigate/frigate.db
+      - /opt/docker/frigate/frigate_storage/frigate.db-shm:/media/frigate/frigate.db-shm
+      - /opt/docker/frigate/frigate_storage/frigate.db-wal:/media/frigate/frigate.db-wal
+      - /opt/docker/frigate/frigate_storage/backup.db:/media/frigate/backup.db
       - /opt/docker/frigate/frigate_storage:/media/frigate
     working_dir: /opt/frigate
 networks:
