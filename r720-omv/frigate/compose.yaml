@@ -15,8 +15,6 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-    cap_drop:
-      - ALL
     container_name: frigate
     entrypoint: ['/init']
     environment:
