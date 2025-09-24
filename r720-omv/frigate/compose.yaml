@@ -87,7 +87,6 @@ services:
     volumes:
       - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV/clips:/media/frigate/clips
       - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV:/media/frigate/recordings
-      - /root/download_yolo.sh:/usr/local/src/tensorrt_demos/yolo/download_yolo.sh
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/frigate/frigate_config:/config
