@@ -106,11 +106,7 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    command:
-      - /init
     container_name: romm
-    entrypoint:
-      - /docker-entrypoint.sh
     environment:
       DB_HOST: "romm-mariadb"
       DB_NAME: "romm"
