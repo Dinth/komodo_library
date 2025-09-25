@@ -97,6 +97,7 @@ services:
       - FOWNER
     cap_drop:
       - ALL
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
     container_name: romm
     environment:
       DB_HOST: "romm-mariadb"
