@@ -90,20 +90,11 @@ services:
         max-file: "1"
   romm:
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
+      - SETGID
+      - SETUID
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     container_name: romm
