@@ -87,8 +87,9 @@ services:
     security_opt:
       - label=disable
     volumes:
-      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV/clips:/media/frigate/clips
-      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV:/media/frigate/recordings
+#      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV/clisp:/media/frigate/clips
+#      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV:/media/frigate/recordings
+      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a:/media/frigate
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/frigate/frigate_config:/config
@@ -96,7 +97,7 @@ services:
       - /opt/docker/frigate/frigate_storage/frigate.db-shm:/media/frigate/frigate.db-shm
       - /opt/docker/frigate/frigate_storage/frigate.db-wal:/media/frigate/frigate.db-wal
       - /opt/docker/frigate/frigate_storage/backup.db:/media/frigate/backup.db
-      - /opt/docker/frigate/frigate_storage:/media/frigate
+#      - /opt/docker/frigate/frigate_storage:/media/frigate
     working_dir: /opt/frigate
 networks:
   frigate:
