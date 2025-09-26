@@ -163,7 +163,7 @@ services:
       RAG_WEB_SEARCH_CONCURRENT_REQUESTS: 10
       SEARXNG_QUERY_URL: "https://search.${DOMAIN_NAME}/search?q=<query>"
     hostname: openwebui
-    image: ghcr.io/open-webui/open-webui:v0.6.30
+    image: ghcr.io/open-webui/open-webui:v0.6.31
     ipc: private
     healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
