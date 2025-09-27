@@ -66,7 +66,7 @@ services:
     networks:
       - freshrss
   freshrss:
-    image: freshrss/freshrss:1.27.0
+    image: freshrss/freshrss:1.27.1
     container_name: freshrss
     restart: unless-stopped
     ipc: private
@@ -122,6 +122,13 @@ services:
     depends_on:
       freshrss-postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "cli/health.php"]
+      timeout: 10s
+      start_period: 60s
+      start_interval: 11s
+      interval: 75s
+      retries: 3
     ports:
       - "8020:80"
     volumes:
