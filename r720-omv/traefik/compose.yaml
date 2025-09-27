@@ -31,7 +31,7 @@ services:
       - traefik
 
   traefik:
-    image: traefik:v3.5.2
+    image: traefik:v3.5.3
     container_name: traefik
     restart: unless-stopped
     security_opt:
@@ -126,7 +126,7 @@ services:
       wud.display.name: "Traefik"
       wud.display.icon: "sh:traefik"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/traefik/traefik/releases/tag/v$${major}$${minor}$${patch}'
+      wud.link.template: 'https://github.com/traefik/traefik/releases/tag/v$${major}\.$${minor}\.$${patch}'
     depends_on:
       - traefik-socket-proxy
     networks:
