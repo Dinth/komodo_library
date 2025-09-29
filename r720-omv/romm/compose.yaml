@@ -122,7 +122,7 @@ services:
       RESCAN_ON_FILESYSTEM_CHANGE_DELAY: "5"
       TZ: "${TZ}"
     hostname: romm
-    image: rommapp/romm:4.2.0
+    image: rommapp/romm:4.3.0
     ipc: private
     healthcheck:
       test: curl -ILfSs http://localhost:8080/  || exit 1
