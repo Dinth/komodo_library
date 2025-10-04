@@ -290,7 +290,7 @@ services:
     environment:
       TZ: "${TZ}"
     hostname: karakeep
-    image: ghcr.io/karakeep-app/karakeep
+    image: ghcr.io/karakeep-app/karakeep:0.27.1
     ipc: private
     deploy:
       resources:
