@@ -70,6 +70,63 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/ollama_data:/root/.ollama
+  automatic1111:
+    image: ghcr.io/AUTOMATIC1111/stable-diffusion-webui:latest
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    container_name: automatic1111
+    environment:
+      CLI_ARGS: "--listen --xformers --api"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+      NVIDIA_VISIBLE_DEVICES: "all"
+      TZ: "${TZ}"
+    hostname: automatic1111
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: '12G'
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [compute,utility]
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:7860/sdapi/v1/sd-models || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+    networks:
+      - openwebui
+    ports:
+      - 7860:7860/tcp
+    user: 0:0
+    volumes:
+      - /opt/docker/openwebui/automatic1111_models:/app/stable-diffusion-webui/models/Stable-diffusion
+      - /opt/docker/openwebui/automatic1111_outputs:/app/stable-diffusion-webui/outputs
+      - /opt/docker/openwebui/automatic1111_extensions:/app/stable-diffusion-webui/extensions
+      - /opt/docker/openwebui/automatic1111_config:/app/stable-diffusion-webui/config
+    restart: unless-stopped
   openwebui-pipelines:
     cap_add:
       - AUDIT_WRITE
@@ -209,7 +266,53 @@ services:
     user: 0:0
     volumes:
       - /opt/docker/openwebui/openwebui_data:/app/backend/data
-    working_dir: /app/backend
+karakeep:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    container_name: karakeep
+    environment:
+      KARAKEEP_PORT: "5000"
+      TZ: "${TZ}"
+      DATABASE_URL: "sqlite:///data/karakeep.db"
+      KARAKEEP_LOG_LEVEL: "info"
+    hostname: karakeep
+    image: ghcr.io/example/karakeep:latest
+    ipc: private
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '1G'
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - openwebui
+    ports:
+      - 5000:5000/tcp
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/openwebui/karakeep_data:/data
 networks:
   openwebui:
     name: openwebui
