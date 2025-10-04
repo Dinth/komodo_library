@@ -288,6 +288,8 @@ services:
       - no-new-privileges:true
     container_name: karakeep
     environment:
+      NEXTAUTH_SECRET: "${KARAKEEP_SECRET}"
+      MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       TZ: "${TZ}"
     hostname: karakeep
     image: ghcr.io/karakeep-app/karakeep:0.27.1
