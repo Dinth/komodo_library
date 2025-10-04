@@ -1,6 +1,6 @@
 services:
   signal_rest_api:
-    image: bbernhard/signal-cli-rest-api:0.94
+    image: bbernhard/signal-cli-rest-api:0.95
     container_name: signal-rest-api
     restart: unless-stopped
     ipc: private
@@ -26,7 +26,7 @@ services:
       wud.tag.include: '^\d+\.\d+$$'
       wud.display.name: "Signal Rest API"
       wud.display.icon: "sh:signal"
-      wud.link.template: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}$${patch}"
     volumes:
       - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
     ports:
