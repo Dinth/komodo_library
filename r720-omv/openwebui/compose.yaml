@@ -309,7 +309,7 @@ services:
     networks:
       - openwebui
     ports:
-      - 5000:5000/tcp
+      - 5000:5005/tcp
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/karakeep_data:/data
