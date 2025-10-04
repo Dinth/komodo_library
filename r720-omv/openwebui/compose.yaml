@@ -289,8 +289,6 @@ services:
     container_name: karakeep
     environment:
       TZ: "${TZ}"
-      DATABASE_URL: "sqlite:///data/karakeep.db"
-      KARAKEEP_LOG_LEVEL: "info"
     hostname: karakeep
     image: ghcr.io/karakeep-app/karakeep
     ipc: private
@@ -300,8 +298,7 @@ services:
           cpus: '1.0'
           memory: '1G'
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:3000/health || exit 1"]
-      interval: 30s
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]      interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
@@ -311,7 +308,7 @@ services:
     networks:
       - openwebui
     ports:
-      - 5005:5000/tcp
+      - 3000:3000/tcp
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/karakeep_data:/data
