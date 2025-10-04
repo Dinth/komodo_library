@@ -115,7 +115,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    labels:
+#    labels:
     networks:
       - openwebui
     ports:
