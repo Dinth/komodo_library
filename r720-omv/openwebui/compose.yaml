@@ -71,7 +71,7 @@ services:
     volumes:
       - /opt/docker/openwebui/ollama_data:/root/.ollama
   automatic1111:
-    image: ghcr.io/automatic1111/stable-diffusion-webui:latest
+    image: universonic/stable-diffusion-webui:latest
     cap_add:
       - AUDIT_WRITE
       - CHOWN
