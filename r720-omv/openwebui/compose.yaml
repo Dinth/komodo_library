@@ -293,7 +293,7 @@ services:
       DATABASE_URL: "sqlite:///data/karakeep.db"
       KARAKEEP_LOG_LEVEL: "info"
     hostname: karakeep
-    image: ghcr.io/example/karakeep:latest
+    image: ghcr.io/karakeep-app/karakeep
     ipc: private
     deploy:
       resources:
