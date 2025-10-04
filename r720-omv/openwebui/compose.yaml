@@ -258,7 +258,7 @@ services:
       homepage.icon: "sh-open-webui.png"
       homepage.instance.internal.href: "https://ai.${DOMAIN_NAME}"
       wud.watch: "true"
-      wud.display.name: "OpenWebUI Server"
+      wud.display.name: "OpenWebUI Server - AI agent manager"
       wud.display.icon: "sh:open-webui"
       wud.tag.include: '^v\d+\.\d+\.\d+$'
       wud.link.template: "https://github.com/open-webui/open-webui/releases/tag/v$${major}.$${minor}.$${patch}"
@@ -291,8 +291,27 @@ services:
       NEXTAUTH_SECRET: "${KARAKEEP_SECRET}"
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       TZ: "${TZ}"
-      NEXTAUTH_URL: "https://keep.wickhay.uk"
+      NEXTAUTH_URL: "https://keep.${DOMAIN_NAME}"
       DATA_DIR: "/data"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.karakeep.rule: "Host(`keep.${DOMAIN_NAME}`)"
+      traefik.http.routers.karakeep.entrypoints: "websecure"
+      traefik.http.routers.karakeep.tls: "true"
+      traefik.http.routers.karakeep.tls.certresolver: "letsencrypt"
+      traefik.http.routers.karakeep.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.karakeep.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.karakeep.middlewares: "secHeaders@file"
+      traefik.http.services.karakeep.loadbalancer.server.port: "8080"
+      homepage.group: "Home"
+      homepage.name: "KaraKeep"
+      homepage.icon: "sh-karakeep.png"
+      homepage.instance.internal.href: "https://keep.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.display.name: "KaraKeep"
+      wud.display.icon: "sh:karakeep"
+      wud.tag.include: '^\d+\.\d+\.\d+$'
+      wud.link.template: "https://github.com/karakeep-app/karakeep/releases/tag/v$${major}.$${minor}.$${patch}"
     hostname: karakeep
     image: ghcr.io/karakeep-app/karakeep:0.27.1
     ipc: private
