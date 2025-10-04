@@ -120,6 +120,7 @@ services:
       ENABLE_SCHEDULED_CONVERT_IMAGES_TO_WEBP: "true"
       ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: "true"
       RESCAN_ON_FILESYSTEM_CHANGE_DELAY: "5"
+      HLTB_API_ENABLED: "true"
       TZ: "${TZ}"
     hostname: romm
     image: rommapp/romm:4.3.0
