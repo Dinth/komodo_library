@@ -266,7 +266,7 @@ services:
     user: 0:0
     volumes:
       - /opt/docker/openwebui/openwebui_data:/app/backend/data
-karakeep:
+  karakeep:
     cap_add:
       - AUDIT_WRITE
       - CHOWN
