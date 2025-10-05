@@ -5,9 +5,6 @@ services:
     ipc: private
     cap_add:
       - MKNOD
-      - SYS_RESOURCE
-      - NET_ADMIN
-      - NET_RAW
     cap_drop:
       - ALL
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
