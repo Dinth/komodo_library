@@ -331,6 +331,7 @@ services:
         condition: service_healthy
     networks:
       - openwebui
+      - traefik
     ports:
       - 3000:3000/tcp
     restart: unless-stopped
