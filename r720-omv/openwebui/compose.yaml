@@ -336,6 +336,93 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/karakeep_data:/data
+  
+  meilisearch:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    container_name: meilisearch
+    environment:
+      MEILI_MASTER_KEY: "${KARAKEEP_MEILI_KEY}"
+      MEILI_NO_ANALYTICS: "true"
+      TZ: "${TZ}"
+    hostname: meilisearch
+    image: getmeili/meilisearch:v1.13.3
+    ipc: private
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '1G'
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:7700/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - openwebui
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/openwebui/meilisearch_data:/meili_data
+
+  chrome:
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+      - SYS_ADMIN
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    container_name: chrome
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+      - --remote-debugging-address=0.0.0.0
+      - --remote-debugging-port=9222
+      - --hide-scrollbars
+    hostname: chrome
+    image: gcr.io/zenika-hub/alpine-chrome:123
+    ipc: private
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '512M'
+    networks:
+      - openwebui
+    restart: unless-stopped
+    shm_size: '1gb'
 networks:
   openwebui:
     name: openwebui
