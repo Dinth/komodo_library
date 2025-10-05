@@ -367,12 +367,12 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    container_name: meilisearch
+    container_name: karakeep-meilisearch
     environment:
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       MEILI_NO_ANALYTICS: "true"
       TZ: "${TZ}"
-    hostname: meilisearch
+    hostname: karakeep-meilisearch
     image: getmeili/meilisearch:v1.13.3
     ipc: private
     deploy:
@@ -413,7 +413,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    container_name: chrome
+    container_name: karakeep-chrome
     command:
       - --no-sandbox
       - --disable-gpu
@@ -421,7 +421,7 @@ services:
       - --remote-debugging-address=0.0.0.0
       - --remote-debugging-port=9222
       - --hide-scrollbars
-    hostname: chrome
+    hostname: karakeep-chrome
     image: gcr.io/zenika-hub/alpine-chrome:123
     ipc: private
     healthcheck:
