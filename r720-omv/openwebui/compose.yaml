@@ -120,7 +120,7 @@ services:
       - openwebui
     ports:
       - 7860:7860/tcp
-    user: 0:0
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - /opt/docker/openwebui/automatic1111_models:/app/stable-diffusion-webui/models/Stable-diffusion
       - /opt/docker/openwebui/automatic1111_outputs:/app/stable-diffusion-webui/outputs
