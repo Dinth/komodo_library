@@ -49,6 +49,10 @@ services:
       wud.link.template: 'https://github.com/linuxserver/docker-unifi-network-application/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: 'Unifi Network Application'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
+      repliqate.enabled: 'true'
+      repliqate.schedule: "@weekly 3am" # Trigger every day at 3 am
+      repliqate.backup_id: unifi
+      repliqate.retention: "90d" # Keep backups for 30 days
     volumes:
       - ./config:/config
     ports:
