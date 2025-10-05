@@ -293,6 +293,8 @@ services:
       TZ: "${TZ}"
       NEXTAUTH_URL: "https://keep.${DOMAIN_NAME}"
       DATA_DIR: "/data"
+      MEILI_ADDR: http://karakeep-meilisearch:7700
+      BROWSER_WEB_URL: http://karakeep-chrome:9222
     labels:
       traefik.enable: "true"
       traefik.http.routers.karakeep.rule: "Host(`keep.${DOMAIN_NAME}`)"
@@ -329,6 +331,10 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
+      karakeep-chrome:
+        condition: service_healthy
+      karakeep-melisearch:
+        condition: service_healthy
     networks:
       - openwebui
       - traefik
@@ -338,7 +344,7 @@ services:
     volumes:
       - /opt/docker/openwebui/karakeep_data:/data
   
-  meilisearch:
+  karakeep-meilisearch:
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -372,7 +378,7 @@ services:
           cpus: '0.5'
           memory: '1G'
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:7700/health || exit 1"]
+      test: ["CMD-SHELL", "curl --fail http://127.0.0.1:7700/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -383,7 +389,7 @@ services:
     volumes:
       - /opt/docker/openwebui/meilisearch_data:/meili_data
 
-  chrome:
+  karakeep-chrome:
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -415,6 +421,12 @@ services:
     hostname: chrome
     image: gcr.io/zenika-hub/alpine-chrome:123
     ipc: private
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:9222/json/version || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     deploy:
       resources:
         limits:
