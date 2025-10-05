@@ -68,7 +68,6 @@ services:
     ports:
       - 11434:11434/tcp
     restart: unless-stopped
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - /opt/docker/openwebui/ollama_data:/root/.ollama
   automatic1111:
