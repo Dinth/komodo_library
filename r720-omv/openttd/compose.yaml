@@ -21,6 +21,8 @@ services:
       PGID: "100"
       PUID: "1002"
       loadgame: last-autosave
+    labels:
+      wud.watch: "false"
     hostname: openttd
     image: bateau/openttd:latest
     ipc: private
