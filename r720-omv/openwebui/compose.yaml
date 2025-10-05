@@ -302,7 +302,7 @@ services:
       traefik.http.routers.karakeep.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.karakeep.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.karakeep.middlewares: "secHeaders@file"
-      traefik.http.services.karakeep.loadbalancer.server.port: "8080"
+      traefik.http.services.karakeep.loadbalancer.server.port: "3000"
       homepage.group: "Home"
       homepage.name: "KaraKeep"
       homepage.icon: "sh-karakeep.png"
