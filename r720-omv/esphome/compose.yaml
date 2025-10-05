@@ -6,6 +6,12 @@ services:
     cap_add:
       - MKNOD
       - AUDIT_WRITE
+      - DAC_OVERRIDE 
+      - DAC_READ_SEARCH
+      - CHOWN
+      - FOWNER
+      - SETUID
+      - SETGID
     cap_drop:
       - ALL
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
