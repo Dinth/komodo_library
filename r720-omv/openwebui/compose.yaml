@@ -336,7 +336,7 @@ services:
         condition: service_healthy
       karakeep-chrome:
         condition: service_healthy
-      karakeep-melisearch:
+      karakeep-meilisearch:
         condition: service_healthy
     networks:
       - openwebui
