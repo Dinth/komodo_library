@@ -295,6 +295,8 @@ services:
       DATA_DIR: "/data"
       MEILI_ADDR: http://karakeep-meilisearch:7700
       BROWSER_WEB_URL: http://karakeep-chrome:9222
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      INFERENCE_TEXT_MODEL: "qwen2.5:14b"
     labels:
       traefik.enable: "true"
       traefik.http.routers.karakeep.rule: "Host(`keep.${DOMAIN_NAME}`)"
