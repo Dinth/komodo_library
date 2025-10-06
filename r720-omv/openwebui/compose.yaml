@@ -366,8 +366,14 @@ services:
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       MEILI_NO_ANALYTICS: "true"
       TZ: "${TZ}"
+    labels:
+      wud.watch: "true"
+      wud.display.name: "KaraKeep - Meilisearch"
+      wud.display.icon: "sh:karakeep"
+      wud.tag.include: '^v\d+\.\d+\.\d+$'
+      wud.link.template: "https://github.com/meilisearch/meilisearch/releases/tag/v1.22.2"
     hostname: karakeep-meilisearch
-    image: getmeili/meilisearch:v1.13.3
+    image: getmeili/meilisearch:v1.22.2
     ipc: private
     deploy:
       resources:
@@ -411,7 +417,7 @@ services:
       - --remote-debugging-port=9222
       - --hide-scrollbars
     hostname: karakeep-chrome
-    image: gcr.io/zenika-hub/alpine-chrome:123
+    image: gcr.io/zenika-hub/alpine-chrome:124
     ipc: private
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:9222/json/version || exit 1"]
@@ -419,6 +425,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    labels:
+      wud.watch: "true"
+      wud.display.name: "KaraKeep - Chrome headless"
+      wud.display.icon: "sh:karakeep"
+      wud.tag.include: '^\d+$'
+      wud.link.template: "https://github.com/jlandure/alpine-chrome/releases/tag/v$${major}.$${minor}.$${patch}"
     deploy:
       resources:
         limits:
