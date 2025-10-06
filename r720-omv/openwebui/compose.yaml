@@ -366,7 +366,6 @@ services:
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       MEILI_NO_ANALYTICS: "true"
       TZ: "${TZ}"
-    command: ["meilisearch", "--experimental-dumpless-upgrade"]
     labels:
       wud.watch: "true"
       wud.display.name: "KaraKeep - Meilisearch"
