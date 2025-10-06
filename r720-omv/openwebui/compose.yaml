@@ -366,6 +366,7 @@ services:
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       MEILI_NO_ANALYTICS: "true"
       TZ: "${TZ}"
+      MEILI_EXPERIMENTAL_DUMPLESS_UPGRADE: "true"
     labels:
       wud.watch: "true"
       wud.display.name: "KaraKeep - Meilisearch"
