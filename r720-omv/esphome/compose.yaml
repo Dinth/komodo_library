@@ -19,7 +19,8 @@ services:
     networks:
       - esphome
     volumes:
-      - /opt/docker/esphome/config:/config:rw
+      - /opt/docker/esphome/esphome_config:/config:rw
+      - /opt/docker/esphome/esphome_pio:/root/.platformio:rw
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 6052:6052
