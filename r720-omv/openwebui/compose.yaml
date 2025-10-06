@@ -274,10 +274,7 @@ services:
       - DAC_OVERRIDE
       - FOWNER
       - FSETID
-      - KILL
       - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
       - SETFCAP
       - SETGID
       - SETPCAP
@@ -347,7 +344,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/karakeep_data:/data
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"  
   karakeep-meilisearch:
     cap_add:
       - AUDIT_WRITE
@@ -355,10 +351,7 @@ services:
       - DAC_OVERRIDE
       - FOWNER
       - FSETID
-      - KILL
       - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
       - SETFCAP
       - SETGID
       - SETPCAP
@@ -400,16 +393,11 @@ services:
       - DAC_OVERRIDE
       - FOWNER
       - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
       - SETFCAP
       - SETGID
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-      - SYS_ADMIN
     cap_drop:
       - ALL
     security_opt:
