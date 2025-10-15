@@ -29,7 +29,7 @@ services:
       OPENCV_FFMPEG_LOGLEVEL: "8"
       OPENCV_LOG_LEVEL: "FATAL"
     hostname: frigate
-    image: ghcr.io/blakeblackshear/frigate:0.16.1-tensorrt
+    image: ghcr.io/blakeblackshear/frigate:0.16.2-tensorrt
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ipc: private
