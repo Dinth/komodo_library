@@ -122,7 +122,6 @@ services:
 #      - "homepage.widget.username:username"
 #      - "homepage.widget.password:password"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.display.name: "Traefik"
       wud.display.icon: "sh:traefik"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
