@@ -24,7 +24,7 @@ services:
       - ALL
     container_name: audiobookshelf
     hostname: audiobookshelf
-    image: ghcr.io/advplyr/audiobookshelf:2.29.0
+    image: ghcr.io/advplyr/audiobookshelf:2.30.0
     ipc: private
     logging:
       driver: json-file
@@ -60,7 +60,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Audiobookshelf"
       wud.display.icon: "sh:audiobookshelf"
-      wud.link.template: "https://github.com/advplyr/audiobookshelf/releases/$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/advplyr/audiobookshelf/releases/tag/v$${major}.$${minor}.$${patch}"
     volumes:
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
       - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
