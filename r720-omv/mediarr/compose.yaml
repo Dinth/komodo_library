@@ -282,7 +282,7 @@ services:
       PGID: "100"
       TZ: "${TZ}"
     hostname: lidarr
-    image: linuxserver/lidarr:2.13.3
+    image: linuxserver/lidarr:2.14.5
     ipc: private
     labels:
       homepage.group: "Media"
@@ -345,7 +345,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    image: redis:8.2.1
+    image: redis:8.2.2
     ipc: private
     labels:       
       wud.watch: "true"
@@ -400,7 +400,7 @@ services:
       REDIS_HOST: "iplayarr-redis"
       REDIS_PORT: "6379"
     hostname: iplayarr
-    image: nikorag/iplayarr:0.7.3a
+    image: nikorag/iplayarr:0.10.2
     ipc: private
     logging:
       driver: json-file
