@@ -21,7 +21,7 @@ services:
     container_name: postgresql
     entrypoint: ['docker-entrypoint.sh']
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
