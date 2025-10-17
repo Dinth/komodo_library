@@ -44,6 +44,7 @@ services:
     networks:
       - pricebuddy
       - traefik
+    restart: unless-stopped
 
   pricebuddy-mariadb:
     cap_add:
@@ -113,6 +114,7 @@ services:
       wud.link.template: 'https://github.com/amerkurev/scrapper/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Pricebuddy Scrapper'
       wud.display.icon: 'sh:pricebuddy'
+      restart: unless-stopped
 
 networks:
   pricebuddy:
