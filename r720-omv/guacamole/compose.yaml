@@ -48,6 +48,7 @@ services:
       - /opt/docker/guacamole/guacamole-firefox_config:/config:rw
     networks: 
       - guacamole
+    restart: unless-stopped
   guacamole:
     container_name: guacamole
     environment:
