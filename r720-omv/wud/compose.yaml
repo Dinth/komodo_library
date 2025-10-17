@@ -101,6 +101,7 @@ services:
     networks:
       - wud
       - signal-rest-api
+    restart: unless-stopped
 networks:
   wud:
     name: wud
