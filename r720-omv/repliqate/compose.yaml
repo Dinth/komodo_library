@@ -51,6 +51,7 @@ services:
       wud.link.template: "https://github.com/lminlone/repliqate/releases/tag/v$${major}$${minor}$${patch}"
       wud.display.name: "Repliqate"
       wud.display.icon: "sh:repliqate"
+    restart: unless-stopped
 networks:
   repliqate:
     external: false
