@@ -580,7 +580,7 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: radarr
-    image: linuxserver/radarr:5.27.5
+    image: linuxserver/radarr:5.28.0
     ipc: private
     labels:
       wud.watch: "true"
