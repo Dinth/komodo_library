@@ -27,15 +27,11 @@ services:
     environment:
       TZ: "${TZ}"
     labels:
-      wud.watch: "true"
+      wud.watch: "false"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/esphome/esphome/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'ESPHome'
       wud.display.icon: 'sh:esphome'
-      repliqate.enabled: 'true'
-      repliqate.schedule: "@weekly 3am"
-      repliqate.backup_id: esphome
-      repliqate.retention: "90d"
     logging:
       driver: json-file
       options:
