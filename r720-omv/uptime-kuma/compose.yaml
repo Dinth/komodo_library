@@ -49,7 +49,7 @@ services:
     container_name: uptime-kuma
     entrypoint: ['/usr/bin/dumb-init','--','extra/entrypoint.sh']
     hostname: uptime-kuma
-    image: louislam/uptime-kuma:1.23.16
+    image: louislam/uptime-kuma:2.0.1
     ipc: private
     labels:
       homepage.group: "Infrastructure"
@@ -65,7 +65,7 @@ services:
       wud.display.icon: 'sh-uptime-kuma'
       wud.display.name: 'Uptime Kuma'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/louislam/uptime-kuma/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/louislam/uptime-kuma/releases/tag/$${major}.$${minor}.$${patch}'
     logging:
       driver: json-file
       options:
