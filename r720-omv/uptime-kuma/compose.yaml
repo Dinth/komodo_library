@@ -81,7 +81,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/uptime-kuma/uptime-kuma_data:/app/data
-    working_dir: /app
 networks:
   uptime-kuma:
     name: uptime-kuma
