@@ -36,6 +36,7 @@ services:
             wud.display.name: 'Zigbee2MQTT'
             wud.display.icon: 'sh:zigbee2mqtt'
             repliqate.enabled: 'true'
+            repliqate.engine: 'restic'
             repliqate.schedule: "@weekly 3am" # Trigger every day at 3 am
             repliqate.backup_id: zigbee2mqtt
             repliqate.retention: "90d" # Keep backups for 30 days
