@@ -40,6 +40,12 @@ services:
       N8N_METRICS: 'true'
       N8N_METRICS_INCLUDE_DEFAULT_METRICS: 'true'
       N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL: 'true'
+      N8N_PROTOCOL: "https"
+      N8N_HOST: "auto.${DOMAIN_NAME}"
+      N8N_EDITOR_BASE_URL: "https://auto.${DOMAIN_NAME}"
+      WEBHOOK_URL: "https://auto.${DOMAIN_NAME}"
+      WEBHOOK_TUNNEL_URL: "https://auto.${DOMAIN_NAME}"
+      N8N_TRUST_PROXY_HEADERS: "true"
     hostname: n8n
     image: docker.n8n.io/n8nio/n8n:1.117.1
     ipc: private
