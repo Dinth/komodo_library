@@ -1,5 +1,7 @@
 services:
   n8n:
+    cap_drop:
+      - ALL
     cap_add:
       - AUDIT_WRITE
       - CHOWN
