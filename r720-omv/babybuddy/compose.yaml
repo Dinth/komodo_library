@@ -59,6 +59,7 @@ services:
       wud.display.name: "Babybuddy"
       wud.display.icon: "sh-baby-buddy"
       repliqate.enabled: 'true'
+      repliqate.engine: "restic"
       repliqate.schedule: "@weekly 3am" # Trigger every day at 3 am
       repliqate.backup_id: babybuddy
       repliqate.retention: "30d" # Keep backups for 30 days
