@@ -63,6 +63,11 @@ services:
       wud.display.name: "n8n"
       wud.display.icon: "sh:n8n"
       wud.link.template: "https://github.com/n8n-io/n8n/releases/tag/n8n%40$${major}.$${minor}.$${patch}"
+      homepage.group: "Infrastructure"
+      homepage.name: "n8n"
+      homepage.description: "Workflow automation"
+      homepage.icon: "n8n.png"
+      homepage.href: "https://n8n.${DOMAIN_NAME}/"
     healthcheck:
       test: wget --spider http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1
       interval: 30s
