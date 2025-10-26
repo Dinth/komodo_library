@@ -34,7 +34,7 @@ services:
       TRUSTED_PROXIES: "*"
       FIREFLY_III_LAYOUT: "v2"
       SESSION_DRIVER: "file"
-    hostname: firefly
+    hostname: fireflyiii
     image: fireflyiii/core:version-6.4.2
     ipc: private
     logging:
