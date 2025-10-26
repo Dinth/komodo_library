@@ -34,6 +34,7 @@ services:
       DEBUG: "true"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
       N8N_USER_FOLDER: "/home/node/.n8n"
+      N8N_RUNNERS_ENABLED: "true"
     hostname: n8n
     image: docker.n8n.io/n8nio/n8n:1.117.1
     ipc: private
