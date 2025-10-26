@@ -29,7 +29,7 @@ services:
       TZ: "${TZ}"
       DEBUG: "true"
     hostname: n8n
-    image: docker.n8n.io/n8nio/n8n:latest
+    image: docker.n8n.io/n8nio/n8n:1.117.1
     ipc: private
     logging:
       driver: json-file
