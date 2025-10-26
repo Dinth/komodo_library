@@ -24,6 +24,12 @@ services:
       homepage.icon: "sm-omnitools"
       homepage.href: "https://omnitools.${DOMAIN_NAME}"
       homepage.description: "Set of different IT tools"
+    healthcheck:
+      test: 'curl --fail --insecure --location --silent --show-error http://localhost:80/'
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 15s
     ports:
       - "8586:80"
     networks:
