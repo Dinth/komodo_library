@@ -36,6 +36,9 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    environment: 
+      N8N_DIAGNOSTICS_ENABLED: false
+      N8N_VERSION_NOTIFICATIONS_ENABLED: false
     labels:
       traefik.enable: "true"
       traefik.http.routers.n8n.rule: "Host(`auto.${DOMAIN_NAME}`)"
