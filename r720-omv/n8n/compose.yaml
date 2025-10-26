@@ -37,9 +37,9 @@ services:
       N8N_RUNNERS_ENABLED: "true"
       N8N_LICENSE_ACTIVATION_KEY: ""
       N8N_LICENSE_AUTO_RENEWAL: "false"
-      N8N_METRICS=true
-      N8N_METRICS_INCLUDE_DEFAULT_METRICS=true
-      N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL=true
+      N8N_METRICS: 'true'
+      N8N_METRICS_INCLUDE_DEFAULT_METRICS: 'true'
+      N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL: 'true'
     hostname: n8n
     image: docker.n8n.io/n8nio/n8n:1.117.1
     ipc: private
