@@ -17,6 +17,7 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
+      - DAC_OVERRIDE
     container_name: n8n
 #    entrypoint: ['tini','--','/docker-entrypoint.sh']
     environment:
