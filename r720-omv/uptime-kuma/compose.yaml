@@ -45,9 +45,7 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    command: ['node','server/server.js']
     container_name: uptime-kuma
-    entrypoint: ['/usr/bin/dumb-init','--','extra/entrypoint.sh']
     hostname: uptime-kuma
     image: louislam/uptime-kuma:2.0.2
     ipc: private
