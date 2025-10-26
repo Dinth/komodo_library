@@ -50,6 +50,7 @@ services:
       wud.display.name: 'Unifi Network Application'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
       repliqate.enabled: 'true'
+      repliqate.engine: "restic"
       repliqate.schedule: "@weekly 3am" # Trigger every day at 3 am
       repliqate.backup_id: unifi
       repliqate.retention: "90d" # Keep backups for 30 days
