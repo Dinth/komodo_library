@@ -27,6 +27,8 @@ services:
       DB_POSTGRESDB_USER: "n8n"
       DB_POSTGRESDB_PASSWORD: "${N8N_DB_PASS}"
       TZ: "${TZ}"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
       DEBUG: "true"
     hostname: n8n
     image: docker.n8n.io/n8nio/n8n:1.117.1
@@ -35,10 +37,7 @@ services:
       driver: json-file
       options:
         max-size: "10m"
-        max-file: "3"
-    environment: 
-      N8N_DIAGNOSTICS_ENABLED: false
-      N8N_VERSION_NOTIFICATIONS_ENABLED: false
+        max-file: "3" 
     labels:
       traefik.enable: "true"
       traefik.http.routers.n8n.rule: "Host(`auto.${DOMAIN_NAME}`)"
@@ -54,6 +53,13 @@ services:
       wud.display.name: "n8n"
       wud.display.icon: "sh:n8n"
       wud.link.template: "https://github.com/n8n-io/n8n/releases/tag/n8n%40$${major}.$${minor}.$${patch}"
+    healthcheck:
+      test: wget --spider http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+      start_interval: 2s
     networks:
       - n8n
     ports:
