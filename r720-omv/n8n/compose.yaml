@@ -83,6 +83,7 @@ services:
       start_interval: 2s
     networks:
       - n8n
+      - traefik
     ports:
       - 5678:5678/tcp
     restart: unless-stopped
@@ -93,3 +94,5 @@ networks:
     name: n8n
     driver: bridge
     external: false
+  traefik:
+    external: true
