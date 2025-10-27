@@ -118,7 +118,7 @@ services:
     user: www-data
     volumes:
       - /opt/docker/fireflyiii/fireflyiii_dataimporter_paulina_upload:/var/www/html/storage/upload
-      - /Data/IT/filebrowser-data/users/paulina/Paulina-Documents/firefly_configurations:/import:ro
+      - /Data/IT/nextcloud/michal/files/Documents/firefly_configurations:/import:ro
     working_dir: /var/www/html
   fireflyiii_michal_dataimporter:
     cap_add:
