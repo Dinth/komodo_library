@@ -82,7 +82,7 @@ services:
       wud.display.name: "Vouchervault - Valkey"
       wud.display.icon: "sh-vouchervault"
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
     healthcheck: 
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
