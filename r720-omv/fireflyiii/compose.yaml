@@ -168,7 +168,7 @@ services:
     restart: unless-stopped
     user: www-data
     volumes:
-      - /Data/IT/filebrowser-data/users/michal/Michal-Documents/firefly_configurations:/import:ro
+      - /Data/IT/nextcloud/michal/files/Documents/firefly_configurations:/import:ro
       - /opt/docker/fireflyiii/fireflyiii_dataimporter_michal_upload:/var/www/html/storage/upload
     working_dir: /var/www/html
 networks:
