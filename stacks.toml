@@ -52,6 +52,7 @@ tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/backblaze-personal-wine"
@@ -347,24 +348,6 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 ##
 
 [[stack]]
-name = "mariadb"
-tags = ["stacks", "needs-improvement"]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/mariadb"
-environment = """
-MARIADB_ADMIN_PASS=[[MARIADB_ADMIN_PASS]]
-DOCKER_PUID=[[DOCKER_PUID]]
-DOCKER_PGID=[[DOCKER_PGID]]
-TZ=[[TZ]]
-"""
-
-##
-
-[[stack]]
 name = "mediarr"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
@@ -433,6 +416,7 @@ TZ=[[TZ]]
 N8N_DB_PASS=[[N8N_DB_PASS]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -511,6 +495,10 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 TZ=[[TZ]]
 OPENWEBUI_SECRET_KEY=[[OPENWEBUI_SECRET_KEY]]
 OPENWEBUI_PIPELINES_PASS=[[OPENWEBUI_PIPELINES_PASS]]
+KARAKEEP_SECRET=[[KARAKEEP_SECRET]]
+MEILISEARCH_SECRET=[[MEILISEARCH_SECRET]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -572,6 +560,8 @@ HOMEPAGE_ROMM_PASS=[[HOMEPAGE_ROMM_PASS]]
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
 ROMM_SCREENSCRAPER_PASS=[[ROMM_SCREENSCRAPER_PASS]]
 """
 
