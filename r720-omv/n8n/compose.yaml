@@ -63,7 +63,7 @@ services:
       traefik.http.routers.n8n.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.n8n.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.n8n.middlewares: "secHeaders@file"
-      traefik.http.services.n8n.loadbalancer.server.port: "80"
+      traefik.http.services.n8n.loadbalancer.server.port: "5678"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "n8n"
