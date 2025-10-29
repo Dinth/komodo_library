@@ -32,7 +32,7 @@ services:
       ENABLE_EXTERNAL_RATES: "true"
       APP_URL: "https://finance.${DOMAIN_NAME}"
       TRUSTED_PROXIES: "*"
-      FIREFLY_III_LAYOUT: "v2"
+#      FIREFLY_III_LAYOUT: "v2"
       SESSION_DRIVER: "file"
     hostname: fireflyiii
     image: fireflyiii/core:version-6.4.2
