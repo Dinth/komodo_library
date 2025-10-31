@@ -1,13 +1,40 @@
 services:
   cloudflared:
-    image: cloudflare/cloudflared:2025.10.0
+    image: cloudflare/cloudflared:2025.10.1
     container_name: cloudflared-tunnel
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
       TUNNEL_TOKEN: "${CLOUDFLARED_TOKEN}"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M  
     networks:
       - cloudflared
+    healthcheck:
+      # WARN: must use array syntax here, otherwise it won't work for some reason
+      test: [ "CMD", "cloudflared", "tunnel", "--metrics", "localhost:20241", "ready" ]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+      start_interval: 3s
+        # Logging Configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   cloudflared:
     external: false
