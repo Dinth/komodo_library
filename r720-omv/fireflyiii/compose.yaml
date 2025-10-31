@@ -18,7 +18,6 @@ services:
     cap_drop:
       - ALL
     container_name: fireflyiii
-#    entrypoint: ['docker-php-serversideup-entrypoint']
     environment:
       DB_CONNECTION: "pgsql"
       DB_PORT: "5432"
@@ -32,10 +31,10 @@ services:
       ENABLE_EXTERNAL_RATES: "true"
       APP_URL: "https://finance.${DOMAIN_NAME}"
       TRUSTED_PROXIES: "*"
-#      FIREFLY_III_LAYOUT: "v2"
+      FIREFLY_III_LAYOUT: "v2"
       SESSION_DRIVER: "file"
     hostname: fireflyiii
-    image: fireflyiii/core:version-6.4.2
+    image: fireflyiii/core:version-6.4.3
     ipc: private
     logging:
       driver: json-file
@@ -118,7 +117,7 @@ services:
     user: www-data
     volumes:
       - /opt/docker/fireflyiii/fireflyiii_dataimporter_paulina_upload:/var/www/html/storage/upload
-      - /Data/IT/nextcloud/michal/files/Documents/firefly_configurations:/import:ro
+      - /Data/IT/filebrowser-data/users/paulina/Paulina-Documents/firefly_configurations:/import:ro
     working_dir: /var/www/html
   fireflyiii_michal_dataimporter:
     cap_add:
@@ -168,7 +167,7 @@ services:
     restart: unless-stopped
     user: www-data
     volumes:
-      - /Data/IT/nextcloud/michal/files/Documents/firefly_configurations:/import:ro
+      - /Data/IT/filebrowser-data/users/michal/Michal-Documents/firefly_configurations:/import:ro
       - /opt/docker/fireflyiii/fireflyiii_dataimporter_michal_upload:/var/www/html/storage/upload
     working_dir: /var/www/html
 networks:
