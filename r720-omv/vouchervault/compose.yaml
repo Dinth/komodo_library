@@ -54,10 +54,10 @@ services:
       homepage.href: "https://cards.${DOMAIN_NAME}"
       homepage.description: "Loyalty cards manager"
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/l4rm4nd/VoucherVault/releases/tag/v$${major}.$${minor}.$${patch}"
-      wud.display.name: 'VoucherVault'
-      wud.display.icon: 'sh-vouchervault'
+      wud.tag.include: "^\d+\.\d+\.\d+$$"
+      wud.link.template: "https://github.com/l4rm4nd/VoucherVault/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: "VoucherVault"
+      wud.display.icon: "sh-vouchervault"
     depends_on:
       vouchervault-valkey:
         condition: service_healthy
