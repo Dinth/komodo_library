@@ -1,7 +1,7 @@
 services:
     zigbee2mqtt:
         container_name: zigbee2mqtt
-        image: ghcr.io/koenkk/zigbee2mqtt:2.6.2
+        image: ghcr.io/koenkk/zigbee2mqtt:2.6.3
         ipc: private
         cap_add:
             - AUDIT_WRITE
