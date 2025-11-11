@@ -25,7 +25,7 @@ services:
       DATA_DIR: "/data"
       MEILI_ADDR: http://karakeep-meilisearch:7700
       BROWSER_WEB_URL: http://karakeep-chrome:9222
-      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_BASE_URL: "http://10.10.1.13:11434"
       INFERENCE_TEXT_MODEL: "qwen2.5:14b"
       INFERENCE_IMAGE_MODEL: "llava:13b"
     labels:
