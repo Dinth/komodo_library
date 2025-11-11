@@ -445,6 +445,14 @@ services:
     cap_drop:
       - ALL
     container_name: cleanuperr
+    hostname: cleanuperr
+    image: ghcr.io/cleanuparr/cleanuparr:2.4.4
+    ipc: private
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       TZ: "${TZ}"
       TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?'"
@@ -492,14 +500,6 @@ services:
       LIDARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
       LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
       LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
-    hostname: cleanuperr
-    image: ghcr.io/cleanuparr/cleanuparr:2.4.3
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
