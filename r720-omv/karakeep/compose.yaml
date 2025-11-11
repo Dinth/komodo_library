@@ -69,7 +69,7 @@ services:
       karakeep-meilisearch:
         condition: service_healthy
     networks:
-      - openwebui
+      - karakeep
       - traefik
     ports:
       - 3000:3000/tcp
@@ -119,7 +119,7 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - openwebui
+      - karakeep
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/meilisearch_data:/meili_data
@@ -169,13 +169,13 @@ services:
           cpus: '0.5'
           memory: '512M'
     networks:
-      - openwebui
+      - karakeep
     restart: unless-stopped
     shm_size: '1gb'
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
 networks:
-  openwebui:
-    name: openwebui
+  karakeep:
+    name: karakeep
     driver: bridge
     external: false
   traefik:
