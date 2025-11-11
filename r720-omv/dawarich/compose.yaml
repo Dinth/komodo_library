@@ -1,3 +1,7 @@
+x-versions:
+  dawarich: &dawarich-version "0.35.1"
+  valkey: &valkey-version "9.0.0-alpine"
+  postgis: &postgis-version "17-3.6-alpine"
 services:
   dawarich-valkey:
     container_name: dawarich-valkey
