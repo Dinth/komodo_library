@@ -446,7 +446,7 @@ services:
       - ALL
     container_name: cleanuperr
     hostname: cleanuperr
-    image: ghcr.io/cleanuparr/cleanuparr:2.4.4
+    image: ghcr.io/cleanuparr/cleanuparr:2.4.5
     ipc: private
     logging:
       driver: json-file
@@ -534,7 +534,7 @@ services:
     command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
     container_name: flaresolverr
     entrypoint: ["/usr/bin/dumb-init","--"]
-    image: flaresolverr/flaresolverr:v3.4.4
+    image: flaresolverr/flaresolverr:v3.4.5
     ipc: private
     labels:
       wud.watch: "true"
