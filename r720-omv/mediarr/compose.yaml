@@ -4,7 +4,7 @@ services:
   # All privacy-sensitive traffic is routed through this container.
   #############################################################################
   gluetun:
-    image: qmcgaw/gluetun:v3.40.0
+    image: qmcgaw/gluetun:v3.40.1
     container_name: gluetun
     hostname: gluetun
     restart: unless-stopped
@@ -106,7 +106,7 @@ services:
   #############################################################################
 
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:2.1.5
+    image: lscr.io/linuxserver/prowlarr:2.3.0
     container_name: prowlarr
     restart: unless-stopped
     ipc: private
@@ -580,7 +580,7 @@ services:
       PUID: "1001"
       PGID: "100"
     hostname: radarr
-    image: linuxserver/radarr:5.28.0
+    image: linuxserver/radarr:6.0.4
     ipc: private
     labels:
       wud.watch: "true"
