@@ -4,7 +4,7 @@ services:
   # All privacy-sensitive traffic is routed through this container.
   #############################################################################
   gluetun:
-    image: qmcgaw/gluetun:v3.40.1
+    image: qmcgaw/gluetun:v3.40.2
     container_name: gluetun
     hostname: gluetun
     restart: unless-stopped
