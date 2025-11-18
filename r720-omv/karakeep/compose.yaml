@@ -103,7 +103,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$'
       wud.link.template: "https://github.com/meilisearch/meilisearch/releases/tag/v$${major}.$${minor}.$${patch}"
     hostname: karakeep-meilisearch
-    image: getmeili/meilisearch:v1.22.2
+    image: getmeili/meilisearch:v1.26.0
     ipc: private
     deploy:
       resources:
