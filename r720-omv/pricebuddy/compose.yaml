@@ -103,7 +103,7 @@ services:
       - /opt/docker/pricebuddy/mariadb_data:/config
 
   pricebuddy-scraper:
-    image: amerkurev/scrapper:latest
+    image: jez500/seleniumbase-scrapper:latest
     networks:
       - pricebuddy
 #    ports:
