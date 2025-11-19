@@ -29,7 +29,7 @@ services:
       OLLAMA_NUM_PARALLEL: "2"
       OLLAMA_MAX_LOADED_MODELS: "1"
       OLLAMA_KEEP_ALIVE: "24h"
-      OLLAMA_DEBUG: "true"
+      OLLAMA_DEBUG: "1"
       OLLAMA_FLASH_ATTENTION: "1"
       TZ: "${TZ}"
     hostname: ollama
