@@ -4,7 +4,7 @@ services:
   # All privacy-sensitive traffic is routed through this container.
   #############################################################################
   gluetun:
-    image: qmcgaw/gluetun:v3.40.2
+    image: qmcgaw/gluetun:v3.40.3
     container_name: gluetun
     hostname: gluetun
     restart: unless-stopped
@@ -347,7 +347,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    image: redis:8.2.3
+    image: redis:8.4.0
     ipc: private
     labels:       
       wud.watch: "true"
