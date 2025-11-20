@@ -1,10 +1,15 @@
+x-versions:
+  gluetun: &gluetun-version "qmcgaw/gluetun:v3.40.3"
+  qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.1.2"
+  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.3.0"
+  recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
 services:
   #############################################################################
   # Gluetun VPN Gateway
   # All privacy-sensitive traffic is routed through this container.
   #############################################################################
   gluetun:
-    image: qmcgaw/gluetun:v3.40.3
+    image: *gluetun-version
     container_name: gluetun
     hostname: gluetun
     restart: unless-stopped
@@ -61,7 +66,7 @@ services:
   # Torrent client
   #############################################################################
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:5.1.2
+    image: *qbittorrent-version
     container_name: qbittorrent
     restart: unless-stopped
     ipc: private
@@ -108,7 +113,7 @@ services:
   #############################################################################
 
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:2.3.0
+    image: *prowlarr-version
     container_name: prowlarr
     restart: unless-stopped
     ipc: private
@@ -173,7 +178,7 @@ services:
     environment:
       PORT: "8282"
     hostname: recommendarr
-    image: tannermiddleton/recommendarr:v1.4.4
+    image: *recommendarr-version
     ipc: private
     logging:
       driver: json-file
