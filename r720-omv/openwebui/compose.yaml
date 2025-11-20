@@ -1,3 +1,6 @@
+x-versions:
+  ollama: &ollama-version "ollama/ollama:0.13.0"
+  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.6.36"
 services:
   ollama:
     cap_add:
@@ -33,7 +36,7 @@ services:
       OLLAMA_FLASH_ATTENTION: "1"
       TZ: "${TZ}"
     hostname: ollama
-    image: ollama/ollama:0.13.0
+    image: *ollama-version
     ipc: private
     deploy:
       resources:
@@ -221,7 +224,7 @@ services:
       RAG_WEB_SEARCH_CONCURRENT_REQUESTS: 10
       SEARXNG_QUERY_URL: "https://search.${DOMAIN_NAME}/search?q=<query>"
     hostname: openwebui
-    image: ghcr.io/open-webui/open-webui:v0.6.36
+    image: *openwebui-version
     ipc: private
     healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
