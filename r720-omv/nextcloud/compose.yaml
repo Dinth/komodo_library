@@ -83,7 +83,7 @@ services:
       homepage.description: File-hosting service
       homepage.widget.type: nextcloud
       homepage.widget.fields: '["numfiles", "numshares"]'
-      homepage.widget.url: http://host.docker.internal:5000
+      homepage.widget.url: http://10.10.1.13:1357
       homepage.widget.username: ${NEXTCLOUD_ADMIN_USER}
       homepage.widget.password: ${NEXTCLOUD_ADMIN_PASSWORD}
       wud.watch: "true"
