@@ -39,6 +39,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '0.5'
     networks:
       - nextcloud
       - traefik
