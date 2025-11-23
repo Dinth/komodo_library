@@ -1,4 +1,38 @@
 services:
+  nextcloud-valkey:
+    container_name: nextcloud-valkey
+    image: docker.io/valkey/valkey:9.0.0-alpine
+    ipc: private
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
+    restart: unless-stopped
+    networks:
+      - nextcloud
+    volumes:
+      - /opt/docker/nextcloud/valkey-data:/data
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - CHOWN
+    cap_drop:
+      - ALL
+    labels:
+      wud.display.name: "Vouchervault - Valkey"
+      wud.display.icon: "sh:nextcloud"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+    healthcheck: 
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
   nextcloud:
     cap_add:
       - AUDIT_WRITE
