@@ -37,6 +37,41 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
+  nextcloud-imaginary:
+    container_name: nextcloud-imaginary
+    image: ghcr.io/nextcloud-releases/aio-imaginary:latest
+    restart: unless-stopped
+    ipc: private
+    networks:
+      - nextcloud
+    environment:
+      TZ: "${TZ}"
+      PORT: "9000"
+    command: -concurrency 50 -enable-url-source -log-level info
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      wud.display.name: "Nextcloud - Imaginary"
+      wud.display.icon: "sh:nextcloud"
+      wud.watch: "false"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+      
   nextcloud:
     cap_add:
       - AUDIT_WRITE
