@@ -81,6 +81,7 @@ services:
       homepage.icon: nextcloud.png
       homepage.href: https://nc.${DOMAIN_NAME}
       homepage.description: File-hosting service
+      homepage.siteMonitor: "http://10.10.1.13:1357"
       homepage.widget.type: nextcloud
       homepage.widget.fields: '["numfiles", "numshares"]'
       homepage.widget.url: http://10.10.1.13:1357
