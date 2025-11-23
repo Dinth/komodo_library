@@ -24,6 +24,8 @@ services:
       TZ: "${TZ}"
       PUID: "1001"
       PGID: "100"
+      PHP_MEMORY_LIMIT: "4096M"
+      APACHE_BODY_LIMIT: "0"
     hostname: nextcloud
     image: linuxserver/nextcloud:32.0.2
     ipc: private
