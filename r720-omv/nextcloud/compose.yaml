@@ -9,6 +9,10 @@ services:
       - nextcloud
     volumes:
       - /opt/docker/nextcloud/valkey-data:/data
+    environment:
+      TZ: "${TZ}"
+      ALLOW_EMPTY_PASSWORD: "no"
+      VALKEY_PASSWORD: "${NEXTCLOUD_VALKEY_PASSWORD}"
     cap_add:
       - SETGID
       - SETUID
@@ -67,6 +71,9 @@ services:
       PHP_MAX_SPARE_SERVERS: "18"
       PHP_UPLOAD_LIMIT: "16G"
       APACHE_BODY_LIMIT: "0"
+      REDIS_HOST: "nextcloud-valkey"
+      REDIS_HOST_PASSWORD: "${NEXTCLOUD_VALKEY_PASSWORD}"
+      REDIS_HOST_PORT: "6379"
     hostname: nextcloud
     image: linuxserver/nextcloud:32.0.2
     ipc: private
@@ -120,7 +127,6 @@ services:
       homepage.widget.fields: '["numfiles", "numshares"]'
       homepage.widget.url: http://10.10.1.13:1357
       homepage.widget.key: "${NEXTCLOUD_TOKEN}"
-
       wud.watch: "true"
       wud.display.name: "NextCloud"
       wud.display.icon: "sh:nextcloud"
