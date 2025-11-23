@@ -8,7 +8,7 @@ services:
     networks:
       - nextcloud
     volumes:
-      - /opt/docker/nextcloud/valkey-data:/data
+      - /opt/docker/nextcloud/valkey_data:/data
     environment:
       TZ: "${TZ}"
       ALLOW_EMPTY_PASSWORD: "no"
