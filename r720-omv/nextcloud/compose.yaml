@@ -76,6 +76,16 @@ services:
       traefik.http.middlewares.nextcloud-securityheaders.headers.stsIncludeSubdomains: "true"
       traefik.http.middlewares.nextcloud-securityheaders.headers.stsPreload: "true"
       traefik.docker.network: "traefik"
+      homepage.group: Home
+      homepage.name: Nextcloud
+      homepage.icon: nextcloud.png
+      homepage.href: https://nc.${DOMAIN}
+      homepage.description: File-hosting service
+      homepage.widget.type: nextcloud
+      homepage.widget.fields: '["numfiles", "numshares"]'
+      homepage.widget.url: http://host.docker.internal:5000
+      homepage.widget.username: ${NEXTCLOUD_ADMIN_USER}
+      homepage.widget.password: ${NEXTCLOUD_ADMIN_PASSWORD}
       wud.watch: "true"
       wud.display.name: "NextCloud"
       wud.display.icon: "sh:nextcloud"
