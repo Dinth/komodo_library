@@ -74,6 +74,11 @@ services:
       REDIS_HOST: "nextcloud-valkey"
       REDIS_HOST_PASSWORD: "${NEXTCLOUD_VALKEY_PASS}"
       REDIS_HOST_PORT: "6379"
+      OVERWRITEHOST: "nc.${DOMAIN_NAME}"
+      OVERWRITEPROTOCOL: "https"
+      OVERWRITECLIURL: "https://nc.${DOMAIN_NAME}"
+      OVERWRITEWEBROOT: "/"
+      TRUSTED_PROXIES: "10.10.1.13 172.16.0.0/12"
     hostname: nextcloud
     image: linuxserver/nextcloud:32.0.2
     ipc: private
