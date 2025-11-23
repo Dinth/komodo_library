@@ -79,7 +79,7 @@ services:
       homepage.group: Home
       homepage.name: Nextcloud
       homepage.icon: nextcloud.png
-      homepage.href: https://nc.${DOMAIN}
+      homepage.href: https://nc.${DOMAIN_NAME}
       homepage.description: File-hosting service
       homepage.widget.type: nextcloud
       homepage.widget.fields: '["numfiles", "numshares"]'
