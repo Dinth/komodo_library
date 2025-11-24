@@ -1,6 +1,6 @@
 services:
   traefik-socket-proxy:
-    image: wollomatic/socket-proxy:1.10.0
+    image: wollomatic/socket-proxy:1.10.1
     ipc: private
     command:
       - '-loglevel=info'
@@ -31,7 +31,7 @@ services:
       - traefik
 
   traefik:
-    image: traefik:v3.6.2
+    image: traefik:v3.5.3
     container_name: traefik
     restart: unless-stopped
     security_opt:
@@ -42,6 +42,9 @@ services:
       TRAEFIK_API_INSECURE: "true" # Be careful with this in production!
       TRAEFIK_API_DEBUG: "false"
       TRAEFIK_LOG_LEVEL: "DEBUG"
+      TRAEFIK_ACCESSLOG: "true"
+      TRAEFIK_ACCESSLOG_FILEPATH: "/tmp/access.log"
+      TRAEFIK_ACCESSLOG_FORMAT: "json"
       TZ: "${TZ}"
   # --- EntryPoints Configuration ---
     # Web (HTTP) EntryPoint on port 80 with a global redirect to websecure
@@ -108,6 +111,8 @@ services:
 #      - /opt/docker/traefik/traefik.yml:/traefik.yml:ro
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
       - /opt/docker/traefik/mojecertpl.verification:/mojecertpl.verification:ro
+    tmpfs:
+       - /tmp
 networks:
   traefik:
     name: traefik
