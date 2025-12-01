@@ -48,7 +48,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: "https://github.com/karakeep-app/karakeep/releases/tag/v$${major}.$${minor}.$${patch}"
     hostname: karakeep
-    image: ghcr.io/karakeep-app/karakeep:0.28.0
+    image: ghcr.io/karakeep-app/karakeep:0.29.0
     ipc: private
     deploy:
       resources:
