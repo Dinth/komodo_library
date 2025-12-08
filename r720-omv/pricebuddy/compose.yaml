@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/php.dockerfile
-    image: jez500/pricebuddy:v1.0.40
+    image: jez500/pricebuddy:v1.0.42
     ports:
       - 5757:80
     volumes:
