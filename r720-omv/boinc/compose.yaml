@@ -1,6 +1,6 @@
 services:
   boinc:
-    image: lscr.io/linuxserver/boinc:8.2.6
+    image: lscr.io/linuxserver/boinc:8.2.8
     container_name: boinc
     ipc: private
     security_opt:
