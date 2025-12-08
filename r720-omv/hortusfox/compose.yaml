@@ -90,7 +90,7 @@ services:
       DB_PASSWORD: "${HORTUSFOX_DB_PASS}"
       APP_DEBUG: "true"
     hostname: hortusfox
-    image: ghcr.io/danielbrendel/hortusfox-web:v5.4
+    image: ghcr.io/danielbrendel/hortusfox-web:v5.5
     ipc: private
     labels:
       homepage.group: "Home"
