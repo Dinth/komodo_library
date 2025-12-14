@@ -34,7 +34,7 @@ services:
       FIREFLY_III_LAYOUT: "v2"
       SESSION_DRIVER: "file"
     hostname: fireflyiii
-    image: fireflyiii/core:version-6.4.9
+    image: fireflyiii/core:version-6.4.10
     ipc: private
     logging:
       driver: json-file
