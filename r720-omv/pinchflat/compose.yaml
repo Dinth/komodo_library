@@ -1,6 +1,6 @@
 services:
   pinchflat:
-    user:  "1001:100"
+    user:  "${MEDIA_PUID}:${MEDIA_PGID}"
     container_name: pinchflat
     image: ghcr.io/kieraneglin/pinchflat:v2025.6.6
     hostname: pinchflat
