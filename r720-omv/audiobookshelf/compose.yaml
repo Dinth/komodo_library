@@ -24,7 +24,7 @@ services:
       - ALL
     container_name: audiobookshelf
     hostname: audiobookshelf
-    image: ghcr.io/advplyr/audiobookshelf:2.31.0
+    image: ghcr.io/advplyr/audiobookshelf:2.32.1
     ipc: private
     logging:
       driver: json-file
