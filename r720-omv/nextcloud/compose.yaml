@@ -1,7 +1,7 @@
 services:
   nextcloud-valkey:
     container_name: nextcloud-valkey
-    image: docker.io/valkey/valkey:9.0.0-alpine
+    image: docker.io/valkey/valkey:9.0.1-alpine
     ipc: private
     command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
