@@ -56,7 +56,7 @@ services:
       - /opt/docker/romm/mariadb_data:/config
   romm-valkey:
     container_name: romm-valkey
-    image: docker.io/valkey/valkey:8.1.3-alpine
+    image: docker.io/valkey/valkey:9.0.1-alpine
     ipc: private
     command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
