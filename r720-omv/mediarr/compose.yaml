@@ -1,5 +1,5 @@
 x-versions:
-  gluetun: &gluetun-version "qmcgaw/gluetun:v3.40.3"
+  gluetun: &gluetun-version "qmcgaw/gluetun:v3.41.0"
   qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.1.4"
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.4.6"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.3.0"
