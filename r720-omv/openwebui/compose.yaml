@@ -1,6 +1,6 @@
 x-versions:
-  ollama: &ollama-version "ollama/ollama:0.13.3"
-  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.6.41"
+  ollama: &ollama-version "ollama/ollama:0.13.5"
+  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.6.43"
 services:
   ollama:
     cap_add:
