@@ -1,16 +1,58 @@
-## Add your compose file here
+x-versions:
+  influxdb: &influxdb-version "influxdb:2.7-alpine"
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  influxdb:
+    container_name: influxdb
+    image: *influxdb-version
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: "setup"
+      DOCKER_INFLUXDB_INIT_USERNAME: "admin"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "${INFLUXDB_ADMIN_PASSWORD}"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "${INFLUXDB_ADMIN_TOKEN}"
+      DOCKER_INFLUXDB_INIT_ORG: "homelab"
+      DOCKER_INFLUXDB_INIT_BUCKET: "home_assistant"
+      DOCKER_INFLUXDB_INIT_RETENTION: "30d"
+      INFLUXDB_HTTP_AUTH_ENABLED: "true"
+      TZ: "${TZ}"
+    hostname: influxdb
+    ipc: private
+    networks:
+      - monitoring
+    ports:
+      - "8086:8086/tcp"
+    volumes:
+      - /opt/docker/monitoring/influxdb_storage:/var/lib/influxdb2
+      - /opt/docker/monitoring/influxdb_config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD-SHELL", "influx ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+-alpine$$'
+      wud.display.name: "InfluxDB"
+      wud.display.icon: "si:influxdb"
+      wud.link.template: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+networks:
+  monitoring:
+    name: monitoring
+    driver: bridge
+    external: true
