@@ -53,6 +53,6 @@ services:
 
 networks:
   influxdb:
-    name: influxdb
+    name: grafana-prometheus
     driver: bridge
     external: true
