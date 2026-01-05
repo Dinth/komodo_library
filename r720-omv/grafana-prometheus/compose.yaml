@@ -34,8 +34,8 @@ services:
       - "3003:3000/tcp"
     volumes:
       - /opt/docker/grafana-prometheus/grafana_storage:/var/lib/grafana
-      - /opt/docker/grafana-prometheus/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - /opt/docker/grafana-prometheus/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - /opt/docker/grafana-prometheus/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - /opt/docker/grafana-prometheus/grafana-provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q '\"database\"\\s*:\\s*\"ok\"'"]
       interval: 30s
