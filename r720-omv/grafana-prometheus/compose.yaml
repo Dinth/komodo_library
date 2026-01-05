@@ -9,6 +9,7 @@ services:
     container_name: grafana
     image: *grafana-version
     restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -57,6 +58,7 @@ services:
     container_name: prometheus
     image: *prometheus-version
     restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
