@@ -29,11 +29,10 @@ services:
     ipc: private
     networks:
       - monitoring
-    # LAN access only (optional; remove if you use a VPN or SSH tunnel)
     ports:
       - "3000:3000/tcp"
     volumes:
-      - /opt/docker/monitoring/grafana_storage:/var/lib/grafana
+      - /opt/docker/monitoring/grafana:/var/lib/grafana
       - ./provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     healthcheck:
@@ -79,13 +78,12 @@ services:
     ipc: private
     networks:
       - monitoring
-    # Optional: access Prometheus UI from LAN; remove if not needed
     ports:
       - "9090:9090/tcp"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
-      - /opt/docker/monitoring/prometheus_storage:/prometheus
+      - /opt/docker/monitoring/prometheus:/prometheus
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy | grep -q 'Prometheus Server is Healthy'"]
       interval: 30s
@@ -109,7 +107,11 @@ services:
     image: *node-exporter-version
     restart: unless-stopped
     cap_add:
-      - SYS_TIME
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
     cap_drop:
       - ALL
     command:
@@ -125,12 +127,12 @@ services:
     ipc: private
     networks:
       - monitoring
-    # Prometheus scrapes via docker network; no port publish required
     ports: []
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host:ro,rslave
+      - /opt/docker/monitoring/node-exporter:/tmp/node-exporter  # State if needed
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9100/metrics | grep -q 'node_exporter'"]
       interval: 30s
@@ -154,19 +156,19 @@ services:
     image: *cadvisor-version
     restart: unless-stopped
     cap_add:
-      - SYS_ADMIN
-      - SYS_PTRACE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
     cap_drop:
       - ALL
-    devices:
-      - /dev/kmsg
     environment:
       TZ: "${TZ}"
     hostname: cadvisor
     ipc: private
     networks:
       - monitoring
-    # Prometheus scrapes via docker network; no port publish required
     ports: []
     volumes:
       - /:/rootfs:ro
@@ -175,7 +177,7 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    privileged: true
+      - /opt/docker/monitoring/cadvisor:/tmp/cadvisor  # State if needed
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz | grep -q 'ok'"]
       interval: 30s
