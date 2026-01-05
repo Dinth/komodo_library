@@ -27,12 +27,12 @@ services:
     hostname: influxdb
     ipc: private
     networks:
-      - monitoring
+      - influxdb
     ports:
       - "8086:8086/tcp"
     volumes:
-      - /opt/docker/monitoring/influxdb_storage:/var/lib/influxdb2
-      - /opt/docker/monitoring/influxdb_config:/etc/influxdb2
+      - /opt/docker/influxdb/influxdb_storage:/var/lib/influxdb2
+      - /opt/docker/influxdb/influxdb_config:/etc/influxdb2
     healthcheck:
       test: ["CMD-SHELL", "influx ping || exit 1"]
       interval: 30s
@@ -52,7 +52,7 @@ services:
         max-file: "3"
 
 networks:
-  monitoring:
-    name: monitoring
+  influxdb:
+    name: influxdb
     driver: bridge
     external: true
