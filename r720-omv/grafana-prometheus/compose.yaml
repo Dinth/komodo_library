@@ -30,7 +30,7 @@ services:
     networks:
       - grafana-prometheus
     ports:
-      - "3000:3000/tcp"
+      - "3000:3003/tcp"
     volumes:
       - /opt/docker/grafana-prometheus/grafana_storage:/var/lib/grafana
       - /opt/docker/grafana-prometheus/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
