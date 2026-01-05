@@ -28,13 +28,13 @@ services:
     hostname: grafana
     ipc: private
     networks:
-      - monitoring
+      - grafana-prometheus
     ports:
       - "3000:3000/tcp"
     volumes:
-      - /opt/docker/monitoring/grafana_storage:/var/lib/grafana
-      - /opt/docker/monitoring/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - /opt/docker/monitoring/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - /opt/docker/grafana-prometheus/grafana_storage:/var/lib/grafana
+      - /opt/docker/grafana-prometheus/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - /opt/docker/grafana-prometheus/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q '\"database\"\\s*:\\s*\"ok\"'"]
       interval: 30s
@@ -77,13 +77,13 @@ services:
     hostname: prometheus
     ipc: private
     networks:
-      - monitoring
+      - grafana-prometheus
     ports:
       - "9090:9090/tcp"
     volumes:
-      - /opt/docker/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - /opt/docker/monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
-      - /opt/docker/monitoring/prometheus_storage:/prometheus
+      - /opt/docker/grafana-prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /opt/docker/grafana-prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - /opt/docker/grafana-prometheus/prometheus_storage:/prometheus
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy | grep -q 'Prometheus Server is Healthy'"]
       interval: 30s
@@ -126,7 +126,7 @@ services:
     hostname: node-exporter
     ipc: private
     networks:
-      - monitoring
+      - grafana-prometheus
     ports: []
     volumes:
       - /proc:/host/proc:ro
@@ -167,7 +167,7 @@ services:
     hostname: cadvisor
     ipc: private
     networks:
-      - monitoring
+      - grafana-prometheus
     ports: []
     volumes:
       - /:/rootfs:ro
@@ -195,7 +195,7 @@ services:
         max-file: "2"
 
 networks:
-  monitoring:
-    name: monitoring
+  grafana-prometheus:
+    name: grafana-prometheus
     driver: bridge
     external: false
