@@ -28,129 +28,51 @@ jobs:
     container: docker:alpine
 
     steps:
-      # 1. Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Python (needed for yamllint)
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x' # Use a recent Python 3 version
-
-      # 3. Install yamllint
-      - name: Install yamllint
-        run: pip install yamllint
-
-      # 4. Find Compose Files (Do this once and potentially pass output if needed, or repeat find)
-      #    Let's find them here for use in subsequent steps if necessary, although yamllint and docker compose can take paths directly.
-      - name: Find Compose files
-        id: find_files
+      - name: Install dependencies
         run: |
-          echo "Searching for Docker Compose files (docker-compose*.y*ml or compose.y*ml)..."
-          # Use find's OR logic and handle special characters
-          compose_files_list=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f -print)
-          if [ -z "$compose_files_list" ]; then
-            echo "No Docker Compose files found matching patterns."
-            # Set an output flag to false if no files are found
-            echo "files_found=false" >> $GITHUB_OUTPUT
-            # Echo the empty list directly for use in xargs (it will handle no input)
-            echo "files_list=''" >> $GITHUB_OUTPUT
-          else
-            echo "Found Compose files:"
-            echo "$compose_files_list" # Print for logging
-            # Set output flag and list
-            echo "files_found=true" >> $GITHUB_OUTPUT
-            # Store the newline-separated list for potential later use
-            # Note: Passing multi-line strings requires care, using find directly in steps is often easier.
-            # For xargs later, print0 is better, but harder to pass between steps easily.
-            # Let's stick to FINDING the files within each step that needs them for simplicity.
-            echo "files_list=''" >> $GITHUB_OUTPUT # Avoid passing complex list
-          fi
+          apk add --no-cache bash curl
+          
+          # Install fy (fast-yaml-cli)
+          curl -L https://github.com/bug-ops/fast-yaml/releases/latest/download/fy-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin
 
-      # 5. Lint YAML style using yamllint
-      #    Checks for style issues like indentation, spacing, comments, key ordering etc.
-      #    Configure via a .yamllint file in the repo root.
-      - name: Lint YAML style (yamllint)
+      - name: Lint YAML files
+        shell: bash
         run: |
-          echo "Searching for files to lint..."
-          # Use find with -print0 and xargs -0 for robustness with filenames
-          compose_files_to_lint=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f -print0)
-
-          if [ -z "$compose_files_to_lint" ]; then
-             echo "No Docker Compose files found. Skipping yamllint."
-             exit 0
-          fi
-
-          echo "Running yamllint on found files..."
-          # Run yamllint on all found files at once.
-          # -s uses stricter default rules. Remove if you rely solely on a .yamllint config file.
-          # xargs -0 handles null-separated input from find -print0
-          echo "$compose_files_to_lint" | xargs -0 yamllint -s
-
-          # Check yamllint exit code explicitly if needed, though default shell behavior (set -e) should handle it.
-          if [ $? -ne 0 ]; then
-            echo "::error::yamllint found style issues."
-            exit 1
-          fi
-          echo "yamllint check successful."
-
-      # 6. Basic Syntax Validation using docker compose config
-      #    Ensures the file structure conforms to the Docker Compose schema.
-      - name: Validate Docker Compose Syntax
-        run: |
-          echo "Searching for files to validate syntax..."
-          # Find files again, using -print0 and while read loop for robustness
-          find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f -print0 | while IFS= read -r -d $'\0' file; do
-            echo "Validating $file..."
-            # Use docker compose (v2+) or docker-compose (v1) config -q
-            if command -v docker &> /dev/null && docker compose version &> /dev/null; then
-              if ! docker compose -f "$file" config -q; then
-                echo "::error file=$file::Syntax validation failed for $file using 'docker compose'"
-                exit 1
-              fi
-            elif command -v docker-compose &> /dev/null; then
-              if ! docker-compose -f "$file" config -q; then
-                 echo "::error file=$file::Syntax validation failed for $file using 'docker-compose'"
-                 exit 1
-              fi
-            else
-              echo "::error::Neither 'docker compose' (v2+) nor 'docker-compose' (v1) command found. Cannot validate syntax."
+          echo "Linting Docker Compose files..."
+          
+          find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f | while read -r file; do
+            echo "Linting $file..."
+            if ! fy lint "$file"; then
+              echo "::error file=$file::Lint failed for $file"
               exit 1
             fi
           done
+          
+          echo "✓ All files passed linting"
 
-          # Check if the loop ran at all (if no files were found by find)
-          # The 'find | while' structure exits 0 if find produces no output.
-          # We need to know if files were actually processed.
-          # Re-check if files exist to confirm validation occurred if expected.
-          check_files_exist=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f -print -quit)
-          if [ -n "$check_files_exist" ]; then
-            echo "Syntax validation successful for all found files."
-          else
-            echo "No Docker Compose files found. Skipping syntax validation step."
-            # No need to exit 0 here, as the script completes successfully if no files are found
-          fi
+      - name: Validate Docker Compose syntax
+        shell: bash
+        run: |
+          echo "Validating Docker Compose files..."
+          
+          find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f | while read -r file; do
+            echo "Validating $file..."
+            if ! docker compose -f "$file" config -q; then
+              echo "::error file=$file::Syntax validation failed"
+              exit 1
+            fi
+          done
+          
+          echo "✓ All files validated successfully"
 
-
-      # 7. Security and Best Practice Scan using Trivy
-      #    Scans for security misconfigurations and some operational best practices.
-      - name: Run Trivy config scan
-        uses: aquasecurity/trivy-action@master # You can pin to a specific version e.g. @0.18.0
+      - name: Run Trivy security scan
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           scan-ref: '.'
           exit-code: '1'
-          severity: 'HIGH,CRITICAL' # Adjust as needed
+          severity: 'HIGH,CRITICAL'
           format: 'table'
-          # Optional SARIF output:
-          # format: 'sarif'
-          # output: 'trivy-results.sarif'
-
-      # Optional: Upload Trivy results SARIF file
-      # Needs: permissions: security-events: write
-      # - name: Upload Trivy scan results to GitHub Security tab
-      #   if: always() && steps.trivy.outputs.exit-code == '1' # Example condition: only upload if issues found
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: 'trivy-results.sarif'
