@@ -1,6 +1,6 @@
 x-versions:
   influxdb: &influxdb-version "influxdb:2.8-alpine"
-
+  telegraf-version: &telegraf-version "telegraf:1.31-alpine"
 services:
   influxdb:
     container_name: influxdb
