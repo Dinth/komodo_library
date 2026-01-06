@@ -52,7 +52,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
- telegraf:
+  telegraf:
     container_name: telegraf
     image: *telegraf-version
     restart: unless-stopped
