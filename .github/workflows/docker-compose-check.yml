@@ -25,18 +25,13 @@ jobs:
   check-lint-docker-compose:
     name: Check, Lint & Scan Docker Compose Files
     runs-on: ubuntu-latest
-    # No container - ubuntu-latest has Docker pre-installed
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install fy (fast-yaml-cli)
-        run: |
-          curl -L https://github.com/fluxcd/flux2/releases/latest/download/fy-linux-amd64.tar.gz | tar xz -C /tmp
-          sudo mv /tmp/fy /usr/local/bin/
-          sudo chmod +x /usr/local/bin/fy
-          fy --version
+      - name: Install yamllint
+        run: pip install yamllint
 
       - name: Lint YAML files
         shell: bash
@@ -50,14 +45,7 @@ jobs:
             exit 0
           fi
           
-          echo "$files" | while read -r file; do
-            echo "Linting $file..."
-            if ! fy lint "$file"; then
-              echo "::error file=$file::Lint failed for $file"
-              exit 1
-            fi
-          done
-          
+          echo "$files" | xargs yamllint -d relaxed
           echo "✓ All files passed linting"
 
       - name: Validate Docker Compose syntax
