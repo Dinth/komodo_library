@@ -25,6 +25,7 @@ jobs:
   check-lint-docker-compose:
     name: Check, Lint & Scan Docker Compose Files
     runs-on: ubuntu-latest
+    container: docker:alpine
 
     steps:
       # 1. Checkout the repository code
