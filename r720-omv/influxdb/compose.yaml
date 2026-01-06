@@ -1,5 +1,5 @@
 x-versions:
-  influxdb: &influxdb-version "influxdb:2.7-alpine"
+  influxdb: &influxdb-version "influxdb:2.8-alpine"
 
 services:
   influxdb:
@@ -52,7 +52,7 @@ services:
         max-file: "3"
 
 networks:
-  influxdb:
+  grafana-prometheus:
     name: grafana-prometheus
     driver: bridge
     external: true
