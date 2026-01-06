@@ -70,10 +70,10 @@ services:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    depends_on:
-      loki:
-        condition: service_healthy
-        restart: true
+#    depends_on:
+#      loki:
+#        condition: service_healthy
+#        restart: true
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9080/ready | grep -q 'Ready'"]
       interval: 30s
