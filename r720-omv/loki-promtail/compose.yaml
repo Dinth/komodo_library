@@ -24,8 +24,8 @@ services:
       - monitoring
     ports: []  # Grafana talks to http://loki:3100 inside the network
     volumes:
-      - /opt/docker/monitoring/loki-config.yml:/etc/loki/local-config.yml:ro
-      - /opt/docker/monitoring/loki_storage:/loki
+      - /opt/docker//loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
+      - /opt/docker//loki-promtail/loki_storage:/loki
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3100/ready | grep -q 'ready'"]
       interval: 30s
@@ -64,7 +64,7 @@ services:
     networks:
       - monitoring
     volumes:
-      - /opt/docker/monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /opt/docker/loki-promtail/promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
