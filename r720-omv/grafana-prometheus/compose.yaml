@@ -3,6 +3,7 @@ x-versions:
   prometheus: &prometheus-version "prom/prometheus:v2.52.0"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.8.2"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.50.0"
+  dcgm-exporter: &dcgm-exporter-version "nvcr.io/nvidia/dcgm/dcgm-exporter:3.2.3-3.0.12-ubuntu20.04" 
 
 services:
   grafana:
@@ -190,6 +191,49 @@ services:
       wud.display.name: "cAdvisor"
       wud.display.icon: "si:docker"
       wud.link.template: 'https://github.com/google/cadvisor/releases/tag/$${major}.$${minor}.$${patch}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+  dcgm-exporter:
+    container_name: dcgm-exporter
+    image: *dcgm-exporter-version
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    environment:
+      TZ: "${TZ}"
+    hostname: dcgm-exporter
+    ipc: private
+    networks:
+      - grafana-prometheus
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all 
+              capabilities: [gpu]
+              
+    ports: []
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9400/metrics | grep -q 'DCGM'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^.*$' 
+      wud.display.name: "DCGM Exporter"
+      wud.display.icon: "si:nvidia"
     logging:
       driver: "json-file"
       options:
