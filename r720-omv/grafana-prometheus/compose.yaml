@@ -201,6 +201,7 @@ services:
     image: *dcgm-exporter-version
     restart: unless-stopped
     cap_add:
+      - SYS_ADMIN
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
