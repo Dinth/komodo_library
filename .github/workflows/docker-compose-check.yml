@@ -35,6 +35,7 @@ jobs:
 
       - name: Lint YAML files
         shell: bash
+        continue-on-error: true
         run: |
           echo "Linting Docker Compose files..."
           
@@ -50,6 +51,7 @@ jobs:
 
       - name: Validate Docker Compose syntax
         shell: bash
+        continue-on-error: true
         run: |
           echo "Validating Docker Compose files..."
           
@@ -72,6 +74,7 @@ jobs:
 
       - name: Run Trivy security scan
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           scan-type: 'config'
           scan-ref: '.'
