@@ -1,6 +1,6 @@
 x-versions:
-  loki: &loki-version "grafana/loki:2.9.10"
-  promtail: &promtail-version "grafana/promtail:2.9.10"
+  loki: &loki-version "grafana/loki:3.6.3"
+  promtail: &promtail-version "grafana/promtail:3.6.3"
 
 services:
   loki:
