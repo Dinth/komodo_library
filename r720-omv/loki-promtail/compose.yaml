@@ -27,12 +27,6 @@ services:
     volumes:
       - /opt/docker/loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
       - /opt/docker/loki-promtail/loki_storage:/loki
-    healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/127.0.0.1/3100 || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 40s
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -70,16 +64,6 @@ services:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-#    depends_on:
-#      loki:
-#        condition: service_healthy
-#        restart: true
-    healthcheck:
-      test: ["CMD-SHELL", "echo > /dev/tcp/127.0.0.1/9080 || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
