@@ -28,9 +28,9 @@ services:
       - /opt/docker/loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
       - /opt/docker/loki-promtail/loki_storage:/loki
     healthcheck:
-      test: ["TCP", "127.0.0.1", "3100"]
+      test: ["CMD-SHELL", "echo > /dev/tcp/127.0.0.1/3100 || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
       start_period: 40s
     labels:
@@ -75,9 +75,9 @@ services:
 #        condition: service_healthy
 #        restart: true
     healthcheck:
-      test: ["TCP", "127.0.0.1", "9080"]
+      test: ["CMD-SHELL", "echo > /dev/tcp/127.0.0.1/9080 || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 5
       start_period: 40s
     labels:
