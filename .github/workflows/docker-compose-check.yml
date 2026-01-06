@@ -33,7 +33,7 @@ jobs:
 
       - name: Install fy (fast-yaml-cli)
         run: |
-          curl -L https://github.com/bug-ops/fast-yaml/releases/latest/download/fy-x86_64-unknown-linux-musl.tar.gz | tar xz -C /tmp
+          curl -L https://github.com/fluxcd/flux2/releases/latest/download/fy-linux-amd64.tar.gz | tar xz -C /tmp
           sudo mv /tmp/fy /usr/local/bin/
           sudo chmod +x /usr/local/bin/fy
           fy --version
