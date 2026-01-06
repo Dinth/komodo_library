@@ -25,25 +25,32 @@ jobs:
   check-lint-docker-compose:
     name: Check, Lint & Scan Docker Compose Files
     runs-on: ubuntu-latest
-    container: docker:dind
+    # No container - ubuntu-latest has Docker pre-installed
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install fy (fast-yaml-cli)
         run: |
-          apk add --no-cache bash curl
-          
-          # Install fy (fast-yaml-cli)
-          curl -L https://github.com/bug-ops/fast-yaml/releases/latest/download/fy-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin
+          curl -L https://github.com/bug-ops/fast-yaml/releases/latest/download/fy-x86_64-unknown-linux-musl.tar.gz | tar xz -C /tmp
+          sudo mv /tmp/fy /usr/local/bin/
+          sudo chmod +x /usr/local/bin/fy
+          fy --version
 
       - name: Lint YAML files
         shell: bash
         run: |
           echo "Linting Docker Compose files..."
           
-          find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f | while read -r file; do
+          files=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f)
+          
+          if [ -z "$files" ]; then
+            echo "No Docker Compose files found"
+            exit 0
+          fi
+          
+          echo "$files" | while read -r file; do
             echo "Linting $file..."
             if ! fy lint "$file"; then
               echo "::error file=$file::Lint failed for $file"
@@ -58,7 +65,14 @@ jobs:
         run: |
           echo "Validating Docker Compose files..."
           
-          find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f | while read -r file; do
+          files=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f)
+          
+          if [ -z "$files" ]; then
+            echo "No Docker Compose files found"
+            exit 0
+          fi
+          
+          echo "$files" | while read -r file; do
             echo "Validating $file..."
             if ! docker compose -f "$file" config -q; then
               echo "::error file=$file::Syntax validation failed"
