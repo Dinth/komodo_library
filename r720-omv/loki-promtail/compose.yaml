@@ -28,11 +28,11 @@ services:
       - /opt/docker/loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
       - /opt/docker/loki-promtail/loki_storage:/loki
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3100/ready | grep -q 'ready'"]
+      test: ["TCP", "127.0.0.1", "3100"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 40s
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -75,11 +75,11 @@ services:
 #        condition: service_healthy
 #        restart: true
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9080/ready | grep -q 'Ready'"]
+      test: ["TCP", "127.0.0.1", "9080"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 20s
+      retries: 5
+      start_period: 40s
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
