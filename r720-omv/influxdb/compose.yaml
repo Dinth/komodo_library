@@ -51,7 +51,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
   telegraf:
     container_name: telegraf
     image: *telegraf-version
