@@ -102,4 +102,4 @@ networks:
   influxdb:
     name: influxdb
     driver: bridge
-    external: true
+    internal: true
