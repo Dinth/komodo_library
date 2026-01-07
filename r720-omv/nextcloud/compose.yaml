@@ -67,7 +67,7 @@ services:
         max-size: "5m"
         max-file: "2"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      test: ["CMD", "wget", "--spider", "-q", "--tries=1", "http://localhost:9000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
