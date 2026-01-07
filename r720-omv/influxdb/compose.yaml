@@ -1,6 +1,6 @@
 x-versions:
-  influxdb: &influxdb-version "influxdb:2.8-alpine"
-  telegraf-version: &telegraf-version "telegraf:1.31-alpine"
+  influxdb: &influxdb-version "influxdb:3.6.0-core"
+  telegraf-version: &telegraf-version "telegraf:1.37-alpine"
 services:
   influxdb:
     container_name: influxdb
@@ -42,10 +42,10 @@ services:
       start_period: 60s
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+-alpine$$'
+      wud.tag.include: '^\d+\.\d+\.\d+-core$$'
       wud.display.name: "InfluxDB"
       wud.display.icon: "si:influxdb"
-      wud.link.template: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.0'
+      wud.link.template: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
