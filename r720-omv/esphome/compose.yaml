@@ -39,7 +39,7 @@ services:
         max-file: "3"
     healthcheck:
       test: >
-        wget -q -T2 -O- http://localhost:6052/ | grep "ESPHome Dashboard" || exit 1
+        curl -sf --max-time 2 http://localhost:6052/ | grep "ESPHome Dashboard" || exit 1
 
 networks:
   esphome:
