@@ -1,5 +1,5 @@
 x-versions:
-  influxdb: &influxdb-version "influxdb:3.6.0-core"
+  influxdb: &influxdb-version "influxdb:3.8.0-core"
   telegraf-version: &telegraf-version "telegraf:1.37-alpine"
 services:
   influxdb:
