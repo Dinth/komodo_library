@@ -38,7 +38,7 @@ services:
         max-size: 10m
         max-file: 3
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080 | grep -q 'Login' || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 | grep -q 'Login' || exit 1"]
       interval: 40s
       timeout: 30s
       retries: 3
@@ -47,7 +47,7 @@ services:
       - tandoor
       - traefik
     ports:
-      - 1244:8080/tcp
+      - 1244:80/tcp
     labels:
       traefik.enable: "true"
       traefik.http.routers.tandoor.entrypoints: websecure
@@ -57,7 +57,7 @@ services:
       traefik.http.routers.tandoor.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.tandoor.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.tandoor.middlewares: "secHeaders@file"
-      traefik.http.services.tandoor.loadbalancer.server.port: "8080"
+      traefik.http.services.tandoor.loadbalancer.server.port: "80"
       homepage.group: "Home"
       homepage.name: "Tandoor"
       homepage.icon: "tandoor-recipes.png"
