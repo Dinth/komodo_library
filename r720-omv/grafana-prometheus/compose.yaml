@@ -30,7 +30,7 @@ services:
     hostname: grafana
     ipc: private
     networks:
-      - grafana-prometheus
+      - monitoring
     ports:
       - "3003:3000/tcp"
     volumes:
@@ -80,7 +80,7 @@ services:
     hostname: prometheus
     ipc: private
     networks:
-      - grafana-prometheus
+      - monitoring
     ports:
       - "9090:9090/tcp"
     volumes:
@@ -129,7 +129,7 @@ services:
     hostname: node-exporter
     ipc: private
     networks:
-      - grafana-prometheus
+      - monitoring
     ports: []
     volumes:
       - /proc:/host/proc:ro
@@ -170,7 +170,7 @@ services:
     hostname: cadvisor
     ipc: private
     networks:
-      - grafana-prometheus
+      - monitoring
     ports: []
     volumes:
       - /:/rootfs:ro
@@ -215,7 +215,7 @@ services:
     hostname: dcgm-exporter
     ipc: private
     networks:
-      - grafana-prometheus
+      - monitoring
     deploy:
       resources:
         reservations:
@@ -242,7 +242,7 @@ services:
         max-file: "2"
 
 networks:
-  grafana-prometheus:
-    name: grafana-prometheus
+  monitoring:
+    name: monitoring
     driver: bridge
     external: false
