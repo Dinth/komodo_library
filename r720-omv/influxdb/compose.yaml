@@ -28,7 +28,7 @@ services:
     hostname: influxdb
     ipc: private
     networks:
-      - influxdb
+      - monitoring
     ports:
       - "8086:8086/tcp"
     volumes:
@@ -71,7 +71,7 @@ services:
     hostname: telegraf
     ipc: private
     networks:
-      - influxdb
+      - monitoring
     ports: []
     volumes:
       - /opt/docker/influxdb-telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
@@ -99,6 +99,6 @@ services:
 
 networks:
   influxdb:
-    name: influxdb
+    name: monitoring
     driver: bridge
-    internal: true
+    external: true
