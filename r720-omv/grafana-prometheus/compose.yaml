@@ -261,7 +261,7 @@ services:
     hostname: blackbox-exporter
     ipc: private
     networks:
-      - grafana-prometheus
+      - monitoring
     ports: []
     volumes:
       - /opt/docker/grafana-prometheus/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
