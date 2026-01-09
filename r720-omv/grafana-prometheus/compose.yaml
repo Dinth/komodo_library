@@ -196,6 +196,7 @@ services:
       options:
         max-size: "5m"
         max-file: "2"
+        
   dcgm-exporter:
     container_name: dcgm-exporter
     image: *dcgm-exporter-version
@@ -222,7 +223,11 @@ services:
             - driver: nvidia
               count: all 
               capabilities: [gpu]
-              
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+-\d+\.\d+\.\d+-distroless$'
+      wud.display.name: "DCGM Exporter"
+      wud.display.icon: "si:nvidia"              
     ports: []
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9400/metrics | grep -q 'DCGM'"]
