@@ -267,7 +267,6 @@ services:
       - /opt/docker/grafana-prometheus/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
     command:
       - '--config.file=/etc/blackbox_exporter/config.yml'
-      - '--web.telemetry-path=/metrics'
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9115/metrics | grep -q 'blackbox_exporter_version'"]
       interval: 30s
