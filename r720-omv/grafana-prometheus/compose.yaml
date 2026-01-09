@@ -244,7 +244,7 @@ services:
 
   blackbox-exporter:
     container_name: blackbox-exporter
-    image: *blackbox-exporter
+    image: *blackbox-exporter-version
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
