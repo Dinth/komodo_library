@@ -285,7 +285,6 @@ services:
         max-size: "5m"
         max-file: "2"
 
-
 networks:
   monitoring:
     name: monitoring
