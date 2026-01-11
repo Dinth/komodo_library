@@ -1,8 +1,41 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.6.3"
   promtail: &promtail-version "grafana/promtail:3.6.3"
+  promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.10.1"
 
 services:
+    promtail-socket-proxy:
+    image: *promtail-socket-proxy-version
+    ipc: private
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=promtail'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(version|containers/.*|events.*)'
+      - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    user: "65534:${DOCKER_SOCKET_GID}"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Promtail'
+      wud.display.icon: 'mdi:connection'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+      
+
   loki:
     container_name: loki
     image: *loki-version
