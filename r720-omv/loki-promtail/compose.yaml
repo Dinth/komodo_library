@@ -50,6 +50,7 @@ services:
       - FOWNER
       - SETGID
       - SETUID
+      - DAC_READ_SEARCH
     cap_drop:
       - ALL
     command: ["-config.file=/etc/promtail/config.yml"]
