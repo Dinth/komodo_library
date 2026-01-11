@@ -122,9 +122,9 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/host'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--collector.netclass.ignored-devices=^(veth.*|br-.*|docker.*)$$'
-      - '--collector.netdev.device-exclude=^(veth.*|br-.*|docker.*)$$'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|var/lib/docker/containers|var/lib/docker/overlay2|run/docker/netns/.+)($$|/)'
+      - '--collector.netclass.ignored-devices=^(veth.*|br-.*|docker.*|lo)$$'
+      - '--collector.netdev.device-exclude=^(veth.*|br-.*|docker.*|lo)$$'
     environment:
       TZ: "${TZ}"
     hostname: node-exporter
