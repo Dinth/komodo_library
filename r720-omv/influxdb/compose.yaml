@@ -118,7 +118,7 @@ services:
       # UniFi Controller configuration
       UP_UNIFI_CONTROLLER_0_URL: "https://10.10.1.13:8443"
       UP_UNIFI_CONTROLLER_0_USER: "telegraf_monitor"
-      UP_UNIFI_CONTROLLER_0_PASS: "${UNIFI_PASS}"
+      UP_UNIFI_CONTROLLER_0_PASS: "${UNPOLLER_UNIFI_PASS}"
       UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "false"
       UP_UNIFI_CONTROLLER_0_SAVE_SITES: "true"
       UP_UNIFI_CONTROLLER_0_SAVE_DPI: "false"
