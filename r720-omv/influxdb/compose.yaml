@@ -22,7 +22,7 @@ services:
       DOCKER_INFLUXDB_INIT_USERNAME: "admin"
       DOCKER_INFLUXDB_INIT_PASSWORD: "${INFLUXDB_PASSWORD}"
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "${INFLUXDB_TOKEN}"
-      DOCKER_INFLUXDB_INIT_ORG: "homelab"
+      DOCKER_INFLUXDB_INIT_ORG: "wickhay"
       DOCKER_INFLUXDB_INIT_BUCKET: "home_assistant"
       DOCKER_INFLUXDB_INIT_RETENTION: "30d"
       INFLUXDB_HTTP_AUTH_ENABLED: "true"
@@ -116,8 +116,8 @@ services:
     environment:
       TZ: "${TZ}"
       # UniFi Controller configuration
-      UP_UNIFI_CONTROLLER_0_URL: "${UNIFI_CONTROLLER_URL}"
-      UP_UNIFI_CONTROLLER_0_USER: "${UNIFI_USER}"
+      UP_UNIFI_CONTROLLER_0_URL: "https://10.10.1.13:8443"
+      UP_UNIFI_CONTROLLER_0_USER: "telegraf_monitor"
       UP_UNIFI_CONTROLLER_0_PASS: "${UNIFI_PASS}"
       UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "false"
       UP_UNIFI_CONTROLLER_0_SAVE_SITES: "true"
@@ -128,8 +128,8 @@ services:
       UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "false"
       # InfluxDB configuration
       UP_INFLUXDB_URL: "http://influxdb:8086"
-      UP_INFLUXDB_ORG: "homelab"
-      UP_INFLUXDB_BUCKET: "unifi"
+      UP_INFLUXDB_ORG: "wickhay"
+      UP_INFLUXDB_BUCKET: "network"
       UP_INFLUXDB_TOKEN: "${INFLUXDB_TOKEN}"
       # Poller configuration
       UP_POLLER_DEBUG: "false"
