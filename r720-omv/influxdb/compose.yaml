@@ -1,6 +1,8 @@
 x-versions:
   influxdb: &influxdb-version "influxdb:2.8.0-alpine"
   telegraf-version: &telegraf-version "telegraf:1.37-alpine"
+  unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v2.21.0"
+
 services:
   influxdb:
     container_name: influxdb
@@ -51,6 +53,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
   telegraf:
     container_name: telegraf
     image: *telegraf-version
@@ -91,6 +94,67 @@ services:
       wud.display.name: "Telegraf"
       wud.display.icon: "si:influxdb"
       wud.link.template: 'https://github.com/influxdata/telegraf/releases/tag/v$${major}.$${minor}.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  unpoller:
+    container_name: unpoller
+    image: *unpoller-version
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    environment:
+      TZ: "${TZ}"
+      # UniFi Controller configuration
+      UP_UNIFI_CONTROLLER_0_URL: "${UNIFI_CONTROLLER_URL}"
+      UP_UNIFI_CONTROLLER_0_USER: "${UNIFI_USER}"
+      UP_UNIFI_CONTROLLER_0_PASS: "${UNIFI_PASS}"
+      UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "false"
+      UP_UNIFI_CONTROLLER_0_SAVE_SITES: "true"
+      UP_UNIFI_CONTROLLER_0_SAVE_DPI: "false"
+      UP_UNIFI_CONTROLLER_0_SAVE_IDS: "false"
+      UP_UNIFI_CONTROLLER_0_SAVE_EVENTS: "false"
+      UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES: "false"
+      UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "false"
+      # InfluxDB configuration
+      UP_INFLUXDB_URL: "http://influxdb:8086"
+      UP_INFLUXDB_ORG: "homelab"
+      UP_INFLUXDB_BUCKET: "unifi"
+      UP_INFLUXDB_TOKEN: "${INFLUXDB_TOKEN}"
+      # Poller configuration
+      UP_POLLER_DEBUG: "false"
+      UP_POLLER_QUIET: "false"
+    hostname: unpoller
+    ipc: private
+    networks:
+      - monitoring
+    ports: []
+    volumes:
+      - /opt/docker/influxdb-telegraf/unpoller_config:/config:ro
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:9130/metrics || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      wud.watch: "true"
+      wud.display.name: "UnPoller"
+      wud.display.icon: "si:ubiquiti"
+      wud.link.template: 'https://github.com/unpoller/unpoller/releases/tag/$${version}'
     logging:
       driver: "json-file"
       options:
