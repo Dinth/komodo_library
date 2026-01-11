@@ -1,6 +1,6 @@
 x-versions:
   fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.4.15"
-  fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-1.9.1"
+  fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.0.4"
   
 services:
   fireflyiii:
