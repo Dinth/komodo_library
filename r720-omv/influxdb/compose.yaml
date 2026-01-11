@@ -42,7 +42,7 @@ services:
       start_period: 60s
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+-core$$'
+      wud.tag.include: '^\d+\.\d+\.\d+-alpine$$'
       wud.display.name: "InfluxDB"
       wud.display.icon: "si:influxdb"
       wud.link.template: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.$${patch}'
