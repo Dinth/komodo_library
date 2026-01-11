@@ -1,3 +1,7 @@
+x-versions:
+  fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.4.15"
+  fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-1.9.1"
+  
 services:
   fireflyiii:
     cap_add:
@@ -34,7 +38,7 @@ services:
       FIREFLY_III_LAYOUT: "v2"
       SESSION_DRIVER: "file"
     hostname: fireflyiii
-    image: fireflyiii/core:version-6.4.15
+    image: *fireflyiii-version
     ipc: private
     logging:
       driver: json-file
@@ -96,7 +100,7 @@ services:
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_PAULINA_AUTOIMPORT_KEY}"
     hostname: fireflyiii_paulina_dataimporter
-    image: fireflyiii/data-importer:version-1.9.1
+    image: *fireflyiii-dataimporter-version
     ipc: private
     labels:
       wud.watch: "true"
@@ -147,7 +151,7 @@ services:
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
     hostname: fireflyiii_michal_dataimporter
-    image: fireflyiii/data-importer:version-1.9.1
+    image: *fireflyiii-dataimporter-version
     ipc: private
     labels:
       wud.watch: "true"
