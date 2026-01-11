@@ -12,7 +12,7 @@ services:
       - '-allowfrom=promtail'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(version|containers/json|networks|events)'
-      - '-allowHEAD=/v1\..{1,2}/_ping'
+      - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
