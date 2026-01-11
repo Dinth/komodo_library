@@ -34,7 +34,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - monitoring
-      
 
   loki:
     container_name: loki
