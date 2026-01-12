@@ -145,7 +145,7 @@ services:
       UP_INFLUXDB_BUCKET: "network"
       UP_INFLUXDB_TOKEN: "${INFLUXDB_TOKEN}"
       # Poller configuration
-      UP_POLLER_DEBUG: "false"
+      UP_POLLER_DEBUG: "true"
       UP_POLLER_QUIET: "false"
     hostname: unpoller
     ipc: private
