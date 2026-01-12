@@ -212,7 +212,7 @@ services:
       USE_OLLAMA_DOCKER: "true"
       PORT: "8080"
       OLLAMA_BASE_URL: "http://ollama:11434"
-      PIPELINES_URL: "http://pipelines:9099"
+      PIPELINES_URL: "http://openwebui-pipelines:9099"
       ENABLE_SIGNUP: "false"
       WEBUI_AUTH: "true"
       WEBUI_SECRET_KEY: "${OPENWEBUI_SECRET_KEY}"
