@@ -65,6 +65,10 @@ services:
       wud.display.name: "Loki"
       wud.display.icon: "si:grafana"
       wud.link.template: 'https://github.com/grafana/loki/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "Loki"
+      homepage.icon: "grafana-loki.png"
+      homepage.description: "Log Aggregation"
     logging:
       driver: "json-file"
       options:
@@ -102,6 +106,10 @@ services:
       wud.display.name: "Promtail"
       wud.display.icon: "si:grafana"
       wud.link.template: 'https://github.com/grafana/loki/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "Promtail"
+      homepage.icon: "grafana-loki.png"
+      homepage.description: "Log Shipper"
     logging:
       driver: "json-file"
       options:
