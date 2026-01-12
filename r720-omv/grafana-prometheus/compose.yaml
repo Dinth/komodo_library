@@ -50,6 +50,13 @@ services:
       wud.display.name: "Grafana"
       wud.display.icon: "si:grafana"
       wud.link.template: 'https://github.com/grafana/grafana/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "Grafana"
+      homepage.icon: "grafana.png"
+      homepage.href: "http://10.10.1.13:3003"
+      homepage.siteMonitor: "http://10.10.1.13:3003/api/health"
+      homepage.description: "Monitoring dashboards"
+      homepage.weight: 0
     logging:
       driver: "json-file"
       options:
@@ -100,6 +107,13 @@ services:
       wud.display.name: "Prometheus"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/prometheus/releases/tag/$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "Prometheus"
+      homepage.icon: "prometheus.png"
+      homepage.href: "http://10.10.1.13:9090"
+      homepage.siteMonitor: "http://10.10.1.13:9090/-/healthy"
+      homepage.description: "Metrics Scraper"
+      homepage.weight: 5
     logging:
       driver: "json-file"
       options:
@@ -148,6 +162,10 @@ services:
       wud.display.name: "Node Exporter"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/node_exporter/releases/tag/$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "Node Exporter"
+      homepage.icon: "linux.png"
+      homepage.description: "Host Metrics"
     logging:
       driver: "json-file"
       options:
@@ -228,7 +246,11 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+-\d+\.\d+\.\d+-distroless$'
       wud.display.name: "DCGM Exporter"
-      wud.display.icon: "si:nvidia"              
+      wud.display.icon: "si:nvidia"
+      homepage.group: "Exporters"
+      homepage.name: "cAdvisor"
+      homepage.icon: "si:nvidia"
+      homepage.description: "Container Metrics"              
     ports: []
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9400/metrics | grep -q 'DCGM'"]
@@ -279,6 +301,10 @@ services:
       wud.display.name: "Blackbox Exporter"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/blackbox_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Exporters"
+      homepage.name: "Blackbox"
+      homepage.icon: "prometheus.png"
+      homepage.description: "Endpoint Probing"
     logging:
       driver: "json-file"
       options:
