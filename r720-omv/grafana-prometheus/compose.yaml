@@ -247,10 +247,10 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+-\d+\.\d+\.\d+-distroless$'
       wud.display.name: "DCGM Exporter"
       wud.display.icon: "si:nvidia"
-      homepage.group: "Exporters"
-      homepage.name: "cAdvisor"
+      homepage.group: "Infrastructure"
+      homepage.name: "DCGM Exporter"
       homepage.icon: "si:nvidia"
-      homepage.description: "Container Metrics"              
+      homepage.description: "GPU Metrics"              
     ports: []
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9400/metrics | grep -q 'DCGM'"]
@@ -301,7 +301,7 @@ services:
       wud.display.name: "Blackbox Exporter"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/blackbox_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
-      homepage.group: "Exporters"
+      homepage.group: "Infrastructure"
       homepage.name: "Blackbox"
       homepage.icon: "prometheus.png"
       homepage.description: "Endpoint Probing"
