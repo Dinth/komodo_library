@@ -155,7 +155,7 @@ services:
       OLLAMA_BASE_URL: "http://ollama:11434"
       DATABASE_URL: "sqlite:///app/pipelines/pipelines.db"  
       PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
-      PIPELINES_URLS: "https://github.com/open-webui/pipelines/blob/main/examples/pipelines/providers/google_manifold_pipeline.py"
+      PIPELINES_URLS: "https://raw.githubusercontent.com/open-webui/pipelines/main/examples/pipelines/providers/google_manifold_pipeline.py"
     hostname: openwebui-pipelines
     image: ghcr.io/open-webui/pipelines:main
     ipc: private
