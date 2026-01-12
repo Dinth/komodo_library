@@ -224,6 +224,9 @@ services:
       RAG_WEB_SEARCH_RESULT_COUNT: 3
       RAG_WEB_SEARCH_CONCURRENT_REQUESTS: 10
       SEARXNG_QUERY_URL: "https://search.${DOMAIN_NAME}/search?q=<query>"
+      ENABLE_IMAGE_GENERATION: "true"
+      IMAGE_GENERATION_ENGINE: "automatic1111"
+      AUTOMATIC1111_BASE_URL: "http://automatic1111:7860"
     hostname: openwebui
     image: *openwebui-version
     ipc: private
