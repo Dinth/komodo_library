@@ -49,6 +49,13 @@ services:
       wud.display.name: "InfluxDB"
       wud.display.icon: "si:influxdb"
       wud.link.template: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "InfluxDB"
+      homepage.icon: "influxdb.png"
+      homepage.href: "http://10.10.1.13:8086"
+      homepage.siteMonitor: "http://10.10.1.13:8086/health"
+      homepage.description: "Time Series Database"
+      homepage.weight: 10
     logging:
       driver: "json-file"
       options:
@@ -95,6 +102,11 @@ services:
       wud.display.name: "Telegraf"
       wud.display.icon: "si:influxdb"
       wud.link.template: 'https://github.com/influxdata/telegraf/releases/tag/v$${major}.$${minor}.0'
+      homepage.group: "Infrastructure"
+      homepage.name: "Telegraf"
+      homepage.icon: "sh:telegraf.png"
+      homepage.description: "Metrics Collector"
+      homepage.weight: 50
     logging:
       driver: "json-file"
       options:
@@ -156,6 +168,11 @@ services:
       wud.display.name: "UnPoller"
       wud.display.icon: "si:ubiquiti"
       wud.link.template: 'https://github.com/unpoller/unpoller/releases/tag/$${version}'
+      homepage.group: "Infrastructure"
+      homepage.name: "UnPoller"
+      homepage.icon: "ubiquiti.png"
+      homepage.description: "UniFi Poller to InfluxDB"
+      homepage.weight: 51
     logging:
       driver: "json-file"
       options:
