@@ -55,7 +55,7 @@ services:
       traefik.http.routers.adventurelog.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.adventurelog.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.adventurelog.middlewares: "secHeaders@file"
-      traefik.http.services.adventurelog.loadbalancer.server.port: "80"
+      traefik.http.services.adventurelog.loadbalancer.server.port: "8000"
       homepage.group: "Media"
       homepage.name: "AdventureLog"
       homepage.icon: "adventurelog.png"
