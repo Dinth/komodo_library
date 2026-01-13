@@ -102,6 +102,7 @@ services:
       - monitoring
     volumes:
       - /opt/docker/loki-promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /etc/machine-id:/etc/machine-id
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     labels:
