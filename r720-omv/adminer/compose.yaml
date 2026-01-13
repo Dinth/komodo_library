@@ -34,6 +34,7 @@ services:
       homepage.icon: "sh-adminer.png"
       homepage.href: "http://10.10.1.13:9009/"
       homepage.description: "Database management via UI"
+      homepage.siteMonitor: "http://10.10.1.13:9009/"
       wud.display.name: "Adminer"
       wud.display.icon: "sh:adminer"
       wud.watch: "true"
