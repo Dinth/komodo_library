@@ -50,6 +50,7 @@ services:
       homepage.icon: "sm-immich"
       homepage.href: "https://photos.${DOMAIN_NAME}"
       homepage.description: "Photo galery"
+      homepage.siteMonitor: "https://photos.${DOMAIN_NAME}"
       homepage.widget.type: "immich"
       homepage.widget.url: "https://photos.${DOMAIN_NAME}"
       homepage.widget.key: "${HOMEPAGE_IMMICH_KEY}"
