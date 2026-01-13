@@ -63,6 +63,7 @@ services:
       homepage.icon: "tandoor-recipes.png"
       homepage.href: "https://recipes.${DOMAIN_NAME}"
       homepage.description: "Recipe manager"
+      homepage.siteMonitor: "https://recipes.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "Tandoor"
