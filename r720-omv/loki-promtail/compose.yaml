@@ -1,6 +1,6 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.6.3"
-  promtail: &promtail-version "grafana/promtail:3.5.9"
+  promtail: &promtail-version "grafana/promtail:3.5.8"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.10.1"
 
 services:
