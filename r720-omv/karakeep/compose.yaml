@@ -42,6 +42,7 @@ services:
       homepage.name: "KaraKeep"
       homepage.icon: "sh-karakeep.png"
       homepage.instance.internal.href: "https://keep.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://keep.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.display.name: "KaraKeep"
       wud.display.icon: "sh:karakeep"
