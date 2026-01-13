@@ -116,7 +116,7 @@ services:
     networks:
       - hortusfox
     ports:
-      - 4142:80/tcp
+      - 4142:8080/tcp
     restart: unless-stopped
     volumes:
       - /opt/docker/hortusfox/hortusfox_logs:/var/www/html/app/logs
