@@ -61,7 +61,7 @@ services:
       homepage.icon: "adventurelog.png"
       homepage.href: "https://adventure.${DOMAIN_NAME}"
       homepage.description: "Media tracker"
-      homepage.siteMonitor: "https://mediatracker.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://adventure.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "AdventureLog - Frontend"
