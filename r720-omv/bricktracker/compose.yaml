@@ -36,6 +36,7 @@ services:
       homepage.icon: "sh-bricktracker.png"
       homepage.href: "http://10.10.1.13:3333"
       homepage.description: "Lego inventory"
+      homepage.siteMonitor: "http://10.10.1.13:3333"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Bricktracker"
