@@ -124,6 +124,7 @@ services:
       homepage.icon: "paperlessngx.png"
       homepage.href: "https://papers.${DOMAIN_NAME}"
       homepage.description: "E-book catalogue"
+      homepage.siteMonitor: "https://papers.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Paperless-ngx"
