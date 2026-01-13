@@ -90,7 +90,7 @@ services:
       homepage.description: "Remote access"
       homepage.href: https://avocado.${DOMAIN_NAME}
       homepage.icon: "sh-apache-guacamole-light.png"
-    homepage.siteMonitor: "https://avocado.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://avocado.${DOMAIN_NAME}"
       wud.watch: 'true'
       wud.display.icon: 'sh-apache-guacamole-dark'
       wud.display.name: 'Guacamole'
