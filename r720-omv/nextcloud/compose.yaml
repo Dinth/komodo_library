@@ -205,12 +205,12 @@ services:
       traefik.http.middlewares.nextcloud-securityheaders.headers.stsPreload: "true"
       traefik.docker.network: "traefik"
       homepage.group: Home
-      homepage.name: Nextcloud
-      homepage.icon: nextcloud.png
-      homepage.href: https://nc.${DOMAIN_NAME}
-      homepage.description: File-hosting service
-      homepage.siteMonitor: "http://10.10.1.13:1357"
-      homepage.widget.type: nextcloud
+      homepage.name: "Nextcloud"
+      homepage.icon: "nextcloud.png"
+      homepage.href: "https://nc.${DOMAIN_NAME}"
+      homepage.description: "File-hosting service"
+      homepage.siteMonitor: "https://nc.${DOMAIN_NAME}"
+      homepage.widget.type: "nextcloud"
       homepage.widget.fields: '["numfiles", "numshares"]'
       homepage.widget.url: http://10.10.1.13:1357
       homepage.widget.key: "${NEXTCLOUD_TOKEN}"
