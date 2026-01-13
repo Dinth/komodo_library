@@ -98,6 +98,7 @@ services:
       homepage.icon: "sh-hortusfox.png"
       homepage.href: "http://${DOMAIN_NAME}:4142"
       homepage.description: "Garden plant manager"
+      homepage.siteMonitor: "http://${DOMAIN_NAME}:4142"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^v\d+\.\d+$$'
