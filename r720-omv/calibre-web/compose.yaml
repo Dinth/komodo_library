@@ -51,6 +51,7 @@ services:
       homepage.name: "Calibre-web"
       homepage.icon: "calibre-web.png"
       homepage.href: "https://calibre.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://calibre.${DOMAIN_NAME}"
       homepage.description: "E-book catalogue"
       homepage.widget.fields: "['books', 'authors', 'categories', 'series']"
       homepage.widget.type: "calibreweb"
