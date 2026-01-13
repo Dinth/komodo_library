@@ -114,6 +114,7 @@ services:
       homepage.icon: "sh-freshrss.png"
       homepage.href: "https://rss.${DOMAIN_NAME}"
       homepage.description: "RSS news reader and aggregator"
+      homepage.siteMonitor: "https://rss.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "FreshRSS"
