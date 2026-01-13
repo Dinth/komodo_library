@@ -87,6 +87,7 @@ services:
       - SETGID
       - SETUID
       - DAC_READ_SEARCH
+      - SYS_ADMIN
     cap_drop:
       - ALL
     command: ["-config.file=/etc/promtail/config.yml"]
