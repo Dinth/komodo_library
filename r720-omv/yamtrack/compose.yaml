@@ -57,7 +57,7 @@ services:
       traefik.http.routers.yamtrack.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.yamtrack.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.yamtrack.middlewares: "secHeaders@file"
-      traefik.http.services.yamtrack.loadbalancer.server.port: "5743"
+      traefik.http.services.yamtrack.loadbalancer.server.port: "8000"
       homepage.group: "Media"
       homepage.name: "Yamtrack"
       homepage.icon: "yamtrack.png"
