@@ -106,7 +106,7 @@ services:
       - /etc/machine-id:/etc/machine-id:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /opt/docker/loki-promtail/promtail-storage:/var/lib/promtail
+      - /opt/docker/loki-promtail/promtail_storage:/var/lib/promtail
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
