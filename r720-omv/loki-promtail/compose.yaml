@@ -55,7 +55,8 @@ services:
     ipc: private
     networks:
       - monitoring
-    ports: []  # Grafana talks to http://loki:3100 inside the network
+    ports: 
+      - 3100:3100
     volumes:
       - /opt/docker/loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
       - /opt/docker/loki-promtail/loki_storage:/loki
