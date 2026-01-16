@@ -11,7 +11,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=promtail'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{1,2}/(version|containers/json|networks|events)'
+      - '-allowGET=/v1\..{1,2}/(version|containers/.*|networks|events)'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
