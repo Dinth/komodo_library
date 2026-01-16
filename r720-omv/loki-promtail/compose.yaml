@@ -1,15 +1,15 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.6.3"
-  promtail: &promtail-version "grafana/promtail:3.5.8"
-  promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.10.1"
+  fluentbit: &fluentbit-version "fluent/fluent-bit:4.2.2"
+  fluentbit-socket-proxy: &fluentbit-socket-proxy-version "wollomatic/socket-proxy:1.10.1"
 
 services:
-  promtail-socket-proxy:
-    image: *promtail-socket-proxy-version
+  fluentbit-socket-proxy:
+    image: *fluentbit-socket-proxy-version
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=promtail'
+      - '-allowfrom=fluentbit'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(version|containers/.*|networks|events)'
       - '-allowHEAD=/_ping'
@@ -28,7 +28,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - Promtail'
+      wud.display.name: 'Docker Socket Proxy - Fluent-bit'
       wud.display.icon: 'mdi:connection'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -76,9 +76,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  promtail:
-    container_name: promtail
-    image: *promtail-version
+  fluentbit:
+    container_name: fluentbit
+    image: *fluentbit-version
     restart: unless-stopped
     user: ${DOCKER_PUID}:${DOCKER_PGID}
     cap_add:
@@ -87,11 +87,9 @@ services:
       - FOWNER
       - SETGID
       - SETUID
-      - DAC_READ_SEARCH
-      - SYS_ADMIN
     cap_drop:
       - ALL
-    command: ["-config.file=/etc/promtail/config.yml"]
+    command: ["-config.file=/etc/loki/local-config.yml"]
     environment:
       TZ: "${TZ}"
     hostname: promtail
@@ -99,25 +97,26 @@ services:
     ports:
       - "1514:1514/udp"
       - "1514:1514/tcp"
-      - 9089:9089
+      - 2020:2020
     networks:
       - monitoring
     volumes:
-      - /opt/docker/loki-promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /opt/docker/loki-promtail/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - /opt/docker/loki-promtail/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - /etc/machine-id:/etc/machine-id:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /opt/docker/loki-promtail/promtail_storage:/var/lib/promtail
     labels:
-      wud.watch: "true"
+wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.display.name: "Promtail"
-      wud.display.icon: "si:grafana"
-      wud.link.template: 'https://github.com/grafana/loki/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Fluent Bit"
+      wud.display.icon: "mdi:pipe"
+      wud.link.template: 'https://github.com/fluent/fluent-bit/releases/tag/v$${major}.$${minor}.$${patch}'
       homepage.group: "Infrastructure"
-      homepage.name: "Promtail"
-      homepage.icon: "grafana-loki.png"
-      homepage.description: "Log Shipper"
+      homepage.name: "Fluent Bit"
+      homepage.icon: "fluentbit.png"
+      homepage.description: "Log Processor"
     logging:
       driver: "json-file"
       options:
