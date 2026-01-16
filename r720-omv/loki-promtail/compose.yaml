@@ -108,7 +108,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /opt/docker/loki-promtail/promtail_storage:/var/lib/promtail
     labels:
-wud.watch: "true"
+      wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Fluent Bit"
       wud.display.icon: "mdi:pipe"
