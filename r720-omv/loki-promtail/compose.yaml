@@ -89,10 +89,9 @@ services:
       - SETUID
     cap_drop:
       - ALL
-    command: ["-config.file=/etc/loki/local-config.yml"]
     environment:
       TZ: "${TZ}"
-    hostname: promtail
+    hostname: fluentbit
     ipc: private
     ports:
       - "1514:1514/udp"
@@ -106,7 +105,6 @@ services:
       - /etc/machine-id:/etc/machine-id:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /opt/docker/loki-promtail/promtail_storage:/var/lib/promtail
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
