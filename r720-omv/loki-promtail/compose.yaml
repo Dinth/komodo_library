@@ -75,6 +75,52 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+        
+  promtail:
+    container_name: promtail
+    image: *promtail-version
+    restart: unless-stopped
+    user: ${DOCKER_PUID}:${DOCKER_PGID}
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+      - DAC_READ_SEARCH
+      - SYS_ADMIN
+    cap_drop:
+      - ALL
+    command: ["-config.file=/etc/promtail/config.yml"]
+    environment:
+      TZ: "${TZ}"
+    hostname: promtail
+    ipc: private
+    ports:
+      - 9089:9089
+    networks:
+      - monitoring
+    volumes:
+      - /opt/docker/loki-promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /opt/docker/loki-promtail/promtail_storage:/var/lib/promtail
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "Promtail"
+      wud.display.icon: "si:grafana"
+      wud.link.template: 'https://github.com/grafana/loki/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "Promtail"
+      homepage.icon: "grafana-loki.png"
+      homepage.description: "Log Shipper"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
 
   fluentbit:
     container_name: fluentbit
