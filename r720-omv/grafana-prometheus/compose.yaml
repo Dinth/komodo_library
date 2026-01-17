@@ -359,3 +359,6 @@ networks:
     name: monitoring
     driver: bridge
     external: false
+  openwebui:
+    name: openwebui
+    external: true
