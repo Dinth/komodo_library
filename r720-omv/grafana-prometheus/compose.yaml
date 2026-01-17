@@ -312,7 +312,7 @@ services:
         max-size: "5m"
         max-file: "2"
 
-mcp-grafana:
+  mcp-grafana:
     container_name: mcp-grafana
     image: *mcp-grafana-version
     restart: unless-stopped
