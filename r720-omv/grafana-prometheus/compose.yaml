@@ -317,6 +317,7 @@ services:
     image: *mcp-grafana-version
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    command: ["--transport", "sse", "--address", ":5133"]
     cap_drop:
       - ALL
     environment:
