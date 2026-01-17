@@ -333,7 +333,7 @@ mcp-grafana:
       - openwebui
     ports: []
     healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep node || exit 1"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/sse"]
       interval: 30s
       timeout: 10s
       retries: 3
