@@ -361,7 +361,7 @@ networks:
     external: false
     ipam:
       config:
-        - subnet: 172.21.0.0/16
+        - subnet: 10.56.0.0/16
   openwebui:
     name: openwebui
     external: true
