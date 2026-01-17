@@ -5,6 +5,7 @@ x-versions:
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.4.2-4.7.1-distroless" 
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
+  mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:latest"
 
 services:
   grafana:
@@ -305,6 +306,46 @@ services:
       homepage.name: "Blackbox"
       homepage.icon: "prometheus.png"
       homepage.description: "Endpoint Probing"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+mcp-grafana:
+    container_name: mcp-grafana
+    image: *mcp-grafana-version
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    stdin_open: true 
+    tty: true
+    cap_drop:
+      - ALL
+    environment:
+      GRAFANA_URL: "http://grafana:3000" 
+      GRAFANA_TOKEN: "${GRAFANA_SERVICE_ACCOUNT_TOKEN}" 
+      TZ: "${TZ}"
+    hostname: mcp-grafana
+    ipc: private
+    networks:
+      - monitoring
+    ports: []
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep node || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      wud.watch: "true"
+      wud.tag.include: 'latest'
+      wud.display.name: "Grafana MCP"
+      wud.display.icon: "si:grafana"
+      homepage.group: "Infrastructure"
+      homepage.name: "Grafana MCP"
+      homepage.icon: "grafana.png"
+      homepage.description: "AI Context Server"
+      homepage.weight: 10
     logging:
       driver: "json-file"
       options:
