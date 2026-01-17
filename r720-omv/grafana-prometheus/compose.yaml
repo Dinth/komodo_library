@@ -359,6 +359,9 @@ networks:
     name: monitoring
     driver: bridge
     external: false
+    ipam:
+      config:
+        subnet: 172.21.0.0/16
   openwebui:
     name: openwebui
     external: true
