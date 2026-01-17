@@ -227,6 +227,7 @@ services:
       ENABLE_IMAGE_GENERATION: "true"
       IMAGE_GENERATION_ENGINE: "automatic1111"
       AUTOMATIC1111_BASE_URL: "http://automatic1111:7860"
+      MCP_SERVERS: "Grafana@http://mcp-grafana:5133"
     hostname: openwebui
     image: *openwebui-version
     ipc: private
