@@ -319,7 +319,7 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     expose: 
       - 5133
-    command: ["--transport", "sse", "--sse-address", ":8000"]
+    command: ["--transport", "sse", "--sse-address", ":5133"]
     cap_drop:
       - ALL
     environment:
