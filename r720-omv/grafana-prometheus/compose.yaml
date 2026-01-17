@@ -324,6 +324,7 @@ services:
       GRAFANA_URL: "http://grafana:3000" 
       GRAFANA_TOKEN: "${GRAFANA_MCP_TOKEN}" 
       TZ: "${TZ}"
+      GRAFANA_DEBUG: "true"
     expose:
       - 5133
     ports:
