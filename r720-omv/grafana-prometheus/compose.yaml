@@ -334,7 +334,7 @@ services:
       - monitoring
       - openwebui
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/sse"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5133/sse"]
       interval: 30s
       timeout: 10s
       retries: 3
