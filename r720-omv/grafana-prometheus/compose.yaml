@@ -333,7 +333,6 @@ services:
     networks:
       - monitoring
       - openwebui
-    ports: []
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/sse"]
       interval: 30s
