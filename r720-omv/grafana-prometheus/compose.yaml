@@ -323,14 +323,8 @@ services:
       - "streamable-http"
       - "--address"
       - ":5133"
-      - "--enable-tools"
-      - "datasources"
-      - "--enable-tools"
-      - "loki"
-      - "--enable-tools"
-      - "prometheus"
-      - "--enable-tools"
-      - "influxdb"
+      - "--enabled-tools"
+      - "search,dashboard,datasources,prometheus,loki"
     cap_drop:
       - ALL
     environment:
