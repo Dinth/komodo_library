@@ -80,9 +80,9 @@ services:
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
       UNIFI_HOST: "10.10.1.13"
-      UNIFI_USERNAME: "${UNIFI_USERNAME}"
+      UNIFI_USERNAME: "dinth"
       UNIFI_PASSWORD: "${UNIFI_PASSWORD}"
-      UNIFI_PORT: "${UNIFI_PORT}"
+      UNIFI_PORT: "8443"
       UNIFI_SITE: "${UNIFI_SITE}"
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
@@ -97,7 +97,7 @@ services:
       wud.display.name: 'UniFi Network MCP'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
     ports:
-      - "3000:5134"
+      - "5134:3000"
     restart: unless-stopped
     depends_on:
       - unifi-network-application
