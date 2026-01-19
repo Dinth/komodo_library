@@ -83,7 +83,7 @@ services:
       UNIFI_USERNAME: "mcp"
       UNIFI_PASSWORD: "${UNIFI_MCP_PASS}"
       UNIFI_PORT: "8443"
-      UNIFI_SITE: "Default"
+      UNIFI_SITE: "default"
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
       UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13:5134,localhost:3000"
