@@ -67,3 +67,37 @@ services:
       - 6789:6789 #optional
       - 5514:5514/udp #optional
     restart: unless-stopped
+  unifi-network-mcp:
+    image: ghcr.io/sirkirby/unifi-network-mcp:latest
+    container_name: unifi-network-mcp
+    cap_add: []
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+      UNIFI_HOST: "10.10.1.13"
+      UNIFI_USERNAME: "${UNIFI_USERNAME}"
+      UNIFI_PASSWORD: "${UNIFI_PASSWORD}"
+      UNIFI_PORT: "${UNIFI_PORT}"
+      UNIFI_SITE: "${UNIFI_SITE}"
+      UNIFI_VERIFY_SSL: "false"
+      UNIFI_MCP_HTTP_ENABLED: "true"
+    labels:
+      homepage.description: "UniFi Network MCP (HTTP/SSE)"
+      homepage.group: "Infrastructure"
+      homepage.icon: "sh-ubiquiti-unifi-dark.png"
+      homepage.name: "UniFi Network MCP"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/sirkirby/unifi-network-mcp/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: 'UniFi Network MCP'
+      wud.display.icon: 'sh:ubiquiti-unifi-dark'
+    ports:
+      - "3000:5134"
+    restart: unless-stopped
+    depends_on:
+      - unifi-network-application
