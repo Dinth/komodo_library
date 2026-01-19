@@ -1,6 +1,6 @@
 services:
   deceptifeed:
-    image: deceptifeed/server:0.65.0
+    image: deceptifeed/server:0.66.0
     container_name: deceptifeed
     environment:
       TZ: "${TZ}"
