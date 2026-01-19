@@ -86,6 +86,7 @@ services:
       UNIFI_SITE: "${UNIFI_SITE}"
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
+      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13:5134,localhost:3000"
     labels:
       homepage.description: "UniFi Network MCP (HTTP/SSE)"
       homepage.group: "Infrastructure"
