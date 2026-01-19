@@ -148,7 +148,7 @@ services:
       - monitoring
     volumes:
       - /opt/docker/loki-promtail/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
-      - /opt/docker/loki-promtail/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+#      - /opt/docker/loki-promtail/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - /etc/machine-id:/etc/machine-id:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
