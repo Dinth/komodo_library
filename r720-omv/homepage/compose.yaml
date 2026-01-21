@@ -1,6 +1,6 @@
 services:
   homepage-socket-proxy:
-    image: wollomatic/socket-proxy:1.10.1
+    image: wollomatic/socket-proxy:1.11.0
     ipc: private
     command:
       - '-loglevel=debug'
@@ -29,7 +29,7 @@ services:
     networks:
       - homepage
   homepage:
-    image: ghcr.io/gethomepage/homepage:v1.8.0
+    image: ghcr.io/gethomepage/homepage:v1.9.0
     container_name: homepage
     environment:
       HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
