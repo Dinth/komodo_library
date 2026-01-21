@@ -1,5 +1,5 @@
 x-versions:
-  loki: &loki-version "grafana/loki:3.6.3"
+  loki: &loki-version "grafana/loki:3.6.4"
   promtail: &promtail-version "grafana/promtail:3.5.8"
   fluentbit: &fluentbit-version "fluent/fluent-bit:4.2.2"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.10.1"
