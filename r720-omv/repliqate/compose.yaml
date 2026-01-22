@@ -1,6 +1,6 @@
 services:
   repliqate-socket-proxy:
-    image: wollomatic/socket-proxy:1.10.1
+    image: wollomatic/socket-proxy:1.11.0
     ipc: private
     command:
       - '-loglevel=info'
