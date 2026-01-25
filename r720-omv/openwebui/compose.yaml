@@ -284,8 +284,8 @@ services:
       - ALL
     container_name: mcp-hass
     environment:
-      HOME_ASSISTANT_WEB_SOCKET_URL: "${HASS_WS_URL}"
-      HOME_ASSISTANT_API_TOKEN: "${HASS_API_TOKEN}"
+      HA_URL: "${HASS_URL}"
+      HA_TOKEN: "${HASS_TOKEN}"
       TZ: "${TZ}"
     hostname: mcp-hass
     image: *hass-mcp-version
@@ -293,6 +293,8 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    stdin_open: true
+    tty: false
     tmpfs:
       - /tmp
     deploy:
@@ -301,7 +303,7 @@ services:
           cpus: '0.5'
           memory: '512M'
     healthcheck:
-      test: ["CMD-SHELL", "test -S /tmp/mcp-hass.sock || exit 1"]
+      test: ["CMD-SHELL", "pgrep -f python || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -314,10 +316,10 @@ services:
       wud.display.name: "Home Assistant MCP"
       wud.display.icon: "sh:home-assistant"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/allenporter/mcp-server-home-assistant/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/voska/hass-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
-      - /opt/docker/openwebui/mcp-hass_data:/home/mcp-user/.config
+      - /opt/docker/openwebui/mcp-hass_data:/app/data
 networks:
   openwebui:
     name: openwebui
