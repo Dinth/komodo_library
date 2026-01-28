@@ -25,7 +25,7 @@ services:
       PGID: "${MEDIA_PGID}"
       JELLYFIN_PublishedServerUrl: "https://jf.${DOMAIN_NAME}"
     hostname: jellyfin
-    image: linuxserver/jellyfin:10.11.0
+    image: linuxserver/jellyfin:10.11.6
     ipc: private
     deploy:
       resources:
