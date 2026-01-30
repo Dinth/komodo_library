@@ -30,7 +30,7 @@ services:
       ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},127.0.0.1"
       GUNICORN_MEDIA: "1"
     hostname: tandoor
-    image: vabene1111/recipes:2.3.6
+    image: vabene1111/recipes:2.4.0
     ipc: private
     logging:
       driver: json-file
