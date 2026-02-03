@@ -1,5 +1,5 @@
 x-versions:
-  ollama: &ollama-version "ollama/ollama:0.15.2"
+  ollama: &ollama-version "ollama/ollama:0.15.4"
   openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.7.2"
   hass-mcp: &hass-mcp-version "voska/hass-mcp:0.1.1"
 
