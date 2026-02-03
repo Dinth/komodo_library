@@ -1,6 +1,6 @@
 services:
   signal_rest_api:
-    image: bbernhard/signal-cli-rest-api:0.96
+    image: bbernhard/signal-cli-rest-api:0.97
     container_name: signal-rest-api
     restart: unless-stopped
     ipc: private
