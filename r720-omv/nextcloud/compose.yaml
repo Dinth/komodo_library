@@ -1,7 +1,7 @@
 services:
   nextcloud-valkey:
     container_name: nextcloud-valkey
-    image: docker.io/valkey/valkey:9.0.1-alpine
+    image: docker.io/valkey/valkey:9.0.2-alpine
     ipc: private
     command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
     cap_drop:
       - ALL
     labels:
-      wud.display.name: "Vouchervault - Valkey"
+      wud.display.name: "Nextcloud - Valkey"
       wud.display.icon: "sh:nextcloud"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
