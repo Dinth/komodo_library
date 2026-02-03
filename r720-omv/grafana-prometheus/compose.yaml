@@ -3,7 +3,7 @@ x-versions:
   prometheus: &prometheus-version "prom/prometheus:v3.9.1"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.10.2"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
-  dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.4.2-4.7.1-distroless" 
+  dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.1-4.8.0-distroless" 
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
   mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:latest"
 
