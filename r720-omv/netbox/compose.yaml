@@ -40,7 +40,7 @@ x-netbox-common: &netbox-common
     REDIS_HOST: "netbox-valkey"
     REDIS_PORT: "6379"
     SECRET_KEY: "${NETBOX_SECRET_KEY}"
-    ALLOWED_HOSTS: "netbox.${DOMAIN_NAME} 10.10.1.13"
+    ALLOWED_HOSTS: "10.10.1.13"
     CSRF_TRUSTED_ORIGINS: "https://netbox.${DOMAIN_NAME} http://10.10.1.13:8080"
     SKIP_SUPERUSER_CHECK: "true"
   volumes:
