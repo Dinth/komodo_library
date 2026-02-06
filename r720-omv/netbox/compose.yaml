@@ -44,6 +44,7 @@ x-netbox-common: &netbox-common
     ALLOWED_HOSTS: "10.10.1.13"
     CSRF_TRUSTED_ORIGINS: "http://10.10.1.13:3004"
     SKIP_SUPERUSER_CHECK: "true"
+    DB_WAIT_DEBUG: "1"
   volumes:
     - /opt/docker/netbox/netbox_media:/opt/netbox/netbox/media:z
     - /opt/docker/netbox/netbox_reports:/opt/netbox/netbox/reports:z
