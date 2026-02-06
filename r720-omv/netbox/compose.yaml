@@ -65,17 +65,7 @@ services:
       - "3004:8080/tcp"
     networks:
       - netbox
-      - traefik
     labels:
-      traefik.enable: "true"
-      traefik.http.routers.netbox.rule: "Host(`netbox.${DOMAIN_NAME}`)"
-      traefik.http.routers.netbox.entrypoints: "websecure"
-      traefik.http.routers.netbox.tls: "true"
-      traefik.http.routers.netbox.tls.certresolver: "letsencrypt"
-      traefik.http.routers.netbox.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.netbox.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.netbox.middlewares: "secHeaders@file"
-      traefik.http.services.netbox.loadbalancer.server.port: "8080"
       homepage.group: "Infrastructure"
       homepage.name: "NetBox"
       homepage.icon: "netbox.png"
