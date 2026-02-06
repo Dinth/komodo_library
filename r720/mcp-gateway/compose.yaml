@@ -1,16 +1,141 @@
-## Add your compose file here
+version: '3.8'
+
+# Standardized Version Management
+x-versions:
+  mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.0
+  mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
+  homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
+  ha-file-server-version: &ha-file-server-version renehagen/ha-mcp-file-server:latest
+  docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:latest
+  ssh-mcp-version: &ssh-mcp-version bvisible/mcp-ssh-manager:latest
+  spiderfoot-version: &spiderfoot-version spiderfoot/spiderfoot:latest
+  misp-version: &misp-version coolacid/misp-docker:latest
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  # --- SECURITY LAYER ---
+  mcp-gateway-socket-proxy:
+    image: *mcp-gateway-socket-proxy-version
+    container_name: mcp-gateway-socket-proxy
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges]
+    user: "65534:${DOCKER_SOCKET_GID:-0}"
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=mcp-gateway,docker-mcp' # Allowing both the gateway and the docker-mcp server
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(containers/.*|images/.*|events|info|version)'
+      - '-allowHEAD=/_ping'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mcp-net
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 sh -c 'cat < /dev/null > /dev/tcp/127.0.0.1/2375' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
-# networks:
-#   default: {}
+  # --- CORE MCP SERVICES ---
+  mcp-gateway:
+    image: *mcp-gateway-version
+    container_name: mcp-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./gateway-config.yaml:/app/config.yaml:ro
+      - ./.mcp.env:/app/.mcp.env:ro
+      - ./certs:/certs:ro
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      mcp-gateway-socket-proxy:
+        condition: service_healthy
+    labels:
+      wud.watch: "true"
+      wud.display.name: "MCP Gateway"
+      wud.display.icon: "mdi:router-network"
+    networks:
+      - mcp-net
 
-# volumes:
-#   data:
+  homeassistant-mcp:
+    image: *homeassistant-mcp-version
+    container_name: homeassistant-mcp
+    environment:
+      - HA_URL=http://10.10.1.11:8123
+      - HA_TOKEN=${HA_MCP_TOKEN}
+    security_opt: [no-new-privileges:true]
+    labels:
+      wud.watch: "true"
+      wud.display.name: "Home Assistant MCP"
+    networks:
+      - mcp-net
+
+  ha-file-server:
+    image: *ha-file-server-version
+    container_name: ha-file-server
+    environment:
+      - HA_URL=http://10.10.1.11:8123
+      - HA_TOKEN=${HA_FILE_TOKEN}
+      - BASE_PATH=/config/esphome
+    labels:
+      wud.watch: "true"
+    networks:
+      - mcp-net
+
+  docker-mcp:
+    image: *docker-mcp-version
+    container_name: docker-mcp
+    environment:
+      - DOCKER_HOST=tcp://mcp-gateway-socket-proxy:2375
+    depends_on:
+      mcp-gateway-socket-proxy:
+        condition: service_healthy
+    labels:
+      wud.watch: "true"
+      wud.display.name: "Docker MCP"
+    networks:
+      - mcp-net
+
+  ssh-mcp:
+    image: *ssh-mcp-version
+    container_name: ssh-mcp
+    volumes:
+      - ~/.ssh:/root/.ssh:ro
+    security_opt: [no-new-privileges:true]
+    labels:
+      wud.watch: "true"
+    networks:
+      - mcp-net
+
+  # --- TOOLS ---
+  spiderfoot:
+    image: *spiderfoot-version
+    container_name: spiderfoot
+    ports:
+      - "5001:5001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      wud.watch: "true"
+    networks:
+      - mcp-net
+
+  misp:
+    image: *misp-version
+    container_name: misp
+    ports:
+      - "8081:80"
+    labels:
+      wud.watch: "true"
+    networks:
+      - mcp-net
+
+networks:
+  mcp-net:
+    driver: bridge
