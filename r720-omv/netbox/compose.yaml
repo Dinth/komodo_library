@@ -1,6 +1,6 @@
 services:
   netbox: &netbox
-    image: docker.io/netboxcommunity/netbox:v4.3.7
+    image: docker.io/netboxcommunity/netbox:v4.5.2
     depends_on:
       - netbox-postgres
       - netbox-redis
@@ -28,9 +28,9 @@ services:
       interval: 15s
     volumes:
       - /opt/docker/netbox/netbox_config:/etc/netbox/config:z,ro
-      - /opt/docker/netbox/netbox_media-files:/opt/netbox/netbox/media:rw
-      - /opt/docker/netbox/netbox_reports-files:/opt/netbox/netbox/reports:rw
-      - /opt/docker/netbox/netbox_scripts-files:/opt/netbox/netbox/scripts:rw
+      - /opt/docker/netbox/netbox_media:/opt/netbox/netbox/media:rw
+      - /opt/docker/netbox/netbox_reports:/opt/netbox/netbox/reports:rw
+      - /opt/docker/netbox/netbox_scripts:/opt/netbox/netbox/scripts:rw
     networks:
       - netbox
   netbox-worker:
@@ -84,8 +84,8 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     command:
       - sh
-      - -c # this is to evaluate the $REDIS_PASSWORD from the env
-      - valkey-server --appendonly yes --requirepass "$${NETBOX_REDIS_PASSWORD}" ## $$ because of docker-compose
+      - -c
+      - valkey-server --appendonly yes --requirepass "$${NETBOX_REDIS_PASSWORD}"
     healthcheck: &redis-healthcheck
       test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_PASSWORD}" ping) = ''PONG'' ]'
       start_period: 5s
@@ -100,8 +100,8 @@ services:
     image: docker.io/valkey/valkey:8.1-alpine
     command:
       - sh
-      - -c # this is to evaluate the $REDIS_PASSWORD from the env
-      - valkey-server --requirepass "$${NETBOX_REDIS_CACHE_PASSWORD}" ## $$ because of docker-compose
+      - -c
+      - valkey-server --requirepass "$${NETBOX_REDIS_CACHE_PASSWORD}"
     healthcheck: &redis-healthcheck
       test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_CACHE_PASSWORD}" ping) = ''PONG'' ]'
       start_period: 5s
