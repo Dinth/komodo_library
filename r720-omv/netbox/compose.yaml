@@ -92,7 +92,7 @@ services:
   netbox-worker:
     <<: *netbox-common
     container_name: netbox-worker
-    entrypoint: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
+    entrypoint: [ "python3", "manage.py", "rqworker" ]
     depends_on:
       netbox:
         condition: service_started
