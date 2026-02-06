@@ -45,9 +45,9 @@ x-netbox-common: &netbox-common
     CSRF_TRUSTED_ORIGINS: "http://10.10.1.13:3004"
     SKIP_SUPERUSER_CHECK: "true"
   volumes:
-    - /opt/docker/netbox/media:/opt/netbox/netbox/media:z
-    - /opt/docker/netbox/reports:/opt/netbox/netbox/reports:z
-    - /opt/docker/netbox/scripts:/opt/netbox/netbox/scripts:z
+    - /opt/docker/netbox/netbox_media:/opt/netbox/netbox/media:z
+    - /opt/docker/netbox/netbox_reports:/opt/netbox/netbox/reports:z
+    - /opt/docker/netbox/netbox_scripts:/opt/netbox/netbox/scripts:z
     - /opt/docker/netbox/netbox_config:/etc/netbox/config:ro
   networks:
     - netbox
