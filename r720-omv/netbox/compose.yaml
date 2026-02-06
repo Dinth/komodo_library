@@ -41,7 +41,7 @@ x-netbox-common: &netbox-common
     REDIS_PORT: "6379"
     SECRET_KEY: "${NETBOX_SECRET_KEY}"
     ALLOWED_HOSTS: "10.10.1.13"
-    CSRF_TRUSTED_ORIGINS: "http://10.10.1.13:8080"
+    CSRF_TRUSTED_ORIGINS: "http://10.10.1.13:3004"
     SKIP_SUPERUSER_CHECK: "true"
   volumes:
     - /opt/docker/netbox/media:/opt/netbox/netbox/media:z
@@ -60,7 +60,7 @@ services:
       netbox-postgres:
         condition: service_healthy
     ports:
-      - "8080:8080/tcp"
+      - "3004:8080/tcp"
     networks:
       - netbox
       - traefik
@@ -77,9 +77,9 @@ services:
       homepage.group: "Infrastructure"
       homepage.name: "NetBox"
       homepage.icon: "netbox.png"
-      homepage.href: "https://netbox.${DOMAIN_NAME}"
+      homepage.href: "http://10.10.1.13:3004"
       homepage.description: "IPAM / DCIM"
-      homepage.siteMonitor: "https://netbox.${DOMAIN_NAME}"
+      homepage.siteMonitor: "http://10.10.1.13:3004"
       wud.watch: "true"
       wud.display.name: "NetBox"
       wud.display.icon: "sh:netbox"
