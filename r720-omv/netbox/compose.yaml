@@ -82,7 +82,7 @@ services:
   netbox-worker:
     <<: *netbox-common
     container_name: netbox-worker
-    entrypoint: [ "python3", "manage.py", "rqworker" ]
+    entrypoint: [ "/opt/netbox/venv/bin/python", "/opt/netbox/netbox/manage.py", "rqworker" ]
     working_dir: /opt/netbox/netbox
     depends_on:
       netbox:
@@ -95,7 +95,7 @@ services:
   netbox-housekeeping:
     <<: *netbox-common
     container_name: netbox-housekeeping
-    entrypoint: [ "python3", "manage.py", "housekeeping" ]
+    entrypoint: [ "/opt/netbox/venv/bin/python", "/opt/netbox/netbox/manage.py", "rqworker" ]
     working_dir: /opt/netbox/netbox
     depends_on:
       - netbox
