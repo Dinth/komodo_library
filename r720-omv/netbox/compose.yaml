@@ -102,6 +102,14 @@ services:
       wud.display.name: "NetBox Worker"
       wud.display.icon: "sh:netbox"
 
+  netbox-housekeeping:
+    <<: *netbox-common
+    container_name: netbox-housekeeping
+    entrypoint: [ "python3", "manage.py", "housekeeping" ]
+    working_dir: /opt/netbox/netbox
+    depends_on:
+      - netbox
+
   netbox-postgres:
     image: *postgres-version
     container_name: netbox-postgres
