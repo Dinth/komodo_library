@@ -1,8 +1,11 @@
+version: '3.8'
+
 x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.0
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
-  ha-file-server-version: &ha-file-server-version renehagen/ha-mcp-file-server:latest
+  # Using Node 22 slim as a runner for the npx-based file server
+  ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:1.0.1
   ssh-mcp-version: &ssh-mcp-version bvisible/mcp-ssh-manager:latest
   spiderfoot-version: &spiderfoot-version spiderfoot/spiderfoot:4.0
@@ -43,9 +46,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: "MCP Socket Proxy"
 
   mcp-gateway:
     image: *mcp-gateway-version
@@ -53,6 +53,8 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 512M
     ports: ["8080:8080"]
     environment:
@@ -68,7 +70,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.display.name: "MCP Gateway"
 
   homeassistant-mcp:
     image: *homeassistant-mcp-version
@@ -76,6 +77,8 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 256M
     environment:
       TZ: "${TZ}"
@@ -92,7 +95,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.display.name: "HA MCP Server"
 
   ha-file-server:
     image: *ha-file-server-version
@@ -100,24 +102,21 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 256M
     environment:
       TZ: "${TZ}"
       HA_URL: "http://10.10.1.11:8123"
       HA_TOKEN: "${HA_FILE_TOKEN}"
-      BASE_PATH: "/config/esphome"
+      HA_CONFIG_PATH: "/config"
+    # This command pulls the latest version of the tool on startup and runs it
+    command: sh -c "npx -y @renehagen/ha-mcp-file-server"
     volumes:
-      - /opt/docker/mcp-gateway/ha-file-server:/data
+      - /opt/docker/mcp-gateway/ha-file-server/config:/config:ro
       - /etc/localtime:/etc/localtime:ro
-    healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep python | grep -v grep || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks: [mcp-gateway]
     logging: *default-logging
-    labels:
-      wud.watch: "true"
 
   docker-mcp:
     image: *docker-mcp-version
@@ -125,6 +124,8 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 128M
     environment:
       TZ: "${TZ}"
@@ -135,8 +136,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/acuvity/mcp-server-docker/releases/tag/v$${major}.$${minor}.$${patch}"
 
   ssh-mcp:
     image: *ssh-mcp-version
@@ -144,6 +143,8 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 128M
     volumes:
       - /opt/docker/mcp-gateway/ssh-mcp:/root/.ssh:ro
@@ -159,7 +160,9 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
-    mem_limit: 2G  # Spiderfoot is heavy on scans
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 2G
     ports: ["5001:5001"]
     volumes:
       - /opt/docker/mcp-gateway/spiderfoot:/var/lib/spiderfoot
@@ -173,16 +176,21 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+$$'
-      wud.link.template: "https://github.com/smicallef/spiderfoot/releases/tag/v$${major}.$${minor}"
 
   misp:
     image: *misp-version
     container_name: misp
     ipc: private
     restart: unless-stopped
-    mem_limit: 2G # MISP requires significant RAM
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETGID, SETUID] 
+    user: "root" 
+    mem_limit: 2G
     ports: ["8081:80"]
+    environment:
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
     volumes:
       - /opt/docker/mcp-gateway/misp:/var/www/MISP
       - /etc/localtime:/etc/localtime:ro
@@ -190,8 +198,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/MISP/MISP/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   mcp-gateway:
