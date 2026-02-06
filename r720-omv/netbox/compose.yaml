@@ -146,8 +146,6 @@ services:
     container_name: netbox-valkey
     image: *valkey-version
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    security_opt:
-      - no-new-privileges=true
     ipc: private
     command: ['valkey-server','--save','60','1','--loglevel','warning']
     restart: unless-stopped
