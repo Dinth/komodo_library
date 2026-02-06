@@ -1,5 +1,5 @@
 x-versions:
-  netbox: &netbox-version "netboxcommunity/netbox:v4.1.0" # Adjust to latest 2026 release
+  netbox: &netbox-version "netboxcommunity/netbox:v4.5.2"
   valkey: &valkey-version "docker.io/valkey/valkey:8.0.0-alpine"
   postgres: &postgres-version "postgres:18-alpine"
 
