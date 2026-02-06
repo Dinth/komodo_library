@@ -1,119 +1,182 @@
+x-versions:
+  netbox: &netbox-version "netboxcommunity/netbox:v4.1.0" # Adjust to latest 2026 release
+  valkey: &valkey-version "docker.io/valkey/valkey:8.0.0-alpine"
+  postgres: &postgres-version "postgres:18-alpine"
+
+x-netbox-common: &netbox-common
+  image: *netbox-version
+  ipc: private
+  security_opt:
+    - no-new-privileges=true
+  restart: unless-stopped
+  cap_add:
+    - AUDIT_WRITE
+    - CHOWN
+    - DAC_OVERRIDE
+    - FOWNER
+    - FSETID
+    - KILL
+    - MKNOD
+    - NET_BIND_SERVICE
+    - NET_RAW
+    - SETFCAP
+    - SETGID
+    - SETPCAP
+    - SETUID
+    - SYS_CHROOT
+  cap_drop:
+    - ALL
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+  environment:
+    TZ: "${TZ}"
+    DB_HOST: "netbox-postgres"
+    DB_NAME: "netbox"
+    DB_USER: "netbox"
+    DB_PASSWORD: "${NETBOX_DB_PASS}"
+    REDIS_HOST: "netbox-valkey"
+    REDIS_PORT: "6379"
+    SECRET_KEY: "${NETBOX_SECRET_KEY}"
+    ALLOWED_HOSTS: "netbox.${DOMAIN_NAME} 10.10.1.13"
+    CSRF_TRUSTED_ORIGINS: "https://netbox.${DOMAIN_NAME} http://10.10.1.13:8080"
+    SKIP_SUPERUSER_CHECK: "true"
+  volumes:
+    - /opt/docker/netbox/media:/opt/netbox/netbox/media:z
+    - /opt/docker/netbox/reports:/opt/netbox/netbox/reports:z
+    - /opt/docker/netbox/scripts:/opt/netbox/netbox/scripts:z
+  networks:
+    - netbox
+
 services:
-  netbox: &netbox
-    image: docker.io/netboxcommunity/netbox:v4.5.2
+  netbox:
+    <<: *netbox-common
+    container_name: netbox
     depends_on:
-      - netbox-postgres
-      - netbox-redis
-      - netbox-redis-cache
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    environment:
-      DB_HOST: "netbox-postgres"
-      DB_NAME: "netbox"
-      DB_PASSWORD: "${NETBOX_POSTGRES_PASS}"
-      DB_USER: "netbox"
-      REDIS_CACHE_DATABASE: 1
-      REDIS_CACHE_HOST: "netbox-redis-cache"
-      REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY: "false"
-      REDIS_CACHE_PASSWORD: "${NETBOX_REDIS_CACHE_PASS}"
-      REDIS_CACHE_SSL: "false"
-      REDIS_DATABASE: 0
-      REDIS_HOST: "netbox-redis"
-      REDIS_INSECURE_SKIP_TLS_VERIFY: "false"
-      REDIS_PASSWORD: "${NETBOX_REDIS_PASS}"
-      REDIS_SSL: "false"
-    healthcheck:
-      test: curl -f http://localhost:8080/login/ || exit 1
-      start_period: 90s
-      timeout: 3s
-      interval: 15s
-    volumes:
-      - /opt/docker/netbox/netbox_config:/etc/netbox/config:z,ro
-      - /opt/docker/netbox/netbox_media:/opt/netbox/netbox/media:rw
-      - /opt/docker/netbox/netbox_reports:/opt/netbox/netbox/reports:rw
-      - /opt/docker/netbox/netbox_scripts:/opt/netbox/netbox/scripts:rw
+      netbox-valkey:
+        condition: service_healthy
+      netbox-postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080/tcp"
     networks:
       - netbox
+      - traefik
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.netbox.rule: "Host(`netbox.${DOMAIN_NAME}`)"
+      traefik.http.routers.netbox.entrypoints: "websecure"
+      traefik.http.routers.netbox.tls: "true"
+      traefik.http.routers.netbox.tls.certresolver: "letsencrypt"
+      traefik.http.routers.netbox.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.netbox.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.netbox.middlewares: "secHeaders@file"
+      traefik.http.services.netbox.loadbalancer.server.port: "8080"
+      homepage.group: "Infrastructure"
+      homepage.name: "NetBox"
+      homepage.icon: "netbox.png"
+      homepage.href: "https://netbox.${DOMAIN_NAME}"
+      homepage.description: "IPAM / DCIM"
+      homepage.siteMonitor: "https://netbox.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.display.name: "NetBox"
+      wud.display.icon: "sh:netbox"
+      repliqate.enabled: 'true'
+      repliqate.engine: "restic"
+      repliqate.backup_id: netbox_app
+
   netbox-worker:
-    <<: *netbox
+    <<: *netbox-common
+    container_name: netbox-worker
+    entrypoint: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
     depends_on:
       netbox:
-        condition: service_healthy
-    command:
-      - /opt/netbox/venv/bin/python
-      - /opt/netbox/netbox/manage.py
-      - rqworker
-    healthcheck:
-      test: ps -aux | grep -v grep | grep -q rqworker || exit 1
-      start_period: 20s
-      timeout: 3s
-      interval: 15s
-  netbox-housekeeping:
-    <<: *netbox
-    depends_on:
-      netbox:
-        condition: service_healthy
-    command:
-      - /opt/netbox/housekeeping.sh
-    healthcheck:
-      test: ps -aux | grep -v grep | grep -q housekeeping || exit 1
-      start_period: 20s
-      timeout: 3s
-      interval: 15s
-    networks:
-      - netbox
+        condition: service_started
+    labels:
+      wud.watch: "true"
+      wud.display.name: "NetBox Worker"
+      wud.display.icon: "sh:netbox"
 
   netbox-postgres:
-    image: docker.io/postgres:17-alpine
+    image: *postgres-version
+    container_name: netbox-postgres
+    ipc: private
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      test: ["CMD-SHELL", "pg_isready -d netbox -U netbox"]
       start_period: 20s
       timeout: 30s
       interval: 10s
       retries: 5
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^18-\d+-alpine$$'
+      wud.display.name: "NetBox - Postgres"
     environment:
       POSTGRES_DB: "netbox"
-      POSTGRES_PASSWORD: "${NETBOX_POSTGRES_PASS}"
       POSTGRES_USER: "netbox"
+      POSTGRES_PASSWORD: "${NETBOX_DB_PASS}"
     volumes:
-      - /opt/docker/netbox/netbox_postgres-data:/var/lib/postgresql/data
+      - /opt/docker/netbox/postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     networks:
       - netbox
+      - adminer
 
-  netbox-redis:
-    image: docker.io/valkey/valkey:8.1-alpine
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    command:
-      - sh
-      - -c
-      - valkey-server --appendonly yes --requirepass "$${NETBOX_REDIS_PASSWORD}"
-    healthcheck: &redis-healthcheck
-      test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_PASSWORD}" ping) = ''PONG'' ]'
-      start_period: 5s
-      timeout: 3s
-      interval: 1s
-      retries: 5
-    volumes:
-      - /opt/docker/netbox/netbox_redis-data:/data
+  netbox-valkey:
+    container_name: netbox-valkey
+    image: *valkey-version
+    ipc: private
+    command: ['valkey-server','--save','60','1','--loglevel','warning']
+    restart: unless-stopped
     networks:
       - netbox
-  netbox-redis-cache:
-    image: docker.io/valkey/valkey:8.1-alpine
-    command:
-      - sh
-      - -c
-      - valkey-server --requirepass "$${NETBOX_REDIS_CACHE_PASSWORD}"
-    healthcheck: &redis-healthcheck
-      test: '[ $$(valkey-cli --pass "$${NETBOX_REDIS_CACHE_PASSWORD}" ping) = ''PONG'' ]'
-      start_period: 5s
-      timeout: 3s
-      interval: 1s
-      retries: 5
     volumes:
-      - /opt/docker/netbox/netbox_redis-cache-data:/data
-    networks:
-      - netbox
+      - /opt/docker/netbox/valkey_data:/data
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - CHOWN
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      wud.display.name: "NetBox - Valkey"
+      wud.watch: "true"
+    healthcheck: 
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
 networks:
   netbox:
     name: netbox
     driver: bridge
-    external: false
+  adminer:
+    external: true
+  traefik:
+    external: true
