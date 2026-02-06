@@ -7,7 +7,7 @@ x-versions:
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:1.0.1
   ssh-mcp-version: &ssh-mcp-version bvisible/mcp-ssh-manager:latest
-  spiderfoot-version: &spiderfoot-version spiderfoot/spiderfoot:4.0
+  spiderfoot-version: &spiderfoot-version bcoles/spiderfoot:latest
   misp-version: &misp-version misp/misp-docker:latest
   misp-mariadb-version: &misp-mariadb-version mariadb:10.11
 
