@@ -4,12 +4,12 @@ x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.0
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
-  # Using Node 22 slim as a runner for the npx-based file server
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:1.0.1
   ssh-mcp-version: &ssh-mcp-version bvisible/mcp-ssh-manager:latest
   spiderfoot-version: &spiderfoot-version spiderfoot/spiderfoot:4.0
-  misp-version: &misp-version coolacid/misp-docker:v2.4.186
+  misp-version: &misp-version misp/misp-docker:latest
+  misp-mariadb-version: &misp-mariadb-version mariadb:10.11
 
 x-logging: &default-logging
   driver: "json-file"
@@ -36,8 +36,7 @@ services:
       - '-allowHEAD=/_ping'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - mcp-gateway
+    networks: [mcp-gateway]
     healthcheck:
       test: ["CMD-SHELL", "timeout 2 sh -c 'cat < /dev/null > /dev/tcp/127.0.0.1/2375' || exit 1"]
       interval: 10s
@@ -110,7 +109,6 @@ services:
       HA_URL: "http://10.10.1.11:8123"
       HA_TOKEN: "${HA_FILE_TOKEN}"
       HA_CONFIG_PATH: "/config"
-    # This command pulls the latest version of the tool on startup and runs it
     command: sh -c "npx -y @renehagen/ha-mcp-file-server"
     volumes:
       - /opt/docker/mcp-gateway/ha-file-server/config:/config:ro
@@ -184,20 +182,52 @@ services:
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
-    cap_add: [CHOWN, SETGID, SETUID] 
+    cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE]
     user: "root" 
     mem_limit: 2G
     ports: ["8081:80"]
     environment:
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+      - PUID=${DOCKER_PUID}
+      - PGID=${DOCKER_PGID}
+      - MISP_BASEURL=http://localhost:8081
+      - MYSQL_HOST=misp-mariadb
+      - MYSQL_LOGIN=misp
+      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
+      - MYSQL_DATABASE=misp
     volumes:
       - /opt/docker/mcp-gateway/misp:/var/www/MISP
       - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      misp-mariadb: { condition: service_healthy }
     networks: [mcp-gateway]
     logging: *default-logging
     labels:
       wud.watch: "true"
+
+  misp-mariadb:
+    image: *misp-mariadb-version
+    container_name: misp-mariadb
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    user: "root"
+    mem_limit: 1G
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MISP_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=misp
+      - MYSQL_USER=misp
+      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
+    volumes:
+      - /opt/docker/mcp-gateway/misp-mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [mcp-gateway]
+    logging: *default-logging
 
 networks:
   mcp-gateway:
