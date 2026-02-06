@@ -6,7 +6,6 @@ x-versions:
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:1.0.1
-  ssh-mcp-version: &ssh-mcp-version bvisible/mcp-ssh-manager:latest
   spiderfoot-version: &spiderfoot-version bcoles/spiderfoot:latest
   misp-version: &misp-version misp/misp-docker:latest
   misp-mariadb-version: &misp-mariadb-version mariadb:10.11
@@ -130,23 +129,6 @@ services:
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
     depends_on:
       mcp-gateway-socket-proxy: { condition: service_healthy }
-    networks: [mcp-gateway]
-    logging: *default-logging
-    labels:
-      wud.watch: "true"
-
-  ssh-mcp:
-    image: *ssh-mcp-version
-    container_name: ssh-mcp
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    mem_limit: 128M
-    volumes:
-      - /opt/docker/mcp-gateway/ssh-mcp:/root/.ssh:ro
-      - /etc/localtime:/etc/localtime:ro
     networks: [mcp-gateway]
     logging: *default-logging
     labels:
