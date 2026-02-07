@@ -109,5 +109,5 @@ services:
 
 networks:
   scanopy:
-    mode: bridge
-    internal: true
+    name: scanopy
+    driver: bridge
