@@ -31,7 +31,7 @@ services:
       SCANOPY_BIND_ADDRESS: ${SCANOPY_BIND_ADDRESS:-0.0.0.0}
       SCANOPY_NAME: "r720-omv_daemon"
       SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
-      SCANOPY_MODE: "DaemonPoll"
+      SCANOPY_MODE: "Push"
       SCANOPY_DAEMON_API_KEY: "${SCANOPY_TOKEN}"
     volumes:
       - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
