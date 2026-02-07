@@ -25,7 +25,7 @@ services:
       PGID: "${MEDIA_PGID}"
       INSTALL_PACKAGES: "libmagic1"
     hostname: calibre-web
-    image: linuxserver/calibre-web:0.6.25
+    image: linuxserver/calibre-web:0.6.26
     ipc: private
     logging:
       driver: json-file
