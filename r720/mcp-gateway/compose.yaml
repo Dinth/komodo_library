@@ -82,7 +82,7 @@ services:
     environment:
       TZ: "${TZ}"
       HA_URL: "http://10.10.1.11:8123"
-      HA_TOKEN: "${HA_MCP_TOKEN}"
+      HA_TOKEN: "${HASS_TOKEN}"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
@@ -107,7 +107,7 @@ services:
     environment:
       TZ: "${TZ}"
       HA_URL: "http://10.10.1.11:8123"
-      HA_TOKEN: "${HA_FILE_TOKEN}"
+      HA_TOKEN: "${HASS_TOKEN}"
       HA_CONFIG_PATH: "/config"
     command: sh -c "npx -y @renehagen/ha-mcp-file-server"
     volumes:
