@@ -20,7 +20,7 @@ services:
     container_name: scanopy-daemon
     network_mode: host
     privileged: true
-    port:
+    ports:
       - 60073:60073
     restart: unless-stopped
     mem_limit: 1G
