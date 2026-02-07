@@ -31,7 +31,7 @@ services:
       SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
       SCANOPY_MODE: ${SCANOPY_MODE:-Push}
     volumes:
-      - /opt/docker/secops/scanopy/daemon-config:/root/.config/daemon
+      - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
@@ -61,7 +61,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "${SCANOPY_DB_PASS}"
     volumes:
-      - /opt/docker/secops/scanopy/postgres_data:/var/lib/postgresql/data
+      - /opt/docker/scanopy/scanopy_postgres:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -94,7 +94,7 @@ services:
       # Updated to use the bridge gateway of your existing secops network
       SCANOPY_INTEGRATED_DAEMON_URL: http://172.17.0.1:${SCANOPY_DAEMON_PORT:-60073}
     volumes:
-      - /opt/docker/secops/scanopy/data:/data
+      - /opt/docker/scanopy/scanopy_data:/data
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       scanopy-postgres: { condition: service_healthy }
