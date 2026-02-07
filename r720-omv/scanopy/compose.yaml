@@ -59,7 +59,7 @@ services:
     environment:
       POSTGRES_DB: scanopy
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${SCANOPY_POSTGRES}
+      POSTGRES_PASSWORD: "${SCANOPY_DB_PASS}"
     volumes:
       - /opt/docker/secops/scanopy/postgres_data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
@@ -88,7 +88,7 @@ services:
       - "${SCANOPY_SERVER_PORT:-60072}:${SCANOPY_SERVER_PORT:-60072}"
     environment:
       <<: *scanopy-env
-      SCANOPY_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@scanopy-postgres:5432/scanopy
+      SCANOPY_DATABASE_URL: "postgresql://postgres:${SCANOPY_DB_PASS}@scanopy-postgres:5432/scanopy"
       SCANOPY_WEB_EXTERNAL_PATH: /app/static
       SCANOPY_PUBLIC_URL: ${SCANOPY_PUBLIC_URL:-http://localhost:${SCANOPY_SERVER_PORT:-60072}}
       # Updated to use the bridge gateway of your existing secops network
