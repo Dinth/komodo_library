@@ -6,7 +6,7 @@ x-versions:
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:1.0.1
-  spiderfoot-version: &spiderfoot-version bcoles/spiderfoot:latest
+  spiderfoot-version: &spiderfoot-version josaorg/spiderfoot:latest
   misp-version: &misp-version misp/misp-docker:latest
   misp-mariadb-version: &misp-mariadb-version mariadb:10.11
 
