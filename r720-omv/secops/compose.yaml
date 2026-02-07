@@ -19,6 +19,9 @@ services:
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 2G
     ports: ["5001:5001"]
