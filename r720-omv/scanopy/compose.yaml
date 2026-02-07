@@ -31,7 +31,7 @@ services:
       SCANOPY_BIND_ADDRESS: ${SCANOPY_BIND_ADDRESS:-0.0.0.0}
       SCANOPY_NAME: "r720-omv_daemon"
       SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
-      SCANOPY_MODE: "Push"
+      SCANOPY_MODE: "DaemonPoll"
       SCANOPY_DAEMON_API_KEY: "${SCANOPY_TOKEN}"
     volumes:
       - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
@@ -94,7 +94,6 @@ services:
       SCANOPY_DATABASE_URL: "postgresql://postgres:${SCANOPY_DB_PASS}@scanopy-postgres:5432/scanopy"
       SCANOPY_WEB_EXTERNAL_PATH: /app/static
       SCANOPY_PUBLIC_URL: ${SCANOPY_PUBLIC_URL:-http://localhost:${SCANOPY_SERVER_PORT:-60072}}
-      # Updated to use the bridge gateway of your existing secops network
       SCANOPY_INTEGRATED_DAEMON_URL: http://169.254.0.1:${SCANOPY_DAEMON_PORT:-60073}
     volumes:
       - /opt/docker/scanopy/scanopy_data:/data
