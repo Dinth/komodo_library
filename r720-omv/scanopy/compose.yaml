@@ -1,16 +1,105 @@
-## Add your compose file here
+x-versions:
+  scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:latest
+  scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:latest
+  scanopy-postgres-version: &scanopy-postgres-version postgres:17-alpine
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-scanopy-env: &scanopy-env
+  SCANOPY_LOG_LEVEL: ${SCANOPY_LOG_LEVEL:-info}
+  SCANOPY_SERVER_PORT: ${SCANOPY_SERVER_PORT:-60072}
+  SCANOPY_DAEMON_PORT: ${SCANOPY_DAEMON_PORT:-60073}
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
 
-# networks:
-#   default: {}
+  scanopy-daemon:
+    image: *scanopy-daemon-version
+    container_name: scanopy-daemon
+    # Note: host mode and privileged are required for network discovery
+    network_mode: host
+    privileged: true
+    restart: unless-stopped
+    mem_limit: 1G
+    environment:
+      <<: *scanopy-env
+      SCANOPY_SERVER_URL: ${SCANOPY_SERVER_URL:-http://127.0.0.1:60072}
+      SCANOPY_PORT: ${SCANOPY_DAEMON_PORT:-60073}
+      SCANOPY_BIND_ADDRESS: ${SCANOPY_BIND_ADDRESS:-0.0.0.0}
+      SCANOPY_NAME: ${SCANOPY_NAME:-scanopy-daemon}
+      SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
+      SCANOPY_MODE: ${SCANOPY_MODE:-Push}
+    volumes:
+      - /opt/docker/secops/scanopy/daemon-config:/root/.config/daemon
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${SCANOPY_DAEMON_PORT:-60073}/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "Scanopy Daemon"
 
-# volumes:
-#   data:
+  scanopy-postgres:
+    image: *scanopy-postgres-version
+    container_name: scanopy-postgres
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, SETGID, SETUID, FOWNER]
+    mem_limit: 1G
+    environment:
+      POSTGRES_DB: scanopy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /opt/docker/secops/scanopy/postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [secops]
+    logging: *default-logging
+
+  scanopy-server:
+    image: *scanopy-server-version
+    container_name: scanopy-server
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 2G
+    ports: 
+      - "${SCANOPY_SERVER_PORT:-60072}:${SCANOPY_SERVER_PORT:-60072}"
+    environment:
+      <<: *scanopy-env
+      SCANOPY_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@scanopy-postgres:5432/scanopy
+      SCANOPY_WEB_EXTERNAL_PATH: /app/static
+      SCANOPY_PUBLIC_URL: ${SCANOPY_PUBLIC_URL:-http://localhost:${SCANOPY_SERVER_PORT:-60072}}
+      # Updated to use the bridge gateway of your existing secops network
+      SCANOPY_INTEGRATED_DAEMON_URL: http://172.17.0.1:${SCANOPY_DAEMON_PORT:-60073}
+    volumes:
+      - /opt/docker/secops/scanopy/data:/data
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      scanopy-postgres: { condition: service_healthy }
+      scanopy-daemon: { condition: service_healthy }
+    networks: [secops]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "Scanopy Server"
+
+networks:
+  secops:
+    external: true
