@@ -4,9 +4,6 @@ x-versions:
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:0.2.1
-  misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.32
-  misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.5
-  misp-mariadb-version: &misp-mariadb-version mariadb:10.11
 
 x-logging: &default-logging
   driver: "json-file"
