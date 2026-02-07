@@ -4,7 +4,7 @@ x-versions:
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.4.6"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.3.0"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
-  bazarr: &bazarr-version "linuxserver/bazarr:1.5.4"
+  bazarr: &bazarr-version "linuxserver/bazarr:1.5.5"
   lidarr: &lidarr-version "linuxserver/lidarr:3.1.0"
   iplayarr-redis: &iplayarr-redis-version "redis:8.4.0"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.4"
