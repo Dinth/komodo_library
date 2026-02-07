@@ -103,12 +103,15 @@ services:
       HA_URL: "http://10.10.1.11:8123"
       HA_TOKEN: "${HASS_TOKEN}"
       HA_CONFIG_PATH: "/config"
-    command: sh -c "npx -y @renehagen/ha-mcp-file-server"
+      # FIX: Tells npm to use /tmp for caching since it can't write to /.npm
+      npm_config_cache: /tmp/.npm
+    # FIX: Corrected package name: @renehagen/mcp-ha-file-server
+    command: sh -c "npx -y @renehagen/mcp-ha-file-server"
     volumes:
       - /opt/docker/mcp-gateway/ha-file-server/config:/config:ro
       - /etc/localtime:/etc/localtime:ro
     networks: [mcp-gateway]
-    logging: *default-logging
+    logging: *default-logging 
 
   docker-mcp:
     image: *docker-mcp-version
