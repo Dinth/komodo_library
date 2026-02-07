@@ -188,7 +188,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/MISP/MISP/releases/tag/${tag}"
+      wud.link.template: "https://github.com/MISP/MISP/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "MISP Core"
   misp-modules:
     image: *misp-modules-version
@@ -209,7 +209,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/MISP/misp-modules/releases/tag/${tag}"
+      wud.link.template: "https://github.com/MISP/misp-modules/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "MISP Modules"
   misp-mariadb:
     image: *misp-mariadb-version
