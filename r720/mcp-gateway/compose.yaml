@@ -7,7 +7,7 @@ x-versions:
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:1.0.1
   spiderfoot-version: &spiderfoot-version josaorg/spiderfoot:latest
-  misp-version: &misp-version misp/misp-docker:latest
+  misp-version: &misp-version ghcr.io/misp/misp-docker/misp-core:latest
   misp-mariadb-version: &misp-mariadb-version mariadb:10.11
 
 x-logging: &default-logging
