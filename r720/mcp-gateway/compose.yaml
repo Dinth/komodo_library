@@ -4,7 +4,6 @@ x-versions:
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
   ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:0.2.1
-  spiderfoot-version: &spiderfoot-version josaorg/spiderfoot:latest
   misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.32
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.5
   misp-mariadb-version: &misp-mariadb-version mariadb:10.11
@@ -132,109 +131,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-
-  spiderfoot:
-    image: *spiderfoot-version
-    container_name: spiderfoot
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    mem_limit: 2G
-    ports: ["5001:5001"]
-    volumes:
-      - /opt/docker/mcp-gateway/spiderfoot:/var/lib/spiderfoot
-      - /etc/localtime:/etc/localtime:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks: [mcp-gateway]
-    logging: *default-logging
-    labels:
-      wud.watch: "true"
-
-  misp-core:
-    image: *misp-core-version
-    container_name: misp
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE]
-    mem_limit: 2G
-    ports: ["8081:80"]
-    environment:
-      - PUID=${DOCKER_PUID}
-      - PGID=${DOCKER_PGID}
-      - MISP_BASEURL=http://localhost:8081
-      - MYSQL_HOST=misp-mariadb
-      - MYSQL_LOGIN=misp
-      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
-      - MYSQL_DATABASE=misp
-      - MISP_MODULES_ENABLE=true
-      - MISP_MODULES_URL=http://misp-modules
-      - MISP_MODULES_PORT=6666
-    volumes:
-      - /opt/docker/mcp-gateway/misp:/var/www/MISP
-      - /etc/localtime:/etc/localtime:ro
-    depends_on:
-      misp-mariadb: { condition: service_healthy }
-      misp-modules: { condition: service_started }
-    networks: [mcp-gateway]
-    logging: *default-logging
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/MISP/MISP/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: "MISP Core"
-  misp-modules:
-    image: *misp-modules-version
-    container_name: misp-modules
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    mem_limit: 1G
-    networks: [mcp-gateway]
-    logging: *default-logging
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6666/modules"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/MISP/misp-modules/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: "MISP Modules"
-  misp-mariadb:
-    image: *misp-mariadb-version
-    container_name: misp-mariadb
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
-    user: "root"
-    mem_limit: 1G
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MISP_DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=misp
-      - MYSQL_USER=misp
-      - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
-    volumes:
-      - /opt/docker/mcp-gateway/misp-mariadb:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks: [mcp-gateway]
-    logging: *default-logging
 
 networks:
   mcp-gateway:
