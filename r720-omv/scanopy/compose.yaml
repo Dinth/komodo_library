@@ -26,11 +26,11 @@ services:
       <<: *scanopy-env
       SCANOPY_SERVER_URL: ${SCANOPY_SERVER_URL:-http://127.0.0.1:60072}
       SCANOPY_PORT: ${SCANOPY_DAEMON_PORT:-60073}
-      SCANOPY_BIND_ADDRESS: ${SCANOPY_BIND_ADDRESS:-0.0.0.0}
-      SCANOPY_NAME: ${SCANOPY_NAME:-scanopy-daemon}
-      SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
-      SCANOPY_MODE: ${SCANOPY_MODE:-Push}
-      SCANOPY_AUTH_TOKEN: "${SCANOPY_TOKEN}"
+      SCANOPY_NAME: "r720-omv_daemon"
+      SCANOPY_USER_ID: "ab50aa94-54d8-4942-9d12-a715740ecb44"
+      SCANOPY_NETWORK_ID: "9cfe3341-79bb-415f-84b5-3c8e48512afb"
+      SCANOPY_MODE: "server_poll"
+      SCANOPY_DAEMON_API_KEY: "${SCANOPY_TOKEN}"
     volumes:
       - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
       - /var/run/docker.sock:/var/run/docker.sock:ro
