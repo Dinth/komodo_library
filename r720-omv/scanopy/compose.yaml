@@ -64,7 +64,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "${SCANOPY_DB_PASS}"
     volumes:
-      - /opt/docker/scanopy/scanopy_postgres:/var/lib/postgresql/data
+      - /opt/docker/scanopy/scanopy_postgres:/var/lib/postgresql
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
