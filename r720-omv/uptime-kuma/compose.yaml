@@ -47,7 +47,7 @@ services:
       - ALL
     container_name: uptime-kuma
     hostname: uptime-kuma
-    image: louislam/uptime-kuma:2.0.2
+    image: louislam/uptime-kuma:2.1.0
     ipc: private
     labels:
       homepage.group: "Infrastructure"
