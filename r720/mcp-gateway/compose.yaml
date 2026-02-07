@@ -2,7 +2,6 @@ x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.0
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
   homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
-  ha-file-server-version: &ha-file-server-version node:22-bookworm-slim
   docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:0.2.1
 
 x-logging: &default-logging
@@ -88,30 +87,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-
-  ha-file-server:
-    image: *ha-file-server-version
-    container_name: ha-file-server
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    mem_limit: 256M
-    environment:
-      TZ: "${TZ}"
-      HA_URL: "http://10.10.1.11:8123"
-      HA_TOKEN: "${HASS_TOKEN}"
-      HA_CONFIG_PATH: "/config"
-      # FIX: Tells npm to use /tmp for caching since it can't write to /.npm
-      npm_config_cache: /tmp/.npm
-    # FIX: Corrected package name: @renehagen/mcp-ha-file-server
-    command: sh -c "npx -y @renehagen/mcp-ha-file-server"
-    volumes:
-      - /opt/docker/mcp-gateway/ha-file-server/config:/config:ro
-      - /etc/localtime:/etc/localtime:ro
-    networks: [mcp-gateway]
-    logging: *default-logging 
 
   docker-mcp:
     image: *docker-mcp-version
