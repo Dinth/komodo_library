@@ -21,7 +21,7 @@ services:
     ipc: private
     security_opt:
       - no-new-privileges=true
-    image: ghcr.io/fuzzygrim/yamtrack:0.24.11
+    image: ghcr.io/fuzzygrim/yamtrack:0.25.0
     restart: unless-stopped
     logging:
       driver: json-file
