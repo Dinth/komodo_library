@@ -44,7 +44,7 @@ services:
     environment:
       COLLECTOR_API_ENDPOINT: "http://10.10.1.13:93"
     hostname: scrutiny-collector
-    image: ghcr.io/analogj/scrutiny:v0.8.1-collector
+    image: ghcr.io/analogj/scrutiny:v0.8.2-collector
     ipc: private
     labels:
       wud.watch: "true"
@@ -82,7 +82,7 @@ services:
       SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
       SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
     hostname: scrutiny-web
-    image: ghcr.io/analogj/scrutiny:v0.8.1-web
+    image: ghcr.io/analogj/scrutiny:v0.8.2-web
     ipc: private
     healthcheck:
       test: curl -ILfSs http://localhost:8080/api/health  || exit 1
