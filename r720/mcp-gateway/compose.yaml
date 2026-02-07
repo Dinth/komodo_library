@@ -27,6 +27,9 @@ services:
       - '-listenip=0.0.0.0'
       - '-allowGET=/(containers/.*|images/.*|events|info|version)'
       - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'     
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks: [mcp-gateway]
