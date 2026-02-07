@@ -109,4 +109,5 @@ services:
 
 networks:
   scanopy:
-    external: true
+    mode: bridge
+    internal: true
