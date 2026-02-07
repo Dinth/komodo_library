@@ -25,6 +25,12 @@ services:
     security_opt:
       - no-new-privileges
     user: "65534:${DOCKER_SOCKET_GID}"
+    # Healthcheck for the socket proxy using wget against its internal ping endpoint
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/_ping || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -58,6 +64,12 @@ services:
       - monitoring
     ports: 
       - 3100:3100
+    healthcheck:
+      test: [ "CMD", "/usr/bin/loki", "-health" ]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - /opt/docker/loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
       - /opt/docker/loki-promtail/loki_storage:/loki
@@ -81,6 +93,10 @@ services:
     container_name: promtail
     image: *promtail-version
     restart: unless-stopped
+    # Promtail depends on Loki being healthy before starting
+    depends_on:
+      loki:
+        condition: service_healthy
     user: ${DOCKER_PUID}:${DOCKER_PGID}
     cap_add:
       - CHOWN
@@ -101,6 +117,11 @@ services:
       - 9089:9089
     networks:
       - monitoring
+    healthcheck:
+      test: ["CMD", "/usr/bin/promtail", "-check-config", "-config.file=/etc/promtail/config.yml"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
     volumes:
       - /opt/docker/loki-promtail/promtail-config.yml:/etc/promtail/config.yml:ro
       - /etc/machine-id:/etc/machine-id:ro
@@ -127,6 +148,9 @@ services:
     container_name: fluentbit
     image: *fluentbit-version
     restart: unless-stopped
+    depends_on:
+      loki:
+        condition: service_healthy
     user: ${DOCKER_PUID}:${DOCKER_PGID}
     cap_add:
       - CHOWN
@@ -146,6 +170,12 @@ services:
       - 2020:2020
     networks:
       - monitoring
+    # Fluent Bit has a built-in HTTP server (if enabled in your .conf) for health checks
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2020/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     volumes:
       - /opt/docker/loki-promtail/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - /opt/docker/loki-promtail/parsers.conf:/fluent-bit/etc/parsers-custom.conf:ro
