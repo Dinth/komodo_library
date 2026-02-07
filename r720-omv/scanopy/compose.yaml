@@ -1,7 +1,7 @@
 x-versions:
-  scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:latest
-  scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:latest
-  scanopy-postgres-version: &scanopy-postgres-version postgres:17-alpine
+  scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:v0.14.3
+  scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:v0.14.3
+  scanopy-postgres-version: &scanopy-postgres-version postgres:18.1-alpine
 
 x-logging: &default-logging
   driver: "json-file"
@@ -15,11 +15,9 @@ x-scanopy-env: &scanopy-env
   SCANOPY_DAEMON_PORT: ${SCANOPY_DAEMON_PORT:-60073}
 
 services:
-
   scanopy-daemon:
     image: *scanopy-daemon-version
     container_name: scanopy-daemon
-    # Note: host mode and privileged are required for network discovery
     network_mode: host
     privileged: true
     restart: unless-stopped
@@ -44,6 +42,8 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Daemon"
 
   scanopy-postgres:
@@ -51,6 +51,7 @@ services:
     container_name: scanopy-postgres
     ipc: private
     restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     cap_add: [CHOWN, DAC_OVERRIDE, SETGID, SETUID, FOWNER]
@@ -58,7 +59,7 @@ services:
     environment:
       POSTGRES_DB: scanopy
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${SCANOPY_POSTGRES}
     volumes:
       - /opt/docker/secops/scanopy/postgres_data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
@@ -67,9 +68,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks: [secops]
+    networks: [scanopy]
     logging: *default-logging
-
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+-alpine$$'
+      wud.link.template: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
+      wud.display.name: "Postgres - Scanopy"
   scanopy-server:
     image: *scanopy-server-version
     container_name: scanopy-server
@@ -94,12 +99,14 @@ services:
     depends_on:
       scanopy-postgres: { condition: service_healthy }
       scanopy-daemon: { condition: service_healthy }
-    networks: [secops]
+    networks: [scanopy]
     logging: *default-logging
     labels:
       wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Server"
 
 networks:
-  secops:
+  scanopy:
     external: true
