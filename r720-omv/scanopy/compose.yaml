@@ -30,6 +30,7 @@ services:
       SCANOPY_NAME: ${SCANOPY_NAME:-scanopy-daemon}
       SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
       SCANOPY_MODE: ${SCANOPY_MODE:-Push}
+      SCANOPY_AUTH_TOKEN: "${SCANOPY_TOKEN}"
     volumes:
       - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
       - /var/run/docker.sock:/var/run/docker.sock:ro
