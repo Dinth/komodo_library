@@ -57,7 +57,10 @@ services:
       - MISP_MODULES_URL=http://misp-modules
       - MISP_MODULES_PORT=6666
     volumes:
-      - /opt/docker/secops/misp:/var/www/MISP
+      - /opt/docker/secops/misp_vonfig:/var/www/MISP/app/Config
+      - /opt/docker/secops/misp_files:/var/www/MISP/app/files
+      - /opt/docker/secops/misp_gnuPG:/var/www/MISP/.gnupg
+      - /opt/docker/secops/misp_customimages:/var/www/MISP/app/webroot/img/custom
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       misp-mariadb: { condition: service_healthy }
@@ -98,7 +101,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
-    user: "root"
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 1G
     environment:
       - MYSQL_ROOT_PASSWORD=${MISP_DB_ROOT_PASSWORD}
