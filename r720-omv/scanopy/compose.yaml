@@ -34,6 +34,7 @@ services:
       SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
       SCANOPY_MODE: "Push"
       SCANOPY_DAEMON_API_KEY: "${SCANOPY_TOKEN}"
+      SCANOPY_NETWORK_ID: "81dfd914-2d19-49de-978c-87388da0b2bc"
     volumes:
       - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
       - /var/run/docker.sock:/var/run/docker.sock:ro
