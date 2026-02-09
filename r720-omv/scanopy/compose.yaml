@@ -101,7 +101,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       scanopy-postgres: { condition: service_healthy }
-      scanopy-daemon: { condition: service_healthy }
     networks: [scanopy]
     logging: *default-logging
     labels:
