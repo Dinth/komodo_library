@@ -20,7 +20,7 @@ services:
     container_name: scanopy-daemon
     network_mode: host
     privileged: true
-    command: ["scanopy-daemon", "--mode", "Push"]
+    command: ["scanopy-daemon", "--mode", "daemon_poll"]
     ports:
       - 60073:60073
     restart: unless-stopped
