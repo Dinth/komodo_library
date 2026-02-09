@@ -20,7 +20,6 @@ services:
     container_name: scanopy-daemon
     network_mode: host
     privileged: true
-    command: ["scanopy-daemon", "--mode", "daemon_poll"]
     ports:
       - 60073:60073
     restart: unless-stopped
@@ -32,7 +31,7 @@ services:
       SCANOPY_BIND_ADDRESS: ${SCANOPY_BIND_ADDRESS:-0.0.0.0}
       SCANOPY_NAME: "r720-omv_daemon"
       SCANOPY_HEARTBEAT_INTERVAL: ${SCANOPY_HEARTBEAT_INTERVAL:-30}
-      SCANOPY_MODE: "Push"
+      SCANOPY_MODE: "daemon_poll"
       SCANOPY_DAEMON_API_KEY: "${SCANOPY_TOKEN}"
       SCANOPY_NETWORK_ID: "81dfd914-2d19-49de-978c-87388da0b2bc"
     volumes:
