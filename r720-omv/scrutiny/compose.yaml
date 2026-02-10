@@ -21,6 +21,7 @@ services:
       - SYS_RAWIO
     cap_drop:
       - ALL
+    security_opt: no-new-privileges:true
     command:
       - /entrypoint-collector.sh
     devices:
@@ -82,6 +83,7 @@ services:
     hostname: scrutiny-web
     cap_drop:
       - ALL
+    security_opt: no-new-privileges:true
     command: ['/opt/scrutiny/bin/scrutiny','start']
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     environment:
