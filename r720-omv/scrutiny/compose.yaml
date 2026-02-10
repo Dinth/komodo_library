@@ -1,6 +1,20 @@
 name: scrutiny
+
+x-versions:
+  scrutiny-collector-version: &scrutiny-collector-version ghcr.io/analogj/scrutiny:v0.8.6-collector
+  scrutiny-web-version: &scrutiny-web-version ghcr.io/analogj/scrutiny:v0.8.6-web
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   scrutiny-collector:
+    image: *scrutiny-collector-version
+    container_name: scrutiny-collector
+    hostname: scrutiny-collector
     cap_add:
       - SETGID
       - SETUID
@@ -9,7 +23,6 @@ services:
       - ALL
     command:
       - /entrypoint-collector.sh
-    container_name: scrutiny-collector
     devices:
       - source: /dev/sda
         target: /dev/sda
@@ -43,22 +56,7 @@ services:
         permissions: rwm
     environment:
       COLLECTOR_API_ENDPOINT: "http://10.10.1.13:93"
-    hostname: scrutiny-collector
-    image: ghcr.io/analogj/scrutiny:v0.8.2-collector
     ipc: private
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+\-collector$$'
-      wud.display.name: "Scrutiny Collector"
-      wud.display.icon: "sh:scrutiny"
-      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      scrutiny: null
     restart: unless-stopped
     volumes:
       - type: bind
@@ -67,13 +65,25 @@ services:
         read_only: true
         bind:
           create_host_path: true
+    networks:
+      scrutiny: null
     working_dir: /opt/scrutiny
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+\-collector$$'
+      wud.display.name: "Scrutiny Collector"
+      wud.display.icon: "sh:scrutiny"
+      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
+
   scrutiny-web:
+    image: *scrutiny-web-version
+    container_name: scrutiny-web
+    hostname: scrutiny-web
     cap_drop:
       - ALL
     command: ['/opt/scrutiny/bin/scrutiny','start']
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    container_name: scrutiny-web
     environment:
       PATH: /opt/scrutiny/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       SCRUTINY_WEB_INFLUXDB_HOST: "10.10.1.11"
@@ -81,41 +91,36 @@ services:
       SCRUTINY_WEB_INFLUXDB_PORT: "8086"
       SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
       SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
-    hostname: scrutiny-web
-    image: ghcr.io/analogj/scrutiny:v0.8.2-web
     ipc: private
-    healthcheck:
-      test: curl -ILfSs http://localhost:8080/api/health  || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+\-web$$'
-      wud.display.name: "Scrutiny"
-      wud.display.icon: "sh:scrutiny"
-      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      scrutiny: null
+    restart: unless-stopped
     ports:
       - mode: ingress
         target: 8080
         published: "93"
         protocol: tcp
-    restart: unless-stopped
     volumes:
       - type: bind
         source: /opt/docker/scrutiny/scrutiny_config
         target: /opt/scrutiny/config
         bind:
           create_host_path: true
+    networks:
+      scrutiny: null
     working_dir: /opt/scrutiny
+    healthcheck:
+      test: curl -ILfSs http://localhost:8080/api/health  || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+\-web$$'
+      wud.display.name: "Scrutiny"
+      wud.display.icon: "sh:scrutiny"
+      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
+
 networks:
   scrutiny:
     name: scrutiny
