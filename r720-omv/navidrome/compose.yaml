@@ -21,7 +21,7 @@ services:
     container_name: navidrome
     entrypoint: ['/app/navidrome']
     hostname: navidrome
-    image: deluan/navidrome:0.60.0
+    image: deluan/navidrome:0.60.2
     ipc: private
     logging:
       driver: json-file
