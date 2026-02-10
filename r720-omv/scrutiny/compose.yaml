@@ -26,34 +26,34 @@ services:
     devices:
       - source: /dev/sda
         target: /dev/sda
-        permissions: rwm
+        permissions: r
       - source: /dev/sdb
         target: /dev/sdb
-        permissions: rwm
+        permissions: r
       - source: /dev/sdc
         target: /dev/sdc
-        permissions: rwm
+        permissions: r
       - source: /dev/sdd
         target: /dev/sdd
-        permissions: rwm
+        permissions: r
       - source: /dev/sde
         target: /dev/sde
-        permissions: rwm
+        permissions: r
       - source: /dev/sdf
         target: /dev/sdf
-        permissions: rwm
+        permissions: r
       - source: /dev/sdg
         target: /dev/sdg
-        permissions: rwm
+        permissions: r
       - source: /dev/sdh
         target: /dev/sdh
-        permissions: rwm
+        permissions: r
       - source: /dev/sdi
         target: /dev/sdi
-        permissions: rwm
+        permissions: r
       - source: /dev/sdj
         target: /dev/sdj
-        permissions: rwm
+        permissions: r
     environment:
       COLLECTOR_API_ENDPOINT: "http://10.10.1.13:93"
     ipc: private
