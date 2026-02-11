@@ -29,6 +29,8 @@ services:
     depends_on:
       piped-postgres: { condition: service_healthy }
     networks: [piped]
+    ports:
+      - "4553:8080"
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/feed || exit 1"]
       interval: 10s
