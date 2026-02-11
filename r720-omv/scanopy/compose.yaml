@@ -1,6 +1,6 @@
 x-versions:
-  scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:v0.14.4
-  scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:v0.14.4
+  scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:v0.14.5
+  scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:v0.14.5
   scanopy-postgres-version: &scanopy-postgres-version postgres:18.1-alpine
 
 x-logging: &default-logging
@@ -47,7 +47,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Daemon"
 
   scanopy-postgres:
@@ -106,7 +106,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Server"
 
 networks:
