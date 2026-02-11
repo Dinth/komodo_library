@@ -111,7 +111,7 @@ services:
       POSTGRES_USER: piped
       POSTGRES_PASSWORD: "${PIPED_DB_PASS}"
     volumes:
-      - /opt/docker/piped/piped_postgres-data:/var/lib/postgresql/data
+      - /opt/docker/piped/piped_postgres-data:/var/lib/postgresql
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U piped"]
