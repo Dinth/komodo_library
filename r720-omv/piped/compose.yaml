@@ -77,6 +77,7 @@ services:
     image: *piped-frontend-version
     container_name: piped-frontend
     ipc: private
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
