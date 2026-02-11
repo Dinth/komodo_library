@@ -89,7 +89,7 @@ services:
       <<: *piped-env
       BACKEND_HOSTNAME: ${PIPED_PUBLIC_URL:-localhost}
     volumes:
-      - /opt/docker/piped/piped_frontend-data:/usr/share/nginx/html/assets
+#      - /opt/docker/piped/piped_frontend-data:/usr/share/nginx/html/assets
       - /etc/localtime:/etc/localtime:ro
     networks: [piped]
     logging: *default-logging
