@@ -2,7 +2,7 @@ services:
   ebusd:
     container_name: ebusd
     hostname: ebusd
-    image: john30/ebusd:v25.1
+    image: john30/ebusd:v26.1
     ipc: private
     security_opt:
       - no-new-privileges:true
