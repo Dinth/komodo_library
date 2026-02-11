@@ -22,7 +22,7 @@ services:
       wud.watch: "true"
       wud.display.icon: "sh-ebusd"
       wud.display.name: "Ebusd"
-      wud.tag.include: '^v\d+\.\d+\$$'
+      wud.tag.include: "^v\d+\.\d$$"
       wud.link.template: "https://github.com/john30/ebusd/releases/tag/v$${major}.$${minor}"
     logging:
       driver: json-file
