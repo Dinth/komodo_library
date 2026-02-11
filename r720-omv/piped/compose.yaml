@@ -1,6 +1,7 @@
 x-versions:
-  piped-backend-version: &piped-backend-version 1337kavin/piped:latest
-  piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest
+  piped-backend-version: &piped-backend-version 1337kavin/piped:v2025.02.10
+  piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest
+  piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:v2025.02.10
   piped-postgres-version: &piped-postgres-version postgres:18.1-alpine
 
 x-logging: &default-logging
@@ -22,8 +23,6 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     mem_limit: 2G
-    environment:
-      <<: *piped-env
     volumes:
       - /opt/docker/piped/piped_backend-config/config.properties:/app/config.properties:ro
       - /etc/localtime:/etc/localtime:ro
@@ -38,9 +37,35 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/TeamPiped/Piped/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Piped Backend"
+
+  piped-proxy:
+    image: *piped-proxy-version
+    container_name: piped-proxy
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    mem_limit: 1G
+    environment:
+      <<: *piped-env
+      UDS: 0
+      BIND: "0.0.0.0:8081"
+    networks: [piped]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8081/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^latest$$'
+      wud.link.template: "https://github.com/TeamPiped/Piped-Proxy/releases"
+      wud.display.name: "Piped Proxy"
 
   piped-frontend:
     image: *piped-frontend-version
@@ -63,7 +88,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/TeamPiped/Piped-Frontend/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Piped Frontend"
 
@@ -95,7 +120,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+-alpine$$'
       wud.link.template: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
-      wud.display.name: "Piped - Postgres"
+      wud.display.name: "Postgres - Piped"
 
 networks:
   piped:
