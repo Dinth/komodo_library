@@ -19,6 +19,7 @@ services:
       - ALL
     container_name: tandoor
     entrypoint: ['/opt/recipes/boot.sh']
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     environment:
       DB_ENGINE: "django.db.backends.postgresql"
       SECRET_KEY: "${TANDOOR_SECRET_KEY}"
