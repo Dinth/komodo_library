@@ -31,6 +31,9 @@ services:
     networks: [piped]
     ports:
       - "4553:8080"
+    depends_on:
+      piped-postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/feed || exit 1"]
       interval: 10s
@@ -114,7 +117,7 @@ services:
       - /opt/docker/piped/piped_postgres-data:/var/lib/postgresql
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U piped"]
+      test: ["CMD-SHELL", "pg_isready -U piped -d piped"]
       interval: 10s
       timeout: 5s
       retries: 5
