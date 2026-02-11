@@ -84,7 +84,7 @@ services:
       - "4551:80"
     environment:
       <<: *piped-env
-      BACKEND_HOSTNAME: ${PIPED_PUBLIC_URL:-localhost}
+      BACKEND_HOSTNAME: 10.10.1.13:4553
     volumes:
 #      - /opt/docker/piped/piped_frontend-data:/usr/share/nginx/html/assets
       - /etc/localtime:/etc/localtime:ro
