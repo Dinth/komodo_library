@@ -130,3 +130,5 @@ networks:
   piped:
     name: piped
     driver: bridge
+  traefik_network:
+    external: true
