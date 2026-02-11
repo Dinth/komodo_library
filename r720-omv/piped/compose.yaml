@@ -1,6 +1,6 @@
 x-versions:
   piped-backend-version: &piped-backend-version 1337kavin/piped:v2025.02.10
-  piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest
+  piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:v2025.02.10
   piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:v2025.02.10
   piped-postgres-version: &piped-postgres-version postgres:18.1-alpine
 
