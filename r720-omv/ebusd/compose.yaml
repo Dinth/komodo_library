@@ -46,8 +46,8 @@ services:
       start_period: 10s
     networks:
       - ebusd
-    ports:
-      - 8888:8888/tcp
+#    ports:
+#      - 8888:8888/tcp
     restart: unless-stopped
     volumes:
       - /opt/docker/ebusd/ebusd_data:/etc/ebusd
