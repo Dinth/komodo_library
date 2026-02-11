@@ -50,6 +50,8 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     mem_limit: 1G
+    ports:
+      - "4552:8081"
     environment:
       <<: *piped-env
       UDS: 0
@@ -77,7 +79,7 @@ services:
     cap_add: [CHOWN, SETGID, SETUID]
     mem_limit: 512M
     ports:
-      - "${PIPED_FRONTEND_PORT:-80}:80"
+      - "4551:80"
     environment:
       <<: *piped-env
       BACKEND_HOSTNAME: ${PIPED_PUBLIC_URL:-localhost}
