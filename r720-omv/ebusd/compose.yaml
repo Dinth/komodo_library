@@ -23,6 +23,11 @@ services:
       EBUSD_MQTTUSER: "${EBUSD_MQTTUSER}"
       EBUSD_MQTTPASS: "${EBUSD_MQTTPASS}"
     labels:
+      repliqate.enabled: 'true'
+      repliqate.engine: "restic"
+      repliqate.schedule: "@monthly 3am"
+      repliqate.backup_id: ebusd
+      repliqate.retention: "365d"
       wud.watch: "true"
       wud.display.icon: "sh-ebusd"
       wud.display.name: "Ebusd"
