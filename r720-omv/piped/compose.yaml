@@ -1,6 +1,5 @@
 x-versions:
   piped-backend-version: &piped-backend-version 1337kavin/piped:latest
-  piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest
   piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest
   piped-postgres-version: &piped-postgres-version postgres:18.1-alpine
 
@@ -26,7 +25,7 @@ services:
     environment:
       <<: *piped-env
     volumes:
-      - /opt/docker/piped/config/config.properties:/app/config.properties:ro
+      - /opt/docker/piped/piped_backend-config/config.properties:/app/config.properties:ro
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       piped-postgres: { condition: service_healthy }
@@ -39,63 +38,33 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/TeamPiped/Piped/releases"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/TeamPiped/Piped/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Piped Backend"
-
-  piped-proxy:
-    image: *piped-proxy-version
-    container_name: piped-proxy
-    ipc: private
-    restart: unless-stopped
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    mem_limit: 1G
-    ports:
-      - "5541:80"
-    environment:
-      <<: *piped-env
-      UDS: 0
-      BIND: "0.0.0.0:80"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    networks: [piped]
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/ || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    logging: *default-logging
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/TeamPiped/Piped-Proxy/releases"
-      wud.display.name: "Piped Proxy"
 
   piped-frontend:
     image: *piped-frontend-version
     container_name: piped-frontend
     ipc: private
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     cap_add: [CHOWN, SETGID, SETUID]
     mem_limit: 512M
     ports:
-      - "5542:80"
+      - "${PIPED_FRONTEND_PORT:-80}:80"
     environment:
       <<: *piped-env
       BACKEND_HOSTNAME: ${PIPED_PUBLIC_URL:-localhost}
     volumes:
+      - /opt/docker/piped/piped_frontend-data:/usr/share/nginx/html/assets
       - /etc/localtime:/etc/localtime:ro
     networks: [piped]
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/TeamPiped/Piped-Frontend/releases"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/TeamPiped/Piped-Frontend/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Piped Frontend"
 
   piped-postgres:
@@ -113,7 +82,7 @@ services:
       POSTGRES_USER: piped
       POSTGRES_PASSWORD: "${PIPED_DB_PASS}"
     volumes:
-      - /opt/docker/piped/db_data:/var/lib/postgresql/data
+      - /opt/docker/piped/piped_postgres-data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U piped"]
@@ -126,7 +95,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+-alpine$$'
       wud.link.template: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
-      wud.display.name: "Postgres - Piped"
+      wud.display.name: "Piped - Postgres"
 
 networks:
   piped:
