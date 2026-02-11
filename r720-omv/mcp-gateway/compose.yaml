@@ -1,16 +1,117 @@
-## Add your compose file here
+x-versions:
+  mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.0
+  mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
+  homeassistant-mcp-version: &homeassistant-mcp-version voska/hass-mcp:latest
+  docker-mcp-version: &docker-mcp-version acuvity/mcp-server-docker:0.2.1
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  mcp-gateway-socket-proxy:
+    image: *mcp-gateway-socket-proxy-version
+    container_name: mcp-gateway-socket-proxy
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges]
+    user: "65534:${DOCKER_SOCKET_GID}"
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=mcp-gateway,docker-mcp'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(containers/.*|images/.*|events|info|version)'
+      - '-allowHEAD=/_ping'
+      - 'allowPOST=/(containers/.*)'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'     
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [mcp-gateway]
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 sh -c 'cat < /dev/null > /dev/tcp/127.0.0.1/2375' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
 
-# networks:
-#   default: {}
+  mcp-gateway:
+    image: *mcp-gateway-version
+    container_name: mcp-gateway
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 512M
+    ports: ["8080:8080"]
+    environment:
+      TZ: "${TZ}"
+      DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
+    volumes:
+      - /opt/docker/mcp-gateway/mcp-gateway/config:/app/config:ro
+      - /opt/docker/mcp-gateway/mcp-gateway/certs:/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      mcp-gateway-socket-proxy: { condition: service_healthy }
+    networks: [mcp-gateway]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
 
-# volumes:
-#   data:
+  homeassistant-mcp:
+    image: *homeassistant-mcp-version
+    container_name: homeassistant-mcp
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 256M
+    environment:
+      TZ: "${TZ}"
+      HA_URL: "http://10.10.1.11:8123"
+      HA_TOKEN: "${HASS_TOKEN}"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep python | grep -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks: [mcp-gateway]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+
+  docker-mcp:
+    image: *docker-mcp-version
+    container_name: docker-mcp
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 128M
+    environment:
+      TZ: "${TZ}"
+      DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
+    depends_on:
+      mcp-gateway-socket-proxy: { condition: service_healthy }
+    networks: [mcp-gateway]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+
+networks:
+  mcp-gateway:
+    name: mcp-gateway
+    driver: bridge
