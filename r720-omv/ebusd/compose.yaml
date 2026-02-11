@@ -4,6 +4,10 @@ services:
     hostname: ebusd
     image: john30/ebusd:v25.1
     ipc: private
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       EBUSD_MQTTINT: "/etc/ebusd/mqtt-hassio.cfg"
       EBUSD_MQTTJSON: "true"
@@ -24,11 +28,22 @@ services:
       wud.display.name: "Ebusd"
       wud.tag.include: '^v\d+\.\d$'
       wud.link.template: "https://github.com/john30/ebusd/releases/tag/v$${major}.$${minor}"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.50'
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD", "ebusctl", "info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - ebusd
     ports:
