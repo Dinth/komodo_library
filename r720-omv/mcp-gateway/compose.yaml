@@ -57,7 +57,7 @@ services:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
     volumes:
-      - /opt/docker/mcp-gateway/mcp-gateway/config:/app/config:ro
+      - /opt/docker/mcp-gateway/mcp-gateway/config:/app/config:rw
       - /opt/docker/mcp-gateway/mcp-gateway/certs:/certs:ro
       - /etc/localtime:/etc/localtime:ro
 #    depends_on:
@@ -81,6 +81,7 @@ services:
       HA_URL: "http://10.10.1.11:8123"
       HA_TOKEN: "${HASS_TOKEN}"
       PYTHONUNBUFFERED: "1"
+      LOG_LEVEL: "DEBUG"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
