@@ -60,8 +60,8 @@ services:
       - /opt/docker/mcp-gateway/mcp-gateway/config:/app/config:ro
       - /opt/docker/mcp-gateway/mcp-gateway/certs:/certs:ro
       - /etc/localtime:/etc/localtime:ro
-    depends_on:
-      mcp-gateway-socket-proxy: { condition: service_healthy }
+#    depends_on:
+#      mcp-gateway-socket-proxy: { condition: service_healthy }
     networks: [mcp-gateway]
     logging: *default-logging
     labels:
@@ -105,8 +105,8 @@ services:
     environment:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
-    depends_on:
-      mcp-gateway-socket-proxy: { condition: service_healthy }
+#    depends_on:
+#      mcp-gateway-socket-proxy: { condition: service_healthy }
     networks: [mcp-gateway]
     logging: *default-logging
     labels:
