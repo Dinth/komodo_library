@@ -73,6 +73,16 @@ services:
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
+    "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "HA_URL",
+        "-e",
+        "HA_TOKEN",
+        "voska/hass-mcp"
+      ],
     cap_drop: [ALL]
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 256M
