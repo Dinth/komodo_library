@@ -80,6 +80,7 @@ services:
       TZ: "${TZ}"
       HA_URL: "http://10.10.1.11:8123"
       HA_TOKEN: "${HASS_TOKEN}"
+      PYTHONUNBUFFERED: "1"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
