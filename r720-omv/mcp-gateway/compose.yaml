@@ -105,6 +105,7 @@ services:
     environment:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
+      HOME: "/tmp"
 #    depends_on:
 #      mcp-gateway-socket-proxy: { condition: service_healthy }
     networks: [mcp-gateway]
