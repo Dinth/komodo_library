@@ -23,7 +23,7 @@ services:
     user: "65534:${DOCKER_SOCKET_GID}"
     command:
       - '-loglevel=info'
-#      - '-allowfrom=mcp-gateway,docker-mcp'
+      - '-allowfrom=mcp-gateway,docker-mcp'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(containers/.*|images/.*|events|info|version)'
       - '-allowHEAD=/_ping'
