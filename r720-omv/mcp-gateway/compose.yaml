@@ -35,10 +35,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks: [mcp-gateway]
     healthcheck:
-      test: ["CMD-SHELL", "timeout 2 sh -c 'cat < /dev/null > /dev/tcp/127.0.0.1/2375' || exit 1"]
+      test: ["CMD", "./healthcheck"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 2
     logging: *default-logging
     labels:
       wud.watch: "true"
