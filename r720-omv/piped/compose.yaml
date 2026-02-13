@@ -2,7 +2,7 @@ x-versions:
   piped-backend-version: &piped-backend-version 1337kavin/piped:latest
   piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest
   piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest
-  piped-postgres-version: &piped-postgres-version postgres:18.1-alpine
+  piped-postgres-version: &piped-postgres-version postgres:18.2-alpine
 
 x-logging: &default-logging
   driver: "json-file"
