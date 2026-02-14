@@ -63,8 +63,8 @@ services:
       - /opt/docker/mcp-gateway/mcp-gateway_certs:/certs:ro
       - /opt/docker:/opt/docker:ro
       - /etc/localtime:/etc/localtime:ro
-    depends_on:
-      mcp-gateway-socket-proxy: { condition: service_healthy }
+#    depends_on:
+#      mcp-gateway-socket-proxy: { condition: service_healthy }
     networks: [mcp-gateway]
     logging: *default-logging
     labels:
