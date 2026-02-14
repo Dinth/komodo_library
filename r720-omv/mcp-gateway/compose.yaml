@@ -24,7 +24,7 @@ services:
       - '-allowfrom=mcp-gateway'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)'
-      - '-allowHEAD=/v1\..{1,2}/_ping'
+      - '-allowHEAD=/_ping'
       - '-allowPOST=/v1\..{1,2}/(containers/.*)'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
