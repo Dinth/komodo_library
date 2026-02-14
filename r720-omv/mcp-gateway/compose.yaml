@@ -61,7 +61,7 @@ services:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
     volumes:
-      - /opt/docker/mcp-gateway/mcp-gateway_config:/app/config:ro
+      - /opt/docker/mcp-gateway/mcp-gateway_config:/mcp:ro
       - /opt/docker/mcp-gateway/mcp-gateway_certs:/certs:ro
       - /opt/docker:/opt/docker:ro
       - /etc/localtime:/etc/localtime:ro
