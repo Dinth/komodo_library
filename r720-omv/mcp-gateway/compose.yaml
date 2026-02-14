@@ -26,6 +26,7 @@ services:
       - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)'
       - '-allowHEAD=/_ping'
       - '-allowPOST=/v1\..{1,2}/(containers/.*|images/create)'
+      - '-allowhealthcheck'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'     
