@@ -56,6 +56,7 @@ services:
     command:
       - "--transport=sse"
       - "--port=8080"
+      - "--catalog=/mcp/registry.yaml"
       - "--registry=/mcp/registry.yaml"
     environment:
       TZ: "${TZ}"
