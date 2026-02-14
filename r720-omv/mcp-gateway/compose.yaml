@@ -23,7 +23,7 @@ services:
       - '-loglevel=info'
       - '-allowfrom=0.0.0.0/0'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)'
+      - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)|/version'
       - '-allowHEAD=/_ping'
       - '-allowPOST=/v1\..{1,2}/(containers/.*|images/create)'
       - '-allowhealthcheck'
