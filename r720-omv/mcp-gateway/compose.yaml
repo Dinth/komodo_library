@@ -25,7 +25,7 @@ services:
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)'
       - '-allowHEAD=/_ping'
-      - '-allowPOST=/v1\..{1,2}/(containers/.*)'
+      - '-allowPOST=/v1\..{1,2}/(containers/.*|images/create)'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'     
