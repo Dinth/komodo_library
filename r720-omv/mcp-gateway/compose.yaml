@@ -56,7 +56,7 @@ services:
     command:
       - "--transport=sse"
       - "--port=8080"
-      - "--servers=hass-mcp,docker-mcp,containers-data"
+      - "--registry=/mcp/registry.yaml"
     environment:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
