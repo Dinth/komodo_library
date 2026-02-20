@@ -30,8 +30,10 @@ services:
       - 8008:8008/tcp # Qbittorrent
     environment:
       TZ: "${TZ}"
-      VPN_SERVICE_PROVIDER: "protonvpn"
+      VPN_SERVICE_PROVIDER: "airvpn"
       VPN_TYPE: "wireguard"
+      WIREGUARD_PRESHARED_KEY: ""
+      WIREGUARD_ADDRESSES: ""
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       VPN_PORT_FORWARDING: "yes"
       PORT_FORWARD_ONLY: "yes"
