@@ -1,7 +1,7 @@
 x-versions:
   scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:v0.14.6
   scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:v0.14.6
-  scanopy-postgres-version: &scanopy-postgres-version postgres:18.1-alpine
+  scanopy-postgres-version: &scanopy-postgres-version postgres:18.2-alpine
 
 x-logging: &default-logging
   driver: "json-file"
