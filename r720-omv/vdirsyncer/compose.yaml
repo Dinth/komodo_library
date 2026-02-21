@@ -1,16 +1,49 @@
-## Add your compose file here
+x-versions:
+  vdirsyncer-version: &vdirsyncer-version bleala/vdirsyncer:latest
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-vdirsyncer-env: &vdirsyncer-env
+  TZ: ${TZ:-UTC}
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  vdirsyncer:
+    image: *vdirsyncer-version
+    container_name: vdirsyncer
+    ipc: private
+    restart: unless-stopped
+    # Note: bleala/vdirsyncer requires root to manage the cron daemon internally.
+    # If a future image version supports dropping privileges, set DOCKER_PUID/PGID here.
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    mem_limit: 256M
+    environment:
+      <<: *vdirsyncer-env
+      # How often to run vdirsyncer sync, in seconds. 900 = 15 minutes.
+      VDIRSYNCER_SYNC_INTERVAL: "${VDIRSYNCER_SYNC_INTERVAL:-900}"
+      # Optional: pass extra flags to the sync command, e.g. "--force-delete"
+      # VDIRSYNCER_SYNC_FLAGS: ""
+    volumes:
+      # Main config file — mounted read-only since the container never modifies it
+      - /opt/docker/vdirsyncer/vdirsyncer_config/config:/etc/vdirsyncer/config:ro
+      # Status/state DB — must be writable; vdirsyncer tracks sync state here
+      - /opt/docker/vdirsyncer/vdirsyncer_status-data:/status
+      # Google OAuth token — must be writable; vdirsyncer refreshes the token on every run
+      - /opt/docker/vdirsyncer/vdirsyncer_config/google_token:/google_token
+      - /etc/localtime:/etc/localtime:ro
+    networks: [vdirsyncer]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^latest$$'
+      wud.link.template: "https://github.com/bleala/vdirsyncer-docker/releases"
+      wud.display.name: "vdirsyncer"
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+networks:
+  vdirsyncer:
+    name: vdirsyncer
+    driver: bridge
