@@ -1,16 +1,152 @@
-## Add your compose file here
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
-
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+  omnivore-redis:
+    container_name: omnivore-redis
+    image: redis:8.2.0
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/omnivore/omnivore-redis_data:/data
+    networks:
+      - omnivore
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.display.name: "Omnivore Redis"
+      wud.display.icon: "sh-omnivore"
+      wud.tag.include: '^$v\d+.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/redis/redis/releases/tag/$${major}.$${minor}.$${patch}'
+  omnivore-postgres:
+    image: docker.io/postgres:17-alpine
+    ipc: private
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    environment:
+      POSTGRES_DB: "omnivore"
+      POSTGRES_PASSWORD: "${OMNIVORE_POSTGRES_PASS}"
+      POSTGRES_USER: "omnivore"
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+        reservations:
+          memory: 50m
+    volumes:
+      - /opt/docker/omnivore/omnivore_postgres-data:/var/lib/postgresql/data
+    networks:
+      - omnivore
+  api:
+    build:
+      context: .
+      dockerfile: ./packages/api/Dockerfile
+    container_name: "omnivore-api"
+    ports:
+      - "4000:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 0.0.0.0 8080 || exit 1"]
+      interval: 15s
+      timeout: 90s
+    environment:
+      - API_ENV=local
+      - PG_HOST=omnivore-postgres
+      - PG_USER=omnivore
+      - PG_PASSWORD=${OMNIVORE_POSTGRES_PASS}
+      - PG_DB=omnivore
+      - PG_PORT=5432
+      - PG_POOL_MAX=20
+      - JAEGER_HOST=jaeger
+      - IMAGE_PROXY_SECRET=some-secret
+      - JWT_SECRET=${OMNIVORE_JWT_SECRET}
+      - SSO_JWT_SECRET=some_sso_secret
+      - CLIENT_URL=http://localhost:3000
+      - GATEWAY_URL=http://localhost:8080/api
+      - CONTENT_FETCH_URL=http://content-fetch:8080/?token=some_token
+      - REDIS_URL='redis://redis:6379'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - omnivore
+  web:
+    build:
+      context: .
+      dockerfile: ./packages/web/Dockerfile
+      args:
+        - APP_ENV=prod
+        - BASE_URL=http://localhost:3000
+        - SERVER_BASE_URL=http://localhost:4000
+        - HIGHLIGHTS_BASE_URL=http://localhost:3000
+    container_name: "omnivore-web"
+    ports:
+      - "3000:8080"
+    environment:
+      - NEXT_PUBLIC_APP_ENV=prod
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+      - NEXT_PUBLIC_SERVER_BASE_URL=http://localhost:4000
+      - NEXT_PUBLIC_HIGHLIGHTS_BASE_URL=http://localhost:3000
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - omnivore
+      - traefik
+  content-fetch:
+    build:
+      context: .
+      dockerfile: ./packages/content-fetch/Dockerfile
+    container_name: "omnivore-content-fetch"
+    ports:
+      - "9090:8080"
+    environment:
+      - JWT_SECRET=${OMNIVORE_JWT_SECRET}
+      - VERIFICATION_TOKEN=some_token
+      - REST_BACKEND_ENDPOINT=http://api:8080/api
+      - REDIS_URL=redis://omnivore-redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - omnivore
+networks:
+  omnivore:
+    external: false
+    name: omnivore
+    driver: bridge
+  traefik:
+    external: true
