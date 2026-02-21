@@ -38,7 +38,6 @@ services:
       FIREWALL_VPN_INPUT_PORTS: "55062"
       SERVER_COUNTRIES: "Netherlands"
       FIREWALL_OUTBOUND_SUBNETS: "10.10.0.0/16"
-      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8008/api/v2/app/setPreferences 2>&1'
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     devices:
