@@ -1,5 +1,5 @@
 x-versions:
-  mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.0
+  mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.3
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
 
 x-logging: &default-logging
