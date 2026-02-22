@@ -28,7 +28,7 @@ services:
     volumes:
       - /opt/docker/vdirsyncer/vdirsyncer_config/config:/vdirsyncer/config:ro
       - /opt/docker/vdirsyncer/vdirsyncer_status:/status
-      - /opt/docker/vdirsyncer/vdirsyncer_config/tokens:/vdirsyncer/tokens
+      - /opt/docker/vdirsyncer/vdirsyncer_tokens:/vdirsyncer/tokens
       - /etc/localtime:/etc/localtime:ro
     networks: [vdirsyncer]
     logging: *default-logging
