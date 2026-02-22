@@ -28,11 +28,8 @@ services:
       # Optional: pass extra flags to the sync command, e.g. "--force-delete"
       # VDIRSYNCER_SYNC_FLAGS: ""
     volumes:
-      # Main config file — mounted read-only since the container never modifies it
       - /opt/docker/vdirsyncer/vdirsyncer_config/config:/etc/vdirsyncer/config:ro
-      # Status/state DB — must be writable; vdirsyncer tracks sync state here
-      - /opt/docker/vdirsyncer/vdirsyncer_status-data:/status
-      # Google OAuth token — must be writable; vdirsyncer refreshes the token on every run
+      - /opt/docker/vdirsyncer/vdirsyncer_status:/status
       - /opt/docker/vdirsyncer/vdirsyncer_config/google_token:/google_token
       - /etc/localtime:/etc/localtime:ro
     networks: [vdirsyncer]
