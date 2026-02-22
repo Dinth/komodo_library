@@ -1,6 +1,6 @@
 services:
   wud-socket-proxy:
-    image: wollomatic/socket-proxy:1.11.2
+    image: wollomatic/socket-proxy:1.11.3
     ipc: private
     command:
       - '-loglevel=info'
