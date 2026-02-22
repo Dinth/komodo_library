@@ -16,21 +16,19 @@ services:
     container_name: vdirsyncer
     ipc: private
     restart: unless-stopped
-    # Note: bleala/vdirsyncer requires root to manage the cron daemon internally.
-    # If a future image version supports dropping privileges, set DOCKER_PUID/PGID here.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     mem_limit: 256M
     environment:
       <<: *vdirsyncer-env
-      # How often to run vdirsyncer sync, in seconds. 900 = 15 minutes.
-      VDIRSYNCER_SYNC_INTERVAL: "${VDIRSYNCER_SYNC_INTERVAL:-900}"
-      # Optional: pass extra flags to the sync command, e.g. "--force-delete"
-      # VDIRSYNCER_SYNC_FLAGS: ""
+      AUTODISCOVER: "false"
+      AUTOSYNC: "true"
+      CRON_TIME: "${VDIRSYNCER_CRON_TIME:-*/15 * * * *}"
     volumes:
-      - /opt/docker/vdirsyncer/vdirsyncer_config/config:/etc/vdirsyncer/config:ro
+      - /opt/docker/vdirsyncer/vdirsyncer_config/config:/vdirsyncer/config:ro
       - /opt/docker/vdirsyncer/vdirsyncer_status:/status
-      - /opt/docker/vdirsyncer/vdirsyncer_config/google_token:/google_token
+      - /opt/docker/vdirsyncer/vdirsyncer_config/tokens:/vdirsyncer/tokens
       - /etc/localtime:/etc/localtime:ro
     networks: [vdirsyncer]
     logging: *default-logging
