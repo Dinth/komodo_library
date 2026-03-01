@@ -73,7 +73,7 @@ services:
       - adventurelog
       - traefik
   adventurelog-server:
-    image: ghcr.io/seanmorley15/adventurelog-backend:v0.11.0
+    image: ghcr.io/seanmorley15/adventurelog-backend:v0.12.0
     restart: unless-stopped
     environment:
       PGHOST: "adventurelog-postgis"
