@@ -32,7 +32,7 @@ services:
     networks:
       - wud
   wud:
-    image: getwud/wud:8.2.0
+    image: getwud/wud:8.2.2
     container_name: wud
     volumes:
       - /opt/docker/wud/wud_store:/store
