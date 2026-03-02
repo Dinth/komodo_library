@@ -170,9 +170,8 @@ services:
       - 2020:2020
     networks:
       - monitoring
-    # Fluent Bit has a built-in HTTP server (if enabled in your .conf) for health checks
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:2020/api/v1/health"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:2020/api/v1/health | grep -q 'ok'"]
       interval: 30s
       timeout: 5s
       retries: 3
