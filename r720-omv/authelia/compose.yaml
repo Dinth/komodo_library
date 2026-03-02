@@ -79,6 +79,7 @@ services:
       timeout: 3s
       interval: 1s
       retries: 5
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"  
     logging:
       driver: "json-file"
       options:
