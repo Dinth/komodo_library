@@ -7,6 +7,7 @@ x-versions:
 services:
   promtail-socket-proxy:
     image: *promtail-socket-proxy-version
+    container_name: promtail-socket-proxy
     ipc: private
     command:
       - '-loglevel=info'
