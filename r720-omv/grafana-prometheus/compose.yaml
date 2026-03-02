@@ -177,6 +177,11 @@ services:
     container_name: cadvisor
     image: *cadvisor-version
     restart: unless-stopped
+    command:
+      - --housekeeping_interval=30s
+      - --docker_only=true
+      - --disable_metrics=percpu,hugetlb,referenced_memory,cpu_topology,resctrl
+      - --store_container_labels=false
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -216,7 +221,7 @@ services:
       options:
         max-size: "5m"
         max-file: "2"
-        
+    mem_limit: 1g
   dcgm-exporter:
     container_name: dcgm-exporter
     image: *dcgm-exporter-version
