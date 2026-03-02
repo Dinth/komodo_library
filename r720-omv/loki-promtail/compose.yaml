@@ -65,7 +65,7 @@ services:
     ports: 
       - 3100:3100
     healthcheck:
-      test: [ "CMD", "/usr/bin/loki", "-health" ]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3100/ready | grep -q 'ready'"]
       start_period: 30s
       interval: 10s
       timeout: 5s
@@ -118,7 +118,7 @@ services:
     networks:
       - monitoring
     healthcheck:
-      test: ["CMD", "/usr/bin/promtail", "-check-config", "-config.file=/etc/promtail/config.yml"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9080/ready | grep -q 'ready'"]
       interval: 60s
       timeout: 10s
       retries: 3
