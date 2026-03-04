@@ -89,6 +89,7 @@ services:
       TZ: "${TZ}"
     hostname: prometheus
     ipc: private
+    mem_limit: 4g
     networks:
       - monitoring
     ports:
