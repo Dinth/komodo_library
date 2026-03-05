@@ -97,7 +97,10 @@ services:
     # Security: Run as root only if necessary for /var/log access, 
     # but we drop all capabilities and only add what's needed for log reading.
     user: "0:0" 
-    memory_swappiness: 0
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     mem_limit: 512M # Alloy is efficient but needs more than the proxy
     cap_drop:
       - ALL
