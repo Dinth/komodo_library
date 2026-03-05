@@ -66,7 +66,7 @@ services:
     ports: 
       - 3100:3100
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3100/ready | grep -q 'ready'"]
+      test: ["CMD", "/usr/bin/loki", "-health"]
       start_period: 30s
       interval: 10s
       timeout: 5s
