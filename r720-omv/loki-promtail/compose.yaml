@@ -112,7 +112,7 @@ services:
     depends_on:
       loki:
         condition: service_healthy
-      socket-proxy:
+      promtail-socket-proxy:
         condition: service_started
     command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy" ]
     environment:
