@@ -94,9 +94,10 @@ services:
     container_name: promtail
     image: *promtail-version
     restart: unless-stopped
-    # Promtail depends on Loki being healthy before starting
     depends_on:
       loki:
+        condition: service_healthy
+      promtail-socket-proxy:
         condition: service_healthy
     user: ${DOCKER_PUID}:${DOCKER_PGID}
     cap_add:
