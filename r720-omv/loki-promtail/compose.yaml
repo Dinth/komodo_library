@@ -19,6 +19,7 @@ services:
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
+      - '-allowhealthcheck'
     restart: unless-stopped
     read_only: true
     mem_limit: 64M
@@ -27,7 +28,6 @@ services:
     security_opt:
       - no-new-privileges
     user: "65534:${DOCKER_SOCKET_GID}"
-    # Healthcheck for the socket proxy using wget against its internal ping endpoint
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
