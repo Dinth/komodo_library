@@ -7,7 +7,7 @@ x-versions:
   bazarr: &bazarr-version "linuxserver/bazarr:1.5.6"
   lidarr: &lidarr-version "linuxserver/lidarr:3.1.0"
   iplayarr-redis: &iplayarr-redis-version "redis:8.6.1"
-  iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.4"
+  iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.5"
   cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.7.6"
   radarr: &radarr-version "linuxserver/radarr:6.0.4"
   sonarr: &sonarr-version "linuxserver/sonarr:4.0.16"
