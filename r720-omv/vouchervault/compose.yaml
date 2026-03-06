@@ -18,7 +18,7 @@ services:
     cap_drop:
       - ALL 
     ipc: private
-    image: l4rm4nd/vouchervault:1.25.7
+    image: l4rm4nd/vouchervault:1.25.8
     container_name: vouchervault
     restart: unless-stopped
     environment:
