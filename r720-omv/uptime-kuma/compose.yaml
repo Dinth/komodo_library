@@ -5,7 +5,7 @@ services:
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=uptime-kuma' # Fixed comment: allow only the uptime-kuma container
+      - '-allowfrom=uptime-kuma'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
@@ -16,7 +16,7 @@ services:
     read_only: true
     mem_limit: 64M
     expose:
-      - "2375" # Explicitly documents the internal port for clarity
+      - "2375"
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
@@ -46,7 +46,7 @@ services:
     ipc: private
     depends_on:
       uptime-kuma-socket-proxy:
-        condition: service_healthy # Ensures the proxy is fully up before Kuma starts
+        condition: service_healthy
     cap_drop:
       - ALL
     cap_add:
