@@ -95,9 +95,6 @@ services:
     image: *alloy-version
     container_name: alloy
     restart: unless-stopped
-    # Security: Run as root only if necessary for /var/log access, 
-    # but we drop all capabilities and only add what's needed for log reading.
-    user: "0:0" 
     deploy:
       resources:
         limits:
