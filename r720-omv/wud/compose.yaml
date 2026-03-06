@@ -28,6 +28,12 @@ services:
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: 'Docker Socket Proxy - WUD'
       wud.display.icon: 'mdi:connection'
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
