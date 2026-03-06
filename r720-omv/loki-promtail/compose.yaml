@@ -12,7 +12,7 @@ services:
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=promtail'
+      - '-allowfrom=promtail,alloy'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(version|containers/.*|networks|events)'
       - '-allowHEAD=/_ping'
@@ -112,7 +112,7 @@ services:
         condition: service_healthy
       promtail-socket-proxy:
         condition: service_started
-    command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy" ]
+    command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting" ]
     environment:
       TZ: "${TZ}"
       # Alloy can use env vars in the .alloy config!
