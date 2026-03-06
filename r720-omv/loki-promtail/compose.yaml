@@ -3,7 +3,7 @@ x-versions:
   promtail: &promtail-version "grafana/promtail:3.5.8"
   fluentbit: &fluentbit-version "fluent/fluent-bit:4.2.3"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.11.3"
-  alloy: &alloy-version "grafana/alloy:v1.0.0"
+  alloy: &alloy-version "grafana/alloy:v1.13.2"
 
 services:
   promtail-socket-proxy:
