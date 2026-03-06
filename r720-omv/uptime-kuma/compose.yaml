@@ -1,10 +1,11 @@
 services:
   uptime-kuma-socket-proxy:
     image: wollomatic/socket-proxy:1.11.3
+    container_name: uptime-kuma-socket-proxy
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=uptime-kuma' # allow only the dozzle container
+      - '-allowfrom=uptime-kuma' # Fixed comment: allow only the uptime-kuma container
       - '-listenip=0.0.0.0'
       - '-allowGET=/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
@@ -14,6 +15,8 @@ services:
     restart: unless-stopped
     read_only: true
     mem_limit: 64M
+    expose:
+      - "2375" # Explicitly documents the internal port for clarity
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
@@ -37,24 +40,30 @@ services:
       - uptime-kuma
       
   uptime-kuma:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - MKNOD
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-    cap_drop:
-      - ALL
+    image: louislam/uptime-kuma:2.2.0
     container_name: uptime-kuma
     hostname: uptime-kuma
-    image: louislam/uptime-kuma:2.2.0
     ipc: private
+    depends_on:
+      uptime-kuma-socket-proxy:
+        condition: service_healthy # Ensures the proxy is fully up before Kuma starts
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW # Required for ICMP/Ping monitors to work properly
+      # - AUDIT_WRITE (See note below regarding capability bloat)
+      # - CHOWN
+      # - DAC_OVERRIDE
+      # - FOWNER
+      # - FSETID
+      # - MKNOD
+      # - SETFCAP
+      # - SETGID
+      # - SETPCAP
+      # - SETUID
+      # - SYS_CHROOT
+    environment:
+      - TZ=Europe/London # Ensures logs and cron schedules match your local time
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Uptime-Kuma"
@@ -77,6 +86,9 @@ services:
         max-file: "3"
     healthcheck:
       test: curl -f http://localhost:3001 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - uptime-kuma
       - signal-rest-api
@@ -85,6 +97,7 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/uptime-kuma/uptime-kuma_data:/app/data
+
 networks:
   uptime-kuma:
     name: uptime-kuma
