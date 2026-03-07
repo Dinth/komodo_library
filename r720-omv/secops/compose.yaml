@@ -1,5 +1,5 @@
 x-versions:
-  spiderfoot-version: &spiderfoot-version josaorg/spiderfoot:latest
+  spiderfoot-version: &spiderfoot-version ghcr.io/smicallef/spiderfoot:v4.0
   misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.33
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.6
   misp-mariadb-version: &misp-mariadb-version mariadb:10.11
