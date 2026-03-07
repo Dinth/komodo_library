@@ -107,6 +107,9 @@ services:
       - CHOWN           # Allows Alloy to manage its own internal positions file
     security_opt:
       - no-new-privileges  
+    ports:
+      - "1514:1514/udp"
+      - "1514:1514/tcp"
     depends_on:
       loki:
         condition: service_healthy
@@ -168,8 +171,8 @@ services:
     hostname: fluentbit
     ipc: private
     ports:
-      - "1514:1514/udp"
-      - "1514:1514/tcp"
+#      - "1514:1514/udp"
+#      - "1514:1514/tcp"
       - 2020:2020
     networks:
       - monitoring
