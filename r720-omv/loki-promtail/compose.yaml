@@ -1,7 +1,5 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.6.7"
-  promtail: &promtail-version "grafana/promtail:3.5.8"
-  fluentbit: &fluentbit-version "fluent/fluent-bit:4.2.3"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.11.3"
   alloy: &alloy-version "grafana/alloy:v1.13.2"
 
@@ -120,7 +118,7 @@ services:
       TZ: "${TZ}"
       HOSTNAME: "r720-omv" 
     healthcheck:
-      test: ["CMD", "/usr/bin/alloy", "status"]
+      test: ["CMD", "alloy validate /etc/alloy/config.alloy || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
