@@ -2,7 +2,6 @@ services:
   fgc:
     container_name: fgc
     image: ghcr.io/vogler/free-games-claimer:dev
-    build: .
     restart: unless-stopped
     command: bash -c "node epic-games; node prime-gaming; node gog; echo sleeping; sleep 1d"
     ports:
@@ -21,6 +20,7 @@ services:
       PG_PASSWORD: "${FGC_PG_PASS}"
       PG_REDEEM: "1"
       PG_CLAIMDLC: "1"
+      SHOW: "1"
     networks:
       - fgc
 networks:
