@@ -99,12 +99,12 @@ services:
       resources:
         limits:
           memory: 512M
-    mem_limit: 512M # Alloy is efficient but needs more than the proxy
+    mem_limit: 512M
     cap_drop:
       - ALL
     cap_add:
-      - DAC_READ_SEARCH # Allows reading logs without full root privileges
-      - CHOWN           # Allows Alloy to manage its own internal positions file
+      - DAC_READ_SEARCH
+      - CHOWN
     security_opt:
       - no-new-privileges  
     ports:
@@ -118,7 +118,6 @@ services:
     command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting" ]
     environment:
       TZ: "${TZ}"
-      # Alloy can use env vars in the .alloy config!
       HOSTNAME: "r720-omv" 
     healthcheck:
       test: ["CMD", "/usr/bin/alloy", "status"]
@@ -131,15 +130,12 @@ services:
       - /var/log/journal:/var/log/journal:ro 
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /opt/docker/loki-promtail/alloy-storage:/var/lib/alloy
-    
     labels:
-      # What's Up Docker (WUD) Configuration
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Grafana Alloy"
       wud.display.icon: "si:grafana"
       wud.link.template: "https://github.com/grafana/alloy/releases/tag/$${tag}"
-      # Homepage Dashboard Labels
       homepage.group: "Infrastructure"
       homepage.name: "Alloy"
       homepage.icon: "grafana-alloy.png"
