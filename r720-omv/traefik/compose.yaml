@@ -11,9 +11,16 @@ services:
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
+      - '-allowhealthcheck'
     restart: unless-stopped
     read_only: true
     mem_limit: 64M
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
     cap_drop:
       - ALL
     security_opt:
@@ -101,7 +108,8 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/traefik/traefik/releases/tag/v$${major}\.$${minor}\.$${patch}'
     depends_on:
-      - traefik-socket-proxy
+      traefik-socket-proxy:
+        condition: service_healthy
     networks:
       - traefik-internal
       - traefik
