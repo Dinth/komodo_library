@@ -34,7 +34,7 @@ services:
       - /dev/bus/usb:/dev/bus/usb
     ipc: private
     runtime: nvidia
-    shm_size: "4gb"
+    shm_size: "8gb"
     deploy:
       resources:
         reservations:
