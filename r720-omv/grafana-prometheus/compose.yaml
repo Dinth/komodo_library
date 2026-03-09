@@ -343,7 +343,7 @@ services:
       - "--address"
       - ":5133"
       - "--enabled-tools"
-      - "search,dashboard,datasources,prometheus,loki"
+      - "search,dashboard,datasources,prometheus,loki,alerting,annotations,navigation"
     cap_drop:
       - ALL
     security_opt:
