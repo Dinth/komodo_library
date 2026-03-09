@@ -362,7 +362,7 @@ services:
       - monitoring
       - openwebui
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5133/sse"]
+      test: ["CMD", "cat < /dev/tcp/localhost/5133"]
       interval: 30s
       timeout: 10s
       retries: 3
