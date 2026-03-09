@@ -87,6 +87,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
       timeout: 30s
     restart: unless-stopped
+    tmpfs:
+      - /transcode:size=64G,mode=1777
     volumes:
       - /opt/docker/jellyfin/jellyfin_config:/config
       - /Data/TVShows:/tv
