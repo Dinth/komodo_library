@@ -57,6 +57,8 @@ services:
       - 7359:7359/udp
       - 8096:8096/tcp
       - 8920:8920/tcp
+    tmpfs:
+      - /transcode:size=64G,mode=1777
     volumes:
       - /opt/docker/jellyfin/jellyfin_config:/config
       - /Data/TVShows:/tv
@@ -105,7 +107,6 @@ services:
       wud.display.icon: "sh:jellyfin"
       wud.tag.include: '^v?(?:\d{1,2}\.){2}\d{1,2}$$'
       wud.link.template: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}.$${patch}"
-
 networks:
   jellyfin:
     name: jellyfin
