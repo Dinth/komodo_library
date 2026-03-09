@@ -1,6 +1,21 @@
+x-versions:
+  yamtrack: &yamtrack-version "ghcr.io/fuzzygrim/yamtrack:0.25.0"
+  postgres: &postgres-version "postgres:16.11-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:8.1.3-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   yamtrack:
+    image: *yamtrack-version
     container_name: yamtrack
+    hostname: yamtrack
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -18,21 +33,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    ipc: private
     security_opt:
-      - no-new-privileges=true
-    image: ghcr.io/fuzzygrim/yamtrack:0.25.0
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      yamtrack-valkey:
-        condition: service_healthy
-      yamtrack-postgres:
-        condition: service_healthy
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       TZ: "${TZ}"
       SECRET: "${YAMTRACK_SECRET}"
@@ -47,7 +50,17 @@ services:
       TMDB_NSFW: "true"
       MAL_NSFW: "true"
       IGDB_NSFW: "true"
-      #MAL_API: "${MYANIMELIST_SECRET}"
+    depends_on:
+      yamtrack-valkey:
+        condition: service_healthy
+      yamtrack-postgres:
+        condition: service_healthy
+    ports:
+      - "5743:8000"
+    networks:
+      - yamtrack
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.yamtrack.rule: "Host(`mediatracker.${DOMAIN_NAME}`)"
@@ -69,16 +82,13 @@ services:
       wud.display.name: "Yamtrack"
       wud.display.icon: "sh:yamtrack"
       wud.link.template: "https://github.com/FuzzyGrim/Yamtrack/releases/tag/v$${major}.$${minor}.$${patch}"
-    ports:
-      - "5743:8000"
-    networks:
-      - yamtrack
-      - traefik
 
   yamtrack-postgres:
-    image: postgres:16.11-alpine
+    image: *postgres-version
     container_name: yamtrack-postgres
+    hostname: yamtrack-postgres
     ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - FOWNER
@@ -89,23 +99,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
-      start_period: 20s
-      timeout: 30s
-      interval: 10s
-      retries: 5
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^16\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
-      wud.display.name: "Yamtrack - Postgres"
-      wud.display.icon: "sh-yamtrack"  
     deploy:
       resources:
         limits:
@@ -116,23 +109,32 @@ services:
       POSTGRES_DB: "yamtrack"
       POSTGRES_USER: "yamtrack"
       POSTGRES_PASSWORD: "${YAMTRACK_DB_PASS}"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
     volumes:
       - /opt/docker/yamtrack/yamtrack-postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
     networks:
       - yamtrack
       - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^16\.\d+-alpine$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Yamtrack - Postgres"
+      wud.display.icon: "sh-yamtrack"
 
   yamtrack-valkey:
+    image: *valkey-version
     container_name: yamtrack-valkey
-    image: docker.io/valkey/valkey:8.1.3-alpine
+    hostname: yamtrack-valkey
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - yamtrack
-    volumes:
-      - /opt/docker/yamtrack/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -140,23 +142,30 @@ services:
       - CHOWN
     cap_drop:
       - ALL
-    labels:
-      wud.display.name: "Yamtrack - Valkey"
-      wud.display.icon: "sh-yamtrack"
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
+    volumes:
+      - /opt/docker/yamtrack/valkey-data:/data
+    networks:
+      - yamtrack
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "1"
+    labels:
+      wud.display.name: "Yamtrack - Valkey"
+      wud.display.icon: "sh-yamtrack"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   yamtrack:

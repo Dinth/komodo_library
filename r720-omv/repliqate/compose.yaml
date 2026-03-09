@@ -1,6 +1,16 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.3"
+  repliqate: &repliqate-version "lminlone/repliqate:v0.2.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   repliqate-socket-proxy:
-    image: wollomatic/socket-proxy:1.11.3
+    image: *socket-proxy-version
     ipc: private
     command:
       - '-loglevel=info'
@@ -19,31 +29,46 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges
+      - no-new-privileges:true
     user: "65534:${DOCKER_SOCKET_GID}"
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - repliqate
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: 'Docker Socket Proxy - Repliqate'
       wud.display.icon: 'mdi:connection'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - repliqate
 
   repliqate:
-    image: lminlone/repliqate:v0.2.1
+    image: *repliqate-version
     container_name: repliqate
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512M
+    environment:
+      DOCKER_SOCK_PATH: "tcp://repliqate-socket-proxy:2375"
     volumes:
       - /Data/IT/Docker_backups:/var/repliqate
       - /opt/docker:/var/lib/docker/volumes:ro
     networks:
       - repliqate
-    environment:
-      DOCKER_SOCK_PATH: "tcp://repliqate-socket-proxy:2375"
     depends_on:
       - repliqate-socket-proxy
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
@@ -51,9 +76,9 @@ services:
       wud.link.template: "https://github.com/lminlone/repliqate/releases/tag/v$${major}$${minor}$${patch}"
       wud.display.name: "Repliqate"
       wud.display.icon: "sh:repliqate"
-    restart: unless-stopped
+
 networks:
   repliqate:
-    external: false
-    driver: bridge
     name: repliqate
+    driver: bridge
+    external: false

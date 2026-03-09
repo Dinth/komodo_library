@@ -1,5 +1,21 @@
+x-versions:
+  babybuddy: &babybuddy-version "linuxserver/babybuddy:2.7.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   babybuddy:
+    image: *babybuddy-version
+    container_name: babybuddy
+    hostname: babybuddy
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    working_dir: /
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,28 +33,30 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: babybuddy
-    entrypoint: ["/init"]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       TZ: "${TZ}"
       CSRF_TRUSTED_ORIGINS: "https://baby.${DOMAIN_NAME},http://10.10.1.13:3938"
       DEBUG: "true"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
-    hostname: babybuddy
-    image: linuxserver/babybuddy:2.7.1
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      start_period: 60s
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    ports:
+      - 3938:8000/tcp
+    volumes:
+      - /opt/docker/babybuddy/babybuddy_data:/config
     networks:
       - babybuddy
       - traefik
-    ports:
-      - 3938:8000/tcp
-    labels:  
+    logging: *default-logging
+    labels:
       traefik.enable: "true"
       traefik.http.routers.babybuddy.rule: "Host(`baby.${DOMAIN_NAME}`)"
       traefik.http.routers.babybuddy.entrypoints: "websecure"
@@ -61,19 +79,10 @@ services:
       wud.display.icon: "sh-baby-buddy"
       repliqate.enabled: 'true'
       repliqate.engine: "restic"
-      repliqate.schedule: "@weekly 3am" # Trigger every day at 3 am
+      repliqate.schedule: "@weekly 3am"
       repliqate.backup_id: babybuddy
-      repliqate.retention: "30d" # Keep backups for 30 days
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      start_period: 60s
-      interval: 20s
-      timeout: 5s
-      retries: 3
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/babybuddy/babybuddy_data:/config
-    working_dir: /
+      repliqate.retention: "30d"
+
 networks:
   babybuddy:
     name: babybuddy

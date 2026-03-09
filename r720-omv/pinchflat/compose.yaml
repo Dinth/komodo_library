@@ -1,19 +1,20 @@
+x-versions:
+  pinchflat: &pinchflat-version "ghcr.io/kieraneglin/pinchflat:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   pinchflat:
-    user:  "${MEDIA_PUID}:${MEDIA_PGID}"
+    image: *pinchflat-version
     container_name: pinchflat
-#    image: ghcr.io/kieraneglin/pinchflat:v2025.6.6
-    image: ghcr.io/kieraneglin/pinchflat:latest
     hostname: pinchflat
-    logging:
-      driver: json-file
-      options:
-        max-file: "3"
-        max-size: 10m
-    networks:
-      - pinchflat
-    restart: unless-stopped
     ipc: private
+    restart: unless-stopped
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -31,8 +32,19 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       TZ: "${TZ}"
+    ports:
+      - '8945:8945'
+    volumes:
+      - /opt/docker/pinchflat/pinchflat_config:/config
+      - /Data/IT/pinchflat_downloads:/downloads
+    networks:
+      - pinchflat
+    logging: *default-logging
     labels:
       homepage.group: "Media"
       homepage.name: "Pinchflat"
@@ -44,11 +56,7 @@ services:
       wud.display.name: 'Pinchflat'
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/kieraneglin/pinchflat/releases/tag/v$${major}.$${minor}.$${patch}'
-    ports:
-      - '8945:8945'
-    volumes:
-      - /opt/docker/pinchflat/pinchflat_config:/config
-      - /Data/IT/pinchflat_downloads:/downloads
+
 networks:
   pinchflat:
     name: pinchflat

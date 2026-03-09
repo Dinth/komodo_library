@@ -1,9 +1,22 @@
 x-versions:
   fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.5.4"
   fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.2.0"
-  
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   fireflyiii:
+    image: *fireflyiii-version
+    container_name: fireflyiii
+    hostname: fireflyiii
+    ipc: private
+    restart: unless-stopped
+    user: www-data
+    working_dir: /var/www/html
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -21,7 +34,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: fireflyiii
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       DB_CONNECTION: "pgsql"
       DB_PORT: "5432"
@@ -37,17 +52,14 @@ services:
       TRUSTED_PROXIES: "*"
       FIREFLY_III_LAYOUT: "v2"
       SESSION_DRIVER: "file"
-    hostname: fireflyiii
-    image: *fireflyiii-version
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    ports:
+      - 4747:8080/tcp
+    volumes:
+      - /opt/docker/fireflyiii/fireflyiii_upload:/var/www/html/storage/upload
     networks:
       - fireflyiii
       - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.fireflyiii.entrypoints: websecure
@@ -63,15 +75,15 @@ services:
       wud.display.name: "Firefly III"
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/firefly-iii/firefly-iii/releases/v$${major}.$${minor}.$${patch}"
-    ports:
-      - 4747:8080/tcp
-    restart: unless-stopped
-    user: www-data
-    volumes:
-      - /opt/docker/fireflyiii/fireflyiii_upload:/var/www/html/storage/upload
-    working_dir: /var/www/html
 
   fireflyiii_paulina_dataimporter:
+    image: *fireflyiii-dataimporter-version
+    container_name: fireflyiii_paulina_dataimporter
+    hostname: fireflyiii_paulina_dataimporter
+    ipc: private
+    restart: unless-stopped
+    user: www-data
+    working_dir: /var/www/html
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -89,8 +101,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: fireflyiii_paulina_dataimporter
-#    entrypoint: ['docker-php-serversideup-entrypoint']
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
       FIREFLY_III_URL: "http://fireflyiii:8080"
@@ -99,31 +112,29 @@ services:
       CAN_POST_AUTOIMPORT: "true"
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_PAULINA_AUTOIMPORT_KEY}"
-    hostname: fireflyiii_paulina_dataimporter
-    image: *fireflyiii-dataimporter-version
-    ipc: private
+    ports:
+      - 4749:8080/tcp
+    volumes:
+      - /opt/docker/fireflyiii/fireflyiii_dataimporter_paulina_upload:/var/www/html/storage/upload
+      - /Data/IT/filebrowser-data/users/paulina/Paulina-Documents/firefly_configurations:/import:ro
+    networks:
+      - fireflyiii
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III Data importer"
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - fireflyiii
-    ports:
-      - 4749:8080/tcp
+
+  fireflyiii_michal_dataimporter:
+    image: *fireflyiii-dataimporter-version
+    container_name: fireflyiii_michal_dataimporter
+    hostname: fireflyiii_michal_dataimporter
+    ipc: private
     restart: unless-stopped
     user: www-data
-    volumes:
-      - /opt/docker/fireflyiii/fireflyiii_dataimporter_paulina_upload:/var/www/html/storage/upload
-      - /Data/IT/filebrowser-data/users/paulina/Paulina-Documents/firefly_configurations:/import:ro
     working_dir: /var/www/html
-  fireflyiii_michal_dataimporter:
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -141,7 +152,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: fireflyiii_michal_dataimporter
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
       FIREFLY_III_URL: "http://fireflyiii:8080"
@@ -150,30 +163,21 @@ services:
       CAN_POST_AUTOIMPORT: "true"
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
-    hostname: fireflyiii_michal_dataimporter
-    image: *fireflyiii-dataimporter-version
-    ipc: private
+    ports:
+      - 4748:8080/tcp
+    volumes:
+      - /Data/IT/filebrowser-data/users/michal/Michal-Documents/firefly_configurations:/import:ro
+      - /opt/docker/fireflyiii/fireflyiii_dataimporter_michal_upload:/var/www/html/storage/upload
+    networks:
+      - fireflyiii
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III Data importer"
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - fireflyiii
-    ports:
-      - 4748:8080/tcp
-    restart: unless-stopped
-    user: www-data
-    volumes:
-      - /Data/IT/filebrowser-data/users/michal/Michal-Documents/firefly_configurations:/import:ro
-      - /opt/docker/fireflyiii/fireflyiii_dataimporter_michal_upload:/var/www/html/storage/upload
-    working_dir: /var/www/html
+
 networks:
   fireflyiii:
     name: fireflyiii

@@ -1,5 +1,25 @@
+x-versions:
+  frigate: &frigate-version "ghcr.io/blakeblackshear/frigate:0.17.0-tensorrt"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   frigate:
+    image: *frigate-version
+    container_name: frigate
+    hostname: frigate
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ['/init']
+    working_dir: /opt/frigate
+    # NOTE: privileged required for GPU/device access
+    privileged: true
+    runtime: nvidia
+    shm_size: "8gb"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,8 +37,15 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: frigate
-    entrypoint: ['/init']
+    security_opt:
+      - label=disable
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [compute,utility,video]
     environment:
       PLUS_API_KEY: "${FRIGATE_PLUS_API_KEY}"
       USE_FP16: "false"
@@ -28,36 +55,28 @@ services:
       TRANSFORMERS_NO_ADVISORY_WARNINGS: "1"
       OPENCV_FFMPEG_LOGLEVEL: "8"
       OPENCV_LOG_LEVEL: "FATAL"
-    hostname: frigate
-    image: ghcr.io/blakeblackshear/frigate:0.17.0-tensorrt
     devices:
       - /dev/bus/usb:/dev/bus/usb
-    ipc: private
-    runtime: nvidia
-    shm_size: "8gb"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [compute,utility,video]
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - frigate
-      - traefik
     ports:
-      - 5000:5000/tcp ## NO AUTH!!!!!
+      - 5000:5000/tcp
       - 1984:1984/tcp
       - 8554:8554/tcp
       - 8555:8555/tcp
       - 8555:8555/udp
-#      - 8971:8971/tcp #authentication
-    privileged: true
+      - 8971:8971/tcp
+    volumes:
+      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a:/media/frigate
+      - /dev/bus/usb:/dev/bus/usb
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/docker/frigate/frigate_config:/config
+      - /opt/docker/frigate/frigate_storage/frigate.db:/media/frigate/frigate.db
+      - /opt/docker/frigate/frigate_storage/frigate.db-shm:/media/frigate/frigate.db-shm
+      - /opt/docker/frigate/frigate_storage/frigate.db-wal:/media/frigate/frigate.db-wal
+      - /opt/docker/frigate/frigate_storage/backup.db:/media/frigate/backup.db
+    networks:
+      - frigate
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.frigate.entrypoints: websecure
@@ -67,7 +86,7 @@ services:
       traefik.http.routers.frigate.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.frigate.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.frigate.middlewares: "secHeaders@file,authelia-auth@docker"
-      traefik.http.services.frigate.loadbalancer.server.port: "5000"
+      traefik.http.services.frigate.loadbalancer.server.port: "8971"
       traefik.docker.network: "traefik"
       homepage.group: "Home"
       homepage.name: "Frigate"
@@ -76,7 +95,7 @@ services:
       homepage.siteMonitor: "https://cctv.${DOMAIN_NAME}"
       homepage.description: "CCTV NVR"
       homepage.widget.type: "frigate"
-      homepage.widget.url: "http://10.10.1.13:5000"
+      homepage.widget.url: "http://10.10.1.13:8971"
       homepage.widget.enableRecentEvents: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
@@ -84,22 +103,7 @@ services:
       wud.link.template: "https://github.com/blakeblackshear/frigate/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Frigate"
       wud.display.icon: "mdi:cctv"
-    restart: unless-stopped
-    security_opt:
-      - label=disable
-    volumes:
-#      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV/clisp:/media/frigate/clips
-#      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a/CCTV:/media/frigate/recordings
-      - /srv/dev-disk-by-uuid-4a6794fd-5f63-42bd-b4ce-3653bce38f8a:/media/frigate
-      - /dev/bus/usb:/dev/bus/usb
-      - /etc/localtime:/etc/localtime:ro
-      - /opt/docker/frigate/frigate_config:/config
-      - /opt/docker/frigate/frigate_storage/frigate.db:/media/frigate/frigate.db
-      - /opt/docker/frigate/frigate_storage/frigate.db-shm:/media/frigate/frigate.db-shm
-      - /opt/docker/frigate/frigate_storage/frigate.db-wal:/media/frigate/frigate.db-wal
-      - /opt/docker/frigate/frigate_storage/backup.db:/media/frigate/backup.db
-#      - /opt/docker/frigate/frigate_storage:/media/frigate
-    working_dir: /opt/frigate
+
 networks:
   frigate:
     name: frigate

@@ -1,10 +1,20 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.3"
+  traefik: &traefik-version "traefik:v3.6.10"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   traefik-socket-proxy:
-    image: wollomatic/socket-proxy:1.11.3
+    image: *socket-proxy-version
     ipc: private
     command:
       - '-loglevel=info'
-      - '-allowfrom=traefik' # allow only the dozzle container
+      - '-allowfrom=traefik'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
@@ -24,27 +34,38 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges
+      - no-new-privileges:true
     user: "65534:${DOCKER_SOCKET_GID}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: 'Docker Socket Proxy - Traefik'
       wud.display.icon: 'mdi:connection'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - traefik
 
   traefik:
-    image: traefik:v3.6.10
+    image: *traefik-version
     container_name: traefik
+    ipc: private
     restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
+    mem_limit: 512M
     environment:
-# --- API, Dashboard & Logging ---
+      # --- API, Dashboard & Logging ---
       TRAEFIK_API_DASHBOARD: "true"
       TRAEFIK_API_INSECURE: "true" # Be careful with this in production!
       TRAEFIK_API_DEBUG: "false"
@@ -53,12 +74,12 @@ services:
       TRAEFIK_ACCESSLOG_FILEPATH: "/tmp/access.log"
       TRAEFIK_ACCESSLOG_FORMAT: "json"
       TZ: "${TZ}"
-  # --- EntryPoints Configuration ---
-    # Web (HTTP) EntryPoint on port 80 with a global redirect to websecure
+      # --- EntryPoints Configuration ---
+      # Web (HTTP) EntryPoint on port 80 with a global redirect to websecure
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO: "websecure"
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_SCHEME: "https"
-    # Websecure (HTTPS) EntryPoint on port 443
+      # Websecure (HTTPS) EntryPoint on port 443
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
@@ -66,22 +87,21 @@ services:
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_WRITETIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_MIDDLEWARES: "cloudflarewarp@file,cf-access-auth@file"
       TRAEFIK_SERVERSTRANSPORT_INSECURESKIPVERIFY: "true"
-  # --- Providers Configuration ---
-    # Docker Provider
+      # --- Providers Configuration ---
+      # Docker Provider
       TRAEFIK_PROVIDERS_DOCKER: "true"
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
       TRAEFIK_PROVIDERS_DOCKER_NETWORK: "traefik"
-    # File Provider
+      # File Provider
       TRAEFIK_PROVIDERS_FILE_FILENAME: "/traefik_dynamic.yml"
-      TRAEFIK_PROVIDERS_FILE_WATCH: "true"    
-  # --- Certificate Resolver (Let's Encrypt with Cloudflare DNS Challenge) ---
+      TRAEFIK_PROVIDERS_FILE_WATCH: "true"
+      # --- Certificate Resolver (Let's Encrypt with Cloudflare DNS Challenge) ---
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ADMIN_EMAIL}"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE: "/certs/acme.json"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_CASERVER: "https://acme-v02.api.letsencrypt.org/directory"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROVIDER: "cloudflare"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_DELAYBEFORECHECK: "10"
-      
       CF_API_EMAIL: "${ADMIN_EMAIL}"
       CF_DNS_API_TOKEN: "${TRAEFIK_CF_DNS_API_TOKEN}"
       LOCAL_IPS: "127.0.0.1/32,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
@@ -90,6 +110,24 @@ services:
       TRAEFIK_EXPERIMENTAL_PLUGINS_CFACCESS_VERSION: "v1.3.7"
       TRAEFIK_EXPERIMENTAL_PLUGINS_CLOUDFLAREWARP_MODULENAME: "github.com/BetterCorp/cloudflarewarp"
       TRAEFIK_EXPERIMENTAL_PLUGINS_CLOUDFLAREWARP_VERSION: "v1.3.3"
+    depends_on:
+      traefik-socket-proxy:
+        condition: service_healthy
+    networks:
+      - traefik-internal
+      - traefik
+    ports:
+      - 80:80
+      - 443:443
+      - 8281:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/docker/traefik/traefik_certs:/certs
+      - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
+      - /opt/docker/traefik/mojecertpl.verification:/mojecertpl.verification:ro
+    tmpfs:
+      - /tmp
+    logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Traefik"
@@ -100,31 +138,12 @@ services:
       homepage.widget.type: "traefik"
       homepage.widget.url: "http://10.10.1.13:8281"
       homepage.widget.fields: "['routers', 'services', 'middleware']"
-#      - "homepage.widget.username:username"
-#      - "homepage.widget.password:password"
       wud.watch: "true"
       wud.display.name: "Traefik"
       wud.display.icon: "sh:traefik"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/traefik/traefik/releases/tag/v$${major}\.$${minor}\.$${patch}'
-    depends_on:
-      traefik-socket-proxy:
-        condition: service_healthy
-    networks:
-      - traefik-internal
-      - traefik
-    ports:
-      - 80:80
-      - 443:443 
-      - 8281:8080 
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /opt/docker/traefik/traefik_certs:/certs
-#      - /opt/docker/traefik/traefik.yml:/traefik.yml:ro
-      - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
-      - /opt/docker/traefik/mojecertpl.verification:/mojecertpl.verification:ro
-    tmpfs:
-       - /tmp
+
 networks:
   traefik:
     name: traefik

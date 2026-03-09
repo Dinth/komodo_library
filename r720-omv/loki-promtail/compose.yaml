@@ -24,7 +24,7 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges
+      - no-new-privileges:true
     user: "65534:${DOCKER_SOCKET_GID}"
     healthcheck:
       test: ["CMD", "./healthcheck"]
@@ -56,6 +56,9 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     command: ["-config.file=/etc/loki/local-config.yml"]
     environment:
       TZ: "${TZ}"
@@ -104,7 +107,7 @@ services:
       - DAC_READ_SEARCH
       - CHOWN
     security_opt:
-      - no-new-privileges  
+      - no-new-privileges:true
     ports:
       - "1514:1514/udp"
       - "1514:1514/tcp"

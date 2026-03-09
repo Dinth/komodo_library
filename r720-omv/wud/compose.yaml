@@ -1,6 +1,16 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.3"
+  wud: &wud-version "getwud/wud:8.2.2"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   wud-socket-proxy:
-    image: wollomatic/socket-proxy:1.11.3
+    image: *socket-proxy-version
     ipc: private
     command:
       - '-loglevel=info'
@@ -20,14 +30,8 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges
+      - no-new-privileges:true
     user: "65534:${DOCKER_SOCKET_GID}"
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
-      wud.display.name: 'Docker Socket Proxy - WUD'
-      wud.display.icon: 'mdi:connection'
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
@@ -35,19 +39,25 @@ services:
       retries: 2
       start_period: 10s
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - wud
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - WUD'
+      wud.display.icon: 'mdi:connection'
+
   wud:
-    image: getwud/wud:8.2.2
+    image: *wud-version
     container_name: wud
-    volumes:
-      - /opt/docker/wud/wud_store:/store
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/komodo/stacks:/docker
     ipc: private
+    restart: unless-stopped
     security_opt:
-      - no-new-privileges
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       TZ: "${TZ}"
       WUD_WATCHER_R720OMV_HOST: wud-socket-proxy
@@ -73,9 +83,25 @@ services:
       WUD_TRIGGER_HTTP_SIGNAL_URL: 'http://signal-rest-api:8080/v2/send?number=${SIGNAL_PHONE_NUMBER}&recipients=${SIGNAL_TECH_ID}&message=Update found for $${container.name}}'
       WUD_AUTH_BASIC_BASIC_USER: "dinth"
       WUD_AUTH_BASIC_BASIC_HASH: ${WUD_PASSWORD}
-#      WUD_AUTH_OIDC_AUTHELIA_CLIENTID: "my-wud-client-id"
-#      WUD_AUTH_OIDC_AUTHELIA_CLIENTSECRET: "${WUD_AUTHELIA_SECRET}"
-#      WUD_AUTH_OIDC_AUTHELIA_DISCOVERY: "https://id.${DOMAIN_NAME}/.well-known/openid-configuration"
+    healthcheck:
+      test: curl --fail http://localhost:3000/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      wud-socket-proxy:
+        condition: service_healthy
+    ports:
+      - 3009:3000
+    volumes:
+      - /opt/docker/wud/wud_store:/store
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/komodo/stacks:/docker
+    networks:
+      - wud
+      - signal-rest-api
+    logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
@@ -91,21 +117,7 @@ services:
       wud.link.template: "https://getwud.github.io/wud/#/changelog/?id=_$${major}$${minor}$${patch}"
       wud.display.name: "Whats Up Docker?"
       wud.display.icon: "sh:wud"
-    healthcheck:
-      test: curl --fail http://localhost:3000/health || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    depends_on:
-      wud-socket-proxy:
-        condition: service_healthy
-    ports:
-      - 3009:3000
-    networks:
-      - wud
-      - signal-rest-api
-    restart: unless-stopped
+
 networks:
   wud:
     name: wud

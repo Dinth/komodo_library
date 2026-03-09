@@ -1,5 +1,22 @@
+x-versions:
+  photoprism: &photoprism-version "photoprism/photoprism:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   photoprism:
+    image: *photoprism-version
+    container_name: photoprism
+    hostname: photoprism
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ['/init']
+    command: ['/scripts/cmd.sh','/opt/photoprism/bin/photoprism','start']
+    working_dir: /photoprism
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -20,9 +37,7 @@ services:
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined
-    command: ['/scripts/cmd.sh','/opt/photoprism/bin/photoprism','start']
-    container_name: photoprism
-    entrypoint: ['/init']
+    mem_limit: 4G
     environment:
       PHOTOPRISM_EXPERIMENTAL: "true"
       PHOTOPRISM_DATABASE_DRIVER: "mysql"
@@ -68,38 +83,35 @@ services:
       PHOTOPRISM_BACKUP_PATH: "/photoprism/storage/backups"
       PHOTOPRISM_LOG_FILENAME: "/photoprism/storage/photoprism.log"
       PHOTOPRISM_PID_FILENAME: "/photoprism/storage/photoprism.pid"
-    hostname: photoprism
-    image: photoprism/photoprism:latest
-    ipc: private
     healthcheck:
       test: "photoprism status"
       interval: 60s
       timeout: 15s
       retries: 5
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - photoprism
-      - traefik
     ports:
       - 2342:2342/tcp
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.photoprism.rule=Host(`photos.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.photoprism.entrypoints=websecure"
-      - "traefik.http.routers.photoprism.tls=true"
-      - "traefik.http.routers.photoprism.tls.certresolver=letsencrypt"
-      - "traefik.http.services.photoprism.loadbalancer.server.port=2342"
     volumes:
       - /opt/docker/photoprism/photoprism_data:/photoprism/storage
       - /Data/IT/photoprism-cache:/photoprism/storage/cache
       - /Data/IT/photoprism-sidecar:/photoprism/storage/sidecar
       - /Data/Photos:/photoprism/originals
-    working_dir: /photoprism    
+    networks:
+      - photoprism
+      - traefik
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.photoprism.rule: "Host(`photos.${DOMAIN_NAME}`)"
+      traefik.http.routers.photoprism.entrypoints: "websecure"
+      traefik.http.routers.photoprism.tls: "true"
+      traefik.http.routers.photoprism.tls.certresolver: "letsencrypt"
+      traefik.http.routers.photoprism.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.photoprism.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.services.photoprism.loadbalancer.server.port: "2342"
+      wud.watch: "true"
+      wud.display.name: "PhotoPrism"
+      wud.display.icon: "sh:photoprism"
+
 networks:
   photoprism:
     name: photoprism

@@ -1,5 +1,21 @@
+x-versions:
+  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.31.0"
+  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.26.0"
+  chrome: &chrome-version "gcr.io/zenika-hub/alpine-chrome:124"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   karakeep:
+    image: *karakeep-version
+    container_name: karakeep
+    hostname: karakeep
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -16,7 +32,11 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    container_name: karakeep
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '1G'
     environment:
       NEXTAUTH_SECRET: "${KARAKEEP_SECRET}"
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
@@ -28,6 +48,25 @@ services:
       OLLAMA_BASE_URL: "http://10.10.1.13:11434"
       INFERENCE_TEXT_MODEL: "qwen2.5:14b"
       INFERENCE_IMAGE_MODEL: "llava:13b"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      karakeep-chrome:
+        condition: service_healthy
+      karakeep-meilisearch:
+        condition: service_healthy
+    networks:
+      - karakeep
+      - traefik
+    ports:
+      - 3000:3000/tcp
+    volumes:
+      - /opt/docker/openwebui/karakeep_data:/data
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.karakeep.rule: "Host(`keep.${DOMAIN_NAME}`)"
@@ -48,34 +87,14 @@ services:
       wud.display.icon: "sh:karakeep"
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: "https://github.com/karakeep-app/karakeep/releases/tag/v$${major}.$${minor}.$${patch}"
-    hostname: karakeep
-    image: ghcr.io/karakeep-app/karakeep:0.31.0
-    ipc: private
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: '1G'
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    depends_on:
-      karakeep-chrome:
-        condition: service_healthy
-      karakeep-meilisearch:
-        condition: service_healthy
-    networks:
-      - karakeep
-      - traefik
-    ports:
-      - 3000:3000/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/openwebui/karakeep_data:/data
+
   karakeep-meilisearch:
+    image: *meilisearch-version
+    container_name: karakeep-meilisearch
+    hostname: karakeep-meilisearch
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -92,25 +111,15 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    container_name: karakeep-meilisearch
-    environment:
-      MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
-      MEILI_NO_ANALYTICS: "true"
-      TZ: "${TZ}"
-    labels:
-      wud.watch: "true"
-      wud.display.name: "KaraKeep - Meilisearch"
-      wud.display.icon: "sh:karakeep"
-      wud.tag.include: '^v\d+\.\d+\.\d+$'
-      wud.link.template: "https://github.com/meilisearch/meilisearch/releases/tag/v$${major}.$${minor}.$${patch}"
-    hostname: karakeep-meilisearch
-    image: getmeili/meilisearch:v1.26.0
-    ipc: private
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: '1G'
+    environment:
+      MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
+      MEILI_NO_ANALYTICS: "true"
+      TZ: "${TZ}"
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://127.0.0.1:7700/health || exit 1"]
       interval: 30s
@@ -119,11 +128,24 @@ services:
       start_period: 30s
     networks:
       - karakeep
-    restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/meilisearch_data:/meili_data
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "KaraKeep - Meilisearch"
+      wud.display.icon: "sh:karakeep"
+      wud.tag.include: '^v\d+\.\d+\.\d+$'
+      wud.link.template: "https://github.com/meilisearch/meilisearch/releases/tag/v$${major}.$${minor}.$${patch}"
+
   karakeep-chrome:
+    image: *chrome-version
+    container_name: karakeep-chrome
+    hostname: karakeep-chrome
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    shm_size: '1gb'
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -139,7 +161,11 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    container_name: karakeep-chrome
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '512M'
     command:
       - --no-sandbox
       - --disable-gpu
@@ -147,31 +173,22 @@ services:
       - --remote-debugging-address=0.0.0.0
       - --remote-debugging-port=9222
       - --hide-scrollbars
-    hostname: karakeep-chrome
-    image: gcr.io/zenika-hub/alpine-chrome:124
-    ipc: private
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:9222/json/version || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 5
       start_period: 15s
+    networks:
+      - karakeep
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.display.name: "KaraKeep - Chrome headless"
       wud.display.icon: "sh:karakeep"
       wud.tag.include: '^\d+$'
       wud.link.template: "https://github.com/jlandure/alpine-chrome/releases/tag/v$${major}.$${minor}.$${patch}"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: '512M'
-    networks:
-      - karakeep
-    restart: unless-stopped
-    shm_size: '1gb'
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+
 networks:
   karakeep:
     name: karakeep

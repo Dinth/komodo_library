@@ -17,7 +17,8 @@ services:
     read_only: true
     mem_limit: 64M
     cap_drop: [ALL]
-    security_opt: [no-new-privileges]
+    security_opt:
+      - no-new-privileges:true
     user: "65534:${DOCKER_SOCKET_GID}"
     command:
       - '-loglevel=info'

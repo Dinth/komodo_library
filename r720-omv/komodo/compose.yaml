@@ -1,16 +1,44 @@
+x-versions:
+  komodo-core: &komodo-core-version "ghcr.io/moghtech/komodo-core:1.19.5"
+  mongo: &mongo-version "mongo:8.2.5"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   mongo:
-    image: mongo:8.2.5
-    command: --quiet --wiredTigerCacheSizeGB 0.25
+    image: *mongo-version
+    container_name: komodo-mongo
+    hostname: komodo-mongo
+    ipc: private
     restart: unless-stopped
-    logging:
-      driver: ${COMPOSE_LOGGING_DRIVER:-local}
-    volumes:
-      - /opt/docker/komodo/mongo_data:/data/db
-      - /opt/docker/komodo/mongo_config:/data/configdb
+    command: --quiet --wiredTigerCacheSizeGB 0.25
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - /opt/docker/komodo/mongo_data:/data/db
+      - /opt/docker/komodo/mongo_config:/data/configdb
+    logging: *default-logging
     labels:
       komodo.skip:
       wud.watch: "true"
@@ -18,22 +46,35 @@ services:
       wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo Mongo DB'
       wud.display.icon: 'sh:komodo'
-    healthcheck:
-      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
-      
+
   core:
-    image: ghcr.io/moghtech/komodo-core:1.19.5
+    image: *komodo-core-version
+    container_name: komodo-core
+    hostname: komodo-core
+    ipc: private
     restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     depends_on:
       - mongo
-    logging:
-      driver: ${COMPOSE_LOGGING_DRIVER:-local}
-    ports:
-      - 9120:9120
     environment:
       TZ: "${TZ}"
       KOMODO_DATABASE_ADDRESS: "mongo:27017"
@@ -60,6 +101,14 @@ services:
       KOMODO_AWS_ACCESS_KEY_ID: ""
       KOMODO_AWS_SECRET_ACCESS_KEY: ""
       KOMODO_HETZNER_TOKEN: ""
+    ports:
+      - 9120:9120
+    volumes:
+      - /opt/docker/komodo/komodo_syncs:/syncs
+      - /opt/docker/komodo/core.config.toml:/config/config.toml
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    logging: *default-logging
     labels:
       komodo.skip:
       wud.watch: "true"
@@ -67,12 +116,3 @@ services:
       wud.link.template: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo'
       wud.display.icon: 'sh:komodo'
-    volumes:
-      ## Store sync files on server
-      - /opt/docker/komodo/komodo_syncs:/syncs
-      ## Optionally mount a custom core.config.toml
-      - /opt/docker/komodo/core.config.toml:/config/config.toml
-    # Allows for systemd Periphery connection at.
-    # "http://host.docker.internal:8120"
-    extra_hosts:
-      - host.docker.internal:host-gateway

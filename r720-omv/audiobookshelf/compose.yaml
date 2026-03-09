@@ -1,9 +1,19 @@
+x-versions:
+  audiobookshelf: &audiobookshelf-version "ghcr.io/advplyr/audiobookshelf:2.32.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
-  #############################################################################
-  # Audiobookshelf
-  # Audiobook library manager
-  #############################################################################  
   audiobookshelf:
+    image: *audiobookshelf-version
+    container_name: audiobookshelf
+    hostname: audiobookshelf
+    ipc: private
+    restart: unless-stopped
     user: "${MEDIA_PUID}:${MEDIA_PGID}"
     cap_add:
       - AUDIT_WRITE
@@ -22,21 +32,20 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: audiobookshelf
-    hostname: audiobookshelf
-    image: ghcr.io/advplyr/audiobookshelf:2.32.1
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    ports:
+      - 3378:80/tcp
+    volumes:
+      - /opt/docker/audiobookshelf/audiobookshelf_config:/config
+      - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
+      - /Data/Ebooks/Audiobooks:/audiobooks:ro
+      - /Data/Ebooks/Podcasts:/podcasts:ro
     networks:
       - audiobookshelf
       - traefik
-    ports:
-      - 3378:80/tcp
-    restart: unless-stopped
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.audiobookshelf.rule: "Host(`audiobooks.${DOMAIN_NAME}`)"
@@ -62,11 +71,7 @@ services:
       wud.display.name: "Audiobookshelf"
       wud.display.icon: "sh:audiobookshelf"
       wud.link.template: "https://github.com/advplyr/audiobookshelf/releases/tag/v$${major}.$${minor}.$${patch}"
-    volumes:
-      - /opt/docker/audiobookshelf/audiobookshelf_config:/config
-      - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
-      - /Data/Ebooks/Audiobooks:/audiobooks:ro
-      - /Data/Ebooks/Podcasts:/podcasts:ro
+
 networks:
   audiobookshelf:
     name: audiobookshelf

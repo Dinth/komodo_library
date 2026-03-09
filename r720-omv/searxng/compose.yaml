@@ -1,14 +1,21 @@
+x-versions:
+  searxng: &searxng-version "docker.io/searxng/searxng:2025.8.8-77f10f0"
+  valkey: &valkey-version "docker.io/valkey/valkey:8.1.3-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   searxng-valkey:
+    image: *valkey-version
     container_name: searxng-valkey
-    image: docker.io/valkey/valkey:8.1.3-alpine
+    hostname: searxng-valkey
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - searxng
-    volumes:
-      - /opt/docker/searxng/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -16,50 +23,73 @@ services:
       - CHOWN
     cap_drop:
       - ALL
-    labels:
-      wud.display.name: "Searxng - Valkey"
-      wud.display.icon: "sh-searxng"
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
+    volumes:
+      - /opt/docker/searxng/valkey-data:/data
+    networks:
+      - searxng
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "1"
+    labels:
+      wud.display.name: "Searxng - Valkey"
+      wud.display.icon: "sh-searxng"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
   searxng:
+    image: *searxng-version
     container_name: searxng
-    image: docker.io/searxng/searxng:2025.8.8-77f10f0
+    hostname: searxng
+    ipc: private
     restart: unless-stopped
-    networks:
-      - searxng
-      - traefik
-    ports:
-      - "9234:8080"
-    volumes:
-      - /opt/docker/searxng/searxng:/etc/searxng:rw
-    depends_on:
-      searxng-valkey:
-        condition: service_healthy
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       SEARXNG_HOSTNAME: "https://search.${DOMAIN_NAME}/"
       SEARXNG_BASE_URL: "https://search.${DOMAIN_NAME}/"
       UWSGI_WORKERS: "${SEARXNG_UWSGI_WORKERS:-4}"
       UWSGI_THREADS: "${SEARXNG_UWSGI_THREADS:-4}"
-#    cap_drop:
-#      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-    labels:  
+    depends_on:
+      searxng-valkey:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-nv", "-t1", "--spider", "0.0.0.0:8080/"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    ports:
+      - "9234:8080"
+    volumes:
+      - /opt/docker/searxng/searxng:/etc/searxng:rw
+    networks:
+      - searxng
+      - traefik
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    labels:
       traefik.enable: "true"
       traefik.http.routers.searxng.rule: "Host(`search.${DOMAIN_NAME}`)"
       traefik.http.routers.searxng.entrypoints: "websecure"
@@ -80,17 +110,6 @@ services:
       homepage.href: "https://search.${DOMAIN_NAME}/"
       homepage.description: "Meta search engine"
       homepage.siteMonitor: "http://10.10.1.13:9234"
-    healthcheck:
-      interval: 1m30s
-      retries: 3
-      start_period: 40s
-      test: ["CMD", "wget", "-nv", "-t1", "--spider", "0.0.0.0:8080/"]
-      timeout: 10s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "1"
 
 networks:
   searxng:

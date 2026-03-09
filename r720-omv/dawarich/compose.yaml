@@ -6,8 +6,10 @@ services:
   dawarich-valkey:
     container_name: dawarich-valkey
     image: *valkey-version
+    ipc: private
     command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
+    mem_limit: 128M
     networks:
       - dawarich
     volumes:
@@ -19,6 +21,8 @@ services:
       - CHOWN
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     labels:
       wud.display.name: "Dawarich - Valkey"
       wud.display.icon: "sh-dawarich"
@@ -52,8 +56,10 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-#    cap_drop:
-#      - ALL
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     command: ['postgres']
     container_name: dawarich-postgis
     entrypoint: ['docker-entrypoint.sh']
@@ -104,6 +110,8 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     command: ['sidekiq']
     container_name: dawarich-sidekiq
     entrypoint: 'sidekiq-entrypoint.sh'
@@ -179,8 +187,10 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-#    cap_drop:
-#      - ALL
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     command: ['bin/rails','server','-p','3000','-b','::']
     container_name: dawarich
     entrypoint: 'web-entrypoint.sh'

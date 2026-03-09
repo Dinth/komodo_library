@@ -1,22 +1,58 @@
+x-versions:
+  cronicle: &cronicle-version "soulteary/cronicle:0.9.80"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 name: cronicle
+
 services:
   cronicle:
-
-    command: ['node','bin/docker-entrypoint.js']
+    image: *cronicle-version
     container_name: cronicle
+    hostname: cronicle
+    ipc: private
+    restart: unless-stopped
+    working_dir: /opt/cronicle
     entrypoint:
       - docker-entrypoint.sh
+    command: ['node','bin/docker-entrypoint.js']
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       CRONICLE_color: "1"
       CRONICLE_echo: "1"
       CRONICLE_foreground: "1"
-    hostname: cronicle
-    image: soulteary/cronicle:0.9.80
-    ipc: private
-    logging:
-      driver: json-file
+    ports:
+      - 3012:3012/tcp
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /opt/docker/cronicle/cronicle_data:/opt/cronicle/data
+      - /etc/localtime:/etc/localtime:ro
     networks:
-      cronicle: null
+      - cronicle
+    logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Cronicle"
@@ -29,30 +65,7 @@ services:
       wud.link.template: "https://github.com/jhuckaby/Cronicle/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Cronicle"
       wud.display.icon: "sh-cronicle"
-    ports:
-      - mode: ingress
-        target: 3012
-        published: "3012"
-        protocol: tcp
-    restart: unless-stopped
-    volumes:
-      - type: bind
-        source: /etc/timezone
-        target: /etc/timezone
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /opt/docker/cronicle/cronicle_data
-        target: /opt/cronicle/data
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
-        read_only: true
-        bind:
-          create_host_path: true
-    working_dir: /opt/cronicle
+
 networks:
   cronicle:
     name: cronicle

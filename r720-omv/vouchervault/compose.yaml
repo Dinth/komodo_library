@@ -1,5 +1,20 @@
+x-versions:
+  vouchervault: &vouchervault-version "l4rm4nd/vouchervault:1.25.8"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   vouchervault:
+    image: *vouchervault-version
+    container_name: vouchervault
+    hostname: vouchervault
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -16,16 +31,18 @@ services:
       - SETUID
       - SYS_CHROOT
     cap_drop:
-      - ALL 
-    ipc: private
-    image: l4rm4nd/vouchervault:1.25.8
-    container_name: vouchervault
-    restart: unless-stopped
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       DOMAIN: "cards.${DOMAIN_NAME}"
       SECURE_COOKIES: "True"
       EXPIRY_THRESHOLD_DAYS: "90"
       TZ: "${TZ}"
+    depends_on:
+      vouchervault-valkey:
+        condition: service_healthy
     ports:
       - 8077:8000
     volumes:
@@ -33,11 +50,7 @@ services:
     networks:
       - vouchervault
       - traefik
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.vouchervault.rule: "Host(`cards.${DOMAIN_NAME}`)"
@@ -59,19 +72,14 @@ services:
       wud.link.template: 'https://github.com/l4rm4nd/VoucherVault/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "VoucherVault"
       wud.display.icon: "sh-vouchervault"
-    depends_on:
-      vouchervault-valkey:
-        condition: service_healthy
+
   vouchervault-valkey:
+    image: *valkey-version
     container_name: vouchervault-valkey
-    image: docker.io/valkey/valkey:9.0.3-alpine
+    hostname: vouchervault-valkey
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - vouchervault
-    volumes:
-      - /opt/docker/vouchervault/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -79,24 +87,32 @@ services:
       - CHOWN
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    volumes:
+      - /opt/docker/vouchervault/valkey-data:/data
+    networks:
+      - vouchervault
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
     labels:
       wud.display.name: "Vouchervault - Valkey"
       wud.display.icon: "sh-vouchervault"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
-      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
-      start_period: 5s
-      timeout: 3s
-      interval: 1s
-      retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "1"
-networks: 
+
+networks:
   vouchervault:
     name: vouchervault
     driver: bridge

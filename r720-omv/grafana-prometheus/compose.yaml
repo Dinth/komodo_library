@@ -21,6 +21,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASSWORD}"
       GF_USERS_ALLOW_SIGN_UP: "false"
@@ -77,6 +79,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -135,6 +139,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     command:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
@@ -192,6 +198,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       TZ: "${TZ}"
     hostname: cadvisor
@@ -237,6 +245,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       TZ: "${TZ}"
     hostname: dcgm-exporter
@@ -286,6 +296,8 @@ services:
       - NET_RAW  # Required for ICMP/ping probes
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       TZ: "${TZ}"
     hostname: blackbox-exporter
@@ -334,6 +346,8 @@ services:
       - "search,dashboard,datasources,prometheus,loki"
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       GRAFANA_URL: "http://grafana:3000" 
       GRAFANA_SERVICE_ACCOUNT_TOKEN: "${GRAFANA_MCP_TOKEN}" 

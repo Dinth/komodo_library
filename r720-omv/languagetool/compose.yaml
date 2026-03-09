@@ -1,5 +1,22 @@
+x-versions:
+  languagetool: &languagetool-version "silviof/docker-languagetool:6.6"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   languagetool:
+    image: *languagetool-version
+    container_name: languagetool
+    hostname: languagetool
+    ipc: private
+    restart: unless-stopped
+    user: nobody
+    command: ['bash','start.sh']
+    working_dir: /LanguageTool-6.6
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,25 +34,25 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    command: ['bash','start.sh']
-    container_name: languagetool
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 412m
+    memswap_limit: 500m
     environment:
       LANGUAGE: "en_GB:en"
       EXTRAOPTIONS: "-Xmx382M"
-    hostname: languagetool
-    image: silviof/docker-languagetool:6.6
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    ports:
+      - 8010:8010/tcp
+    volumes:
+      - /Data/IT/languagetool_ngrams:/ngrams:ro
     networks:
       - languagetool
       - traefik
-    ports:
-      - 8010:8010/tcp
-    labels:  
+    logging: *default-logging
+    labels:
       traefik.enable: "true"
       traefik.http.routers.languagetool.rule: "Host(`spellcheck.${DOMAIN_NAME}`)"
       traefik.http.routers.languagetool.entrypoints: "websecure"
@@ -50,16 +67,7 @@ services:
       wud.link.template: 'https://github.com/languagetool-org/languagetool/releases/tag/v$${major}.$${minor}'
       wud.display.name: 'Languagetool'
       wud.display.icon: 'sh:languagetool'
-    restart: unless-stopped
-    user: nobody
-    volumes:
-      - /Data/IT/languagetool_ngrams:/ngrams:ro
-    working_dir: /LanguageTool-6.6
-    deploy:
-      resources:
-        limits:
-          memory: 412m
-    memswap_limit: 500m
+
 networks:
   languagetool:
     name: languagetool

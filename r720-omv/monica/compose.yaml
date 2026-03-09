@@ -1,5 +1,20 @@
+x-versions:
+  mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
+  monica: &monica-version "monica:4.1.2-apache"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   monica-mariadb:
+    image: *mariadb-version
+    container_name: monica-mariadb
+    hostname: monica-mariadb
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - SETGID
@@ -9,8 +24,14 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges=true
-    container_name: monica-mariadb
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
@@ -21,43 +42,51 @@ services:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
-    hostname: monica-mariadb
-    image: linuxserver/mariadb:11.4.8
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1g
-        reservations:
-          memory: 512m
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
+    volumes:
+      - /opt/docker/monica/mariadb_data:/config
     networks:
       - monica
       - adminer
-    restart: unless-stopped
+    logging: *default-logging
     labels:
       wud.display.name: "Monica - MariaDB"
       wud.display.icon: "sh-monica"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
-    volumes:
-      - /opt/docker/monica/mariadb_data:/config
+
   monica:
-    image: monica:4.1.2-apache
-    ports:
-      - 5435:80
+    image: *monica-version
+    container_name: monica
+    hostname: monica
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       APP_KEY: "${MONICA_APP_KEY}"
       DB_HOST: "monica-mariadb"
@@ -65,7 +94,18 @@ services:
       DB_PASSWORD: "${MONICA_DB_PASS}"
       APP_URL: "https://monica.${DOMAIN_NAME}"
       APP_TRUSTED_PROXIES: "*"
-    labels:  
+    depends_on:
+      monica-mariadb:
+        condition: service_healthy
+    ports:
+      - 5435:80
+    volumes:
+      - /opt/docker/monica/monica_data:/var/www/html/storage
+    networks:
+      - monica
+      - traefik
+    logging: *default-logging
+    labels:
       traefik.enable: "true"
       traefik.http.routers.monica.rule: "Host(`monica.${DOMAIN_NAME}`)"
       traefik.http.routers.monica.entrypoints: "websecure"
@@ -80,21 +120,13 @@ services:
       wud.display.name: "Monica"
       wud.display.icon: "sh:monica"
       wud.link.template: "https://github.com/monicahq/monica/releases/tag/v$${major}.$${minor}.$${patch}"
-    volumes:
-      - /opt/docker/monica/monica_data:/var/www/html/storage
-    depends_on:
-      monica-mariadb:
-        condition: service_healthy
-    restart: always
-    networks:
-      - monica
-      - traefik
+
 networks:
   monica:
     name: monica
     driver: bridge
     external: false
-  adminer: 
+  adminer:
     external: true
   traefik:
     external: true

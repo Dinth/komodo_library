@@ -1,15 +1,33 @@
+x-versions:
+  fgc: &fgc-version "ghcr.io/vogler/free-games-claimer:dev"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   fgc:
     container_name: fgc
-    image: ghcr.io/vogler/free-games-claimer:dev
+    image: *fgc-version
+    ipc: private
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    mem_limit: 2G
     command: bash -c "while true; do node epic-games; node prime-gaming; node gog; echo sleeping; sleep 1d; done"
     ports:
       - "5900:5900" # VNC server
       - "6080:6080" # noVNC (browser-based VNC client)
     volumes:
       - /opt/docker/fgc/fgc_data:/fgc/data
-    #command: ['bash','-c','"node epic-games; node gog"']
     environment:
       EMAIL: "${ADMIN_EMAIL}"
       GOG_EMAIL: "${ADMIN_EMAIL}"
@@ -23,6 +41,8 @@ services:
       SHOW: "1"
     networks:
       - fgc
+    logging: *default-logging
+
 networks:
   fgc:
     name: fgc

@@ -1,18 +1,23 @@
+x-versions:
+  nextcloud: &nextcloud-version "linuxserver/nextcloud:33.0.0"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
+  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:latest"
+  collabora: &collabora-version "collabora/code:25.04.7.2.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   nextcloud-valkey:
+    image: *valkey-version
     container_name: nextcloud-valkey
-    image: docker.io/valkey/valkey:9.0.3-alpine
+    hostname: nextcloud-valkey
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - nextcloud
-    volumes:
-      - /opt/docker/nextcloud/valkey_data:/data
-    environment:
-      TZ: "${TZ}"
-      ALLOW_EMPTY_PASSWORD: "no"
-      VALKEY_PASSWORD: "${NEXTCLOUD_VALKEY_PASS}"
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -20,74 +25,79 @@ services:
       - CHOWN
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    environment:
+      TZ: "${TZ}"
+      ALLOW_EMPTY_PASSWORD: "no"
+      VALKEY_PASSWORD: "${NEXTCLOUD_VALKEY_PASS}"
+    healthcheck:
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+    volumes:
+      - /opt/docker/nextcloud/valkey_data:/data
+    networks:
+      - nextcloud
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
     labels:
       wud.display.name: "Nextcloud - Valkey"
       wud.display.icon: "sh:nextcloud"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
-      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
-      start_period: 5s
-      timeout: 3s
-      interval: 1s
-      retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "1"
+
   nextcloud-imaginary:
+    image: *imaginary-version
     container_name: nextcloud-imaginary
-    image: ghcr.io/nextcloud-releases/aio-imaginary:latest
-    restart: unless-stopped
+    hostname: nextcloud-imaginary
     ipc: private
-    networks:
-      - nextcloud
-    environment:
-      TZ: "${TZ}"
-      PORT: "9000"
+    restart: unless-stopped
     command: -concurrency 50 -enable-url-source -log-level info
-    cap_drop:
-      - ALL
     cap_add:
       - CHOWN
       - SETUID
       - SETGID
       - SYS_NICE
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
-    labels:
-      wud.display.name: "Nextcloud - Imaginary"
-      wud.display.icon: "sh:nextcloud"
-      wud.watch: "false"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "2"
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      PORT: "9000"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "--tries=1", "http://localhost:9000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-  nextcloud-collabora:
-    container_name: nextcloud-collabora
-    image: collabora/code:25.04.7.2.1
-    restart: unless-stopped
     networks:
       - nextcloud
-      - traefik
-    environment:
-      TZ: "${TZ}"
-      aliasgroup1: "https://nc.${DOMAIN_NAME}:443"
-      username: "admin"
-      password: "${COLLABORA_ADMIN_PASSWORD}"
-      extra_params: "--o:ssl.enable=false --o:ssl.termination=true --o:logging.level=warning"
-      dictionaries: "en_GB en_US pl_PL"
-    cap_drop:
-      - ALL
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      wud.display.name: "Nextcloud - Imaginary"
+      wud.display.icon: "sh:nextcloud"
+      wud.watch: "false"
+
+  nextcloud-collabora:
+    image: *collabora-version
+    container_name: nextcloud-collabora
+    hostname: nextcloud-collabora
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -98,8 +108,26 @@ services:
       - SYS_CHROOT
       - MKNOD
       - NET_BIND_SERVICE
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      aliasgroup1: "https://nc.${DOMAIN_NAME}:443"
+      username: "admin"
+      password: "${COLLABORA_ADMIN_PASSWORD}"
+      extra_params: "--o:ssl.enable=false --o:ssl.termination=true --o:logging.level=warning"
+      dictionaries: "en_GB en_US pl_PL"
+    networks:
+      - nextcloud
+      - traefik
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
     labels:
       traefik.enable: "true"
       traefik.http.routers.collabora.rule: "Host(`collabora.${DOMAIN_NAME}`)"
@@ -113,12 +141,16 @@ services:
       wud.watch: "true"
       wud.display.name: "Nextcloud - Collabora"
       wud.display.icon: "si:collaboraonline"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "2"     
+
   nextcloud:
+    image: *nextcloud-version
+    container_name: nextcloud
+    hostname: nextcloud
+    ipc: private
+    restart: unless-stopped
+    entrypoint:
+      - /init
+    working_dir: /
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -138,9 +170,14 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    container_name: nextcloud
-    entrypoint:
-      - /init
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '0.5'
     environment:
       TZ: "${TZ}"
       PUID: "1001"
@@ -161,27 +198,21 @@ services:
       OVERWRITEWEBROOT: "/"
       TRUSTED_PROXIES: "10.10.1.13 10.55.0.0/24"
       DOCKER_MODS: "linuxserver/mods:nextcloud-notify-push"
-    hostname: nextcloud
-    image: linuxserver/nextcloud:33.0.0
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 6G
-          cpus: '2.0'
-        reservations:
-          memory: 2G
-          cpus: '0.5'
+    healthcheck:
+      test: ["CMD-SHELL", "curl -Ss http://localhost/status.php | grep '\"installed\":true' || exit 1"]
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    ports:
+      - 1357:80/tcp
+    volumes:
+      - /opt/docker/nextcloud/nextcloud_config:/config
+      - /Data/IT/nextcloud:/data
     networks:
       - nextcloud
       - traefik
-    ports:
-      - 1357:80/tcp
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.nextcloud.rule: "Host(`nc.${DOMAIN_NAME}`)"
@@ -219,17 +250,7 @@ services:
       wud.display.icon: "sh:nextcloud"
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: "https://github.com/nextcloud/server/releases/tag/v$${major}.$${minor}.$${patch}"
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/nextcloud/nextcloud_config:/config
-      - /Data/IT/nextcloud:/data
-    working_dir: /
-    healthcheck:
-      test: ["CMD-SHELL", "curl -Ss http://localhost/status.php | grep '\"installed\":true' || exit 1"]
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+
 networks:
   nextcloud:
     driver: bridge

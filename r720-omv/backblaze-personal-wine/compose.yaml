@@ -1,5 +1,20 @@
+x-versions:
+  backblaze: &backblaze-version "tessypowder/backblaze-personal-wine:ubuntu22"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   backblaze-personal-wine:
+    image: *backblaze-version
+    container_name: backblaze-personal-wine
+    hostname: backblaze-personal-wine
+    ipc: private
+    restart: unless-stopped
+    working_dir: /tmp
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -13,11 +28,13 @@ services:
       - FOWNER
       - MKNOD
       - KILL
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2G
     command: ['/init']
-    container_name: backblaze-personal-wine
     environment:
-#      USER_ID: "1003"
-#      GROUP_ID: "100"
       UMASK: "0022"
       LANG: "en_GB.UTF-8"
       KEEP_APP_RUNNING: "0"
@@ -28,14 +45,19 @@ services:
       WEB_LISTENING_PORT: "5800"
       VNC_LISTENING_PORT: "5900"
       VNC_PASSWORD: ""
-    hostname: backblaze-personal-wine
-    image: tessypowder/backblaze-personal-wine:ubuntu22
-    ipc: private
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5800"]
       interval: 10s
       timeout: 5s
       retries: 3
+    ports:
+      - 5800:5800/tcp
+    volumes:
+      - /opt/docker/backblaze-personal-wine/backblaze_data:/config
+      - /Data:/storage
+    networks:
+      - backblaze-personal-wine
+    logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Backblaze Backup"
@@ -48,22 +70,9 @@ services:
       wud.link.template: "https://github.com/JonathanTreffler/backblaze-personal-wine-container/releases/tag/v${major}.${minor}"
       wud.display.name: "Blackblaze"
       wud.display.icon: "sh-backblaze"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - backblaze-personal-wine
-    ports:
-      - 5800:5800/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/backblaze-personal-wine/backblaze_data:/config
-      - /Data:/storage
-    working_dir: /tmp
+
 networks:
   backblaze-personal-wine:
-    driver: bridge
     name: backblaze-personal-wine
+    driver: bridge
     external: false

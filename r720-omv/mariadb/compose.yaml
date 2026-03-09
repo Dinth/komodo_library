@@ -1,5 +1,19 @@
+x-versions:
+  mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   mariadb:
+    image: *mariadb-version
+    container_name: mariadb
+    hostname: mariadb
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - SETGID
@@ -8,23 +22,7 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges=true
-    container_name: mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: "${MARIADB_ADMIN_PASS}"
-      MYSQL_DIR: "/config"
-      DATADIR: "/config/databases"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
-      TZ: "${TZ}"
-    hostname: mariadb
-    image: linuxserver/mariadb:11.4.8
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -32,19 +30,27 @@ services:
           memory: 1g
         reservations:
           memory: 512m
-    networks:
-      - mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MARIADB_ADMIN_PASS}"
+      MYSQL_DIR: "/config"
+      DATADIR: "/config/databases"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
     ports:
       - 3306:3306/tcp
-    restart: unless-stopped
+    volumes:
+      - /opt/docker/mariadb/mariadb_data:/config
+    networks:
+      - mariadb
+    logging: *default-logging
     labels:
       wud.display.name: "MariaDB"
       wud.display.icon: "sh-mariadb"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
-    volumes:
-      - /opt/docker/mariadb/mariadb_data:/config
+
 networks:
   mariadb:
     name: mariadb

@@ -1,15 +1,32 @@
+x-versions:
+  deceptifeed: &deceptifeed-version "deceptifeed/server:0.68.0"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   deceptifeed:
-    image: deceptifeed/server:0.68.0
+    image: *deceptifeed-version
     container_name: deceptifeed
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       TZ: "${TZ}"
+    mem_limit: 256M
     networks:
       - deceptifeed
       - traefik
     ports:
       - "12222:2222"
       - "19000:9000"
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.deceptifeed-http.rule: "HostRegexp(`{host:.+}`) || PathPrefix(`/`)"
@@ -34,7 +51,7 @@ services:
       wud.display.icon: "sh-deceptifeed"
     volumes:
       - /opt/docker/deceptifeed/deceptifeed_data:/data/
-    restart: unless-stopped
+
 networks:
   deceptifeed:
     name: deceptifeed

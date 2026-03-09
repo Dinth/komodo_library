@@ -1,5 +1,21 @@
+x-versions:
+  romm: &romm-version "rommapp/romm:4.7.0"
+  mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.0.1-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   romm-mariadb:
+    image: *mariadb-version
+    container_name: romm-mariadb
+    hostname: romm-mariadb
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - SETGID
@@ -9,8 +25,14 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges=true
-    container_name: romm-mariadb
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
@@ -21,49 +43,32 @@ services:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
-    hostname: romm-mariadb
-    image: linuxserver/mariadb:11.4.8
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1g
-        reservations:
-          memory: 512m
-    networks:
-      - romm
-      - adminer
-    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
+    volumes:
+      - /opt/docker/romm/mariadb_data:/config
+    networks:
+      - romm
+      - adminer
+    logging: *default-logging
     labels:
       wud.display.name: "Romm - MariaDB"
       wud.display.icon: "sh-romm"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
-    volumes:
-      - /opt/docker/romm/mariadb_data:/config
+
   romm-valkey:
+    image: *valkey-version
     container_name: romm-valkey
-    image: docker.io/valkey/valkey:9.0.1-alpine
+    hostname: romm-valkey
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - romm
-    volumes:
-      - /opt/docker/romm/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -71,24 +76,39 @@ services:
       - CHOWN
     cap_drop:
       - ALL
-    labels:
-      wud.display.name: "Romm - Valkey"
-      wud.display.icon: "sh-romm"
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
+    volumes:
+      - /opt/docker/romm/valkey-data:/data
+    networks:
+      - romm
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "1"
+    labels:
+      wud.display.name: "Romm - Valkey"
+      wud.display.icon: "sh-romm"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+
   romm:
+    image: *romm-version
+    container_name: romm
+    hostname: romm
+    ipc: private
+    restart: unless-stopped
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    working_dir: /romm
     cap_add:
       - CHOWN
       - SETGID
@@ -97,8 +117,9 @@ services:
       - FOWNER
     cap_drop:
       - ALL
-    user: "${MEDIA_PUID}:${MEDIA_PGID}"
-    container_name: romm
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       DB_HOST: "romm-mariadb"
       DB_NAME: "romm"
@@ -122,24 +143,29 @@ services:
       RESCAN_ON_FILESYSTEM_CHANGE_DELAY: "5"
       HLTB_API_ENABLED: "true"
       TZ: "${TZ}"
-    hostname: romm
-    image: rommapp/romm:4.7.0
-    ipc: private
     healthcheck:
-      test: curl -ILfSs http://localhost:8080/  || exit 1
+      test: curl -ILfSs http://localhost:8080/ || exit 1
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    depends_on:
+      romm-valkey:
+        condition: service_healthy
+      romm-mariadb:
+        condition: service_healthy
+    ports:
+      - 4040:8080/tcp
+    volumes:
+      - /opt/docker/romm/romm_assets:/romm/assets
+      - /opt/docker/romm/romm_config:/romm/config
+      - /Data/ROMs:/romm/library
+      - /opt/docker/romm/romm_resources:/romm/resources
     networks:
       - romm
       - traefik
-    labels:  
+    logging: *default-logging
+    labels:
       traefik.enable: "true"
       traefik.http.routers.romm.rule: "Host(`emu.${DOMAIN_NAME}`)"
       traefik.http.routers.romm.entrypoints: "websecure"
@@ -164,20 +190,7 @@ services:
       wud.display.name: 'Romm'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/rommapp/romm/releases/tag/$${major}.$${minor}.$${patch}'
-    depends_on:
-      romm-valkey:
-        condition: service_healthy
-      romm-mariadb:
-        condition: service_healthy
-    ports:
-      - 4040:8080/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/romm/romm_assets:/romm/assets
-      - /opt/docker/romm/romm_config:/romm/config
-      - /Data/ROMs:/romm/library
-      - /opt/docker/romm/romm_resources:/romm/resources
-    working_dir: /romm
+
 networks:
   romm:
     name: romm

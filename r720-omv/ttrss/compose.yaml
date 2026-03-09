@@ -1,42 +1,20 @@
+x-versions:
+  ttrss: &ttrss-version "wangqiru/ttrss:latest"
+  mercury-parser: &mercury-parser-version "wangqiru/mercury-parser-api:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   mercury-parser-api:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
-#    cap_drop:
-#      - ALL
-#    command: ['npm','run','start']
+    image: *mercury-parser-version
     container_name: mercury-parser-api
-#    entrypoint: ['dumb-init','--']
     hostname: mercury-parser-api
-    image: wangqiru/mercury-parser-api:latest
     ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - ttrss
-    ports:
-      - 3000:3000/tcp
     restart: unless-stopped
- #   volumes:
- #     - /opt/docker/ttrss/mercury-parser-api_appcustomizer:/app/customizer
- #   working_dir: /app
-  ttrss:
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -54,9 +32,47 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-#    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
+    ports:
+      - 3000:3000/tcp
+    networks:
+      - ttrss
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "TT-RSS - Mercury Parser"
+      wud.display.icon: "sh:tiny-tiny-rss"
+
+  ttrss:
+    image: *ttrss-version
     container_name: ttrss
+    hostname: ttrss
+    ipc: private
+    restart: unless-stopped
     entrypoint: ['sh','/docker-entrypoint.sh']
+    working_dir: /var/www
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       DB_HOST: "10.10.1.13"
       SELF_URL_PATH: "https://ttrss.${DOMAIN_NAME}"
@@ -72,25 +88,20 @@ services:
       SINGLE_USER_MODE: "false"
       LOG_DESTINATION: "sql"
       FEED_LOG_QUIET: "false"
-    hostname: ttrss
-    image: wangqiru/ttrss:latest
-    ipc: private
     healthcheck:
       test: curl --fail http://localhost:80/ || exit 1
       interval: 40s
       timeout: 30s
       retries: 3
       start_period: 60s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    ports:
+      - 2015:80/tcp
+    volumes:
+      - /opt/docker/ttrss/ttrss_fever:/var/www/plugins/fever
     networks:
       - ttrss
       - traefik
-    ports:
-      - 2015:80/tcp
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.ttrss.entrypoints: websecure
@@ -99,11 +110,12 @@ services:
       traefik.http.routers.ttrss.tls.certresolver: letsencrypt
       traefik.http.routers.ttrss.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.ttrss.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.ttrss.middlewares: "secHeaders@file"
       traefik.http.services.ttrss.loadbalancer.server.port: "80"
-    restart: always
-    volumes:
-      - /opt/docker/ttrss/ttrss_fever:/var/www/plugins/fever
-    working_dir: /var/www
+      wud.watch: "true"
+      wud.display.name: "TT-RSS"
+      wud.display.icon: "sh:tiny-tiny-rss"
+
 networks:
   ttrss:
     name: ttrss

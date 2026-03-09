@@ -1,79 +1,106 @@
+x-versions:
+  redis: &redis-version "redis:8.2.0"
+  postgres: &postgres-version "docker.io/postgres:17-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# NOTE: This stack requires building from source. The api, web, and content-fetch
+# services need Dockerfiles from the omnivore repo. This compose file is incomplete
+# and needs the migrate service and proper build contexts to function.
+
 services:
   omnivore-redis:
+    image: *redis-version
     container_name: omnivore-redis
-    image: redis:8.2.0
+    hostname: omnivore-redis
+    ipc: private
+    restart: unless-stopped
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
+      - DAC_OVERRIDE
     cap_drop:
       - ALL
-    ipc: private
     security_opt:
       - no-new-privileges:true
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/omnivore/omnivore-redis_data:/data
-    networks:
-      - omnivore
+    mem_limit: 256M
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - /opt/docker/omnivore/omnivore-redis_data:/data
+    networks:
+      - omnivore
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "Omnivore Redis"
       wud.display.icon: "sh-omnivore"
-      wud.tag.include: '^$v\d+.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/redis/redis/releases/tag/$${major}.$${minor}.$${patch}'
+
   omnivore-postgres:
-    image: docker.io/postgres:17-alpine
+    image: *postgres-version
+    container_name: omnivore-postgres
+    hostname: omnivore-postgres
     ipc: private
     restart: unless-stopped
-    healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
-      start_period: 20s
-      timeout: 30s
-      interval: 10s
-      retries: 5
-    environment:
-      POSTGRES_DB: "omnivore"
-      POSTGRES_PASSWORD: "${OMNIVORE_POSTGRES_PASS}"
-      POSTGRES_USER: "omnivore"
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
           memory: 200m
         reservations:
           memory: 50m
+    environment:
+      POSTGRES_DB: "omnivore"
+      POSTGRES_PASSWORD: "${OMNIVORE_POSTGRES_PASS}"
+      POSTGRES_USER: "omnivore"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
     volumes:
       - /opt/docker/omnivore/omnivore_postgres-data:/var/lib/postgresql/data
     networks:
       - omnivore
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^17-alpine$$'
+      wud.display.name: "Omnivore - Postgres"
+      wud.display.icon: "sh-omnivore"
+
+  # The following services require building from source
+  # See: https://github.com/omnivore-app/omnivore
   api:
     build:
       context: .
       dockerfile: ./packages/api/Dockerfile
     container_name: "omnivore-api"
+    ipc: private
+    restart: unless-stopped
+    mem_limit: 1G
     ports:
       - "4000:8080"
     healthcheck:
@@ -81,68 +108,82 @@ services:
       interval: 15s
       timeout: 90s
     environment:
-      - API_ENV=local
-      - PG_HOST=omnivore-postgres
-      - PG_USER=omnivore
-      - PG_PASSWORD=${OMNIVORE_POSTGRES_PASS}
-      - PG_DB=omnivore
-      - PG_PORT=5432
-      - PG_POOL_MAX=20
-      - JAEGER_HOST=jaeger
-      - IMAGE_PROXY_SECRET=some-secret
-      - JWT_SECRET=${OMNIVORE_JWT_SECRET}
-      - SSO_JWT_SECRET=some_sso_secret
-      - CLIENT_URL=http://localhost:3000
-      - GATEWAY_URL=http://localhost:8080/api
-      - CONTENT_FETCH_URL=http://content-fetch:8080/?token=some_token
-      - REDIS_URL='redis://redis:6379'
+      API_ENV: local
+      PG_HOST: omnivore-postgres
+      PG_USER: omnivore
+      PG_PASSWORD: ${OMNIVORE_POSTGRES_PASS}
+      PG_DB: omnivore
+      PG_PORT: "5432"
+      PG_POOL_MAX: "20"
+      JAEGER_HOST: jaeger
+      IMAGE_PROXY_SECRET: some-secret
+      JWT_SECRET: ${OMNIVORE_JWT_SECRET}
+      SSO_JWT_SECRET: some_sso_secret
+      CLIENT_URL: http://localhost:3000
+      GATEWAY_URL: http://localhost:8080/api
+      CONTENT_FETCH_URL: http://content-fetch:8080/?token=some_token
+      REDIS_URL: 'redis://omnivore-redis:6379'
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      omnivore-postgres:
+        condition: service_healthy
+      omnivore-redis:
+        condition: service_healthy
     networks:
       - omnivore
+    logging: *default-logging
+
   web:
     build:
       context: .
       dockerfile: ./packages/web/Dockerfile
       args:
-        - APP_ENV=prod
-        - BASE_URL=http://localhost:3000
-        - SERVER_BASE_URL=http://localhost:4000
-        - HIGHLIGHTS_BASE_URL=http://localhost:3000
+        APP_ENV: prod
+        BASE_URL: http://localhost:3000
+        SERVER_BASE_URL: http://localhost:4000
+        HIGHLIGHTS_BASE_URL: http://localhost:3000
     container_name: "omnivore-web"
+    ipc: private
+    restart: unless-stopped
+    mem_limit: 512M
     ports:
       - "3000:8080"
     environment:
-      - NEXT_PUBLIC_APP_ENV=prod
-      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
-      - NEXT_PUBLIC_SERVER_BASE_URL=http://localhost:4000
-      - NEXT_PUBLIC_HIGHLIGHTS_BASE_URL=http://localhost:3000
+      NEXT_PUBLIC_APP_ENV: prod
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_SERVER_BASE_URL: http://localhost:4000
+      NEXT_PUBLIC_HIGHLIGHTS_BASE_URL: http://localhost:3000
     depends_on:
       api:
         condition: service_healthy
     networks:
       - omnivore
       - traefik
+    logging: *default-logging
+
   content-fetch:
     build:
       context: .
       dockerfile: ./packages/content-fetch/Dockerfile
     container_name: "omnivore-content-fetch"
+    ipc: private
+    restart: unless-stopped
+    mem_limit: 512M
     ports:
       - "9090:8080"
     environment:
-      - JWT_SECRET=${OMNIVORE_JWT_SECRET}
-      - VERIFICATION_TOKEN=some_token
-      - REST_BACKEND_ENDPOINT=http://api:8080/api
-      - REDIS_URL=redis://omnivore-redis:6379
+      JWT_SECRET: ${OMNIVORE_JWT_SECRET}
+      VERIFICATION_TOKEN: some_token
+      REST_BACKEND_ENDPOINT: http://api:8080/api
+      REDIS_URL: redis://omnivore-redis:6379
     depends_on:
-      redis:
+      omnivore-redis:
         condition: service_healthy
       api:
         condition: service_healthy
     networks:
       - omnivore
+    logging: *default-logging
+
 networks:
   omnivore:
     external: false

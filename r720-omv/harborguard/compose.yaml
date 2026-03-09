@@ -1,36 +1,51 @@
+x-versions:
+  harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest"
+  postgres: &postgres-version "postgres:16.11-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   harborguard:
-    image: ghcr.io/harborguard/harborguard:latest
+    image: *harborguard-version
     ipc: private
-    depends_on:
-      harborguard-postgres:
-        condition: service_healthy
-    labels:
-      wud.display.name: "HarbourGuard"
-      wud.display.icon: "sh-harbourguard" #no icon yet
-      wud.digest: "true"
-      wud.watch: "true"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       MAX_CONCURRENT_SCANS: "5"
       PORT: "3005"
       DATABASE_URL: "postgresql://harborguard:${HARBORGUARD_DB_PASS}@harborguard-postgres:5432/harborguard"
       HEALTH_CHECK_ENABLED: "true"
-    restart: unless-stopped
+    depends_on:
+      harborguard-postgres:
+        condition: service_healthy
+    ports:
+      - "3005:3005"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - harborguard
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
-        max-file: "1"  
-    ports:
-      - "3005:3005"
-    networks:
-      - harborguard
+        max-file: "1"
+    labels:
+      wud.display.name: "HarbourGuard"
+      wud.display.icon: "sh-harbourguard"
+      wud.digest: "true"
+      wud.watch: "true"
+
   harborguard-postgres:
-    image: postgres:16.11-alpine
+    image: *postgres-version
     container_name: harborguard-postgres
     ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - FOWNER
@@ -41,23 +56,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
-      start_period: 20s
-      timeout: 30s
-      interval: 10s
-      retries: 5
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^16\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
-      wud.display.name: "Harborguard - Postgres"
-      wud.display.icon: "sh-harborguard"  
     deploy:
       resources:
         limits:
@@ -68,17 +66,29 @@ services:
       POSTGRES_DB: "harborguard"
       POSTGRES_USER: "harborguard"
       POSTGRES_PASSWORD: "${HARBORGUARD_DB_PASS}"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
     volumes:
       - /opt/docker/harborguard/postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
     networks:
       - harborguard
       - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^16\.\d+-alpine$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Harborguard - Postgres"
+      wud.display.icon: "sh-harborguard"
 
-networks: 
+networks:
   harborguard:
-    external: false
     name: harborguard
     driver: bridge
+    external: false
   adminer:
     external: true

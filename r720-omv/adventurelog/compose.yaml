@@ -1,5 +1,23 @@
+x-versions:
+  adventurelog-frontend: &adventurelog-frontend-version "ghcr.io/seanmorley15/adventurelog-frontend:v0.12.0"
+  adventurelog-backend: &adventurelog-backend-version "ghcr.io/seanmorley15/adventurelog-backend:v0.12.0"
+  postgis: &postgis-version "postgis/postgis:17-3.6-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   adventurelog-postgis:
+    image: *postgis-version
+    container_name: adventurelog-postgis
+    hostname: adventurelog-postgis
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ['docker-entrypoint.sh']
+    command: ['postgres']
     cap_add:
       - CHOWN
       - FOWNER
@@ -8,44 +26,71 @@ services:
       - SETGID
     cap_drop:
       - ALL
-    command: ['postgres']
-    container_name: adventurelog-postgis
-    entrypoint: ['docker-entrypoint.sh']
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 64m
     environment:
       POSTGRES_USER: "adventurelog"
       PGUSER: "adventurelog"
       POSTGRES_PASSWORD: "${ADVENTURELOG_DB_PASS}"
-    hostname: adventurelog-postgis
-    image: postgis/postgis:17-3.6-alpine
-    ipc: private
     healthcheck:
-      test: [ 'CMD-SHELL','pg_isready','-U','adventurelog','-d','adventurelog' ]
+      test: ['CMD-SHELL', 'pg_isready', '-U', 'adventurelog', '-d', 'adventurelog']
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^17-\d+\.\d+-alpine$$'
-      wud.display.name: "AdventureLog - Postgis"
-      wud.display.icon: "sh-dawarich"  
-    restart: unless-stopped
     volumes:
       - /opt/docker/adventurelog/postgis_data:/var/lib/postgresql/data
     networks:
       - adventurelog
       - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^17-\d+\.\d+-alpine$$'
+      wud.display.name: "AdventureLog - Postgis"
+      wud.display.icon: "sh-adventurelog"
+
   adventurelog-web:
-    image: ghcr.io/seanmorley15/adventurelog-frontend:v0.12.0
+    image: *adventurelog-frontend-version
+    container_name: adventurelog-web
+    hostname: adventurelog-web
+    ipc: private
     restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       PUBLIC_SERVER_URL: "http://server:8000"
       BODY_SIZE_LIMIT: "100000"
+    depends_on:
+      - adventurelog-server
+    networks:
+      - adventurelog
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.adventurelog.rule: "Host(`adventure.${DOMAIN_NAME}`)"
@@ -67,14 +112,33 @@ services:
       wud.display.name: "AdventureLog - Frontend"
       wud.display.icon: "sh:adventurelog"
       wud.link.template: "https://github.com/seanmorley15/AdventureLog/releases/tag/v$${major}.$${minor}.$${patch}"
-    depends_on:
-      - adventurelog-server
-    networks:
-      - adventurelog
-      - traefik
+
   adventurelog-server:
-    image: ghcr.io/seanmorley15/adventurelog-backend:v0.12.0
+    image: *adventurelog-backend-version
+    container_name: adventurelog-server
+    hostname: adventurelog-server
+    ipc: private
     restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       PGHOST: "adventurelog-postgis"
       PGDATABASE: "adventurelog"
@@ -85,23 +149,25 @@ services:
       DJANGO_ADMIN_PASSWORD: "${ADVENTURELOG_ADMIN_PASS}"
       DJANGO_ADMIN_EMAIL: "${ADMIN_EMAIL}"
       PUBLIC_URL: "https://adventure.${DOMAIN_NAME}"
-      CSRF_TRUSTED_ORIGINS: "https://adventure.${DOMAIN_NAME}" 
+      CSRF_TRUSTED_ORIGINS: "https://adventure.${DOMAIN_NAME}"
       DEBUG: "false"
       FRONTEND_URL: "https://adventure.${DOMAIN_NAME}"
+    depends_on:
+      adventurelog-postgis:
+        condition: service_healthy
     volumes:
       - /opt/docker/adventurelog/adventurelog-media:/code/media
     networks:
       - adventurelog
       - traefik
-    depends_on:
-      adventurelog-postgis:
-        condition: service_healthy
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "AdventureLog - Backend"
       wud.display.icon: "sh:adventurelog"
       wud.link.template: "https://github.com/seanmorley15/AdventureLog/releases/tag/v$${major}.$${minor}.$${patch}"
+
 networks:
   adventurelog:
     external: false

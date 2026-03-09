@@ -1,35 +1,86 @@
+x-versions:
+  guacd: &guacd-version "guacamole/guacd:1.6.0"
+  guacamole: &guacamole-version "guacamole/guacamole:1.6.0"
+  firefox: &firefox-version "jlesage/firefox:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   guacamole-guacd:
-    container_name: guacamole-guacd 
+    image: *guacd-version
+    container_name: guacamole-guacd
     hostname: guacamole-guacd
-    image: guacamole/guacd:1.6.0
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       GUACD_LOG_LEVEL: "debug"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - guacamole
-    restart: unless-stopped
     healthcheck:
       test: "nc -z 127.0.0.1 4822 || exit 1"
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 10s
+    networks:
+      - guacamole
+    logging: *default-logging
     labels:
       wud.watch: 'true'
       wud.display.icon: 'sh-apache-guacamole-dark'
       wud.display.name: 'Guacamole daemon'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
+
   guacamole-firefox:
-    image: jlesage/firefox:latest
+    image: *firefox-version
+    container_name: guacamole-firefox
+    hostname: guacamole-firefox
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     shm_size: 2G
-    ports:
-      - "5801:5801"
+    mem_limit: 2G
     environment:
       USER_ID: "${DOCKER_PUID}"
       GROUP_ID: "${DOCKER_PGID}"
@@ -42,15 +93,44 @@ services:
       SECURE_CONNECTION_VNC_METHOD: "SSL"
       SECURE_CONNECTION_CERTS_CHECK_INTERVAL: 60
       FF_OPEN_URL: "https://fp.${DOMAIN_NAME}"
+    ports:
+      - "5801:5801"
     volumes:
-      # create ./docker/appdata/firefox/.vncpass_clear pre-startup
-      # see https://github.com/jlesage/docker-firefox#vnc-password
       - /opt/docker/guacamole/guacamole-firefox_config:/config:rw
-    networks: 
+    networks:
       - guacamole
-    restart: unless-stopped
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "Guacamole - Firefox"
+      wud.display.icon: "sh-apache-guacamole-dark"
+
   guacamole:
+    image: *guacamole-version
     container_name: guacamole
+    hostname: guacamole
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       POSTGRESQL_DATABASE: "guacamole"
       POSTGRESQL_USER: "guacamole"
@@ -61,20 +141,13 @@ services:
       TOTP_ENABLED: "true"
       WEBAPP_CONTEXT: "ROOT"
       CATALINA_OPTS: "-Djava.net.preferIPv4Stack=true"
-    hostname: guacamole
-    image: guacamole/guacamole:1.6.0
     depends_on:
       guacamole-guacd:
         condition: service_healthy
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
     networks:
       - guacamole
       - traefik
-    restart: unless-stopped
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.guacamole.rule: "Host(`avocado.${DOMAIN_NAME}`)"
@@ -96,6 +169,7 @@ services:
       wud.display.name: 'Guacamole'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/apache/guacamole-server/releases/tag/v$${major}.$${minor}.$${patch}'
+
 networks:
   guacamole:
     name: guacamole

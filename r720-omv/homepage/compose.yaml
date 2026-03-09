@@ -1,6 +1,16 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.3"
+  homepage: &homepage-version "ghcr.io/gethomepage/homepage:v1.10.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   homepage-socket-proxy:
-    image: wollomatic/socket-proxy:1.11.3
+    image: *socket-proxy-version
     ipc: private
     command:
       - '-loglevel=debug'
@@ -16,8 +26,15 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges
+      - no-new-privileges:true
     user: "65534:${DOCKER_SOCKET_GID}"
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -28,15 +45,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - homepage
+
   homepage:
-    image: ghcr.io/gethomepage/homepage:v1.10.1
+    image: *homepage-version
     container_name: homepage
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512M
     environment:
       HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
     ports:
       - 3008:3000
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.homepage.rule: "Host(`fp.${DOMAIN_NAME}`)"
@@ -54,12 +80,12 @@ services:
       wud.display.icon: 'sh:homepage'
     volumes:
       - /opt/docker/homepage/homepage_config:/app/config
-    restart: unless-stopped
     depends_on:
       - homepage-socket-proxy
     networks:
       - homepage
       - traefik
+
 networks:
   homepage:
     name: homepage

@@ -1,9 +1,18 @@
+x-versions:
+  signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.97"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   signal_rest_api:
-    image: bbernhard/signal-cli-rest-api:0.97
+    image: *signal-rest-api-version
     container_name: signal-rest-api
-    restart: unless-stopped
     ipc: private
+    restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     cap_add:
@@ -14,23 +23,26 @@ services:
       - SETUID
     cap_drop:
       - ALL
-    networks:
-      - signal-rest-api
+    mem_limit: 512M
     environment:
       MODE: "normal" #supported modes: json-rpc, native, normal
       SIGNAL_CLI_UID: "${DOCKER_PUID}"
       SIGNAL_CLI_GID: "${DOCKER_PGID}"
-      #- AUTO_RECEIVE_SCHEDULE=0 22 * * * #enable this parameter on demand (see description below)
+      #AUTO_RECEIVE_SCHEDULE: "0 22 * * *" #enable this parameter on demand
+    volumes:
+      - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
+    ports:
+      - 3162:8080/tcp
+    networks:
+      - signal-rest-api
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+$$'
       wud.display.name: "Signal Rest API"
       wud.display.icon: "sh:signal"
       wud.link.template: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}"
-    volumes:
-      - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
-    ports:
-      - 3162:8080/tcp
+
 networks:
   signal-rest-api:
     name: signal-rest-api

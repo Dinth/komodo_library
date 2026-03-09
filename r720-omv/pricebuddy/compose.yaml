@@ -1,13 +1,41 @@
+x-versions:
+  pricebuddy: &pricebuddy-version "jez500/pricebuddy:v1.0.45"
+  mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
+  scraper: &scraper-version "jez500/seleniumbase-scrapper:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   pricebuddy:
-    build:
-      context: .
-      dockerfile: docker/php.dockerfile
-    image: jez500/pricebuddy:v1.0.45
-    ports:
-      - 5757:80
-    volumes:
-      - /opt/docker/pricebuddy/pricebuddy_data:/app/storage
+    image: *pricebuddy-version
+    container_name: pricebuddy
+    hostname: pricebuddy
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       DB_HOST: "pricebuddy-mariadb"
       DB_USERNAME: "pricebuddy"
@@ -20,8 +48,17 @@ services:
       ASSET_URL: "https://prices.${DOMAIN_NAME}"
       APP_URL: "https://prices.${DOMAIN_NAME}"
     depends_on:
-      - pricebuddy-mariadb
-    labels:  
+      pricebuddy-mariadb:
+        condition: service_healthy
+    ports:
+      - 5757:80
+    volumes:
+      - /opt/docker/pricebuddy/pricebuddy_data:/app/storage
+    networks:
+      - pricebuddy
+      - traefik
+    logging: *default-logging
+    labels:
       traefik.enable: "true"
       traefik.http.routers.pricebuddy.rule: "Host(`prices.${DOMAIN_NAME}`)"
       traefik.http.routers.pricebuddy.entrypoints: "websecure"
@@ -42,12 +79,13 @@ services:
       wud.link.template: 'https://github.com/jez500/pricebuddy/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Pricebuddy'
       wud.display.icon: 'sh:pricebuddy'
-    networks:
-      - pricebuddy
-      - traefik
-    restart: unless-stopped
 
   pricebuddy-mariadb:
+    image: *mariadb-version
+    container_name: pricebuddy-mariadb
+    hostname: pricebuddy-mariadb
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - SETGID
@@ -57,8 +95,14 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges=true
-    container_name: pricebuddy-mariadb
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
@@ -69,53 +113,50 @@ services:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
-    hostname: pricebuddy-mariadb
-    image: linuxserver/mariadb:11.4.8
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1g
-        reservations:
-          memory: 512m
-    networks:
-      - pricebuddy
-      - adminer
-    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
+    volumes:
+      - /opt/docker/pricebuddy/mariadb_data:/config
+    networks:
+      - pricebuddy
+      - adminer
+    logging: *default-logging
     labels:
       wud.display.name: "Pricebuddy - MariaDB"
       wud.display.icon: "sh-pricebuddy"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
-    volumes:
-      - /opt/docker/pricebuddy/mariadb_data:/config
 
   pricebuddy-scraper:
-    image: jez500/seleniumbase-scrapper:latest
+    image: *scraper-version
+    container_name: pricebuddy-scraper
+    hostname: pricebuddy-scraper
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     networks:
       - pricebuddy
-#    ports:
-#      - 3030:3000
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/amerkurev/scrapper/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Pricebuddy Scrapper'
       wud.display.icon: 'sh:pricebuddy'
-      restart: unless-stopped
 
 networks:
   pricebuddy:

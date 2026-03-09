@@ -1,5 +1,19 @@
+x-versions:
+  calibre-web: &calibre-web-version "linuxserver/calibre-web:0.6.26"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   calibre-web:
+    image: *calibre-web-version
+    container_name: calibre-web
+    hostname: calibre-web
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,26 +31,24 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: calibre-web
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       TZ: "${TZ}"
       DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:universal-package-install"
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
       INSTALL_PACKAGES: "libmagic1"
-    hostname: calibre-web
-    image: linuxserver/calibre-web:0.6.26
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    ports:
+      - 8083:8083/tcp
+    volumes:
+      - /Data/Ebooks:/books
+      - /opt/docker/calibre-web/calibre-web_config:/config
     networks:
       - calibre-web
       - traefik
-    ports:
-      - 8083:8083/tcp
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.calibre-web.rule: "Host(`calibre.${DOMAIN_NAME}`)"
@@ -63,10 +75,7 @@ services:
       wud.link.template: 'https://github.com/janeczku/calibre-web/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Calibre-Web"
       wud.display.icon: "sh-calibre-web"
-    restart: unless-stopped
-    volumes:
-      - /Data/Ebooks:/books
-      - /opt/docker/calibre-web/calibre-web_config:/config
+
 networks:
   calibre-web:
     name: calibre-web

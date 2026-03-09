@@ -1,13 +1,20 @@
+x-versions:
+  openttd: &openttd-version "bateau/openttd:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 name: openttd
 services:
   openttd:
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-    command:
-      - /openttd.sh
+    image: *openttd-version
     container_name: openttd
+    hostname: openttd
+    ipc: private
+    restart: unless-stopped
     entrypoint:
       - /usr/bin/dumb-init
       - --rewrite
@@ -15,55 +22,38 @@ services:
       - --rewrite
       - "9:3"
       - --
+    command:
+      - /openttd.sh
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       DEBUG: "1"
       PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PGID: "100"
       PUID: "1002"
       loadgame: last-autosave
+    ports:
+      - 3978:3978/tcp
+      - 3978:3978/udp
+      - 3979:3979/tcp
+      - 3979:3979/udp
+    volumes:
+      - /opt/docker/openttd/openttd_config:/home/openttd/.config/openttd
+      - /opt/docker/openttd/openttd_save:/home/openttd/.openttd/save
+      - /opt/docker/openttd/openttd_data:/home/openttd/.local/share/openttd
+    networks:
+      - openttd
+    logging: *default-logging
     labels:
       wud.watch: "false"
-    hostname: openttd
-    image: bateau/openttd:latest
-    ipc: private
-    logging:
-      driver: json-file
-    networks:
-      openttd: null
-    ports:
-      - mode: ingress
-        target: 3978
-        published: "3978"
-        protocol: tcp
-      - mode: ingress
-        target: 3978
-        published: "3978"
-        protocol: udp
-      - mode: ingress
-        target: 3979
-        published: "3979"
-        protocol: tcp
-      - mode: ingress
-        target: 3979
-        published: "3979"
-        protocol: udp
-    restart: unless-stopped
-    volumes:
-      - type: bind
-        source: /opt/docker/openttd/openttd_config
-        target: /home/openttd/.config/openttd
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /opt/docker/openttd/openttd_save
-        target: /home/openttd/.openttd/save
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /opt/docker/openttd/openttd_data
-        target: /home/openttd/.local/share/openttd
-        bind:
-          create_host_path: true
+
 networks:
   openttd:
     name: openttd

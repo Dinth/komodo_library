@@ -1,11 +1,31 @@
+x-versions:
+  authelia: &authelia-version "authelia/authelia:4.39.15"
+  valkey: &valkey-version "docker.io/valkey/valkey:8.1.3-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   authelia:
-    image: authelia/authelia:4.39.15
+    image: *authelia-version
     container_name: authelia
-    restart: unless-stopped
+    hostname: authelia
     ipc: private
-    volumes:
-      - /opt/docker/authelia/authelia_config:/config
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
     environment:
       TZ: "${TZ}"
       REDIS_PASSWORD: "${AUTHELIA_REDIS_PASS}"
@@ -16,9 +36,18 @@ services:
       AUTHELIA_SESSION_REDIS_HOST: authelia-valkey
       AUTHELIA_SESSION_REDIS_PORT: 6379
       X_AUTHELIA_CONFIG_FILTERS: "template"
+    depends_on:
+      authelia-valkey:
+        condition: service_healthy
+    volumes:
+      - /opt/docker/authelia/authelia_config:/config
+    networks:
+      - authelia
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
-  # --- Router for the Authelia Portal ---
+      # Router for the Authelia Portal
       traefik.http.routers.authelia.rule: "Host(`id.${DOMAIN_NAME}`)"
       traefik.http.routers.authelia.entrypoints: "websecure"
       traefik.http.routers.authelia.tls: "true"
@@ -27,38 +56,24 @@ services:
       traefik.http.routers.authelia.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.authelia.middlewares: "secHeaders@file"
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
-  # --- Middleware for other services to use for authentication ---
+      # Middleware for other services to use for authentication
       traefik.http.middlewares.authelia-auth.forwardauth.address: "http://authelia:9091/api/verify?rd=https://id.${DOMAIN_NAME}/"
       traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader: "true"
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
-  # --- Whats up Docker? config ---
+      # Whats up Docker? config
       wud.watch: "true"
       wud.display.name: "Authelia"
       wud.display.icon: sh-authelia
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/authelia/authelia/releases/tag/v$${major}.$${minor}.$${patch}'
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"  
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    depends_on:
-      - authelia-valkey
-    networks:
-      - authelia
-      - traefik
 
   authelia-valkey:
+    image: *valkey-version
     container_name: authelia-valkey
-    image: docker.io/valkey/valkey:8.1.3-alpine
+    hostname: authelia-valkey
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - authelia
-    volumes:
-      - /opt/docker/authelia/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -66,23 +81,30 @@ services:
       - CHOWN
     cap_drop:
       - ALL
-    labels:
-      wud.display.name: "Authelia - Valkey"
-      wud.display.icon: "sh-authelia"
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
+    volumes:
+      - /opt/docker/authelia/valkey-data:/data
+    networks:
+      - authelia
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "1"
+    labels:
+      wud.display.name: "Authelia - Valkey"
+      wud.display.icon: "sh-authelia"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   authelia:

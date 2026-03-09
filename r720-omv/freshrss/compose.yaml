@@ -1,29 +1,41 @@
+x-versions:
+  freshrss: &freshrss-version "freshrss/freshrss:1.28.1"
+  rss-bridge: &rss-bridge-version "rssbridge/rss-bridge:latest"
+  postgres: &postgres-version "docker.io/postgres:17.7-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   freshrss-rssbridge:
-    image: rssbridge/rss-bridge:latest
+    image: *rss-bridge-version
     ipc: private
     restart: unless-stopped
-    volumes:
-      - /opt/docker/freshrss/freshrss-rssbridge_config:/config
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
     entrypoint: ["sh", "-c", "/app/bin/cache-clear && exec /app/docker-entrypoint.sh"]
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/80 && echo HTTP OK || echo HTTP FAIL'"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+    ports:
+      - "4746:80"
+    volumes:
+      - /opt/docker/freshrss/freshrss-rssbridge_config:/config
     networks:
       - freshrss
-    ports: 
-      - "4746:80"
+    logging: *default-logging
+
   freshrss-postgres:
-    image: docker.io/postgres:17.7-alpine
+    image: *postgres-version
     ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -33,49 +45,48 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    restart: unless-stopped
-    healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
-      start_period: 20s
-      timeout: 30s
-      interval: 10s
-      retries: 5
-    environment:
-      POSTGRES_DB: "freshrss"
-      POSTGRES_PASSWORD: "${FRESHRSS_POSTGRES_PASS}"
-      POSTGRES_USER: "freshrss"
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^17\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
-      wud.display.name: "FreshRSS - Postgres"
-      wud.display.icon: "sh-freshrss"  
     deploy:
       resources:
         limits:
           memory: 200m
         reservations:
           memory: 50m
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    environment:
+      POSTGRES_DB: "freshrss"
+      POSTGRES_PASSWORD: "${FRESHRSS_POSTGRES_PASS}"
+      POSTGRES_USER: "freshrss"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
     volumes:
       - /opt/docker/freshrss/freshrss_postgres-data:/var/lib/postgresql/data
     networks:
       - freshrss
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^17\.\d+-alpine$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "FreshRSS - Postgres"
+      wud.display.icon: "sh-freshrss"
+
   freshrss:
-    image: freshrss/freshrss:1.28.1
+    image: *freshrss-version
     container_name: freshrss
-    restart: unless-stopped
     ipc: private
-    environment: 
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
+    environment:
       TRUSTED_PROXIES: "traefik"
       TZ: "${TZ}"
       BASE_URL: "https://rss.${DOMAIN_NAME}"
       CRON_MIN: "*/10"
-      ADMIN_EMAIL : "ddd@ddd.pl"
+      ADMIN_EMAIL: "ddd@ddd.pl"
       ADMIN_PASSWORD: "freshrss"
       ADMIN_API_PASSWORD: "freshrss"
       DB_TYPE: "pgsql"
@@ -99,6 +110,26 @@ services:
         --language en
         --password ${FRESHRSS_ADMIN_PASS}
         --user admin
+    depends_on:
+      freshrss-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "cli/health.php"]
+      timeout: 10s
+      start_period: 60s
+      start_interval: 11s
+      interval: 75s
+      retries: 3
+    ports:
+      - "8020:80"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/docker/freshrss/freshrss_data:/var/www/FreshRSS/data
+      - /opt/docker/freshrss/freshrss_extensions:/var/www/FreshRSS/extensions
+    networks:
+      - freshrss
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.freshrss.rule: "Host(`rss.${DOMAIN_NAME}`)"
@@ -120,35 +151,11 @@ services:
       wud.display.name: "FreshRSS"
       wud.display.icon: "sh:freshrss"
       wud.link.template: "https://github.com/FreshRSS/FreshRSS/releases/$${major}.$${minor}.$${patch}"
-    depends_on:
-      freshrss-postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "cli/health.php"]
-      timeout: 10s
-      start_period: 60s
-      start_interval: 11s
-      interval: 75s
-      retries: 3
-    ports:
-      - "8020:80"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /opt/docker/freshrss/freshrss_data:/var/www/FreshRSS/data
-      - /opt/docker/freshrss/freshrss_extensions:/var/www/FreshRSS/extensions
-    networks:
-      - freshrss
-      - traefik
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-        
+
 networks:
   freshrss:
     name: freshrss
     driver: bridge
   traefik:
     name: traefik
-    external: true    
+    external: true

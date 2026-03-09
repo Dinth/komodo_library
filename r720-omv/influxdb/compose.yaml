@@ -17,6 +17,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       DOCKER_INFLUXDB_INIT_MODE: "setup"
       DOCKER_INFLUXDB_INIT_USERNAME: "admin"
@@ -76,6 +78,8 @@ services:
       - NET_RAW  # Needed for SNMP/ICMP
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       INFLUX_TOKEN: "${INFLUXDB_TOKEN}"
       TZ: "${TZ}"
@@ -126,6 +130,8 @@ services:
       - SETUID
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       TZ: "${TZ}"
       # UniFi Controller configuration

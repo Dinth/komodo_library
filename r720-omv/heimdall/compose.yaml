@@ -1,6 +1,22 @@
+x-versions:
+  heimdall: &heimdall-version "linuxserver/heimdall:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
   heimdall:
+    image: *heimdall-version
+    container_name: heimdall
+    hostname: heimdall
+    ipc: private
+    restart: unless-stopped
+    entrypoint:
+      - /init
+    working_dir: /
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -18,37 +34,29 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: heimdall
-    entrypoint:
-      - /init
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
     environment:
       TZ: "${TZ}"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
-    hostname: heimdall
-    image: linuxserver/heimdall:latest
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    ports:
+      - 3838:80/tcp
+    volumes:
+      - /opt/docker/heimdall/heimdall_config:/config
     networks:
       - heimdall
       - traefik
-    ports:
-      - 3838:80/tcp
-    labels:  
-      - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`fp.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.heimdall.entrypoints=websecure"
-      - "traefik.http.routers.heimdall.tls=true"
-      - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
-      - "traefik.http.services.heimdall.loadbalancer.server.port=80"
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/heimdall/heimdall_config:/config
-    working_dir: /
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.heimdall.rule: "Host(`fp.${DOMAIN_NAME}`)"
+      traefik.http.routers.heimdall.entrypoints: "websecure"
+      traefik.http.routers.heimdall.tls: "true"
+      traefik.http.routers.heimdall.tls.certresolver: "letsencrypt"
+      traefik.http.services.heimdall.loadbalancer.server.port: "80"
+
 networks:
   heimdall:
     name: heimdall

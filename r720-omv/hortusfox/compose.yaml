@@ -1,5 +1,20 @@
+x-versions:
+  mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
+  hortusfox: &hortusfox-version "ghcr.io/danielbrendel/hortusfox-web:v5.7"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   hortusfox-mariadb:
+    image: *mariadb-version
+    container_name: hortusfox-mariadb
+    hostname: hortusfox-mariadb
+    ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - SETGID
@@ -9,8 +24,14 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges=true
-    container_name: hortusfox-mariadb
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+        reservations:
+          memory: 512m
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
@@ -21,41 +42,37 @@ services:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
-    hostname: hortusfox-mariadb
-    image: linuxserver/mariadb:11.4.8
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1g
-        reservations:
-          memory: 512m
-    networks:
-      - hortusfox
-      - adminer
-    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
+    volumes:
+      - /opt/docker/hortusfox/mariadb_data:/config
+    networks:
+      - hortusfox
+      - adminer
+    logging: *default-logging
     labels:
       wud.display.name: "HortusFox - MariaDB"
       wud.display.icon: "sh-hortusfox"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
-    volumes:
-      - /opt/docker/hortusfox/mariadb_data:/config
+
   hortusfox:
+    image: *hortusfox-version
+    container_name: hortusfox
+    hostname: hortusfox
+    ipc: private
+    restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    command:
+      - apache2-foreground
+    entrypoint:
+      - docker-entrypoint.sh
+    working_dir: /var/www/html
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -73,11 +90,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    command:
-      - apache2-foreground
-    container_name: hortusfox
-    entrypoint:
-      - docker-entrypoint.sh
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       APP_ADMIN_EMAIL: "${ADMIN_EMAIL}"
       APP_ADMIN_PASSWORD: "${HORTUSFOX_ADMIN_PASS}"
@@ -89,9 +104,20 @@ services:
       DB_CHARSET: "utf8mb4"
       DB_PASSWORD: "${HORTUSFOX_DB_PASS}"
       APP_DEBUG: "true"
-    hostname: hortusfox
-    image: ghcr.io/danielbrendel/hortusfox-web:v5.7
-    ipc: private
+    depends_on:
+      hortusfox-mariadb:
+        condition: service_healthy
+    ports:
+      - 4142:8080/tcp
+    volumes:
+      - /opt/docker/hortusfox/hortusfox_logs:/var/www/html/app/logs
+      - /opt/docker/hortusfox/hortusfox_backup:/var/www/html/public/backup
+      - /opt/docker/hortusfox/hortusfox_themes:/var/www/html/public/themes
+      - /opt/docker/hortusfox/hortusfox_migrate:/var/www/html/app/migrations
+      - /opt/docker/hortusfox/hortusfox_images:/var/www/html/public/img
+    networks:
+      - hortusfox
+    logging: *default-logging
     labels:
       homepage.group: "Home"
       homepage.name: "HortusFox"
@@ -105,30 +131,11 @@ services:
       wud.link.template: 'https://github.com/danielbrendel/hortusfox-web/releases/tag/v$${major}.$${minor}'
       wud.display.name: "HortusFox"
       wud.display.icon: "sh-hortusfox"
-    depends_on:
-      hortusfox-mariadb:
-        condition: service_healthy
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - hortusfox
-    ports:
-      - 4142:8080/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/hortusfox/hortusfox_logs:/var/www/html/app/logs
-      - /opt/docker/hortusfox/hortusfox_backup:/var/www/html/public/backup
-      - /opt/docker/hortusfox/hortusfox_themes:/var/www/html/public/themes
-      - /opt/docker/hortusfox/hortusfox_migrate:/var/www/html/app/migrations
-      - /opt/docker/hortusfox/hortusfox_images:/var/www/html/public/img
-    working_dir: /var/www/html
+
 networks:
   hortusfox:
-    driver: bridge
     name: hortusfox
+    driver: bridge
     external: false
   adminer:
     external: true

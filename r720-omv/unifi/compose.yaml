@@ -1,28 +1,64 @@
+x-versions:
+  mongo: &mongo-version "docker.io/mongo:8.2.5"
+  unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.1.85"
+  unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   unifi-db:
-    image: docker.io/mongo:8.2.5
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    image: *mongo-version
     container_name: unifi-db
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
-      wud.display.name: 'Unifi Network Application - Mongo DB'
-      wud.display.icon: 'sh:ubiquiti-unifi-dark'
-    volumes:
-      - /opt/docker/unifi/unifi_db:/data/db
-      - /opt/docker/unifi/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    ipc: private
     restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     healthcheck:
       test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 5s
       timeout: 5s
       retries: 3
       start_period: 5s
+    volumes:
+      - /opt/docker/unifi/unifi_db:/data/db
+      - /opt/docker/unifi/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
+      wud.display.name: 'Unifi Network Application - Mongo DB'
+      wud.display.icon: 'sh:ubiquiti-unifi-dark'
 
   unifi-network-application:
-    image: lscr.io/linuxserver/unifi-network-application:10.1.85
+    image: *unifi-version
     container_name: unifi-network-application
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2G
     environment:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
@@ -32,8 +68,20 @@ services:
       MONGO_HOST: "unifi-db"
       MONGO_PORT: "27017"
       MONGO_DBNAME: "unifi"
-      MEM_LIMIT: "1024" #optional
-      MEM_STARTUP: "1024" #optional
+      MEM_LIMIT: "1024"
+      MEM_STARTUP: "1024"
+    volumes:
+      - ./config:/config
+    ports:
+      - 8443:8443
+      - 3478:3478/udp
+      - 10001:10001/udp
+      - 9080:8080
+      - 8843:8843
+      - 8880:8880
+      - 6789:6789
+      - 5514:5514/udp
+    logging: *default-logging
     labels:
       homepage.description: "WiFi management"
       homepage.group: "Infrastructure"
@@ -51,30 +99,20 @@ services:
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
       repliqate.enabled: 'true'
       repliqate.engine: "restic"
-      repliqate.schedule: "@weekly 3am" # Trigger every day at 3 am
+      repliqate.schedule: "@weekly 3am"
       repliqate.backup_id: unifi
-      repliqate.retention: "90d" # Keep backups for 30 days
-    volumes:
-      - ./config:/config
-    ports:
-      - 8443:8443
-      - 3478:3478/udp
-      - 10001:10001/udp
-      - 9080:8080
-#     - 1900:1900/udp #optional
-      - 8843:8843 #optional
-      - 8880:8880 #optional
-      - 6789:6789 #optional
-      - 5514:5514/udp #optional
-    restart: unless-stopped
+      repliqate.retention: "90d"
+
   unifi-network-mcp:
-    image: ghcr.io/sirkirby/unifi-network-mcp:latest
+    image: *unifi-mcp-version
     container_name: unifi-network-mcp
-    cap_add: []
+    ipc: private
+    restart: unless-stopped
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
+    mem_limit: 256M
     environment:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
@@ -87,6 +125,11 @@ services:
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
       UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13:5134,localhost:3000"
+    ports:
+      - "5134:3000"
+    depends_on:
+      - unifi-network-application
+    logging: *default-logging
     labels:
       homepage.description: "UniFi Network MCP (HTTP/SSE)"
       homepage.group: "Infrastructure"
@@ -97,8 +140,3 @@ services:
       wud.link.template: 'https://github.com/sirkirby/unifi-network-mcp/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'UniFi Network MCP'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
-    ports:
-      - "5134:3000"
-    restart: unless-stopped
-    depends_on:
-      - unifi-network-application

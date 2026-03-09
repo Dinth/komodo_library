@@ -1,8 +1,21 @@
+x-versions:
+  uptime-kuma: &uptime-kuma-version "louislam/uptime-kuma:2.2.0"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.3"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   uptime-kuma-socket-proxy:
-    image: wollomatic/socket-proxy:1.11.3
+    image: *socket-proxy-version
     container_name: uptime-kuma-socket-proxy
+    hostname: uptime-kuma-socket-proxy
     ipc: private
+    restart: unless-stopped
+    read_only: true
     command:
       - '-loglevel=info'
       - '-allowfrom=uptime-kuma'
@@ -13,58 +26,63 @@ services:
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
       - '-allowhealthcheck'
-    restart: unless-stopped
-    read_only: true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     mem_limit: 64M
-    expose:
-      - "2375"
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
       timeout: 5s
       retries: 2
       start_period: 10s
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges
-    user: "65534:${DOCKER_SOCKET_GID}"
+    expose:
+      - "2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - uptime-kuma
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: 'Docker Socket Proxy - Uptime Kuma'
       wud.display.icon: 'mdi:connection'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - uptime-kuma
-      
+
   uptime-kuma:
-    image: louislam/uptime-kuma:2.2.0
+    image: *uptime-kuma-version
     container_name: uptime-kuma
     hostname: uptime-kuma
     ipc: private
+    restart: unless-stopped
+    cap_add:
+      - NET_RAW
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
+    environment:
+      TZ: "Europe/London"
     depends_on:
       uptime-kuma-socket-proxy:
         condition: service_healthy
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_RAW # Required for ICMP/Ping monitors to work properly
-      # - AUDIT_WRITE (See note below regarding capability bloat)
-      # - CHOWN
-      # - DAC_OVERRIDE
-      # - FOWNER
-      # - FSETID
-      # - MKNOD
-      # - SETFCAP
-      # - SETGID
-      # - SETPCAP
-      # - SETUID
-      # - SYS_CHROOT
-    environment:
-      - TZ=Europe/London # Ensures logs and cron schedules match your local time
+    healthcheck:
+      test: curl -f http://localhost:3001 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - 3001:3001/tcp
+    volumes:
+      - /opt/docker/uptime-kuma/uptime-kuma_data:/app/data
+    networks:
+      - uptime-kuma
+      - signal-rest-api
+    logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Uptime-Kuma"
@@ -80,24 +98,6 @@ services:
       wud.display.name: 'Uptime Kuma'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/louislam/uptime-kuma/releases/tag/$${major}.$${minor}.$${patch}'
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: curl -f http://localhost:3001 || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - uptime-kuma
-      - signal-rest-api
-    ports:
-      - 3001:3001/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/uptime-kuma/uptime-kuma_data:/app/data
 
 networks:
   uptime-kuma:

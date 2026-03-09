@@ -1,5 +1,21 @@
+x-versions:
+  swag: &swag-version "lscr.io/linuxserver/swag:latest"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   swag:
+    image: *swag-version
+    container_name: swag
+    hostname: swag
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ['/init']
+    working_dir: /
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,8 +33,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: swag
-    entrypoint: ['/init']
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
     environment:
       DNSPLUGIN: "cloudflare"
       EMAIL: "${ADMIN_EMAIL}"
@@ -30,25 +47,21 @@ services:
       VALIDATION: "dns"
       PROPAGATION: "80"
       DOCKER_MODS: "linuxserver/mods:swag-dashboard"
-    hostname: swag
-    image: lscr.io/linuxserver/swag:latest
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - swag
     ports:
       - 443:443/tcp
       - 80:80/tcp
       - 82:81/tcp
-    restart: unless-stopped
     volumes:
       - /Data/IT/cdn:/cdn:ro
       - /opt/docker/swag/swag_config:/config
-    working_dir: /
+    networks:
+      - swag
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "SWAG"
+      wud.display.icon: "sh:swag"
+
 networks:
   swag:
     name: swag

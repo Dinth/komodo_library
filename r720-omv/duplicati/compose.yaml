@@ -1,8 +1,18 @@
+x-versions:
+  duplicati: &duplicati-version "duplicati/duplicati:2.1.2.0"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   duplicati:
-    image: duplicati/duplicati:2.1.2.0
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    image: *duplicati-version
+    ipc: private
     restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
       - CHOWN
       - SETGID
@@ -12,26 +22,24 @@ services:
     cap_drop:
       - ALL
     security_opt:
-      - no-new-privileges=true
-    ports:
-      - "8200:8200/tcp"
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       TZ: "${TZ}"
       DUPLICATI__DISABLE_DB_ENCRYPTION: "true"
       DUPLICATI__WEBSERVICE_PASSWORD: "${DUPLICATI_ADMIN_PASS}"
-    networks:
-      - duplicati
+    ports:
+      - "8200:8200/tcp"
     volumes:
       - /opt/docker/duplicati/duplicati_data:/data
       - /Data/IT/Backups:/backups
       - /opt/docker:/source:ro
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    networks:
+      - duplicati
+    logging: *default-logging
+
 networks:
   duplicati:
-    external: false
-    name: "duplicati"
+    name: duplicati
     driver: bridge
+    external: false

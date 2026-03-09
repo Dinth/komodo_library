@@ -1,8 +1,20 @@
+x-versions:
+  n8n: &n8n-version "docker.n8n.io/n8nio/n8n:1.117.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   n8n:
+    image: *n8n-version
+    container_name: n8n
+    hostname: n8n
+    ipc: private
+    restart: unless-stopped
     user: ${DOCKER_PUID}:${DOCKER_PGID}
-    cap_drop:
-      - ALL
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -18,9 +30,11 @@ services:
       - SETPCAP
       - SETUID
       - SYS_CHROOT
-      - DAC_OVERRIDE
-    container_name: n8n
-#    entrypoint: ['tini','--','/docker-entrypoint.sh']
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
     environment:
       DB_TYPE: "postgresdb"
       DB_POSTGRESDB_DATABASE: "n8n"
@@ -46,14 +60,21 @@ services:
       WEBHOOK_URL: "https://auto.${DOMAIN_NAME}"
       WEBHOOK_TUNNEL_URL: "https://auto.${DOMAIN_NAME}"
       N8N_TRUST_PROXY_HEADERS: "true"
-    hostname: n8n
-    image: docker.n8n.io/n8nio/n8n:1.117.1
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3" 
+    healthcheck:
+      test: wget --spider http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+      start_interval: 2s
+    ports:
+      - 5678:5678/tcp
+    volumes:
+      - /opt/docker/n8n/n8n_data:/home/node/.n8n
+    networks:
+      - n8n
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.n8n.rule: "Host(`auto.${DOMAIN_NAME}`)"
@@ -74,21 +95,7 @@ services:
       homepage.description: "Workflow automation"
       homepage.icon: "n8n.png"
       homepage.href: "https://n8n.${DOMAIN_NAME}/"
-    healthcheck:
-      test: wget --spider http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 1m
-      start_interval: 2s
-    networks:
-      - n8n
-      - traefik
-    ports:
-      - 5678:5678/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/n8n/n8n_data:/home/node/.n8n
+
 networks:
   n8n:
     name: n8n

@@ -1,5 +1,20 @@
+x-versions:
+  jellyfin: &jellyfin-version "linuxserver/jellyfin:10.11.6"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   jellyfin:
+    image: *jellyfin-version
+    container_name: jellyfin
+    hostname: jellyfin
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ['/init']
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,16 +32,9 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: jellyfin
-    entrypoint: ['/init']
-    environment:
-      TZ: "${TZ}"
-      PUID: "${MEDIA_PUID}"
-      PGID: "${MEDIA_PGID}"
-      JELLYFIN_PublishedServerUrl: "https://jf.${DOMAIN_NAME}"
-    hostname: jellyfin
-    image: linuxserver/jellyfin:10.11.6
-    ipc: private
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 8G
     deploy:
       resources:
         reservations:
@@ -34,20 +42,36 @@ services:
             - driver: nvidia
               count: all
               capabilities: [video]
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - jellyfin
-      - traefik
+    environment:
+      TZ: "${TZ}"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+      JELLYFIN_PublishedServerUrl: "https://jf.${DOMAIN_NAME}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 3m
+      timeout: 30s
+      retries: 3
     ports:
       - 1900:1900/udp
       - 7359:7359/udp
       - 8096:8096/tcp
       - 8920:8920/tcp
-    labels:  
+    volumes:
+      - /opt/docker/jellyfin/jellyfin_config:/config
+      - /Data/TVShows:/tv
+      - /Data/Anime:/anime
+      - /Data/CartoonMovies:/cartoon_movies
+      - /Data/Cartoons:/cartoons
+      - /Data/DocumentaryMovies:/documentary_movies
+      - /Data/DocumentaryShows:/documentary_shows
+      - /Data/Movies:/movies
+      - /Data/IT/pinchflat_downloads:/youtube
+    networks:
+      - jellyfin
+      - traefik
+    logging: *default-logging
+    labels:
       traefik.enable: "true"
       traefik.http.routers.jellyfin.rule: "Host(`jf.${DOMAIN_NAME}`)"
       traefik.http.routers.jellyfin.entrypoints: "websecure"
@@ -58,7 +82,7 @@ services:
       traefik.http.routers.jellyfin.middlewares: "secHeaders@file,jellyfin-mw"
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
       traefik.http.middlewares.jellyfin-mw.headers.SSLRedirect: "true"
-      traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains: "true" 
+      traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains: "true"
       traefik.http.middlewares.jellyfin-mw.headers.STSPreload: "true"
       traefik.http.middlewares.jellyfin-mw.headers.customrequestheaders.X-Forwarded-Proto: "https"
       homepage.group: "Media"
@@ -73,7 +97,7 @@ services:
       homepage.widget.key: "${HOMEPAGE_JELLYFIN_API}"
       homepage.widget.enableBlocks: true
       homepage.widget.enableNowPlaying: true
-      homepage.widget.enableUser: true 
+      homepage.widget.enableUser: true
       homepage.widget.showEpisodeNumber: true
       homepage.widget.expandOneStreamToTwoRows: true
       wud.watch: "true"
@@ -81,22 +105,7 @@ services:
       wud.display.icon: "sh:jellyfin"
       wud.tag.include: '^v?(?:\d{1,2}\.){2}\d{1,2}$$'
       wud.link.template: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}.$${patch}"
-    healthcheck:
-      interval: 3m
-      retries: 3
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-      timeout: 30s
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/jellyfin/jellyfin_config:/config
-      - /Data/TVShows:/tv
-      - /Data/Anime:/anime
-      - /Data/CartoonMovies:/cartoon_movies
-      - /Data/Cartoons:/cartoons
-      - /Data/DocumentaryMovies:/documentary_movies
-      - /Data/DocumentaryShows:/documentary_shows
-      - /Data/Movies:/movies
-      - /Data/IT/pinchflat_downloads:/youtube
+
 networks:
   jellyfin:
     name: jellyfin

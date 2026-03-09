@@ -1,5 +1,20 @@
+x-versions:
+  adminer: &adminer-version "adminer:5.4.2"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   adminer:
+    image: *adminer-version
+    container_name: adminer
+    hostname: adminer
+    ipc: private
+    restart: unless-stopped
+    user: adminer
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -17,17 +32,17 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
     command: ['php','-S','[::]:8080','-t','/var/www/html']
-    container_name: adminer
     entrypoint: ['entrypoint.sh','docker-php-entrypoint']
-    hostname: adminer
-    image: adminer:5.4.2
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    working_dir: /var/www/html
+    ports:
+      - 9009:8080/tcp
+    networks:
+      - adminer
+    logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Adminer"
@@ -40,13 +55,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/vrana/adminer/releases/tag/v$${major}.$${minor}.$${patch}"
-    networks:
-      - adminer
-    ports:
-      - 9009:8080/tcp
-    restart: unless-stopped
-    user: adminer
-    working_dir: /var/www/html
+
 networks:
   adminer:
     name: adminer

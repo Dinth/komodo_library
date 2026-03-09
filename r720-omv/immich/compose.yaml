@@ -1,8 +1,25 @@
+x-versions:
+  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v2.5.6"
+  immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v2.5.6-cuda"
+  valkey: &valkey-version "docker.io/valkey/valkey:8.1.3-alpine"
+  postgres: &postgres-version "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.3.0"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   immich-server:
+    image: *immich-server-version
     container_name: immich-server
-    image: ghcr.io/immich-app/immich-server:v2.5.6
+    ipc: private
+    restart: unless-stopped
     user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 4G
     deploy:
       resources:
         reservations:
@@ -19,16 +36,27 @@ services:
       DB_USERNAME: "immich"
       DB_PASSWORD: "${IMMICH_POSTGRES_PASS}"
       DB_DATABASE_NAME: "immich"
-    ports:
-      - '2283:2283'
     depends_on:
       immich-valkey:
         condition: service_healthy
       immich-postgres:
         condition: service_healthy
-    restart: unless-stopped
     healthcheck:
       disable: false
+    ports:
+      - '2283:2283'
+    volumes:
+      - /Data/Photos:/usr/src/app/upload/library
+      - /opt/docker/immich/immich_backups:/usr/src/app/upload/backups
+      - /Data/IT/immich_encoded-video:/usr/src/app/upload/encoded-video
+      - /opt/docker/immich/immich_profile:/usr/src/app/upload/profile
+      - /opt/docker/immich/immich_thumbs:/usr/src/app/upload/thumbs
+      - /Data/IT/immich_upload:/usr/src/app/upload/upload
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - immich
+      - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.immich.rule: "Host(`photos.${DOMAIN_NAME}`)"
@@ -56,21 +84,15 @@ services:
       homepage.widget.key: "${HOMEPAGE_IMMICH_KEY}"
       homepage.widget.version: "2"
       homepage.widget.fields: "['users' ,'photos', 'videos', 'storage']"
-    volumes:
-      - /Data/Photos:/usr/src/app/upload/library
-      - /opt/docker/immich/immich_backups:/usr/src/app/upload/backups
-      - /Data/IT/immich_encoded-video:/usr/src/app/upload/encoded-video
-      - /opt/docker/immich/immich_profile:/usr/src/app/upload/profile
-      - /opt/docker/immich/immich_thumbs:/usr/src/app/upload/thumbs
-      - /Data/IT/immich_upload:/usr/src/app/upload/upload
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - immich
-      - traefik
 
   immich-machine-learning:
+    image: *immich-ml-version
     container_name: immich-machine-learning
-    image: ghcr.io/immich-app/immich-machine-learning:v2.5.6-cuda
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 4G
     deploy:
       resources:
         reservations:
@@ -79,30 +101,26 @@ services:
               count: 1
               capabilities:
                 - gpu
+    healthcheck:
+      disable: false
+    volumes:
+      - /opt/docker/immich/immich_model-cache:/cache
+    networks:
+      - immich
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.display.icon: "sh-immich"
       wud.display.name: "Immich Machine Learning"
       wud.tag.include: '^v\d+\.\d+\.\d+\-cuda$$'
       wud.link.template: "https://github.com/immich-app/immich/releases/tag/v$${major}.$${minor}.$${patch}"
-    volumes:
-      - /opt/docker/immich/immich_model-cache:/cache
-    restart: unless-stopped
-    healthcheck:
-      disable: false
-    networks:
-      - immich
 
   immich-valkey:
+    image: *valkey-version
     container_name: immich-valkey
-    image: docker.io/valkey/valkey:8.1.3-alpine
     ipc: private
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    networks:
-      - immich
-    volumes:
-      - /opt/docker/yamtrack/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -110,29 +128,36 @@ services:
       - CHOWN
     cap_drop:
       - ALL
-    labels:
-      wud.display.name: "Yamtrack - Valkey"
-      wud.display.icon: "sh-searxng"
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
+    volumes:
+      - /opt/docker/immich/valkey-data:/data
+    networks:
+      - immich
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "1"
-
+    labels:
+      wud.display.name: "Immich - Valkey"
+      wud.display.icon: "sh-immich"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
   immich-postgres:
+    image: *postgres-version
     container_name: immich-postgres
-    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.3.0
     ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - FOWNER
@@ -143,22 +168,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
-      start_period: 20s
-      timeout: 30s
-      interval: 10s
-      retries: 5
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors\d+\.\d+\.\d+$$'
-      wud.display.name: "Immich - Postgres"
-      wud.display.icon: "sh-immich"  
     deploy:
       resources:
         limits:
@@ -170,12 +179,23 @@ services:
       POSTGRES_USER: immich
       POSTGRES_DB: immich
       POSTGRES_INITDB_ARGS: '--data-checksums'
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
     volumes:
       - /opt/docker/immich/immich_postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
     networks:
       - immich
       - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors\d+\.\d+\.\d+$$'
+      wud.display.name: "Immich - Postgres"
+      wud.display.icon: "sh-immich"
 
 networks:
   immich:

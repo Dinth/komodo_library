@@ -1,7 +1,21 @@
+x-versions:
+  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:2.20.10"
+  postgres: &postgres-version "docker.io/postgres:17.8-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.0.0-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   paperlessngx-postgres:
+    image: *postgres-version
     container_name: paperlessngx-postgres
+    hostname: paperlessngx-postgres
     ipc: private
+    restart: unless-stopped
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -11,48 +25,41 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    image: docker.io/postgres:17.8-alpine
-    restart: unless-stopped
-    healthcheck:
-      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
-      start_period: 20s
-      timeout: 30s
-      interval: 10s
-      retries: 5
-    environment:
-      POSTGRES_DB: "paperlessngx"
-      POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
-      POSTGRES_USER: "paperlessngx"
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^17\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
-      wud.display.name: "Paperless-ngx - Postgres"
-      wud.display.icon: "sh-paperlessngx"  
     deploy:
       resources:
         limits:
           memory: 200m
         reservations:
           memory: 50m
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    environment:
+      POSTGRES_DB: "paperlessngx"
+      POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
+      POSTGRES_USER: "paperlessngx"
+    healthcheck:
+      test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
     volumes:
       - /opt/docker/paperlessngx/postgres-data:/var/lib/postgresql/data
     networks:
       - paperlessngx
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^17\.\d+-alpine$$'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.display.name: "Paperless-ngx - Postgres"
+      wud.display.icon: "sh-paperlessngx"
+
   paperlessngx-valkey:
+    image: *valkey-version
     container_name: paperlessngx-valkey
-    image: docker.io/valkey/valkey:9.0.0-alpine
-    command: ['valkey-server','--save','30','1','--loglevel','warning']
+    hostname: paperlessngx-valkey
+    ipc: private
     restart: unless-stopped
-    networks:
-      - paperlessngx
-    volumes:
-      - /opt/docker/paperlessngx/valkey-data:/data
+    command: ['valkey-server','--save','30','1','--loglevel','warning']
     cap_add:
       - SETGID
       - SETUID
@@ -60,39 +67,62 @@ services:
       - CHOWN
     cap_drop:
       - ALL
-    labels:
-      wud.display.name: "Paperless-ngx - Valkey"
-      wud.display.icon: "sh-paperless-ngx"
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+\-alipne$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128M
+    healthcheck:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
       interval: 1s
       retries: 5
+    volumes:
+      - /opt/docker/paperlessngx/valkey-data:/data
+    networks:
+      - paperlessngx
     logging:
       driver: "json-file"
       options:
         max-size: "1m"
         max-file: "1"
+    labels:
+      wud.display.name: "Paperless-ngx - Valkey"
+      wud.display.icon: "sh-paperless-ngx"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+
   paperlessngx:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.10
-    restart: unless-stopped
+    image: *paperlessngx-version
+    container_name: paperlessngx
+    hostname: paperlessngx
     ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2G
     depends_on:
       paperlessngx-valkey:
         condition: service_healthy
       paperlessngx-postgres:
         condition: service_healthy
-    ports:
-      - "8583:8000"
-    volumes:
-      - /opt/docker/paperlessngx/paperlessngx_data:/usr/src/paperless/data
-      - /opt/docker/paperlessngx/paperlessngx_media:/usr/src/paperless/media
-      - /opt/docker/paperlessngx/paperlessngx_export:/usr/src/paperless/export
-      - /opt/docker/paperlessngx/paperlessngx_consume:/usr/src/paperless/consume
     environment:
       PAPERLESS_REDIS: "redis://paperlessngx-valkey:6379"
       PAPERLESS_DBHOST: "paperlessngx-postgres"
@@ -106,9 +136,17 @@ services:
       PAPERLESS_ALLOWED_HOSTS: "papers.${DOMAIN_NAME},10.10.1.13"
       PAPERLESS_CORS_ALLOWED_HOSTS: "https://papers.${DOMAIN_NAME},http://10.10.1.13:8583"
       PAPERLESS_SECRET_KEY: "${PAPERLESSNGX_SECRET_KEY}"
+    ports:
+      - "8583:8000"
+    volumes:
+      - /opt/docker/paperlessngx/paperlessngx_data:/usr/src/paperless/data
+      - /opt/docker/paperlessngx/paperlessngx_media:/usr/src/paperless/media
+      - /opt/docker/paperlessngx/paperlessngx_export:/usr/src/paperless/export
+      - /opt/docker/paperlessngx/paperlessngx_consume:/usr/src/paperless/consume
     networks:
       - paperlessngx
       - traefik
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.paperlessngx.rule: "Host(`papers.${DOMAIN_NAME}`)"
@@ -130,6 +168,7 @@ services:
       wud.display.name: "Paperless-ngx"
       wud.display.icon: "sh:paperless-ngx"
       wud.link.template: "https://github.com/paperless-ngx/paperless-ngx/releases/tag/v$${major}.$${minor}.$${patch}"
+
 networks:
   paperlessngx:
     name: paperlessngx-web

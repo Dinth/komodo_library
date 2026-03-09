@@ -8,7 +8,8 @@ x-netbox-common: &netbox-common
   ipc: private
   user: "${DOCKER_PUID}:${DOCKER_PGID}"
   security_opt:
-    - no-new-privileges=true
+    - no-new-privileges:true
+  mem_limit: 1G
   restart: unless-stopped
   cap_add:
     - AUDIT_WRITE
@@ -106,7 +107,8 @@ services:
     container_name: netbox-postgres
     ipc: private
     security_opt:
-      - no-new-privileges=true
+      - no-new-privileges:true
+    mem_limit: 512M
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
       - CHOWN
@@ -162,6 +164,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    mem_limit: 256M
     labels:
       wud.display.name: "NetBox - Valkey"
       wud.watch: "true"

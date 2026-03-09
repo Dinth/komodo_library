@@ -1,6 +1,21 @@
+x-versions:
+  navidrome: &navidrome-version "deluan/navidrome:0.60.3"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   navidrome:
+    image: *navidrome-version
+    container_name: navidrome
+    hostname: navidrome
+    ipc: private
+    restart: unless-stopped
     user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    entrypoint: ['/app/navidrome']
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -18,21 +33,18 @@ services:
       - SYS_CHROOT
     cap_drop:
       - ALL
-    container_name: navidrome
-    entrypoint: ['/app/navidrome']
-    hostname: navidrome
-    image: deluan/navidrome:0.60.3
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-file: "3"
-        max-size: 10m
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
+    ports:
+      - 4533:4533/tcp
+    volumes:
+      - /opt/docker/navidrome/navidrome_data:/data
+      - /Data/Music:/music:ro
     networks:
       - navidrome
       - traefik
-    ports:
-      - 4533:4533/tcp
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.navidrome.entrypoints: websecure
@@ -49,19 +61,12 @@ services:
       homepage.href: "https://music.${DOMAIN_NAME}"
       homepage.description: "Music streamer"
       homepage.siteMonitor: "https://music.${DOMAIN_NAME}"
-#      homepage.widget.type: "navidrome"
-#      homepage.widget.url: "https://music.${DOMAIN_NAME}"
-#      homepage.widget.username: "${HOMEPAGE_CALIBREWEB_USER}"
-#      homepage.widget.password: "${HOMEPAGE_CALIBREWEB_PASS}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Navidrome"
       wud.display.icon: "sh:navidrome"
       wud.link.template: "https://github.com/navidrome/navidrome/releases/v$${major}.$${minor}.$${patch}"
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/navidrome/navidrome_data:/data
-      - /Data/Music:/music:ro
+
 networks:
   navidrome:
     name: navidrome

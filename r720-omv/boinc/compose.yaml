@@ -1,6 +1,15 @@
+x-versions:
+  boinc: &boinc-version "lscr.io/linuxserver/boinc:8.2.8"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   boinc:
-    image: lscr.io/linuxserver/boinc:8.2.8
+    image: *boinc-version
     container_name: boinc
     ipc: private
     security_opt:
@@ -37,6 +46,7 @@ services:
     restart: unless-stopped
     networks:
       - boinc
+    logging: *default-logging
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d\.\d+\.\d+$$'
