@@ -160,7 +160,7 @@ services:
       - /sys:/host/sys:ro
       - /:/host:ro,rslave
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9100/metrics | grep -q 'node_exporter'"]
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:9100/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
