@@ -159,6 +159,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host:ro,rslave
+      - /run/udev/data:/run/udev/data:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:9100/ || exit 1"]
       interval: 30s
