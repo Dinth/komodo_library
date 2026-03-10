@@ -1,5 +1,5 @@
 x-versions:
-  cloudflared: &cloudflared-version "cloudflare/cloudflared:2026.2.0"
+  cloudflared: &cloudflared-version "cloudflare/cloudflared:2026.3.0"
 
 x-logging: &default-logging
   driver: "json-file"
