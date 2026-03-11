@@ -74,6 +74,7 @@ services:
     networks:
       - n8n
       - traefik
+      - cloudflared
     logging: *default-logging
     labels:
       traefik.enable: "true"
