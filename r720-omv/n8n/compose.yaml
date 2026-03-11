@@ -103,3 +103,5 @@ networks:
     external: false
   traefik:
     external: true
+  cloudflared:
+    external: true
