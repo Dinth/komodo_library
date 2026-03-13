@@ -124,7 +124,7 @@ services:
       UNIFI_SITE: "default"
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
-      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13:5134,localhost:3000"
+      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13,10.10.10.10,localhost,127.0.0.1"
     ports:
       - "5134:3000"
     depends_on:
