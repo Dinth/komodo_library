@@ -186,7 +186,7 @@ services:
     image: *cadvisor-version
     restart: unless-stopped
     command:
-      - --housekeeping_interval=30s
+      - --housekeeping_interval=60s
       - --docker_only=true
       - --disable_metrics=percpu,hugetlb,referenced_memory,cpu_topology,resctrl
       - --store_container_labels=false

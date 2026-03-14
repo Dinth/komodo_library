@@ -15,6 +15,7 @@ services:
     image: *scrutiny-collector-version
     container_name: scrutiny-collector
     hostname: scrutiny-collector
+    mem_limit: 256M
     cap_add:
       - SETGID
       - SETUID
@@ -81,6 +82,7 @@ services:
     image: *scrutiny-web-version
     container_name: scrutiny-web
     hostname: scrutiny-web
+    mem_limit: 512M
     cap_drop:
       - ALL
     security_opt: no-new-privileges:true

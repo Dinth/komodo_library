@@ -60,7 +60,7 @@ services:
       - MISP_MODULES_URL=http://misp-modules
       - MISP_MODULES_PORT=6666
     volumes:
-      - /opt/docker/secops/misp_vonfig:/var/www/MISP/app/Config
+      - /opt/docker/secops/misp_config:/var/www/MISP/app/Config
       - /opt/docker/secops/misp_files:/var/www/MISP/app/files
       - /opt/docker/secops/misp_gnuPG:/var/www/MISP/.gnupg
       - /opt/docker/secops/misp_customimages:/var/www/MISP/app/webroot/img/custom

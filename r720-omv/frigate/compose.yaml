@@ -20,6 +20,7 @@ services:
     privileged: true
     runtime: nvidia
     shm_size: "8gb"
+    mem_limit: 16G
     cap_add:
       - AUDIT_WRITE
       - CHOWN
