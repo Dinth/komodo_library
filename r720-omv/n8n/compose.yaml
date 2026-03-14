@@ -74,6 +74,7 @@ services:
     networks:
       - n8n
       - traefik
+      - cloudflared
     logging: *default-logging
     labels:
       traefik.enable: "true"
@@ -102,4 +103,6 @@ networks:
     driver: bridge
     external: false
   traefik:
+    external: true
+  cloudflared:
     external: true

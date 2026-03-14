@@ -159,8 +159,9 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host:ro,rslave
+      - /run/udev/data:/run/udev/data:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9100/metrics | grep -q 'node_exporter'"]
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:9100/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -343,7 +344,7 @@ services:
       - "--address"
       - ":5133"
       - "--enabled-tools"
-      - "search,dashboard,datasources,prometheus,loki"
+      - "search,dashboard,datasources,prometheus,loki,alerting,annotations,navigation"
     cap_drop:
       - ALL
     security_opt:
@@ -362,7 +363,7 @@ services:
       - monitoring
       - openwebui
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5133/sse"]
+      test: ["CMD", "echo -e 'GET /healthz HTTP/1.0\r\nHost: localhost\r\n\r\n' > /dev/tcp/localhost/5133"]
       interval: 30s
       timeout: 10s
       retries: 3
