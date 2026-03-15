@@ -1,5 +1,5 @@
 x-versions:
-  signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.97"
+  signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.98"
 
 x-logging: &default-logging
   driver: "json-file"
