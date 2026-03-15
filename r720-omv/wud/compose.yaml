@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.3"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.4"
   wud: &wud-version "getwud/wud:8.2.2"
 
 x-logging: &default-logging

@@ -1,6 +1,6 @@
 x-versions:
-  ollama: &ollama-version "ollama/ollama:0.17.7"
-  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.8.8"
+  ollama: &ollama-version "ollama/ollama:0.18.0"
+  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.8.10"
   hass-mcp: &hass-mcp-version "voska/hass-mcp:0.1.1"
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
   
