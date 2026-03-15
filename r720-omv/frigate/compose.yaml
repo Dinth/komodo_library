@@ -19,8 +19,8 @@ services:
     # NOTE: privileged required for GPU/device access
     privileged: true
     runtime: nvidia
-    shm_size: "8gb"
-    mem_limit: 16G
+    shm_size: "16gb"
+    mem_limit: 32G
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -74,6 +74,8 @@ services:
       - /opt/docker/frigate/frigate_storage/frigate.db-shm:/media/frigate/frigate.db-shm
       - /opt/docker/frigate/frigate_storage/frigate.db-wal:/media/frigate/frigate.db-wal
       - /opt/docker/frigate/frigate_storage/backup.db:/media/frigate/backup.db
+    tmpfs:
+      - /tmp:size=4G,mode=1777
     networks:
       - frigate
       - traefik
