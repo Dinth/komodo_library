@@ -1,5 +1,5 @@
 x-versions:
-  audiobookshelf: &audiobookshelf-version "ghcr.io/advplyr/audiobookshelf:2.33.0"
+  audiobookshelf: &audiobookshelf-version "ghcr.io/advplyr/audiobookshelf:2.33.1"
 
 x-logging: &default-logging
   driver: "json-file"
