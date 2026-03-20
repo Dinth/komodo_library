@@ -1,6 +1,6 @@
 x-versions:
   mongo: &mongo-version "docker.io/mongo:8.2.5"
-  unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.1.85"
+  unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.1.89"
   unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:latest"
 
 x-logging: &default-logging
