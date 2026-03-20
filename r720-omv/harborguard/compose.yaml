@@ -1,6 +1,6 @@
 x-versions:
   harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest"
-  postgres: &postgres-version "postgres:16.11-alpine"
+  postgres: &postgres-version "postgres:18-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -80,7 +80,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^16\.\d+-alpine$$'
+      wud.tag.include: '^18\.\d+-alpine$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Harborguard - Postgres"
       wud.display.icon: "sh-harborguard"

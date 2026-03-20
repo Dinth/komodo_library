@@ -1,5 +1,5 @@
 x-versions:
-  postgresql: &postgresql-version "postgres:15"
+  postgresql: &postgresql-version "postgres:18-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -49,10 +49,10 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+$$'
+      wud.tag.include: '^18\.\d+-alpine$$'
       wud.display.name: "PostgreSQL"
       wud.display.icon: "sh:postgresql"
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_0'
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
 
 networks:
   postgresql:
