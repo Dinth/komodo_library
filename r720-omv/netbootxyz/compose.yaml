@@ -1,5 +1,5 @@
 x-versions:
-  netbootxyz: &netbootxyz-version "linuxserver/netbootxyz:0.7.6"
+  netbootxyz: &netbootxyz-version "linuxserver/netbootxyz:2.0.53"
 
 x-logging: &default-logging
   driver: "json-file"
