@@ -109,7 +109,6 @@ services:
       POSTGRES_DB: "yamtrack"
       POSTGRES_USER: "yamtrack"
       POSTGRES_PASSWORD: "${YAMTRACK_DB_PASS}"
-      PGDATA: "/var/lib/postgresql/data"
     healthcheck:
       test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
       start_period: 20s
