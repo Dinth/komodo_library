@@ -1,5 +1,6 @@
 x-versions:
   frigate: &frigate-version "ghcr.io/blakeblackshear/frigate:0.17.0-tensorrt"
+  whoami: &whoami-version "traefik/whoami:v1.10.3"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -106,6 +107,37 @@ services:
       wud.link.template: "https://github.com/blakeblackshear/frigate/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Frigate"
       wud.display.icon: "mdi:cctv"
+
+  # Temporary debug service to see headers - REMOVE AFTER DEBUGGING
+  debug-headers:
+    image: *whoami-version
+    container_name: frigate-debug-headers
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 32M
+    networks:
+      - traefik
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      # Raw headers - no CF middlewares (priority 200 = higher than default)
+      traefik.http.routers.debug-raw.entrypoints: websecure
+      traefik.http.routers.debug-raw.rule: Host(`cctv.${DOMAIN_NAME}`) && PathPrefix(`/debug`)
+      traefik.http.routers.debug-raw.priority: "200"
+      traefik.http.routers.debug-raw.tls: "true"
+      traefik.http.routers.debug-raw.middlewares: "secHeaders@file"
+      # With cloudflarewarp middleware
+      traefik.http.routers.debug-warp.entrypoints: websecure
+      traefik.http.routers.debug-warp.rule: Host(`cctv.${DOMAIN_NAME}`) && PathPrefix(`/debug-cf`)
+      traefik.http.routers.debug-warp.priority: "200"
+      traefik.http.routers.debug-warp.tls: "true"
+      traefik.http.routers.debug-warp.middlewares: "cloudflarewarp@file,secHeaders@file"
+      traefik.http.services.debug-headers.loadbalancer.server.port: "80"
+      traefik.docker.network: "traefik"
 
 networks:
   frigate:
