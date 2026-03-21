@@ -1,16 +1,60 @@
-## Add your compose file here
+x-versions:
+  netbootxyz: &netbootxyz-version "linuxserver/netbootxyz:0.7.6"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  netbootxyz:
+    image: *netbootxyz-version
+    container_name: netbootxyz
+    hostname: netbootxyz
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+    healthcheck:
+      test: curl -sf --max-time 2 http://localhost:3000/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - 3000:3000/tcp   # Web configuration interface
+      - 69:69/udp       # TFTP server (PXE boot)
+      - 8080:80/tcp     # HTTP server for assets
+    volumes:
+      - /opt/docker/netbootxyz/netbootxyz_config:/config:rw
+      - /opt/docker/netbootxyz/netbootxyz_assets:/assets:rw
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - netbootxyz
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/netbootxyz/netboot.xyz/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.display.name: 'netboot.xyz'
+      wud.display.icon: 'mdi:server-network'
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+networks:
+  netbootxyz:
+    name: netbootxyz
+    driver: bridge
+    external: false
