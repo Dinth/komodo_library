@@ -62,7 +62,7 @@ services:
       interval: 10s
       retries: 5
     volumes:
-      - /opt/docker/freshrss/freshrss_postgres-data:/var/lib/postgresql/data
+      - /opt/docker/freshrss/freshrss_postgres-data:/var/lib/postgresql/18/docker
     networks:
       - freshrss
     logging: *default-logging
