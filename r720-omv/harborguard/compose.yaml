@@ -1,6 +1,6 @@
 x-versions:
   harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest"
-  postgres: &postgres-version "postgres:18-alpine"
+  postgres: &postgres-version "postgres:18.3-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
