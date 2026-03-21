@@ -1,7 +1,7 @@
 x-versions:
   yamtrack: &yamtrack-version "ghcr.io/fuzzygrim/yamtrack:0.25.0"
   postgres: &postgres-version "postgres:18.3-alpine"
-  valkey: &valkey-version "docker.io/valkey/valkey:8.1.3-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
