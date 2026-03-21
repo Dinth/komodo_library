@@ -35,6 +35,7 @@ services:
       POSTGRES_DB: "paperlessngx"
       POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
       POSTGRES_USER: "paperlessngx"
+      PGDATA: "/var/lib/postgresql/data"
     healthcheck:
       test: pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER
       start_period: 20s
@@ -48,7 +49,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^17\.\d+-alpine$$'
+      wud.tag.include: '^18\.\d+-alpine$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Paperless-ngx - Postgres"
       wud.display.icon: "sh-paperlessngx"
