@@ -29,6 +29,8 @@ services:
       TZ: "${TZ}"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
+      WEB_APP_PORT: "3010"
+      NGINX_PORT: "85"
     healthcheck:
       test: curl -sf --max-time 2 http://localhost:3000/ || exit 1
       interval: 30s
@@ -36,12 +38,12 @@ services:
       retries: 3
       start_period: 10s
     ports:
-      - 3000:3000/tcp   # Web configuration interface
+      - 3010:3010/tcp   # Web configuration interface
       - 69:69/udp       # TFTP server (PXE boot)
-      - 8080:80/tcp     # HTTP server for assets
+      - 85:85/tcp     # HTTP server for assets
     volumes:
       - /opt/docker/netbootxyz/netbootxyz_config:/config:rw
-      - //Data/IT/netbootxyz_assets:/assets:rw
+      - /Data/IT/netbootxyz_assets:/assets:rw
       - /etc/localtime:/etc/localtime:ro
     networks:
       - netbootxyz
