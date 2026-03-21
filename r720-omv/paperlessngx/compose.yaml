@@ -1,5 +1,5 @@
 x-versions:
-  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:2.20.12"
+  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:2.20.13"
   postgres: &postgres-version "docker.io/postgres:18.3-alpine"
   valkey: &valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
 
