@@ -41,7 +41,7 @@ services:
       - 8080:80/tcp     # HTTP server for assets
     volumes:
       - /opt/docker/netbootxyz/netbootxyz_config:/config:rw
-      - /opt/docker/netbootxyz/netbootxyz_assets:/assets:rw
+      - //Data/IT/netbootxyz_assets:/assets:rw
       - /etc/localtime:/etc/localtime:ro
     networks:
       - netbootxyz
