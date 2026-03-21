@@ -108,6 +108,7 @@ services:
     container_name: unifi-network-mcp
     ipc: private
     restart: unless-stopped
+    stdin_open: true
     cap_drop:
       - ALL
     security_opt:
