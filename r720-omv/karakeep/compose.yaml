@@ -95,7 +95,7 @@ services:
     ipc: private
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    command: "./meilisearch --experimental-dumpless-upgrade"
+    command: "meilisearch --experimental-dumpless-upgrade"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
