@@ -46,7 +46,7 @@ services:
       traefik.http.routers.authelia-cfaccess.tls.certresolver: "letsencrypt"
       traefik.http.routers.authelia-cfaccess.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.authelia-cfaccess.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.authelia-cfaccess.middlewares: "cf-access-required@file,set-cfaccess-trusted-ip@file,secHeaders@file"
+      traefik.http.routers.authelia-cfaccess.middlewares: "cf-access-auth@file,set-cfaccess-trusted-ip@file,secHeaders@file"
       traefik.http.routers.authelia-cfaccess.service: "authelia"
       # --- Default router for the Authelia Portal ---
       traefik.http.routers.authelia.rule: "Host(`id.${DOMAIN_NAME}`)"

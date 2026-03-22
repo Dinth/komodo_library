@@ -91,7 +91,7 @@ services:
       traefik.http.routers.frigate-cfaccess.tls.certresolver: letsencrypt
       traefik.http.routers.frigate-cfaccess.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.frigate-cfaccess.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.frigate-cfaccess.middlewares: "cf-access-required@file,set-cfaccess-trusted-ip@file,secHeaders@file,authelia-auth@docker"
+      traefik.http.routers.frigate-cfaccess.middlewares: "cf-access-auth@file,set-cfaccess-trusted-ip@file,secHeaders@file,authelia-auth@docker"
       traefik.http.routers.frigate-cfaccess.service: frigate
       # Default router for non-CF-Access traffic (local network or external) - normal auth flow
       traefik.http.routers.frigate.entrypoints: websecure
