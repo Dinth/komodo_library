@@ -1,6 +1,7 @@
 x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.4
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
+  mqtt-mcp-version: &mqtt-mcp-version ghcr.io/ezhuk/mqtt-mcp:latest
 
 x-logging: &default-logging
   driver: "json-file"
@@ -73,6 +74,34 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+  mqtt-mcp:
+    image: *mqtt-mcp-version
+    container_name: mqtt-mcp
+    hostname: mqtt-mcp
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 128M
+    environment:
+      TZ: "${TZ}"
+      MQTT_MCP_MQTT__HOST: "10.10.1.11"
+      MQTT_MCP_MQTT__PORT: "1883"
+      MQTT_MCP_MQTT__USERNAME: "${MQTT_USERNAME}"
+      MQTT_MCP_MQTT__PASSWORD: "${MQTT_PASSWORD}"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T2", "-O-", "http://localhost:8000/mcp/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks: [mcp-gateway]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.display.name: "MQTT MCP"
+
 networks:
   mcp-gateway:
     name: mcp-gateway
