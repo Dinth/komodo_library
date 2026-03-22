@@ -1,6 +1,6 @@
 x-versions:
-  bunkerm: &bunkerm-version "bunkeriot/bunkerm:latest"
-  mqtt-explorer: &mqtt-explorer-version "smeagolworms4/mqtt-explorer:latest"
+  bunkerm: &bunkerm-version "bunkeriot/bunkerm:v2.1.0"
+  mqtt-explorer: &mqtt-explorer-version "smeagolworms4/mqtt-explorer:browser-1.0.3"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -25,6 +25,12 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:4000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     ports:
       - "4000:4000/tcp"
     volumes:
@@ -34,8 +40,10 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+      wud.tag.include: '^browser-\d+\.\d+\.\d+$$'
       wud.display.name: "MQTT Explorer"
       wud.display.icon: "sh-bunkerm"
+      wud.link.template: "https://github.com/smeagolworms4/mqtt-explorer-docker/releases"
 
   bunkerm:
     image: *bunkerm-version
@@ -53,10 +61,17 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:2000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     environment:
+      TZ: "${TZ}"
       HOST_ADDRESS: "10.10.1.13"
     ports:
-      - "1900:1900"
+      - "1883:1883"
       - "2000:2000"
     volumes:
       - "/opt/docker/bunkerm/bunkerm_data:/var/lib/mosquitto"
@@ -76,7 +91,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "BunkerM"
       wud.display.icon: "sh:bunkerm"
-      wud.link.template: "https://github.com/bunkeriot/BunkerM/releases/v$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/bunkeriot/BunkerM/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   bunkerm:
