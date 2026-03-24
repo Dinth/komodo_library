@@ -1,5 +1,5 @@
 x-versions:
-  fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.5.8"
+  fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.5.9"
   fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.2.1"
 
 x-logging: &default-logging
