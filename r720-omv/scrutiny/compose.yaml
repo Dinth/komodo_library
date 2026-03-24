@@ -57,7 +57,7 @@ services:
         target: /dev/sdj
         permissions: r
     environment:
-      COLLECTOR_API_ENDPOINT: "http://10.10.1.13:93"
+      COLLECTOR_API_ENDPOINT: "http://scrutiny-web:8080"
     ipc: private
     restart: unless-stopped
     volumes:
@@ -68,7 +68,7 @@ services:
         bind:
           create_host_path: true
     networks:
-      scrutiny: null
+      - monitoring
     working_dir: /opt/scrutiny
     logging: *default-logging
     labels:
@@ -90,9 +90,10 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     environment:
       PATH: /opt/scrutiny/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      SCRUTINY_WEB_INFLUXDB_HOST: "10.10.1.11"
-      SCRUTINY_WEB_INFLUXDB_ORG: "scrutiny"
+      SCRUTINY_WEB_INFLUXDB_HOST: "influxdb"
+      SCRUTINY_WEB_INFLUXDB_ORG: "wickhay"
       SCRUTINY_WEB_INFLUXDB_PORT: "8086"
+      SCRUTINY_WEB_INFLUXDB_BUCKET: "scrutiny"
       SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
       SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
     ipc: private
@@ -109,7 +110,7 @@ services:
         bind:
           create_host_path: true
     networks:
-      scrutiny: null
+      - monitoring
     working_dir: /opt/scrutiny
     healthcheck:
       test: curl -ILfSs http://localhost:8080/api/health  || exit 1
@@ -126,6 +127,6 @@ services:
       wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
-  scrutiny:
-    name: scrutiny
-    driver: bridge
+  monitoring:
+    name: monitoring
+    external: true
