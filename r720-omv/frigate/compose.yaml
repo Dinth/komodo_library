@@ -1,6 +1,6 @@
 x-versions:
   frigate: &frigate-version "ghcr.io/blakeblackshear/frigate:0.17.1-tensorrt"
-  whoami: &whoami-version "traefik/whoami:v1.10.3"
+  whoami: &whoami-version "traefik/whoami:v1.11.0"
 
 x-logging: &default-logging
   driver: "json-file"
