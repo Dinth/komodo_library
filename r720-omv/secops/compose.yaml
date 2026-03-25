@@ -45,12 +45,14 @@ services:
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
-    cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE]
+    cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE, FOWNER]
     mem_limit: 2G
+    cpus: 2.0
     ports: ["8081:80"]
     environment:
       - PUID=${DOCKER_PUID}
       - PGID=${DOCKER_PGID}
+      - ADMIN_PASSWORD=${MISP_ADMIN_PASSWORD}
       - MISP_BASEURL=http://10.10.1.13:8081
       - MYSQL_HOST=misp-mariadb
       - MYSQL_LOGIN=misp
@@ -59,6 +61,12 @@ services:
       - MISP_MODULES_ENABLE=true
       - MISP_MODULES_URL=http://misp-modules
       - MISP_MODULES_PORT=6666
+      # Reduce worker counts to minimize idle CPU (default is 5 each)
+      - WORKERS_DEFAULT=1
+      - WORKERS_EMAIL=1
+      - WORKERS_CACHE=1
+      - WORKERS_PRIO=1
+      - WORKERS_UPDATE=1
     volumes:
       - /opt/docker/secops/misp_config:/var/www/MISP/app/Config
       - /opt/docker/secops/misp_files:/var/www/MISP/app/files

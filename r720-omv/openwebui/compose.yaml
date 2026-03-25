@@ -138,28 +138,24 @@ services:
   automatic1111:
     image: universonic/stable-diffusion-webui:latest
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     container_name: automatic1111
     environment:
-      CLI_ARGS: "--listen --xformers --api"
+      # Added --lowvram to reduce idle VRAM/CPU, --no-download-sd-model to skip auto-download
+      CLI_ARGS: "--listen --xformers --api --lowvram --no-download-sd-model --opt-channelslast"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       NVIDIA_VISIBLE_DEVICES: "all"
       TZ: "${TZ}"
+      # Fix git ownership errors when running as non-root
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: "safe.directory"
+      GIT_CONFIG_VALUE_0: "*"
     hostname: automatic1111
     ipc: private
     security_opt:
@@ -167,19 +163,25 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4.0'
-          memory: '12G'
+          cpus: '2.0'
+          memory: '8G'
         reservations:
           devices:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
+    # Use simple healthcheck that doesn't load models
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:7860/sdapi/v1/sd-models || exit 1"]
-      interval: 30s
+      test: ["CMD-SHELL", "curl --fail http://localhost:7860/ || exit 1"]
+      interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 180s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
