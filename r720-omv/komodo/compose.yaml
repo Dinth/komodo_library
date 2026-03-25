@@ -1,5 +1,5 @@
 x-versions:
-  komodo-core: &komodo-core-version "ghcr.io/moghtech/komodo-core:1.19.5"
+  komodo-core: &komodo-core-version "ghcr.io/moghtech/komodo-core:2.0.0"
   mongo: &mongo-version "mongo:8.2.5"
 
 x-logging: &default-logging
@@ -73,6 +73,7 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 512M
+    init: true
     depends_on:
       - mongo
     environment:
@@ -106,6 +107,7 @@ services:
     volumes:
       - /opt/docker/komodo/komodo_syncs:/syncs
       - /opt/docker/komodo/core.config.toml:/config/config.toml
+      - /opt/docker/komodo/keys:/config/keys
     extra_hosts:
       - host.docker.internal:host-gateway
     logging: *default-logging
