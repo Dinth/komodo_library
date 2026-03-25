@@ -52,7 +52,7 @@ services:
     environment:
       - PUID=${DOCKER_PUID}
       - PGID=${DOCKER_PGID}
-      - ADMIN_PASSWORD=${MISP_ADMIN_PASSWORD}
+      - ADMIN_PASSWORD=${SECOPS_MISP_ADMIN_PASSWORD}
       - MISP_BASEURL=http://10.10.1.13:8081
       - MYSQL_HOST=misp-mariadb
       - MYSQL_LOGIN=misp
