@@ -150,7 +150,7 @@ services:
     container_name: automatic1111
     shm_size: '4gb'
     environment:
-      WEBUI_ARGS: "--listen --xformers --api --lowvram --opt-channelslast"
+      WEBUI_ARGS: "--listen --xformers --api --lowvram --opt-channelslast --cors-allow-origins=* --allow-code"
       DIRECT_ADDRESS: "0.0.0.0"
       WEB_ENABLE_AUTH: "false"
       SKIP_ACL: "true"
