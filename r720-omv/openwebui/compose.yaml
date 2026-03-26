@@ -187,6 +187,7 @@ services:
       wud.watch.digest: "true"
       wud.display.name: "Automatic1111"
       wud.display.icon: "sh:stablediffusion"
+      wud.tag.include: "^v2-cuda-12\\.1\\.1-base-22\\.04(-v\\d+\\.\\d+\\.\\d+)?$$"
     networks:
       - openwebui
     ports:
