@@ -92,7 +92,7 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     environment:
       PATH: /opt/scrutiny/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      SCRUTINY_WEB_INFLUXDB_HOST: "influxdb"
+      SCRUTINY_WEB_INFLUXDB_HOST: "10.10.1.13"
       SCRUTINY_WEB_INFLUXDB_ORG: "wickhay"
       SCRUTINY_WEB_INFLUXDB_PORT: "8086"
       SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
