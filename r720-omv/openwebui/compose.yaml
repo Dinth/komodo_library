@@ -3,6 +3,7 @@ x-versions:
   openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.8.10"
   hass-mcp: &hass-mcp-version "voska/hass-mcp:0.1.1"
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
+  automatic1111: &automatic1111-version "ghcr.io/ai-dock/stable-diffusion-webui:cuda-12.1.1-base-22.04-v2"
   
 services:
   ollama:
@@ -136,7 +137,7 @@ services:
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
   automatic1111:
-    image: universonic/stable-diffusion-webui:latest
+    image: *automatic1111-version
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -147,15 +148,13 @@ services:
       - ALL
     container_name: automatic1111
     environment:
-      # Added --lowvram to reduce idle VRAM/CPU, --no-download-sd-model to skip auto-download
-      CLI_ARGS: "--listen --xformers --api --lowvram --no-download-sd-model --opt-channelslast"
+      WEBUI_ARGS: "--listen --xformers --api --lowvram --opt-channelslast"
+      DIRECT_ADDRESS: "0.0.0.0"
+      WEB_ENABLE_AUTH: "false"
+      SKIP_ACL: "true"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       NVIDIA_VISIBLE_DEVICES: "all"
       TZ: "${TZ}"
-      # Fix git ownership errors when running as non-root
-      GIT_CONFIG_COUNT: "1"
-      GIT_CONFIG_KEY_0: "safe.directory"
-      GIT_CONFIG_VALUE_0: "*"
     hostname: automatic1111
     ipc: private
     security_opt:
@@ -163,20 +162,19 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: '8G'
+          cpus: '4.0'
+          memory: '12G'
         reservations:
           devices:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
-    # Use simple healthcheck that doesn't load models
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:7860/ || exit 1"]
       interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 180s
+      start_period: 120s
     logging:
       driver: json-file
       options:
@@ -191,12 +189,8 @@ services:
       - openwebui
     ports:
       - 7860:7860/tcp
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
-      - /opt/docker/openwebui/automatic1111_models:/app/stable-diffusion-webui/models/Stable-diffusion
-      - /opt/docker/openwebui/automatic1111_outputs:/app/stable-diffusion-webui/outputs
-      - /opt/docker/openwebui/automatic1111_extensions:/app/stable-diffusion-webui/extensions
-      - /opt/docker/openwebui/automatic1111_config:/app/stable-diffusion-webui/config
+      - /opt/docker/openwebui/automatic1111_workspace:/workspace
     restart: unless-stopped
   openwebui-pipelines:
     cap_add:
