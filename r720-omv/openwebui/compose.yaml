@@ -144,6 +144,8 @@ services:
       - FOWNER
       - SETGID
       - SETUID
+      - KILL
+      - SYS_CHROOT
     cap_drop:
       - ALL
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
