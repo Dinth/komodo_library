@@ -1,5 +1,5 @@
 x-versions:
-  nextcloud: &nextcloud-version "linuxserver/nextcloud:33.0.0"
+  nextcloud: &nextcloud-version "linuxserver/nextcloud:33.0.1"
   valkey: &valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
   imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:latest"
   collabora: &collabora-version "collabora/code:25.04.7.2.1"
