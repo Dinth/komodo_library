@@ -47,7 +47,7 @@ services:
       resources:
         limits:
           cpus: '8.0'
-          memory: '8G'
+          memory: '64G'
         reservations:
           devices:
             - driver: nvidia
@@ -147,6 +147,7 @@ services:
     cap_drop:
       - ALL
     container_name: automatic1111
+    shm_size: '4gb'
     environment:
       WEBUI_ARGS: "--listen --xformers --api --lowvram --opt-channelslast"
       DIRECT_ADDRESS: "0.0.0.0"
@@ -163,7 +164,7 @@ services:
       resources:
         limits:
           cpus: '4.0'
-          memory: '12G'
+          memory: '32G'
         reservations:
           devices:
             - driver: nvidia
@@ -293,6 +294,11 @@ services:
     hostname: openwebui
     image: *openwebui-version
     ipc: private
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '8G'
     healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
