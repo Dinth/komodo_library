@@ -8,7 +8,7 @@ x-versions:
   lidarr: &lidarr-version "linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.5"
-  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.8.3"
+  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.9.1"
   radarr: &radarr-version "linuxserver/radarr:6.0.4"
   sonarr: &sonarr-version "linuxserver/sonarr:4.0.17"
 services:
@@ -488,7 +488,7 @@ services:
         max-file: "3"
     environment:
       TZ: "${TZ}"
-      TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?'"
+      TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?"
       TRIGGERS__CONTENTBLOCKER: "0 0/5 * * * ?"
       TRIGGERS__DOWNLOADCLEANER: "0 0 * * * ?"
       QUEUECLEANER__ENABLED: "true"
@@ -536,7 +536,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Cleanuparr/Cleanuparr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/flmorg/cleanuperr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Cleanuperr"
       wud.display.icon: "sh-cleanuperr"
     networks:
