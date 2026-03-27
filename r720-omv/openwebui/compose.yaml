@@ -162,6 +162,7 @@ services:
       WEBUI_ARGS: "--listen --xformers --api --lowvram --opt-channelslast --cors-allow-origins=* --allow-code"
       DIRECT_ADDRESS: "0.0.0.0"
       WEB_ENABLE_AUTH: "false"
+      CF_QUICK_TUNNELS: "false"
       SKIP_ACL: "true"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       NVIDIA_VISIBLE_DEVICES: "all"
