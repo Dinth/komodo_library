@@ -1,5 +1,5 @@
 x-versions:
-  tandoor: &tandoor-version "vabene1111/recipes:2.6.0"
+  tandoor: &tandoor-version "vabene1111/recipes:2.6.1"
 
 x-logging: &default-logging
   driver: "json-file"
