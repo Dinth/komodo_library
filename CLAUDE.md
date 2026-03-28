@@ -23,6 +23,12 @@ compose.yaml                          # Root-level compose (special/test stacks 
 
 **Never edit files directly on the server.**
 
+## Server Access
+
+- **Do NOT use SSH to `10.10.1.13`** — it will not work from this environment
+- Server files may be accessible via SFTP FUSE mount under `/run/user/1000/kio-fuse-*/sftp/10.10.1.13/` (path varies between sessions)
+- Ask the user for the current mount path if you need to access server config files
+
 ## Compose File Conventions
 
 ### Image Versioning
