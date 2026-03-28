@@ -1,5 +1,5 @@
 x-versions:
-  homepage: &homepage-version "ghcr.io/gethomepage/homepage:v1.11.0"
+  homepage: &homepage-version "ghcr.io/gethomepage/homepage:v1.12.1"
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.11.4"
 
 x-logging: &default-logging
