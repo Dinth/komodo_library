@@ -8,13 +8,37 @@ x-logging: &default-logging
     max-size: "10m"
     max-file: "3"
 
+x-homepage-common: &homepage-common
+  image: *homepage-version
+  ipc: private
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  cap_add:
+    - SETGID
+    - SETUID
+  mem_limit: 256M
+  environment:
+    HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008,10.10.1.13:3018"
+    PUID: "${DOCKER_PUID}"
+    PGID: "${DOCKER_PGID}"
+  logging: *default-logging
+  depends_on:
+    - homepage-socket-proxy
+  networks:
+    - homepage
+    - traefik
+
 services:
   homepage-socket-proxy:
     image: *socket-proxy-version
+    container_name: homepage-socket-proxy
     ipc: private
     command:
       - '-loglevel=debug'
-      - '-allowfrom=homepage'
+      - '-allowfrom=homepage-michal,homepage-paulina'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(version|containers/.*)'
       - '-watchdoginterval=1200'
@@ -46,48 +70,71 @@ services:
     networks:
       - homepage
 
-  homepage:
-    image: *homepage-version
-    container_name: homepage
-    ipc: private
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - SETGID
-      - SETUID
-    mem_limit: 512M
-    environment:
-      HOMEPAGE_ALLOWED_HOSTS: "fp.${DOMAIN_NAME},10.10.1.13:3008"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+  homepage-michal:
+    <<: *homepage-common
+    container_name: homepage-michal
+    hostname: homepage-michal
     ports:
       - 3008:3000
-    logging: *default-logging
+    volumes:
+      - /opt/docker/homepage/homepage_config_michal:/app/config
     labels:
+      # --- Traefik routing for michal (highest priority) ---
       traefik.enable: "true"
-      traefik.http.routers.homepage.rule: "Host(`fp.${DOMAIN_NAME}`)"
-      traefik.http.routers.homepage.entrypoints: "websecure"
-      traefik.http.routers.homepage.tls: "true"
-      traefik.http.routers.homepage.tls.certresolver: "letsencrypt"
-      traefik.http.routers.homepage.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.homepage.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.homepage.middlewares: "secHeaders@file,authelia-auth@docker"
-      traefik.http.services.homepage.loadbalancer.server.port: "3000"
+      traefik.http.routers.homepage-michal.rule: "Host(`fp.${DOMAIN_NAME}`) && HeaderRegexp(`Remote-User`, `^michal$$`)"
+      traefik.http.routers.homepage-michal.priority: "110"
+      traefik.http.routers.homepage-michal.entrypoints: "websecure"
+      traefik.http.routers.homepage-michal.tls: "true"
+      traefik.http.routers.homepage-michal.tls.certresolver: "letsencrypt"
+      traefik.http.routers.homepage-michal.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.homepage-michal.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.homepage-michal.middlewares: "secHeaders@file"
+      traefik.http.routers.homepage-michal.service: "homepage-michal"
+      traefik.http.services.homepage-michal.loadbalancer.server.port: "3000"
+      # --- Default fallback router (lowest priority) ---
+      traefik.http.routers.homepage-default.rule: "Host(`fp.${DOMAIN_NAME}`)"
+      traefik.http.routers.homepage-default.priority: "100"
+      traefik.http.routers.homepage-default.entrypoints: "websecure"
+      traefik.http.routers.homepage-default.tls: "true"
+      traefik.http.routers.homepage-default.tls.certresolver: "letsencrypt"
+      traefik.http.routers.homepage-default.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.homepage-default.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.homepage-default.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.routers.homepage-default.service: "homepage-michal"
+      # --- WUD labels ---
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
-      wud.display.name: 'Homepage'
+      wud.display.name: 'Homepage - Michal'
       wud.display.icon: 'sh:homepage'
+
+  homepage-paulina:
+    <<: *homepage-common
+    container_name: homepage-paulina
+    hostname: homepage-paulina
+    ports:
+      - 3018:3000
     volumes:
-      - /opt/docker/homepage/homepage_config:/app/config
-    depends_on:
-      - homepage-socket-proxy
-    networks:
-      - homepage
-      - traefik
+      - /opt/docker/homepage/homepage_config_paulina:/app/config
+    labels:
+      # --- Traefik routing for paulina ---
+      traefik.enable: "true"
+      traefik.http.routers.homepage-paulina.rule: "Host(`fp.${DOMAIN_NAME}`) && HeaderRegexp(`Remote-User`, `^paulina$$`)"
+      traefik.http.routers.homepage-paulina.priority: "110"
+      traefik.http.routers.homepage-paulina.entrypoints: "websecure"
+      traefik.http.routers.homepage-paulina.tls: "true"
+      traefik.http.routers.homepage-paulina.tls.certresolver: "letsencrypt"
+      traefik.http.routers.homepage-paulina.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.homepage-paulina.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.homepage-paulina.middlewares: "secHeaders@file"
+      traefik.http.routers.homepage-paulina.service: "homepage-paulina"
+      traefik.http.services.homepage-paulina.loadbalancer.server.port: "3000"
+      # --- WUD labels ---
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: 'Homepage - Paulina'
+      wud.display.icon: 'sh:homepage'
 
 networks:
   homepage:
