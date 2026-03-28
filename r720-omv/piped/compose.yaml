@@ -95,6 +95,13 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/TeamPiped/Piped-Frontend/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Piped Frontend"
+      wud.display.icon: "sh:piped"
+      homepage.group: "Media"
+      homepage.name: "Piped"
+      homepage.icon: "sh:piped"
+      homepage.href: "http://10.10.1.13:4551"
+      homepage.description: "YouTube frontend"
+      homepage.siteMonitor: "http://10.10.1.13:4551"
 
   piped-postgres:
     image: *piped-postgres-version

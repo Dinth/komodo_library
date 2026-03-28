@@ -37,6 +37,16 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+$$'
+      wud.display.name: "SpiderFoot"
+      wud.display.icon: "sh:spiderfoot"
+      wud.link.template: "https://github.com/smicallef/spiderfoot/releases/tag/v$${major}.$${minor}"
+      homepage.group: "Security"
+      homepage.name: "SpiderFoot"
+      homepage.icon: "sh:spiderfoot"
+      homepage.href: "http://10.10.1.13:5001"
+      homepage.description: "OSINT reconnaissance"
+      homepage.siteMonitor: "http://10.10.1.13:5001"
 
   misp-core:
     image: *misp-core-version
@@ -83,6 +93,13 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/MISP/MISP/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "MISP Core"
+      wud.display.icon: "sh:misp"
+      homepage.group: "Security"
+      homepage.name: "MISP"
+      homepage.icon: "sh:misp"
+      homepage.href: "http://10.10.1.13:8081"
+      homepage.description: "Threat intelligence platform"
+      homepage.siteMonitor: "http://10.10.1.13:8081"
   misp-modules:
     image: *misp-modules-version
     container_name: misp-modules
