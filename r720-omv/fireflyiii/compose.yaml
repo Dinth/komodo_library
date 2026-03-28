@@ -75,6 +75,15 @@ services:
       wud.display.name: "Firefly III"
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/firefly-iii/firefly-iii/releases/v$${major}.$${minor}.$${patch}"
+      homepage.group: "Finance"
+      homepage.name: "Firefly III"
+      homepage.icon: "firefly.png"
+      homepage.href: "https://finance.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://finance.${DOMAIN_NAME}"
+      homepage.description: "Personal finance manager"
+      homepage.widget.type: "firefly"
+      homepage.widget.url: "http://10.10.1.13:4747"
+      homepage.widget.key: "${HOMEPAGE_MICHAL_FIREFLY_API}"
 
   fireflyiii_paulina_dataimporter:
     image: *fireflyiii-dataimporter-version

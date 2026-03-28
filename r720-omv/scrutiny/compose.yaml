@@ -127,6 +127,14 @@ services:
       wud.display.name: "Scrutiny"
       wud.display.icon: "sh:scrutiny"
       wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
+      homepage.group: "Infrastructure"
+      homepage.name: "Scrutiny"
+      homepage.icon: "scrutiny.png"
+      homepage.href: "http://10.10.1.13:93"
+      homepage.siteMonitor: "http://10.10.1.13:93/api/health"
+      homepage.description: "S.M.A.R.T. disk monitoring"
+      homepage.widget.type: "scrutiny"
+      homepage.widget.url: "http://10.10.1.13:93"
 
 networks:
   monitoring:

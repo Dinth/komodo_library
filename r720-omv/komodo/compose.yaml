@@ -118,3 +118,13 @@ services:
       wud.link.template: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo'
       wud.display.icon: 'sh:komodo'
+      homepage.group: "Infrastructure"
+      homepage.name: "Komodo"
+      homepage.icon: "komodo.png"
+      homepage.href: "http://10.10.1.13:9120"
+      homepage.siteMonitor: "http://10.10.1.13:9120"
+      homepage.description: "Stack deployment manager"
+      homepage.widget.type: "komodo"
+      homepage.widget.url: "http://10.10.1.13:9120"
+      homepage.widget.username: "${HOMEPAGE_KOMODO_USERNAME}"
+      homepage.widget.password: "${HOMEPAGE_KOMODO_PASSWORD}"

@@ -48,6 +48,14 @@ services:
       wud.link.template: 'https://github.com/esphome/esphome/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'ESPHome'
       wud.display.icon: 'sh:esphome'
+      homepage.group: "Smart Home"
+      homepage.name: "ESPHome"
+      homepage.icon: "esphome.png"
+      homepage.href: "http://10.10.1.13:6052"
+      homepage.siteMonitor: "http://10.10.1.13:6052"
+      homepage.description: "ESP device manager"
+      homepage.widget.type: "esphome"
+      homepage.widget.url: "http://10.10.1.13:6052"
 
 networks:
   esphome:
