@@ -162,8 +162,11 @@ services:
       homepage.name: "Paperless-ngx"
       homepage.icon: "paperlessngx.png"
       homepage.href: "https://papers.${DOMAIN_NAME}"
-      homepage.description: "E-book catalogue"
+      homepage.description: "Document management"
       homepage.siteMonitor: "https://papers.${DOMAIN_NAME}"
+      homepage.widget.type: "paperlessngx"
+      homepage.widget.url: "http://10.10.1.13:8583"
+      homepage.widget.key: "${HOMEPAGE_PAPERLESS_API}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Paperless-ngx"

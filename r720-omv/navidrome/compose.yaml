@@ -61,6 +61,11 @@ services:
       homepage.href: "https://music.${DOMAIN_NAME}"
       homepage.description: "Music streamer"
       homepage.siteMonitor: "https://music.${DOMAIN_NAME}"
+      homepage.widget.type: "navidrome"
+      homepage.widget.url: "http://10.10.1.13:4533"
+      homepage.widget.user: "${HOMEPAGE_NAVIDROME_USER}"
+      homepage.widget.token: "${HOMEPAGE_NAVIDROME_TOKEN}"
+      homepage.widget.salt: "${HOMEPAGE_NAVIDROME_SALT}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Navidrome"
