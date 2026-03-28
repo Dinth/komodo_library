@@ -148,8 +148,8 @@ services:
       homepage.siteMonitor: "https://rss.${DOMAIN_NAME}"
       homepage.widget.type: "freshrss"
       homepage.widget.url: "http://10.10.1.13:8020"
-      homepage.widget.username: "${HOMEPAGE_FRESHRSS_USERNAME}"
-      homepage.widget.password: "${HOMEPAGE_FRESHRSS_PASSWORD}"
+      homepage.widget.username: "${HOMEPAGE_FRESHRSS_MICHAL_USERNAME}"
+      homepage.widget.password: "${HOMEPAGE_FRESHRSS_MICHAL_PASSWORD}"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "FreshRSS"
