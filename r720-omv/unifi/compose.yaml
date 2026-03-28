@@ -88,6 +88,7 @@ services:
       homepage.href: "https://10.10.1.13:8443"
       homepage.icon: "sh-ubiquiti-unifi-dark.png"
       homepage.name: "Unifi Network Application"
+      homepage.siteMonitor: "https://10.10.1.13:8443"
       homepage.widget.type: "unifi"
       homepage.widget.url: "https://10.10.1.13:8443"
       homepage.widget.username: "${HOMEPAGE_UNIFI_USER}"

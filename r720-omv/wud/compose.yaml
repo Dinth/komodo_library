@@ -108,6 +108,7 @@ services:
       homepage.icon: "sh-whats-up-docker.png"
       homepage.href: "http://10.10.1.13:3009"
       homepage.description: "Docker updates manager"
+      homepage.siteMonitor: "http://10.10.1.13:3009"
       homepage.widget.type: "whatsupdocker"
       homepage.widget.url: "http://10.10.1.13:3009"
       homepage.widget.fields: "['monitoring', 'updates']"

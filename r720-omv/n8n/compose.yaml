@@ -95,7 +95,8 @@ services:
       homepage.name: "n8n"
       homepage.description: "Workflow automation"
       homepage.icon: "n8n.png"
-      homepage.href: "https://n8n.${DOMAIN_NAME}/"
+      homepage.href: "https://auto.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://auto.${DOMAIN_NAME}"
 
 networks:
   n8n:

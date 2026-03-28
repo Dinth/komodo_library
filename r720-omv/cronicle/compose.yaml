@@ -59,6 +59,7 @@ services:
       homepage.icon: "sh-cronicle.png"
       homepage.href: "http://10.10.1.13:3012"
       homepage.description: "Web cron"
+      homepage.siteMonitor: "http://10.10.1.13:3012"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'

@@ -134,10 +134,10 @@ services:
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Traefik"
-      homepage.icon: "traefik"
-      homepage.internal.href: "http://10.10.1.13:8281"
+      homepage.icon: "traefik.png"
+      homepage.href: "http://10.10.1.13:8281"
       homepage.description: "HTTP reverse proxy"
-      homepage.statusStyle: "dot"
+      homepage.siteMonitor: "http://10.10.1.13:8281"
       homepage.widget.type: "traefik"
       homepage.widget.url: "http://10.10.1.13:8281"
       homepage.widget.fields: "['routers', 'services', 'middleware']"

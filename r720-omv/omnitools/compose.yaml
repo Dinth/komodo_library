@@ -48,9 +48,10 @@ services:
       wud.link.template: "https://github.com/iib0011/omni-tools/releases/tag/v$${major}.$${minor}.$${patch}"
       homepage.group: "Infrastructure"
       homepage.name: "Omni Tools"
-      homepage.icon: "sm-omnitools"
+      homepage.icon: "sh:omnitools"
       homepage.href: "https://omnitools.${DOMAIN_NAME}"
       homepage.description: "Set of different IT tools"
+      homepage.siteMonitor: "https://omnitools.${DOMAIN_NAME}"
 
 networks:
   omnitools:
