@@ -108,6 +108,13 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Server"
+      wud.display.icon: "sh:scanopy"
+      homepage.group: "Infrastructure"
+      homepage.name: "Scanopy"
+      homepage.icon: "sh:scanopy"
+      homepage.href: "http://10.10.1.13:60072"
+      homepage.description: "Network scanner"
+      homepage.siteMonitor: "http://10.10.1.13:60072"
 
 networks:
   scanopy:

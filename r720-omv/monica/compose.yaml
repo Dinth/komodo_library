@@ -120,6 +120,12 @@ services:
       wud.display.name: "Monica"
       wud.display.icon: "sh:monica"
       wud.link.template: "https://github.com/monicahq/monica/releases/tag/v$${major}.$${minor}.$${patch}"
+      homepage.group: "Home"
+      homepage.name: "Monica"
+      homepage.icon: "sh:monica"
+      homepage.href: "https://monica.${DOMAIN_NAME}"
+      homepage.description: "Personal CRM"
+      homepage.siteMonitor: "https://monica.${DOMAIN_NAME}"
 
 networks:
   monica:

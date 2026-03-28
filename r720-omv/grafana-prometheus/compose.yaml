@@ -60,6 +60,10 @@ services:
       homepage.siteMonitor: "http://10.10.1.13:3003/api/health"
       homepage.description: "Monitoring dashboards"
       homepage.weight: 0
+      homepage.widget.type: "grafana"
+      homepage.widget.url: "http://10.10.1.13:3003"
+      homepage.widget.username: "${HOMEPAGE_GRAFANA_USERNAME}"
+      homepage.widget.password: "${HOMEPAGE_GRAFANA_PASSWORD}"
     logging:
       driver: "json-file"
       options:

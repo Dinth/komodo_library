@@ -252,6 +252,12 @@ services:
       wud.link.template: 'https://github.com/Freika/dawarich/releases/tag/$${major}.$${minor}.$${patch}'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.watch: "true"
+      homepage.group: "Home"
+      homepage.name: "Dawarich"
+      homepage.icon: "sh:dawarich"
+      homepage.href: "https://traces.${DOMAIN_NAME}"
+      homepage.description: "Location tracking"
+      homepage.siteMonitor: "https://traces.${DOMAIN_NAME}"
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
