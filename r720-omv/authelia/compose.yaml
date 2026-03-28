@@ -63,6 +63,7 @@ services:
       traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader: "true"
       traefik.http.middlewares.authelia-auth.forwardauth.authRequestHeaders: "Cookie,X-Forwarded-For,X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Uri,X-Forwarded-Method,X-Real-Ip"
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
+      traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeadersRegex: "^(Location|Set-Cookie)$"
       # --- Whats up Docker? config ---
       wud.watch: "true"
       wud.display.name: "Authelia"
