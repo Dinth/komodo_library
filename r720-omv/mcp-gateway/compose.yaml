@@ -2,6 +2,7 @@ x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.4
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
   mqtt-mcp-version: &mqtt-mcp-version ghcr.io/ezhuk/mqtt-mcp:latest
+  # mitmproxy-mcp: no published image, built from source
 
 x-logging: &default-logging
   driver: "json-file"
@@ -101,6 +102,32 @@ services:
     labels:
       wud.watch: "true"
       wud.display.name: "MQTT MCP"
+
+  # mitmproxy-mcp: MCP server for traffic inspection
+  # Note: Uses stdio transport - proxy port exposed for device testing
+  # MCP access: run locally via 'uvx mitmproxy-mcp' or use mcp-proxy wrapper
+  mitmproxy-mcp:
+    build:
+      context: https://github.com/snapspecter/mitmproxy-mcp.git
+    container_name: mitmproxy-mcp
+    ipc: private
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    mem_limit: 256M
+    ports:
+      - "8085:8080"  # Proxy port for MCP-controlled instance
+    volumes:
+      - /opt/docker/mcp-gateway/mitmproxy-mcp:/home/mitmproxy/.mitmproxy
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: "${TZ}"
+    networks: [mcp-gateway]
+    logging: *default-logging
+    labels:
+      wud.watch: "false"
+      wud.display.name: "mitmproxy MCP"
 
 networks:
   mcp-gateway:
