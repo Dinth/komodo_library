@@ -29,7 +29,6 @@ services:
     environment:
       TZ: "${TZ}"
       PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
       WEB_APP_PORT: "3010"
       NGINX_PORT: "85"
       TFTPD_OPTS: "--tftp-single-port"
