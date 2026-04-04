@@ -1,5 +1,5 @@
 x-versions:
-  netbootxyz: &netbootxyz-version "linuxserver/netbootxyz:2.0.53"
+  netbootxyz: &netbootxyz-version "ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz18"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -32,16 +32,17 @@ services:
       PGID: "${DOCKER_PGID}"
       WEB_APP_PORT: "3010"
       NGINX_PORT: "85"
+      TFTPD_OPTS: "--tftp-single-port"
     healthcheck:
       test: curl -sf --max-time 2 http://localhost:3010/ || exit 1
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 30s
     ports:
       - 3010:3010/tcp   # Web configuration interface
       - 69:69/udp       # TFTP server (PXE boot)
-      - 85:85/tcp     # HTTP server for assets
+      - 85:85/tcp       # HTTP server for assets
     volumes:
       - /opt/docker/netbootxyz/netbootxyz_config:/config:rw
       - /Data/IT/netbootxyz_assets:/assets:rw
@@ -51,10 +52,10 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/netbootxyz/netboot.xyz/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^\d+\.\d+\.\d+-nbxyz\d+$$'
       wud.display.name: 'netboot.xyz'
       wud.display.icon: 'mdi:server-network'
+      wud.link.template: 'https://github.com/netbootxyz/docker-netbootxyz/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   netbootxyz:
