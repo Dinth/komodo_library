@@ -32,7 +32,7 @@ services:
       WEB_APP_PORT: "3010"
       NGINX_PORT: "85"
     healthcheck:
-      test: curl -sf --max-time 2 http://localhost:3000/ || exit 1
+      test: curl -sf --max-time 2 http://localhost:3010/ || exit 1
       interval: 30s
       timeout: 10s
       retries: 3
