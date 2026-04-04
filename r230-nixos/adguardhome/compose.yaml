@@ -33,6 +33,12 @@ services:
       - "53:53/tcp"
       - "53:53/udp"
       - "3000:3000/tcp"  # initial setup wizard; remains as admin UI after first run
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T2", "-O-", "http://localhost:3000/control/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     volumes:
       - /opt/docker/adguardhome/adguardhome_work:/opt/adguardhome/work
       - /opt/docker/adguardhome/adguardhome_conf:/opt/adguardhome/conf
