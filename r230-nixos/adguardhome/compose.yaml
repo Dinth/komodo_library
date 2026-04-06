@@ -14,8 +14,6 @@ services:
     hostname: adguardhome
     ipc: private
     restart: unless-stopped
-    # AdGuard Home must run as root to bind port 53 and manage its internal process supervisor.
-    # Security is enforced via cap_drop + minimal cap_add instead of a non-root user.
     cap_add:
       - NET_BIND_SERVICE  # bind privileged DNS port 53
       - CHOWN
@@ -26,13 +24,13 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 256M
+    mem_limit: 1G
     environment:
       TZ: "${TZ}"
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "3000:3000/tcp"  # initial setup wizard; remains as admin UI after first run
+      - "3000:3000/tcp" 
     healthcheck:
       test: ["CMD-SHELL", "nslookup -timeout=2 cloudflare.com 127.0.0.1 >/dev/null 2>&1 || exit 1"]
       interval: 30s
