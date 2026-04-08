@@ -1,5 +1,5 @@
 x-versions:
-  pricebuddy: &pricebuddy-version "jez500/pricebuddy:v1.0.45"
+  pricebuddy: &pricebuddy-version "jez500/pricebuddy:v1.0.46"
   mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
   scraper: &scraper-version "jez500/seleniumbase-scrapper:latest"
 
