@@ -1,5 +1,5 @@
 x-versions:
-  navidrome: &navidrome-version "deluan/navidrome:0.60.3"
+  navidrome: &navidrome-version "deluan/navidrome:0.61.1"
 
 x-logging: &default-logging
   driver: "json-file"
