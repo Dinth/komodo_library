@@ -1,5 +1,5 @@
 x-versions:
-  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v2.6.3"
+  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v2.7.2"
   immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v2.6.3-cuda"
   valkey: &valkey-version "docker.io/valkey/valkey:8.1.3-alpine"
   postgres: &postgres-version "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.3.0"
