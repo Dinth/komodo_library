@@ -1,5 +1,5 @@
 x-versions:
-  jellyfin: &jellyfin-version "linuxserver/jellyfin:10.11.7"
+  jellyfin: &jellyfin-version "linuxserver/jellyfin:10.11.8"
 
 x-logging: &default-logging
   driver: "json-file"
