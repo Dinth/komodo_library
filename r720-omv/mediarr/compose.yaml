@@ -2,14 +2,14 @@ x-versions:
   gluetun: &gluetun-version "qmcgaw/gluetun:v3.41.1"
   qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.1.4"
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.4.6"
-  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.3.0"
+  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.3.5"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
   bazarr: &bazarr-version "linuxserver/bazarr:1.5.6"
   lidarr: &lidarr-version "linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.0.3-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.5"
-  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.9.1"
-  radarr: &radarr-version "linuxserver/radarr:6.0.4"
+  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.9.5"
+  radarr: &radarr-version "linuxserver/radarr:6.1.1"
   sonarr: &sonarr-version "linuxserver/sonarr:4.0.17"
 services:
   #############################################################################
