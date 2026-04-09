@@ -1,7 +1,7 @@
 x-versions:
   grafana: &grafana-version "grafana/grafana:12.4.2"
-  prometheus: &prometheus-version "prom/prometheus:v3.10.0"
-  node-exporter: &node-exporter-version "prom/node-exporter:v1.10.2"
+  prometheus: &prometheus-version "prom/prometheus:v3.11.1"
+  node-exporter: &node-exporter-version "prom/node-exporter:v1.11.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.2-4.8.1-distroless" 
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
@@ -117,7 +117,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Prometheus"
       wud.display.icon: "si:prometheus"
-      wud.link.template: 'https://github.com/prometheus/prometheus/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/prometheus/prometheus/releases/tag/v$${major}.$${minor}.$${patch}'
       homepage.group: "Infrastructure"
       homepage.name: "Prometheus"
       homepage.icon: "prometheus.png"
