@@ -1,7 +1,7 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.7.1"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.11.4"
-  alloy: &alloy-version "grafana/alloy:v1.14.2"
+  alloy: &alloy-version "grafana/alloy:v1.15.0"
 
 services:
   promtail-socket-proxy:
@@ -137,7 +137,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Grafana Alloy"
       wud.display.icon: "si:grafana"
-      wud.link.template: "https://github.com/grafana/alloy/releases/tag/$${tag}"
+      wud.link.template: "https://github.com/grafana/alloy/releases/tag/v$${major}.$${minor}.$${patch}"
       homepage.group: "Infrastructure"
       homepage.name: "Alloy"
       homepage.icon: "grafana-alloy.png"
