@@ -38,25 +38,14 @@ services:
     logging: *default-logging
     labels:
       traefik.enable: "true"
-      # --- Router for CF Access authenticated users (WARP org) - gets trusted IP ---
-      traefik.http.routers.authelia-cfaccess.rule: "Host(`id.${DOMAIN_NAME}`) && HeaderRegexp(`Cf-Access-Jwt-Assertion`, `.+`)"
-      traefik.http.routers.authelia-cfaccess.priority: "110"
-      traefik.http.routers.authelia-cfaccess.entrypoints: "websecure"
-      traefik.http.routers.authelia-cfaccess.tls: "true"
-      traefik.http.routers.authelia-cfaccess.tls.certresolver: "letsencrypt"
-      traefik.http.routers.authelia-cfaccess.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.authelia-cfaccess.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.authelia-cfaccess.middlewares: "cf-access-auth@file,set-cfaccess-trusted-ip@file,secHeaders@file"
-      traefik.http.routers.authelia-cfaccess.service: "authelia"
-      # --- Default router for the Authelia Portal ---
+      # --- Router for the Authelia Portal ---
       traefik.http.routers.authelia.rule: "Host(`id.${DOMAIN_NAME}`)"
-      traefik.http.routers.authelia.priority: "100"
       traefik.http.routers.authelia.entrypoints: "websecure"
       traefik.http.routers.authelia.tls: "true"
       traefik.http.routers.authelia.tls.certresolver: "letsencrypt"
       traefik.http.routers.authelia.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.authelia.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.authelia.middlewares: "cloudflarewarp@file,secHeaders@file"
+      traefik.http.routers.authelia.middlewares: "secHeaders@file"
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
       # --- Middleware for other services to use for authentication ---
       traefik.http.middlewares.authelia-auth.forwardauth.address: "http://authelia:9091/api/verify?rd=https://id.${DOMAIN_NAME}/"

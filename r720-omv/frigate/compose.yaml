@@ -1,6 +1,5 @@
 x-versions:
   frigate: &frigate-version "ghcr.io/blakeblackshear/frigate:0.17.1-tensorrt"
-  whoami: &whoami-version "traefik/whoami:v1.11.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -83,25 +82,13 @@ services:
     logging: *default-logging
     labels:
       traefik.enable: "true"
-      # Router for CF Access authenticated users (WARP org) - gets 1FA via trusted IP
-      traefik.http.routers.frigate-cfaccess.entrypoints: websecure
-      traefik.http.routers.frigate-cfaccess.rule: Host(`cctv.${DOMAIN_NAME}`) && HeaderRegexp(`Cf-Access-Jwt-Assertion`, `.+`)
-      traefik.http.routers.frigate-cfaccess.priority: "110"
-      traefik.http.routers.frigate-cfaccess.tls: "true"
-      traefik.http.routers.frigate-cfaccess.tls.certresolver: letsencrypt
-      traefik.http.routers.frigate-cfaccess.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.frigate-cfaccess.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.frigate-cfaccess.middlewares: "cf-access-auth@file,set-cfaccess-trusted-ip@file,secHeaders@file,authelia-auth@docker"
-      traefik.http.routers.frigate-cfaccess.service: frigate
-      # Default router for non-CF-Access traffic (local network or external) - normal auth flow
       traefik.http.routers.frigate.entrypoints: websecure
       traefik.http.routers.frigate.rule: Host(`cctv.${DOMAIN_NAME}`)
-      traefik.http.routers.frigate.priority: "100"
       traefik.http.routers.frigate.tls: "true"
       traefik.http.routers.frigate.tls.certresolver: letsencrypt
       traefik.http.routers.frigate.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.frigate.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.frigate.middlewares: "cloudflarewarp@file,secHeaders@file,authelia-auth@docker"
+      traefik.http.routers.frigate.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.frigate.loadbalancer.server.port: "8971"
       traefik.docker.network: "traefik"
       homepage.group: "Home"
@@ -120,48 +107,6 @@ services:
       wud.display.name: "Frigate"
       wud.display.icon: "mdi:cctv"
 
-  # Temporary debug service to see headers - REMOVE AFTER DEBUGGING
-  debug-headers:
-    image: *whoami-version
-    container_name: frigate-debug-headers
-    ipc: private
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    mem_limit: 32M
-    networks:
-      - traefik
-    logging: *default-logging
-    labels:
-      traefik.enable: "true"
-      # 1. Raw headers - no middlewares
-      traefik.http.routers.debug-raw.entrypoints: websecure
-      traefik.http.routers.debug-raw.rule: Host(`cctv.${DOMAIN_NAME}`) && Path(`/debug/raw`)
-      traefik.http.routers.debug-raw.priority: "200"
-      traefik.http.routers.debug-raw.tls: "true"
-      traefik.http.routers.debug-raw.middlewares: "secHeaders@file"
-      # 2. With cloudflarewarp middleware
-      traefik.http.routers.debug-warp.entrypoints: websecure
-      traefik.http.routers.debug-warp.rule: Host(`cctv.${DOMAIN_NAME}`) && Path(`/debug/warp`)
-      traefik.http.routers.debug-warp.priority: "200"
-      traefik.http.routers.debug-warp.tls: "true"
-      traefik.http.routers.debug-warp.middlewares: "cloudflarewarp@file,secHeaders@file"
-      # 3. With cf-access-auth (optional) - see X-Auth-User header if JWT valid
-      traefik.http.routers.debug-cfauth.entrypoints: websecure
-      traefik.http.routers.debug-cfauth.rule: Host(`cctv.${DOMAIN_NAME}`) && Path(`/debug/cfauth`)
-      traefik.http.routers.debug-cfauth.priority: "200"
-      traefik.http.routers.debug-cfauth.tls: "true"
-      traefik.http.routers.debug-cfauth.middlewares: "cloudflarewarp@file,cf-access-auth@file,secHeaders@file"
-      # 4. With trusted IP override (simulates what CF Access users will see)
-      traefik.http.routers.debug-trusted.entrypoints: websecure
-      traefik.http.routers.debug-trusted.rule: Host(`cctv.${DOMAIN_NAME}`) && Path(`/debug/trusted`)
-      traefik.http.routers.debug-trusted.priority: "200"
-      traefik.http.routers.debug-trusted.tls: "true"
-      traefik.http.routers.debug-trusted.middlewares: "cf-access-required@file,set-cfaccess-trusted-ip@file,secHeaders@file"
-      traefik.http.services.debug-headers.loadbalancer.server.port: "80"
-      traefik.docker.network: "traefik"
 
 networks:
   frigate:
