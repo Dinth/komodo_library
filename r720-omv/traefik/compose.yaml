@@ -69,7 +69,7 @@ services:
       TRAEFIK_API_DASHBOARD: "true"
       TRAEFIK_API_INSECURE: "true" # Be careful with this in production!
       TRAEFIK_API_DEBUG: "false"
-      TRAEFIK_LOG_LEVEL: "DEBUG"
+      TRAEFIK_LOG_LEVEL: "INFO"
       TRAEFIK_ACCESSLOG: "true"
       TRAEFIK_ACCESSLOG_FILEPATH: "/tmp/access.log"
       TRAEFIK_ACCESSLOG_FORMAT: "json"
@@ -120,7 +120,6 @@ services:
       - 443:443
       - 8281:8080
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /opt/docker/traefik/traefik_certs:/certs
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
       - /opt/docker/traefik/mojecertpl.verification:/mojecertpl.verification:ro
