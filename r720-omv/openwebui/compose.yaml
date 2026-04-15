@@ -4,7 +4,7 @@ x-versions:
   hass-mcp: &hass-mcp-version "voska/hass-mcp:0.1.1"
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
   automatic1111: &automatic1111-version "ghcr.io/ai-dock/stable-diffusion-webui:v2-cuda-12.1.1-base-22.04-v1.10.1"
-  
+
 services:
   ollama:
     cap_add:
@@ -34,11 +34,14 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       NVIDIA_VISIBLE_DEVICES: "all"
       OLLAMA_NUM_PARALLEL: "1"
-      OLLAMA_MAX_LOADED_MODELS: "1"
-      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_MAX_LOADED_MODELS: "2"
+      OLLAMA_KEEP_ALIVE: "30m"
       OLLAMA_DEBUG: "1"
       OLLAMA_FLASH_ATTENTION: "1"
-      OLLAMA_KV_CACHE_TYPE: "q4_0"
+      OLLAMA_KV_CACHE_TYPE: "q8_0"
+      OLLAMA_LOAD_TIMEOUT: "10m"
+      OLLAMA_MAX_QUEUE: "64"
+      GIN_MODE: "release"
       TZ: "${TZ}"
     hostname: ollama
     image: *ollama-version
@@ -49,11 +52,13 @@ services:
           cpus: '8.0'
           memory: '64G'
         reservations:
+          memory: '8G'
           devices:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
-    cpuset: "0-7"
+    # Pin to NUMA node 0 (even threads only). 8 threads = matches cpus limit.
+    cpuset: "0,2,4,6,8,10,12,14"
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
@@ -159,13 +164,18 @@ services:
     container_name: automatic1111
     shm_size: '4gb'
     environment:
-      WEBUI_ARGS: "--listen --xformers --api --lowvram --opt-channelslast --cors-allow-origins=* --allow-code"
+      # 13 GB usable VRAM (16 GB - 3 GB video decoding). --medvram is far faster
+      # than --lowvram and still safe for SD 1.5 / SDXL with flash-attention via
+      # --opt-sdp-attention. --no-half-vae prevents NaN with some VAEs.
+      WEBUI_ARGS: "--listen --xformers --api --medvram --opt-channelslast --opt-sdp-attention --no-half-vae --cors-allow-origins=* --allow-code"
       DIRECT_ADDRESS: "0.0.0.0"
       WEB_ENABLE_AUTH: "false"
       CF_QUICK_TUNNELS: "false"
       SKIP_ACL: "true"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       NVIDIA_VISIBLE_DEVICES: "all"
+      PYTORCH_CUDA_ALLOC_CONF: "garbage_collection_threshold:0.9,max_split_size_mb:512"
+      MALLOC_TRIM_THRESHOLD_: "131072"
       TZ: "${TZ}"
     hostname: automatic1111
     ipc: private
@@ -179,6 +189,8 @@ services:
             - driver: nvidia
               count: all
               capabilities: [compute,utility]
+    # Pin to NUMA node 1 (odd threads) to avoid CPU-cache contention with ollama on NUMA 0
+    cpuset: "1,3,5,7"
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:7860/ || exit 1"]
       interval: 60s
@@ -226,9 +238,10 @@ services:
     environment:
       PIPELINES_PORT: "9099"
       OLLAMA_BASE_URL: "http://ollama:11434"
-      DATABASE_URL: "sqlite:///app/pipelines/pipelines.db"  
+      DATABASE_URL: "sqlite:///app/pipelines/pipelines.db"
       PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
       PIPELINES_URLS: "https://raw.githubusercontent.com/open-webui/pipelines/main/examples/pipelines/providers/google_manifold_pipeline.py"
+      TZ: "${TZ}"
     hostname: openwebui-pipelines
     image: ghcr.io/open-webui/pipelines:main
     ipc: private
@@ -253,7 +266,7 @@ services:
       start_period: 30s
     networks:
       - openwebui
-    labels:  
+    labels:
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "OpenWebUI Pipelines"
@@ -291,7 +304,8 @@ services:
       WEBUI_SECRET_KEY: "${OPENWEBUI_SECRET_KEY}"
       SCARF_NO_ANALYTICS: "true"
       DO_NOT_TRACK: "true"
-      ANONYMIZED_TELEMETRY: "true"
+      ANONYMIZED_TELEMETRY: "false"
+      AIOHTTP_CLIENT_TIMEOUT: "600"
       ENABLE_RAG_WEB_SEARCH: "true"
       RAG_WEB_SEARCH_ENGINE: "searxng"
       RAG_WEB_SEARCH_RESULT_COUNT: 3
@@ -302,6 +316,7 @@ services:
       AUTOMATIC1111_BASE_URL: "http://automatic1111:7860"
       MCP_SERVERS: "Grafana@http://mcp-grafana:5133"
       OPENWEBUI_MCP_SYNC_MODE: "true"
+      TZ: "${TZ}"
     hostname: openwebui
     image: *openwebui-version
     ipc: private
@@ -310,7 +325,7 @@ services:
         limits:
           cpus: '1.0'
           memory: '8G'
-    healthcheck: 
+    healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
