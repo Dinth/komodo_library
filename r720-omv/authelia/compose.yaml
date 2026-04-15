@@ -48,7 +48,7 @@ services:
       traefik.http.routers.authelia.middlewares: "secHeaders@file"
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
       # --- Middleware for other services to use for authentication ---
-      traefik.http.middlewares.authelia-auth.forwardauth.address: "http://authelia:9091/api/verify?rd=https://id.${DOMAIN_NAME}/"
+      traefik.http.middlewares.authelia-auth.forwardauth.address: "http://authelia:9091/api/authz/forward-auth"
       traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader: "true"
       traefik.http.middlewares.authelia-auth.forwardauth.authRequestHeaders: "Cookie,X-Forwarded-For,X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Uri,X-Forwarded-Method,X-Real-Ip"
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
