@@ -67,7 +67,6 @@ services:
       - 8971:8971/tcp
     volumes:
       - /frigate-pool/recordings:/media/frigate
-      - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/frigate/frigate_config:/config
       - /opt/docker/frigate/frigate_storage/frigate.db:/media/frigate/frigate.db
