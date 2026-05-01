@@ -1,5 +1,5 @@
 x-versions:
-  fgc: &fgc-version "ghcr.io/vogler/free-games-claimer:dev"
+  fgc: &fgc-version "ghcr.io/feldorn/free-games-claimer:latest"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -22,23 +22,52 @@ services:
       - SETGID
       - SETUID
     mem_limit: 2G
-    command: bash -c "while true; do node epic-games; node prime-gaming; node gog; echo sleeping; sleep 1d; done"
+    healthcheck:
+      test: curl --fail http://localhost:6080 || exit 1
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
     ports:
       - "5900:5900" # VNC server
       - "6080:6080" # noVNC (browser-based VNC client)
+      - "7080:7080" # control panel (always running)
     volumes:
       - /opt/docker/fgc/fgc_data:/fgc/data
+      - /etc/localtime:/etc/localtime:ro
     environment:
+      # Common credentials (used as fallback for per-service overrides)
       EMAIL: "${ADMIN_EMAIL}"
+      PASSWORD: "${FGC_PASSWORD}"
+      # Per-service credential overrides
       GOG_EMAIL: "${ADMIN_EMAIL}"
-      EG_EMAIL: "${ADMIN_EMAIL}"
-      PG_EMAIL: "${ADMIN_EMAIL}"
       GOG_PASSWORD: "${FGC_GOG_PASS}"
+      EG_EMAIL: "${ADMIN_EMAIL}"
       EG_PASSWORD: "${FGC_EG_PASS}"
+      PG_EMAIL: "${ADMIN_EMAIL}"
       PG_PASSWORD: "${FGC_PG_PASS}"
       PG_REDEEM: "1"
       PG_CLAIMDLC: "1"
-      SHOW: "1"
+      # Microsoft Rewards (Bing search points + free game alerts)
+      MS_EMAIL: "${ADMIN_EMAIL}"
+      MS_PASSWORD: "${FGC_MS_PASS}"
+      # MS_OTPKEY: "${FGC_MS_OTPKEY}" # Uncomment if Microsoft account uses 2FA TOTP
+      # Steam free game filters
+      STEAM_MIN_RATING: "6" # Minimum review score 1-9 (6 = Mostly Positive)
+      STEAM_MIN_PRICE: "5"  # Minimum original price in USD
+      # Built-in scheduler — replaces the old manual bash loop in command
+      LOOP: "86400" # Run every 24 hours (in seconds)
+      # Notifications (apprise URL, e.g. tgram://..., discord://, etc.)
+      NOTIFY: "${FGC_NOTIFY}"
+      NOTIFY_ATTACH_SCREENSHOTS: "1" # Attach screenshots to failure notifications
+      # Non-root runtime support
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
+      TZ: "${TZ}"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^latest$$'
+      wud.display.name: "Free Games Claimer"
+      wud.link.template: "https://github.com/feldorn/free-games-claimer/commits/main"
     networks:
       - fgc
     logging: *default-logging
