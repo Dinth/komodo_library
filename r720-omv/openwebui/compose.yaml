@@ -106,7 +106,7 @@ services:
       - no-new-privileges:true
     container_name: ollama-metrics
     environment:
-      OLLAMA_HOST: "http://ollama:11435"
+      OLLAMA_HOST: "http://ollama:11434"
       TZ: "${TZ}"
     hostname: ollama-metrics
     image: *ollama-metrics-version
