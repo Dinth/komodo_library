@@ -59,9 +59,6 @@ services:
       # Notifications (apprise URL, e.g. tgram://..., discord://, etc.)
       NOTIFY: "${FGC_NOTIFY}"
       NOTIFY_ATTACH_SCREENSHOTS: "1" # Attach screenshots to failure notifications
-      # Non-root runtime support
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
     labels:
       wud.watch: "true"
