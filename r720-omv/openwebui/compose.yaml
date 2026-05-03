@@ -167,7 +167,7 @@ services:
       # 13 GB usable VRAM (16 GB - 3 GB video decoding). --medvram is far faster
       # than --lowvram and still safe for SD 1.5 / SDXL with flash-attention via
       # --opt-sdp-attention. --no-half-vae prevents NaN with some VAEs.
-      WEBUI_ARGS: "--listen --xformers --api --medvram --opt-channelslast --opt-sdp-attention --no-half-vae --cors-allow-origins=* --allow-code"
+      WEBUI_ARGS: "--listen --xformers --api --medvram --opt-channelslast --opt-sdp-attention --no-half-vae --cors-allow-origins=* --allow-code --unload-gfx-model"
       DIRECT_ADDRESS: "0.0.0.0"
       WEB_ENABLE_AUTH: "false"
       CF_QUICK_TUNNELS: "false"
