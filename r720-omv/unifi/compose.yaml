@@ -1,5 +1,5 @@
 x-versions:
-  mongo: &mongo-version "docker.io/mongo:8.2.6"
+  mongo: &mongo-version "docker.io/mongo:8.2.7"
   unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.3.58"
   unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:latest"
 
