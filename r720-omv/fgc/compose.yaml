@@ -21,7 +21,7 @@ services:
       - CHOWN
       - SETGID
       - SETUID
-    mem_limit: 4G
+    mem_limit: 8G
     healthcheck:
       test: curl --fail http://localhost:6080 || exit 1
       interval: 30s
