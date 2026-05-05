@@ -26,7 +26,7 @@ services:
       test: curl --fail http://localhost:6080 || exit 1
       interval: 30s
       timeout: 5s
-      start_period: 15s
+      start_period: 60s
     ports:
       - "5900:5900" # VNC server
       - "6080:6080" # noVNC (browser-based VNC client)
