@@ -15,13 +15,13 @@ services:
     restart: unless-stopped
 #    security_opt:
 #      - no-new-privileges:true
-    cap_drop:
-      - ALL
+#    cap_drop:
+#      - ALL
     cap_add:
       - CHOWN
       - SETGID
       - SETUID
-    mem_limit: 8G
+    mem_limit: 4G
     healthcheck:
       test: curl --fail http://localhost:6080 || exit 1
       interval: 30s
