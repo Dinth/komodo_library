@@ -1,5 +1,5 @@
 x-versions:
-  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.31.0"
+  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.32.0"
   meilisearch: &meilisearch-version "getmeili/meilisearch:v1.39.0"
   chrome: &chrome-version "gcr.io/zenika-hub/alpine-chrome:124"
 
