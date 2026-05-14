@@ -1,6 +1,6 @@
 x-versions:
   uptime-kuma: &uptime-kuma-version "louislam/uptime-kuma:2.3.2"
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.0"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.1"
 
 x-logging: &default-logging
   driver: "json-file"
