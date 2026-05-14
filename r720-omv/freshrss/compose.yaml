@@ -1,5 +1,5 @@
 x-versions:
-  freshrss: &freshrss-version "freshrss/freshrss:1.28.1"
+  freshrss: &freshrss-version "freshrss/freshrss:1.29.0"
   rss-bridge: &rss-bridge-version "rssbridge/rss-bridge:latest"
   postgres: &postgres-version "docker.io/postgres:18.3-alpine"
 
