@@ -1,7 +1,7 @@
 x-versions:
-  loki: &loki-version "grafana/loki:3.7.1"
-  promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.12.0"
-  alloy: &alloy-version "grafana/alloy:v1.16.0"
+  loki: &loki-version "grafana/loki:3.7.2"
+  promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.12.1"
+  alloy: &alloy-version "grafana/alloy:v1.16.1"
 
 services:
   promtail-socket-proxy:
