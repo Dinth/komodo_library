@@ -91,6 +91,8 @@ services:
       MQTT_MCP_MQTT__PORT: "1883"
       MQTT_MCP_MQTT__USERNAME: "${MQTT_USERNAME}"
       MQTT_MCP_MQTT__PASSWORD: "${MQTT_PASSWORD}"
+    ports:
+      - 5136:8000/tcp
     healthcheck:
       test: ["CMD", "wget", "-q", "-T2", "-O-", "http://localhost:8000/mcp/"]
       interval: 30s
@@ -105,7 +107,7 @@ services:
 
   # mitmproxy-mcp: MCP server for traffic inspection
   # Built from ghcr.io/astral-sh/uv:python3.12-bookworm-slim (runs as root)
-  # MCP endpoint: http://<host>:8085/ (HTTP/SSE transport)
+  # MCP endpoint: http://<host>:5137/ (HTTP/SSE transport)
   mitmproxy-mcp:
     build:
       context: https://github.com/snapspecter/mitmproxy-mcp.git
@@ -117,7 +119,7 @@ services:
     cap_add: [NET_BIND_SERVICE]
     mem_limit: 256M
     ports:
-      - "8085:8080"  # MCP server port (HTTP/SSE)
+      - "5137:8080"  # MCP server port (HTTP/SSE)
     volumes:
       - /opt/docker/mcp-gateway/mitmproxy-mcp:/root/.mitmproxy
       - /etc/localtime:/etc/localtime:ro
