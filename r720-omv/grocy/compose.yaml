@@ -1,5 +1,6 @@
 x-versions:
   grocy: &grocy-version "linuxserver/grocy:4.6.0"
+  grocy-mcp: &grocy-mcp-version "ghcr.io/saya6k/mcp-grocy-api:1.4.13"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -72,6 +73,39 @@ services:
       repliqate.schedule: "@daily 3am"
       repliqate.backup_id: grocy
       repliqate.retention: "30d"
+
+  grocy-mcp:
+    image: *grocy-mcp-version
+    container_name: grocy-mcp
+    hostname: grocy-mcp
+    depends_on:
+      - grocy
+    ipc: private
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 256M
+    command: ["node", "build/index.js"]
+    environment:
+      TZ: "${TZ}"
+      GROCY_BASE_URL: "http://grocy:80"
+      GROCY_APIKEY_VALUE: "${GROCY_API_KEY}"
+      GROCY_ENABLE_SSL_VERIFY: "false"
+      ENABLE_HTTP_SERVER: "true"
+      HTTP_SERVER_PORT: "8080"
+      REST_RESPONSE_SIZE_LIMIT: "10mb"
+    networks:
+      - grocy
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/saya6k/mcp-grocy-api/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Grocy MCP'
+      wud.display.icon: 'sh:grocy'
 
 networks:
   grocy:
