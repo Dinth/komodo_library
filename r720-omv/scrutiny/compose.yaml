@@ -1,8 +1,8 @@
 name: scrutiny
 
 x-versions:
-  scrutiny-collector-version: &scrutiny-collector-version ghcr.io/analogj/scrutiny:v0.8.6-collector
-  scrutiny-web-version: &scrutiny-web-version ghcr.io/analogj/scrutiny:v0.8.6-web
+  scrutiny-collector-version: &scrutiny-collector-version ghcr.io/analogj/scrutiny:v0.9.2-collector
+  scrutiny-web-version: &scrutiny-web-version ghcr.io/analogj/scrutiny:v0.9.2-web
 
 x-logging: &default-logging
   driver: "json-file"
