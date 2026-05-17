@@ -444,8 +444,8 @@ services:
       # it up via ${CRAWL4AI_API_TOKEN}. Until then the API accepts unauthenticated
       # requests — acceptable because the service is internal-only on the openwebui
       # network with no Traefik route and no published host port.
-      CRAWL4AI_API_TOKEN: "${CRAWL4AI_API_TOKEN}"
-      SECRET_KEY: "${CRAWL4AI_API_TOKEN}"
+      OPENWEBCRAWL4AI_API_TOKEN: "${OPENWEBUI_CRAWL4AI_API_TOKEN}"
+      SECRET_KEY: "${OPENWEBUI_CRAWL4AI_API_TOKEN}"
       CRAWL4AI_HOOKS_ENABLED: "false"
       TZ: "${TZ}"
     hostname: crawl4ai
