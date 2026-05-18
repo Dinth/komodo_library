@@ -20,6 +20,7 @@ services:
       - SETGID
       - SETUID
       - SYS_RAWIO
+      - SYS_ADMIN
     cap_drop:
       - ALL
     security_opt: 
@@ -56,6 +57,15 @@ services:
         permissions: r
       - source: /dev/sdj
         target: /dev/sdj
+        permissions: r
+      - source: /dev/sdk
+        target: /dev/sdk
+        permissions: r
+      - source: /dev/nvme0
+        target: /dev/nvme0
+        permissions: r
+      - source: /dev/nvme0n1
+        target: /dev/nvme0n1
         permissions: r
     environment:
       COLLECTOR_API_ENDPOINT: "http://scrutiny-web:8080"
