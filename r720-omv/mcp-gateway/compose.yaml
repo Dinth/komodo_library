@@ -2,7 +2,6 @@ x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.11.4
   mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
   mqtt-mcp-version: &mqtt-mcp-version ghcr.io/ezhuk/mqtt-mcp:latest
-  # mitmproxy-mcp: no published image, built from source
 
 x-logging: &default-logging
   driver: "json-file"
@@ -105,37 +104,9 @@ services:
       wud.watch: "true"
       wud.display.name: "MQTT MCP"
 
-  # mitmproxy-mcp: MCP server for traffic inspection
-  # Built from ghcr.io/astral-sh/uv:python3.12-bookworm-slim (runs as root)
-  # MCP endpoint: http://<host>:5137/ (HTTP/SSE transport)
-  mitmproxy-mcp:
-    build:
-      context: https://github.com/snapspecter/mitmproxy-mcp.git
-    container_name: mitmproxy-mcp
-    ipc: private
-    restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    cap_add: [NET_BIND_SERVICE]
-    mem_limit: 256M
-    ports:
-      - "5137:8080"  # MCP server port (HTTP/SSE)
-    volumes:
-      - /opt/docker/mcp-gateway/mitmproxy-mcp:/root/.mitmproxy
-      - /etc/localtime:/etc/localtime:ro
-    environment:
-      TZ: "${TZ}"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    networks: [mcp-gateway]
-    logging: *default-logging
-    labels:
-      wud.watch: "false"
-      wud.display.name: "mitmproxy MCP"
+  # mitmproxy-mcp is gateway-spawned (stdio) via /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml
+  # Build the image manually on the host before deploying:
+  #   docker build -t mitmproxy-mcp:local https://github.com/snapspecter/mitmproxy-mcp.git
 
 networks:
   mcp-gateway:
