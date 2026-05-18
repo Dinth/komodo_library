@@ -41,7 +41,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - "10.10.1.12:2375:2375"
+      - "10.10.1.12:2376:2375"
     logging: *default-logging
     labels:
       wud.watch: "true"
