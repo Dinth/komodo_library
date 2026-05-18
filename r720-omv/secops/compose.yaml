@@ -167,7 +167,7 @@ services:
       - /opt/docker/secops/mitmproxy:/home/mitmproxy/.mitmproxy
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8081 || exit 1"]
+      test: ["CMD", "python3", "-c", "import socket,sys; s=socket.socket(); s.settimeout(5); s.connect(('localhost',8081)); s.close()"]
       interval: 30s
       timeout: 10s
       retries: 3
