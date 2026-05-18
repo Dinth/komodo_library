@@ -153,6 +153,8 @@ services:
     entrypoint: [""]
     command: ["mitmweb", "--web-host", "0.0.0.0", "--web-port", "8081", "--listen-port", "8080", "--set", "block_global=false"]
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    environment:
+      - HOME=/home/mitmproxy
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
