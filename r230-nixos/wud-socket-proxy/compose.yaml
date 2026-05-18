@@ -1,0 +1,51 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.1"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  wud-socket-proxy:
+    image: *socket-proxy-version
+    container_name: wud-socket-proxy
+    ipc: private
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=10.10.1.13/32'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(containers/.*|images/.*|events|info|version)'
+      - '-allowPOST=/(containers/.*|images/.*)'
+      - '-allowDELETE=/(containers/.*|images/.*)'
+      - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+      - '-allowhealthcheck'
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "10.10.1.12:2375:2375"
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - WUD (r230-nixos)'
+      wud.display.icon: 'mdi:connection'
