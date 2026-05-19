@@ -31,7 +31,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    user: "65534:131"  # r230-nixos docker group GID (NixOS default); omv uses 911
+    user: "65534:${DOCKER_SOCKET_GID}"
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
