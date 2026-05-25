@@ -3,6 +3,12 @@ x-versions:
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.12.1"
   alloy: &alloy-version "grafana/alloy:v1.16.1"
 
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   promtail-socket-proxy:
     image: *promtail-socket-proxy-version
@@ -42,6 +48,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - monitoring
+    logging: *default-logging
 
   loki:
     container_name: loki
@@ -87,11 +94,8 @@ services:
       homepage.name: "Loki"
       homepage.icon: "grafana-loki.png"
       homepage.description: "Log Aggregation"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: *default-logging
+
   alloy:
     image: *alloy-version
     container_name: alloy
@@ -145,7 +149,9 @@ services:
       homepage.widget.type: "prometheus"
       homepage.widget.url: "http://alloy:12345"
     networks:
-      - monitoring      
+      - monitoring
+    logging: *default-logging
+
 networks:
   monitoring:
     name: monitoring
