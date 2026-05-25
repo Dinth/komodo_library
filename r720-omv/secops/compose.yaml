@@ -3,7 +3,7 @@ x-versions:
   misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.38
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.7
   misp-mariadb-version: &misp-mariadb-version mariadb:11.4
-  mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:11.1.3
+  mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:12.2.3
 
 x-logging: &default-logging
   driver: "json-file"
