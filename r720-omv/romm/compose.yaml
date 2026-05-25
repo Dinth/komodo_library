@@ -1,7 +1,7 @@
 x-versions:
   romm: &romm-version "rommapp/romm:4.8.1"
   mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.0.4-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
