@@ -168,6 +168,8 @@ services:
     labels:
       wud.display.name: "NetBox - Valkey"
       wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
     healthcheck: 
       test: ["CMD", "valkey-cli", "ping"]
       interval: 10s

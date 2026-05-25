@@ -27,7 +27,7 @@ services:
       wud.display.name: "Dawarich - Valkey"
       wud.display.icon: "sh-dawarich"
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
     healthcheck: 
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'

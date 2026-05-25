@@ -150,7 +150,7 @@ services:
       wud.display.name: "Immich - Valkey"
       wud.display.icon: "sh-immich"
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
   immich-postgres:
