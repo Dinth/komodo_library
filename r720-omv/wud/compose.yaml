@@ -102,8 +102,6 @@ services:
     depends_on:
       wud-socket-proxy:
         condition: service_healthy
-    ports:
-      - 3009:3000
     volumes:
       - /opt/docker/wud/wud_store:/store
       - /etc/localtime:/etc/localtime:ro
@@ -111,17 +109,24 @@ services:
     networks:
       - wud
       - signal-rest-api
+      - traefik
     logging: *default-logging
     labels:
       homepage.group: "Infrastructure"
       homepage.name: "Whats up Docker?"
       homepage.icon: "sh-whats-up-docker.png"
-      homepage.href: "http://10.10.1.13:3009"
+      homepage.href: "https://wud.${DOMAIN_NAME}"
       homepage.description: "Docker updates manager"
-      homepage.siteMonitor: "http://10.10.1.13:3009"
-      homepage.widget.type: "whatsupdocker"
-      homepage.widget.url: "http://10.10.1.13:3009"
-      homepage.widget.fields: "['monitoring', 'updates']"
+      homepage.siteMonitor: "https://wud.${DOMAIN_NAME}"
+      traefik.enable: "true"
+      traefik.http.routers.wud.rule: "Host(`wud.${DOMAIN_NAME}`)"
+      traefik.http.routers.wud.entrypoints: "websecure"
+      traefik.http.routers.wud.tls: "true"
+      traefik.http.routers.wud.tls.certresolver: "letsencrypt"
+      traefik.http.routers.wud.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.wud.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.wud.middlewares: "secHeaders@file,lan-only@file"
+      traefik.http.services.wud.loadbalancer.server.port: "3000"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -135,4 +140,6 @@ networks:
     driver: bridge
     external: false
   signal-rest-api:
+    external: true
+  traefik:
     external: true
