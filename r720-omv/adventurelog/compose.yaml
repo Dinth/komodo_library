@@ -1,5 +1,5 @@
 x-versions:
-  adventurelog-frontend: &adventurelog-frontend-version "ghcr.io/seanmorley15/adventurelog-frontend:v0.12.2"
+  adventurelog-frontend: &adventurelog-frontend-version "ghcr.io/seanmorley15/adventurelog-frontend:v0.12.1"
   adventurelog-backend: &adventurelog-backend-version "ghcr.io/seanmorley15/adventurelog-backend:v0.12.2"
   postgis: &postgis-version "postgis/postgis:17-3.6-alpine"
 
