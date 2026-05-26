@@ -58,8 +58,6 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 512M
-    extra_hosts:
-      - "id.${DOMAIN_NAME}:10.10.1.13"
     environment:
       TZ: "${TZ}"
       WUD_WATCHER_R720OMV_HOST: wud-socket-proxy
