@@ -1,5 +1,5 @@
 x-versions:
-  yamtrack: &yamtrack-version "ghcr.io/fuzzygrim/yamtrack:0.25.2"
+  yamtrack: &yamtrack-version "ghcr.io/fuzzygrim/yamtrack:0.25.3"
   postgres: &postgres-version "postgres:18.4-alpine"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
 
