@@ -179,7 +179,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "mitmproxy"
       wud.display.icon: "sh:mitmproxy"
-      wud.link.template: "https://github.com/mitmproxy/mitmproxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/mitmproxy/mitmproxy/releases/tag/v$${major}.$${minor}.$${patch}"
       homepage.group: "Security"
       homepage.name: "mitmproxy"
       homepage.icon: "sh:mitmproxy"
