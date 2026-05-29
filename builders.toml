@@ -1,0 +1,8 @@
+[[builder]]
+name = "r720-omv"
+tags = ["builders"]
+description = "Server builder running on the r720-omv Periphery agent — builds local images directly on the host that runs them."
+[builder.config]
+type = "Server"
+[builder.config.params]
+server_id = "r720-omv"

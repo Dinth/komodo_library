@@ -73,14 +73,11 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-  # mitmproxy-mcp is gateway-spawned (stdio) via /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml
-  # Build the image manually on the host before deploying:
-  #   docker build -t mitmproxy-mcp:local https://github.com/snapspecter/mitmproxy-mcp.git
-  #
-  # mcpmqtt (tspspi/mcpMQTT) is gateway-spawned (stdio) via the same registry.yaml.
-  # No upstream image — build locally on the host from /opt/docker/mcp-gateway/mcpmqtt-build/Dockerfile:
-  #   docker build -t mcpmqtt:local /opt/docker/mcp-gateway/mcpmqtt-build/
-  # Config (broker + topic ACL) lives at /opt/docker/mcp-gateway/mcpmqtt-config/config.json.
+  # Gateway-spawned stdio MCP servers are listed in
+  # /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml.
+  # Their images are produced by Komodo Builds (see ../../builds.toml) that run on the
+  # r720-omv server-builder, tagged as mitmproxy-mcp:latest and mcpmqtt:latest.
+  # mcpmqtt config (broker + topic ACL) lives at /opt/docker/mcp-gateway/mcpmqtt-config/config.json.
 
 networks:
   mcp-gateway:
