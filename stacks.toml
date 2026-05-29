@@ -246,29 +246,7 @@ DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
 HOMEPAGE_GROCY_API=[[HOMEPAGE_GROCY_API]]
-"""
-
-##
-
-[[stack]]
-name = "guacamole"
-tags = [
-  "stacks",
-  "needs-improvement",
-  "database-to-migrate"
-]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/guacamole"
-environment = """
-GUACAMOLE_DB_PASS=[[GUACAMOLE_DB_PASS]]
-DOMAIN_NAME=[[DOMAIN_NAME]]
-TZ=[[TZ]]
-DOCKER_PUID=[[DOCKER_PUID]]
-DOCKER_PGID=[[DOCKER_PGID]]
+GROCY_MCP_API_KEY=[[GROCY_MCP_API_KEY]]
 """
 
 ##
@@ -358,6 +336,8 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/mediarr"
+registry_provider = "docker.io"
+registry_account = "dinth"
 environment = """
 TZ=[[TZ]]
 MEDIA_PUID=[[MEDIA_PUID]]
@@ -501,6 +481,7 @@ DOCKER_PGID=[[DOCKER_PGID]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
 TZ=[[TZ]]
 HASS_TOKEN=[[HASS_TOKEN]]
+OPENWEBUI_CRAWL4AI_API_TOKEN=[[OPENWEBUI_CRAWL4AI_API_TOKEN]]
 """
 
 ##
