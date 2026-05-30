@@ -1,6 +1,6 @@
 x-versions:
   grafana: &grafana-version "grafana/grafana:13.0.1"
-  prometheus: &prometheus-version "prom/prometheus:v3.11.3"
+  prometheus: &prometheus-version "prom/prometheus:v3.12.0"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.11.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.2-4.8.1-distroless" 
