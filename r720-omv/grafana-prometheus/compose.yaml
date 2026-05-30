@@ -5,7 +5,7 @@ x-versions:
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.2-4.8.1-distroless" 
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
-  snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.30.0"
+  snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.30.1"
   mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:latest"
 
 services:
