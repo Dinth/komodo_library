@@ -58,7 +58,10 @@ services:
       wud.tag.transform: '^(\d+\.\d+\.\d+)-nbxyz(\d+)$$ => $$1-$$2'
       wud.display.name: 'netboot.xyz'
       wud.display.icon: 'mdi:server-network'
-      wud.link.template: 'https://github.com/netbootxyz/docker-netbootxyz/releases/tag/$${major}.$${minor}.$${patch}'
+      # Tags are 0.7.6-nbxyzN (no clean semver releases), so $${major}.$${minor}.$${patch}
+      # -> 0.7.6 404s. $${raw} is the untransformed tag (0.7.6-nbxyz23), which is the real
+      # tag page. The semver placeholders here derive from the *transformed* tag (0.7.6-23).
+      wud.link.template: 'https://github.com/netbootxyz/docker-netbootxyz/releases/tag/$${raw}'
 
 networks:
   netbootxyz:
