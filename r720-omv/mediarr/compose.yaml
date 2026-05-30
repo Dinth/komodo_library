@@ -410,8 +410,8 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "1m"
-        max-file: "1"
+        max-size: "10m"
+        max-file: "3"
     labels:
       wud.display.name: "Iplayarr - Valkey"
       wud.display.icon: "sh-iplayarr"
@@ -555,17 +555,17 @@ services:
       SONARR__SEARCHTYPE: "Episode"
       SONARR__BLOCK__TYPE: "blacklist"
       SONARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
-      SONARR__INSTANCES__0__URL: "http://10.10.1.13:8989"
+      SONARR__INSTANCES__0__URL: "http://sonarr:8989"
       SONARR__INSTANCES__0__APIKEY: "${SONARR__INSTANCES__0__APIKEY}"
       RADARR__ENABLED: "true"
       RADARR__BLOCK__TYPE: "blacklist"
       RADARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
-      RADARR__INSTANCES__0__URL: "http://10.10.1.13:7878"
+      RADARR__INSTANCES__0__URL: "http://radarr:7878"
       RADARR__INSTANCES__0__APIKEY: "${RADARR__INSTANCES__0__APIKEY}"
       LIDARR__ENABLED: "true"
       LIDARR__BLOCK__TYPE: "blacklist"
       LIDARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
-      LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
+      LIDARR__INSTANCES__0__URL: "http://lidarr:8686"
       LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
     labels:
       wud.watch: "true"
@@ -729,7 +729,7 @@ services:
       wud.display.name: "Sonarr"
       wud.display.icon: "sh-sonarr"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8989/sonarr/ping"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8989/ping"]
       interval: 30s
       timeout: 10s
       start_period: 30s
