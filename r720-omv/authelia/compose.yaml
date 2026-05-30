@@ -1,5 +1,5 @@
 x-versions:
-  authelia: &authelia-version "authelia/authelia:4.39.19"
+  authelia: &authelia-version "authelia/authelia:4.39.20"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
 
 x-logging: &default-logging
