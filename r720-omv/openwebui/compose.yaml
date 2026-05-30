@@ -209,6 +209,10 @@ services:
       wud.display.name: "Automatic1111"
       wud.display.icon: "sh:stablediffusion"
       wud.tag.include: "^v2-cuda-12\\.1\\.1-base-22\\.04-v\\d+\\.\\d+\\.\\d+$$"
+      # Strip the constant CUDA/base prefix so WUD compares only the trailing
+      # webui semver (v1.10.1 -> 1.10.1). Otherwise it treats the whole string
+      # as a prerelease and sorts "v1.10.1" below "v1.9.1" lexically.
+      wud.tag.transform: '^.*-v(\d+\.\d+\.\d+)$$ => $$1'
       wud.link.template: "https://github.com/ai-dock/stable-diffusion-webui/releases"
     networks:
       - openwebui

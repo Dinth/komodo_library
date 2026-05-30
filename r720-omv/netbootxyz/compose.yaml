@@ -52,6 +52,10 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+-nbxyz\d+$$'
+      # Rewrite 0.7.6-nbxyz18 -> 0.7.6-18 so the build counter is a *numeric*
+      # semver prerelease id. WUD otherwise compares "nbxyz18" vs "nbxyz9" as
+      # strings, where '1' < '9' makes nbxyz9 look newer than nbxyz18.
+      wud.tag.transform: '^(\d+\.\d+\.\d+)-nbxyz(\d+)$$ => $$1-$$2'
       wud.display.name: 'netboot.xyz'
       wud.display.icon: 'mdi:server-network'
       wud.link.template: 'https://github.com/netbootxyz/docker-netbootxyz/releases/tag/$${major}.$${minor}.$${patch}'
