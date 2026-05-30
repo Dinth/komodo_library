@@ -5,6 +5,7 @@ x-versions:
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.2-4.8.1-distroless" 
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
+  snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.30.0"
   mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:latest"
 
 services:
@@ -332,6 +333,47 @@ services:
       homepage.name: "Blackbox"
       homepage.icon: "prometheus.png"
       homepage.description: "Endpoint Probing"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  snmp-exporter:
+    container_name: snmp-exporter
+    image: *snmp-exporter-version
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: "${TZ}"
+    hostname: snmp-exporter
+    ipc: private
+    mem_limit: 128M
+    networks:
+      - monitoring
+    ports: []
+    volumes:
+      - /opt/docker/grafana-prometheus/snmp.yml:/etc/snmp_exporter/snmp.yml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9116/-/healthy | grep -q 'Healthy'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.display.name: "SNMP Exporter"
+      wud.display.icon: "si:prometheus"
+      wud.link.template: 'https://github.com/prometheus/snmp_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
+      homepage.group: "Infrastructure"
+      homepage.name: "SNMP Exporter"
+      homepage.icon: "prometheus.png"
+      homepage.description: "SNMP polling (switch, pfSense, iDRAC)"
     logging:
       driver: "json-file"
       options:
