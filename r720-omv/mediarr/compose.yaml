@@ -4,13 +4,13 @@ x-versions:
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.0"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.3.5"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
-  bazarr: &bazarr-version "linuxserver/bazarr:1.5.6"
-  lidarr: &lidarr-version "linuxserver/lidarr:3.1.0"
+  bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.5.6"
+  lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
   cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.9.13"
-  radarr: &radarr-version "linuxserver/radarr:6.1.1"
-  sonarr: &sonarr-version "linuxserver/sonarr:4.0.17"
+  radarr: &radarr-version "lscr.io/linuxserver/radarr:6.1.1"
+  sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.17"
 services:
   #############################################################################
   # Gluetun VPN Gateway
@@ -50,6 +50,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    mem_limit: 256M
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
       interval: 10s
@@ -78,6 +79,9 @@ services:
     restart: unless-stopped
     ipc: private
     network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
@@ -126,6 +130,9 @@ services:
     restart: unless-stopped
     ipc: private
     network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
@@ -174,20 +181,11 @@ services:
   #############################################################################      
   recommendarr:
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
@@ -195,10 +193,17 @@ services:
     mem_limit: 512M
     command: ['sh','/start-unified.sh']
     container_name: recommendarr
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:8282/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     entrypoint:
       - docker-entrypoint.sh
     environment:
       PORT: "8282"
+      TZ: "${TZ}"
     hostname: recommendarr
     image: *recommendarr-version
     ipc: private
@@ -208,6 +213,12 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
+      homepage.group: "Media"
+      homepage.name: "Recommendarr"
+      homepage.icon: "recommendarr.png"
+      homepage.href: "http://10.10.1.13:8282"
+      homepage.description: "AI recommendations"
+      homepage.siteMonitor: "http://10.10.1.13:8282"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
@@ -246,12 +257,18 @@ services:
       - no-new-privileges:true
     mem_limit: 512M
     container_name: bazarr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:6767/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     entrypoint:
       - /init
     environment:
       TZ: "${TZ}"
-      PUID: "1001"
-      PGID: "100"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
     hostname: bazarr
     image: *bazarr-version
     ipc: private
@@ -285,6 +302,9 @@ services:
       - /opt/docker/mediarr/bazarr_config:/config
       - /Data/Movies:/movies
       - /Data/TVShows:/tv
+      - /Data/Anime:/anime
+      - /Data/Cartoons:/cartoons
+      - /Data/CartoonMovies:/cartoon_movies
   #############################################################################
   # Lidarr
   # Music collection manager
@@ -311,11 +331,17 @@ services:
       - no-new-privileges:true
     mem_limit: 1G
     container_name: lidarr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8686/ping"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     entrypoint:
       - /init
     environment:
-      PUID: "1001"
-      PGID: "100"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
       TZ: "${TZ}"
     hostname: lidarr
     image: *lidarr-version
@@ -332,7 +358,7 @@ services:
       homepage.widget.url: "http://10.10.1.13:8686"
       homepage.widget.key: "${HOMEPAGE_LIDARR_API}"
       wud.watch: "true"
-      wud.tag.include: '^v?[0-7].\d+.\d+$$'
+      wud.tag.include: '^v?[0-7]\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Lidarr/Lidarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Lidarr"
       wud.display.icon: "sh-lidarr"
@@ -375,10 +401,10 @@ services:
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 5s
       timeout: 3s
-      interval: 1s
+      interval: 10s
       retries: 5
     volumes:
-      - /opt/docker/iplayarr/valkey_data:/data
+      - /opt/docker/mediarr/iplayarr_valkey_data:/data
     networks:
       - mediarr
     logging:
@@ -419,14 +445,20 @@ services:
     mem_limit: 512M
     command: ['npm','run','start']
     container_name: iplayarr
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:4404/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     entrypoint:
       - docker-entrypoint.sh
     environment:
-      PUID: "1001"
-      PGID: "100"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
       API_KEY: "${IPLAYARR_API_KEY}"
-      DOWNLOAD_DIR: "/mnt/media/!Complete"
-      COMPLETE_DIR: "/mnt/media/!Incomplete"
+      DOWNLOAD_DIR: "/mnt/media/!Incomplete"
+      COMPLETE_DIR: "/mnt/media/!Complete"
       STORAGE_LOCATION: "/config"
       CACHE_LOCATION: "/data"
       REDIS_HOST: "iplayarr-valkey"
@@ -447,6 +479,9 @@ services:
       wud.display.icon: "sh-iplayarr"
     networks:
       - mediarr
+    depends_on:
+      iplayarr-valkey:
+        condition: service_healthy
     ports:
       - 4404:4404/tcp
     restart: unless-stopped
@@ -460,26 +495,23 @@ services:
   #############################################################################
   cleanuparr:
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     mem_limit: 256M
     container_name: cleanuperr
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:11011/health || wget -q -O- http://127.0.0.1:11011/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     hostname: cleanuperr
     image: *cleanuparr-version
     ipc: private
@@ -522,23 +554,23 @@ services:
       SONARR__ENABLED: "true"
       SONARR__SEARCHTYPE: "Episode"
       SONARR__BLOCK__TYPE: "blacklist"
-      SONARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
+      SONARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
       SONARR__INSTANCES__0__URL: "http://10.10.1.13:8989"
       SONARR__INSTANCES__0__APIKEY: "${SONARR__INSTANCES__0__APIKEY}"
       RADARR__ENABLED: "true"
       RADARR__BLOCK__TYPE: "blacklist"
-      RADARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
+      RADARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
       RADARR__INSTANCES__0__URL: "http://10.10.1.13:7878"
       RADARR__INSTANCES__0__APIKEY: "${RADARR__INSTANCES__0__APIKEY}"
       LIDARR__ENABLED: "true"
       LIDARR__BLOCK__TYPE: "blacklist"
-      LIDARR__BLOCK__PATH: "https://raw.githubusercontent.com/flmorg/cleanuperr/refs/heads/main/blacklist"
+      LIDARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
       LIDARR__INSTANCES__0__URL: "http://10.10.1.13:8686"
       LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/flmorg/cleanuperr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/Cleanuparr/Cleanuparr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Cleanuperr"
       wud.display.icon: "sh-cleanuperr"
     networks:
@@ -549,21 +581,6 @@ services:
   # CAPTCHA resolver for Prowlarr
   #############################################################################    
   flaresolverr:
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
@@ -571,6 +588,12 @@ services:
     mem_limit: 1G
     command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
     container_name: flaresolverr
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/local/bin/python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8191/\")'"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 5
     entrypoint: ["/usr/bin/dumb-init","--"]
     image: *flaresolverr-version
     ipc: private
@@ -586,6 +609,9 @@ services:
         max-size: "10m"
         max-file: "3"
     network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
     restart: unless-stopped
     user: flaresolverr
   #############################################################################
@@ -614,19 +640,25 @@ services:
       - no-new-privileges:true
     mem_limit: 2G
     container_name: radarr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     entrypoint:
       - /init
     environment:
       TZ: "${TZ}"
-      PUID: "1001"
-      PGID: "100"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
     hostname: radarr
     image: *radarr-version
     ipc: private
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'hhttps://github.com/Radarr/Radarr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/Radarr/Radarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Radarr"
       wud.display.icon: "sh-radarr"
     logging:
@@ -674,8 +706,8 @@ services:
       - /init
     environment:
       TZ: "${TZ}"
-      PUID: "1001"
-      PGID: "100"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
     hostname: sonarr
     image: *sonarr-version
     ipc: private
@@ -697,9 +729,11 @@ services:
       wud.display.name: "Sonarr"
       wud.display.icon: "sh-sonarr"
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8989/sonarr/ping", "https://google.com" ]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8989/sonarr/ping"]
       interval: 30s
-      retries: 10
+      timeout: 10s
+      start_period: 30s
+      retries: 5
     logging:
       driver: json-file
       options:
