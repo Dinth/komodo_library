@@ -256,21 +256,21 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    runtime: nvidia
     environment:
       TZ: "${TZ}"
-    NVIDIA_VISIBLE_DEVICES: all
-    NVIDIA_DRIVER_CAPABILITIES: all
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
     hostname: dcgm-exporter
     ipc: private
     networks:
       - monitoring
-    runtime: nvidia
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: all 
+              count: all
               capabilities: [gpu]
     labels:
       wud.watch: "true"
