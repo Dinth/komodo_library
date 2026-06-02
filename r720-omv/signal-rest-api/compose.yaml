@@ -23,9 +23,9 @@ services:
       - SETUID
     cap_drop:
       - ALL
-    mem_limit: 512M
+    mem_limit: 768M
     environment:
-      MODE: "normal" #supported modes: json-rpc, native, normal
+      MODE: "json-rpc" #supported modes: json-rpc, native, normal
       SIGNAL_CLI_UID: "${DOCKER_PUID}"
       SIGNAL_CLI_GID: "${DOCKER_PGID}"
       #AUTO_RECEIVE_SCHEDULE: "0 22 * * *" #enable this parameter on demand
