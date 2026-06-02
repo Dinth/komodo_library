@@ -79,6 +79,10 @@ services:
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO: "websecure"
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_SCHEME: "https"
+      # Demote the global redirect's priority (default ~maxint) below the
+      # mojecert-verification router (priority 200) so that one .well-known path
+      # is served over plain HTTP; every other web request still redirects.
+      TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_PRIORITY: "100"
       # Websecure (HTTPS) EntryPoint on port 443
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
