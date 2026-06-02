@@ -98,6 +98,12 @@ services:
       # File Provider
       TRAEFIK_PROVIDERS_FILE_FILENAME: "/traefik_dynamic.yml"
       TRAEFIK_PROVIDERS_FILE_WATCH: "true"
+      # --- Experimental Plugins ---
+      # staticresponse: lets a router return an inline body (used to serve the
+      # mojeCERT domain-verification token over plain HTTP). Cached under
+      # /plugins-storage so a restart never depends on GitHub reachability.
+      TRAEFIK_EXPERIMENTAL_PLUGINS_STATICRESPONSE_MODULENAME: "github.com/jdel/staticresponse"
+      TRAEFIK_EXPERIMENTAL_PLUGINS_STATICRESPONSE_VERSION: "v0.0.1"
       # --- Certificate Resolver (Let's Encrypt with Cloudflare DNS Challenge) ---
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ADMIN_EMAIL}"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE: "/certs/acme.json"
@@ -122,7 +128,7 @@ services:
     volumes:
       - /opt/docker/traefik/traefik_certs:/certs
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
-      - /opt/docker/traefik/mojecertpl.verification:/mojecertpl.verification:ro
+      - /opt/docker/traefik/traefik_plugins:/plugins-storage
     tmpfs:
       - /tmp
     logging: *default-logging
