@@ -4,6 +4,7 @@ x-versions:
   hass-mcp: &hass-mcp-version "voska/hass-mcp:0.1.1"
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
   automatic1111: &automatic1111-version "ghcr.io/ai-dock/stable-diffusion-webui:v2-cuda-12.1.1-base-22.04-v1.10.1"
+  a1111-idle: &a1111-idle-version "curlimages/curl:8.11.1"
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:latest"
 
 services:
@@ -221,6 +222,56 @@ services:
     volumes:
       - /opt/docker/openwebui/automatic1111_workspace:/workspace
     restart: unless-stopped
+  automatic1111-idle:
+    image: *a1111-idle-version
+    container_name: automatic1111-idle
+    depends_on:
+      automatic1111:
+        condition: service_healthy
+    environment:
+      TZ: "${TZ}"
+    entrypoint: ["/bin/sh", "-c"]
+    # Frees VRAM by unloading the A1111 checkpoint after IDLE seconds with no
+    # active render job; the next txt2img from OpenWebUI auto-reloads it.
+    # job_count>0 means A1111 is mid-generation, so the timer never fires then.
+    command:
+      - |
+        A=http://automatic1111:7860; IDLE=600; STEP=60; idle=0; loaded=1
+        while :; do
+          sleep $$STEP
+          jc=$$(curl -sf "$$A/sdapi/v1/progress?skip_current_image=true" | grep -o '"job_count":[0-9]*' | cut -d: -f2)
+          if [ "$${jc:-0}" -gt 0 ]; then
+            idle=0; loaded=1
+          elif [ $$loaded -eq 1 ]; then
+            idle=$$((idle+STEP))
+            [ $$idle -ge $$IDLE ] && curl -sf -X POST "$$A/sdapi/v1/unload-checkpoint" >/dev/null 2>&1 \
+              && { loaded=0; echo "[idle-unload] freed VRAM after $${idle}s idle"; }
+          fi
+        done
+    ipc: private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    restart: unless-stopped
+    networks:
+      - openwebui
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: '32M'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.display.name: "A1111 Idle Unloader"
+      wud.display.icon: "sh:curl"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
   openwebui-pipelines:
     cap_add:
       - AUDIT_WRITE
