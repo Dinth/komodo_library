@@ -167,8 +167,9 @@ services:
     shm_size: '4gb'
     environment:
       # ComfyUI ships with no models. On first boot this provisioning script
-      # pulls one SDXL checkpoint into persistent /workspace storage; ai-dock
-      # symlinks it into ComfyUI's models/checkpoints dir. Idempotent (wget -nc).
+      # pulls the DreamShaper XL Turbo checkpoint into persistent /workspace
+      # storage; ai-dock symlinks it into ComfyUI's models/checkpoints dir.
+      # Idempotent (wget -nc).
       PROVISIONING_SCRIPT: "https://raw.githubusercontent.com/Dinth/komodo_library/main/r720-omv/openwebui/comfyui-provisioning.sh"
       # --listen binds all interfaces so OpenWebUI (and the host port) can reach
       # the API. Default "smart" VRAM management lets ComfyUI release memory back
@@ -197,8 +198,8 @@ services:
     # Pin to NUMA node 1 (odd threads) to avoid CPU-cache contention with ollama on NUMA 0
     cpuset: "1,3,5,7"
     healthcheck:
-      # Generous start_period: first boot downloads the ~6.5 GB SDXL checkpoint
-      # before ComfyUI answers on 8188.
+      # Generous start_period: first boot downloads the ~6.9 GB DreamShaper XL
+      # Turbo checkpoint before ComfyUI answers on 8188.
       test: ["CMD-SHELL", "curl --fail http://localhost:8188/ || exit 1"]
       interval: 30s
       timeout: 10s

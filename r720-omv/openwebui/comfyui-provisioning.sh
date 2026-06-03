@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-# Purpose:      ai-dock ComfyUI provisioning. On first boot, download a single
-#               SDXL checkpoint into persistent /workspace storage. ai-dock's
+# Purpose:      ai-dock ComfyUI provisioning. On first boot, download the
+#               DreamShaper XL Turbo checkpoint (versatile/style-rich, ~8-step
+#               Turbo model) into persistent /workspace storage. ai-dock's
 #               init.sh sources this file, then symlinks storage into ComfyUI's
 #               models/checkpoints directory.
 # Dependencies: wget (shipped in the ai-dock base image); WORKSPACE env var set
@@ -20,7 +21,7 @@ function provisioning_start() {
         ckpt_dir="${WORKSPACE:-/workspace}/storage/stable_diffusion/models/ckpt"
         mkdir -p "$ckpt_dir"
         wget -nc --content-disposition -P "$ckpt_dir" \
-            "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors"
+            "https://huggingface.co/Lykon/dreamshaper-xl-v2-turbo/resolve/main/DreamShaperXL_Turbo_v2.safetensors"
     )
 }
 
