@@ -174,9 +174,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200m
+          memory: 2g
         reservations:
-          memory: 50m
+          memory: 256m
     environment:
       POSTGRES_PASSWORD: ${IMMICH_POSTGRES_PASS}
       POSTGRES_USER: immich
