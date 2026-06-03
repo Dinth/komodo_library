@@ -92,6 +92,7 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
     mem_limit: 4G
     deploy:
       resources:
@@ -118,6 +119,7 @@ services:
   immich-valkey:
     image: *valkey-version
     container_name: immich-valkey
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
     ipc: private
     restart: unless-stopped
     command: ['valkey-server','--save','30','1','--loglevel','warning']
@@ -158,6 +160,7 @@ services:
     container_name: immich-postgres
     ipc: private
     restart: unless-stopped
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
     cap_add:
       - CHOWN
       - FOWNER
