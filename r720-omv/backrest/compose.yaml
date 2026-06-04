@@ -1,0 +1,136 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.1"
+  backrest: &backrest-version "garethgeorge/backrest:v1.13.0-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # Scoped Docker API for Backrest's pre-backup DB-dump hooks (docker exec into the
+  # Postgres/MariaDB containers). Read-only socket; only containers/exec endpoints.
+  backrest-socket-proxy:
+    image: *socket-proxy-version
+    ipc: private
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=backrest'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(containers/.*|exec/.*|version|info|_ping)'
+      - '-allowPOST=/(containers/.*|exec/.*)'
+      - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+      - '-allowhealthcheck'
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - backrest
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Backrest'
+      wud.display.icon: 'mdi:connection'
+
+  backrest:
+    image: *backrest-version
+    container_name: backrest
+    hostname: backrest
+    ipc: private
+    restart: unless-stopped
+    # Backup tool: runs as root with DAC_READ_SEARCH so it can READ every file under
+    # /opt/docker regardless of owner/mode (0600 configs, postgres-owned data, etc.)
+    # without the broader DAC_OVERRIDE write-bypass. cap_drop ALL keeps the rest off.
+    user: "0:0"
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_READ_SEARCH
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    depends_on:
+      backrest-socket-proxy:
+        condition: service_healthy
+    environment:
+      TZ: "${TZ}"
+      # docker-cli (bundled in the -alpine image) talks to the scoped proxy for hooks
+      DOCKER_HOST: "tcp://backrest-socket-proxy:2375"
+      # Consumed by the Signal notification hook (see repo README / Backrest UI hook)
+      SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
+      SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9898/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    volumes:
+      # Backrest's own state (defaults baked into the image: BACKREST_DATA=/data,
+      # BACKREST_CONFIG=/config/config.json, XDG_CACHE_HOME=/cache)
+      - /opt/docker/backrest/config:/config
+      - /opt/docker/backrest/data:/data
+      - /opt/docker/backrest/cache:/cache
+      # DB dumps land here (written by the pre-backup hook); included in the backup
+      # because it lives under /opt/docker -> /userdata. NOT under backrest/ which is excluded.
+      - /opt/docker/db-dumps:/dumps
+      # Backup SOURCE - all container bind-mount data, read-only.
+      - /opt/docker:/userdata:ro
+      # Restic repository destination (browsable/restorable via the Backrest UI).
+      - /Data/IT/Docker_backups/backrest:/repos
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - backrest
+      - signal-rest-api
+      - traefik
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.backrest.rule: "Host(`backrest.${DOMAIN_NAME}`)"
+      traefik.http.routers.backrest.entrypoints: "websecure"
+      traefik.http.routers.backrest.tls: "true"
+      traefik.http.routers.backrest.tls.certresolver: "letsencrypt"
+      traefik.http.routers.backrest.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.backrest.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.backrest.middlewares: "secHeaders@file,lan-only@file"
+      traefik.http.services.backrest.loadbalancer.server.port: "9898"
+      homepage.group: "Infrastructure"
+      homepage.name: "Backrest"
+      homepage.icon: "sh-backrest.png"
+      homepage.href: "https://backrest.${DOMAIN_NAME}"
+      homepage.description: "Backup orchestrator (restic)"
+      homepage.siteMonitor: "https://backrest.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+-alpine$$'
+      wud.display.name: "Backrest"
+      wud.display.icon: "sh:backrest"
+      wud.link.template: "https://github.com/garethgeorge/backrest/releases/tag/v$${major}.$${minor}.$${patch}"
+
+networks:
+  backrest:
+    name: backrest
+    driver: bridge
+    external: false
+  signal-rest-api:
+    external: true
+  traefik:
+    external: true
