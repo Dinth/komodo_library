@@ -84,6 +84,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    ports:
+      - "9898:9898/tcp"
     volumes:
       # Backrest's own state (defaults baked into the image: BACKREST_DATA=/data,
       # BACKREST_CONFIG=/config/config.json, XDG_CACHE_HOME=/cache)
@@ -101,24 +103,14 @@ services:
     networks:
       - backrest
       - signal-rest-api
-      - traefik
     logging: *default-logging
     labels:
-      traefik.enable: "true"
-      traefik.http.routers.backrest.rule: "Host(`backrest.${DOMAIN_NAME}`)"
-      traefik.http.routers.backrest.entrypoints: "websecure"
-      traefik.http.routers.backrest.tls: "true"
-      traefik.http.routers.backrest.tls.certresolver: "letsencrypt"
-      traefik.http.routers.backrest.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.backrest.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.backrest.middlewares: "secHeaders@file,lan-only@file"
-      traefik.http.services.backrest.loadbalancer.server.port: "9898"
       homepage.group: "Infrastructure"
       homepage.name: "Backrest"
       homepage.icon: "sh-backrest.png"
-      homepage.href: "https://backrest.${DOMAIN_NAME}"
+      homepage.href: "http://10.10.1.13:9898"
       homepage.description: "Backup orchestrator (restic)"
-      homepage.siteMonitor: "https://backrest.${DOMAIN_NAME}"
+      homepage.siteMonitor: "http://10.10.1.13:9898"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+-alpine$$'
       wud.display.name: "Backrest"
@@ -131,6 +123,4 @@ networks:
     driver: bridge
     external: false
   signal-rest-api:
-    external: true
-  traefik:
     external: true

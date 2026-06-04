@@ -5,7 +5,7 @@ Web-UI orchestrator around **restic** — backs up the container bind-mount data
 Replaces the abandoned-for-bind-mounts repliqate approach: Backrest backs up by **path**,
 so bind mounts need no `o: bind` volume tricks.
 
-- **URL:** `https://backrest.${DOMAIN_NAME}` (LAN-only middleware)
+- **URL:** `http://10.10.1.13:9898` (direct host port, no reverse proxy)
 - **Engine:** restic (repo is plain restic — readable by the `restic` CLI, no lock-in)
 - **Image:** `garethgeorge/backrest:*-alpine` — the `-alpine` tag is **required** (the
   default `scratch` image has no `curl`/`bash`/`docker-cli`, which the hooks need)
