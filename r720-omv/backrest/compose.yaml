@@ -18,9 +18,11 @@ services:
       - '-loglevel=info'
       - '-allowfrom=backrest'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/(containers/.*|exec/.*|version|info|_ping)'
-      - '-allowPOST=/(containers/.*|exec/.*)'
-      - '-allowHEAD=/_ping'
+      # docker-cli prefixes paths with the negotiated API version (e.g. /v1.52/containers/...),
+      # so allow an optional /vX.Y/ prefix or every exec call 403s.
+      - '-allowGET=/(v[0-9.]+/)?(containers/.*|exec/.*|version|info|_ping)'
+      - '-allowPOST=/(v[0-9.]+/)?(containers/.*|exec/.*)'
+      - '-allowHEAD=/(v[0-9.]+/)?_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
