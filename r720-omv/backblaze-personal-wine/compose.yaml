@@ -47,10 +47,11 @@ services:
       VNC_LISTENING_PORT: "5900"
       VNC_PASSWORD: ""
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5800"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pgrep -f bzserv.exe > /dev/null"]
+      interval: 60s
+      timeout: 10s
       retries: 3
+      start_period: 120s
     ports:
       - 5800:5800/tcp
     volumes:
