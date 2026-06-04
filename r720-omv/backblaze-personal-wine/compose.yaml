@@ -30,8 +30,6 @@ services:
       - KILL
     cap_drop:
       - ALL
-    security_opt:
-      - no-new-privileges:true
     mem_limit: 2G
     command: ['/init']
     environment:
