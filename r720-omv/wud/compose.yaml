@@ -43,6 +43,8 @@ services:
     networks:
       - wud
     logging: *default-logging
+      ports:
+      - "10.10.1.13:2377:2375"
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
