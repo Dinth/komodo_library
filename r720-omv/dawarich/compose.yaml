@@ -70,6 +70,7 @@ services:
     hostname: dawarich-postgis
     image: *postgis-version
     ipc: private
+    mem_limit: 1G
     healthcheck:
       test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]
       interval: 10s
@@ -136,6 +137,7 @@ services:
     hostname: dawarich-sidekiq
     image: *dawarich-version
     ipc: private
+    mem_limit: 512M
     healthcheck:
       test: [ "CMD-SHELL", "pgrep -f sidekiq" ]
       interval: 10s
@@ -214,6 +216,7 @@ services:
     hostname: dawarich
     image: *dawarich-version
     ipc: private
+    mem_limit: 1G
 #    healthcheck:
 #      test: [ "CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'" ]
 #      interval: 10s

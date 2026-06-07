@@ -34,6 +34,7 @@ services:
       TZ: "${TZ}"
     hostname: grafana
     ipc: private
+    mem_limit: 512M
     networks:
       - monitoring
     ports:
@@ -158,6 +159,7 @@ services:
       TZ: "${TZ}"
     hostname: node-exporter
     ipc: private
+    mem_limit: 128M
     networks:
       - monitoring
     ports: []
@@ -263,6 +265,7 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: all
     hostname: dcgm-exporter
     ipc: private
+    mem_limit: 256M
     networks:
       - monitoring
     deploy:
@@ -314,6 +317,7 @@ services:
       TZ: "${TZ}"
     hostname: blackbox-exporter
     ipc: private
+    mem_limit: 128M
     networks:
       - monitoring
     ports: []
@@ -411,6 +415,7 @@ services:
       - 5133:5133/tcp
     hostname: mcp-grafana
     ipc: private
+    mem_limit: 256M
     networks:
       - monitoring
       - openwebui
