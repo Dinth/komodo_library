@@ -34,7 +34,7 @@ services:
       TZ: "${TZ}"
       # Signal delivery target (signal-cli-rest-api /v2/send) — consumed by the
       # provisioned "signal" contact point via $__env{} interpolation.
-      SIGNAL_NUMBER: "${SIGNAL_NUMBER}"
+      SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
       SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
     hostname: grafana
     ipc: private
