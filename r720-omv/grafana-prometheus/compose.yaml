@@ -3,7 +3,7 @@ x-versions:
   prometheus: &prometheus-version "prom/prometheus:v3.12.0"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.11.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
-  dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.2-4.8.1-distroless" 
+  dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.5.2-4.8.1-distroless"
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
   snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.30.1"
   mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:latest"
@@ -32,6 +32,10 @@ services:
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_USERS_DEFAULT_THEME: "dark"
       TZ: "${TZ}"
+      # Signal delivery target (signal-cli-rest-api /v2/send) — consumed by the
+      # provisioned "signal" contact point via $__env{} interpolation.
+      SIGNAL_NUMBER: "${SIGNAL_NUMBER}"
+      SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
     hostname: grafana
     ipc: private
     mem_limit: 512M
@@ -43,6 +47,7 @@ services:
       - /opt/docker/grafana-prometheus/grafana_storage:/var/lib/grafana
       - /opt/docker/grafana-prometheus/grafana_provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - /opt/docker/grafana-prometheus/grafana_provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - /opt/docker/grafana-prometheus/grafana_provisioning/alerting:/etc/grafana/provisioning/alerting:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q '\"database\"\\s*:\\s*\"ok\"'"]
       interval: 30s
