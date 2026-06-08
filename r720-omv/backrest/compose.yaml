@@ -69,7 +69,7 @@ services:
       - DAC_READ_SEARCH
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    mem_limit: 2G
     depends_on:
       backrest-socket-proxy:
         condition: service_healthy
