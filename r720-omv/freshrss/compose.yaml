@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    mem_limit: 256M
+    mem_limit: 512M
     entrypoint: ["sh", "-c", "/app/bin/cache-clear && exec /app/docker-entrypoint.sh"]
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/80 && echo HTTP OK || echo HTTP FAIL'"]
