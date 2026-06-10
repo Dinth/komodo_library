@@ -38,7 +38,7 @@ services:
       SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
     hostname: grafana
     ipc: private
-    mem_limit: 512M
+    mem_limit: 1G
     networks:
       - monitoring
     ports:
