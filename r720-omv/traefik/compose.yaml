@@ -85,6 +85,12 @@ services:
       # Kept at 1000 (well above any rule-length-derived default priority) so a
       # future web router with a long rule can't accidentally serve plaintext.
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_PRIORITY: "1000"
+      # Wazuh agent edge ports. 1514/1515 on this host are owned by Alloy syslog,
+      # so we expose custom ports 9514 (agent comms) / 9515 (authd enrollment) and
+      # map them to the Wazuh manager's default 1514/1515 on 10.10.1.18 via the
+      # HostSNI(`*`) TCP routers in traefik_dynamic.yml. Manager is left unchanged.
+      TRAEFIK_ENTRYPOINTS_WAZUHAGENT_ADDRESS: ":9514"
+      TRAEFIK_ENTRYPOINTS_WAZUHENROLL_ADDRESS: ":9515"
       # Websecure (HTTPS) EntryPoint on port 443
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
@@ -131,6 +137,8 @@ services:
     ports:
       - 80:80
       - 443:443
+      - 9514:9514
+      - 9515:9515
       - 8281:8080
     volumes:
       - /opt/docker/traefik/traefik_certs:/certs
