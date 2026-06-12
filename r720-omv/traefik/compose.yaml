@@ -85,13 +85,6 @@ services:
       # Kept at 1000 (well above any rule-length-derived default priority) so a
       # future web router with a long rule can't accidentally serve plaintext.
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_PRIORITY: "1000"
-      # Wazuh agent comms (1514) and enrollment (1515) — raw TCP passthrough
-      # entrypoints. These carry no SNI/Host, so they're routed by dedicated
-      # entrypoint (one port = one backend) via HostSNI(`*`) TCP routers defined
-      # in traefik_dynamic.yml. No TLS block there => Traefik does NOT terminate,
-      # it forwards bytes untouched to the Wazuh manager on 10.10.1.18.
-      TRAEFIK_ENTRYPOINTS_WAZUHAGENT_ADDRESS: ":1514"
-      TRAEFIK_ENTRYPOINTS_WAZUHENROLL_ADDRESS: ":1515"
       # Websecure (HTTPS) EntryPoint on port 443
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
@@ -138,8 +131,6 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 1514:1514
-      - 1515:1515
       - 8281:8080
     volumes:
       - /opt/docker/traefik/traefik_certs:/certs
