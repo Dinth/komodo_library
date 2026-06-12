@@ -103,8 +103,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
-    mem_limit: 512M
+          memory: 1G
+    mem_limit: 1G
     cap_drop:
       - ALL
     cap_add:
