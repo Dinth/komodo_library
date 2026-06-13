@@ -72,7 +72,7 @@ services:
         source: /frigate-pool/recordings
         target: /media/frigate
         bind:
-        create_host_path: false
+          create_host_path: false
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/frigate/frigate_config:/config
       - /opt/docker/frigate/frigate_storage/frigate.db:/media/frigate/frigate.db
