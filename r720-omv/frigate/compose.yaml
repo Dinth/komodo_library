@@ -45,12 +45,14 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              # Pin Frigate to GPU 0 (Tesla T4); leave GPU 1 (RTX 5000) free.
+              # By UUID so it survives device re-enumeration across reboots.
+              device_ids: ["GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"]
               capabilities: [compute,utility,video]
     environment:
       PLUS_API_KEY: "${FRIGATE_PLUS_API_KEY}"
       USE_FP16: "false"
-      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_VISIBLE_DEVICES: "GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"
       NVIDIA_DRIVER_CAPABILITIES: "compute,video,utility"
       TOKENIZERS_PARALLELISM: "true"
       TRANSFORMERS_NO_ADVISORY_WARNINGS: "1"
