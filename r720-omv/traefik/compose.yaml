@@ -67,7 +67,12 @@ services:
     environment:
       # --- API, Dashboard & Logging ---
       TRAEFIK_API_DASHBOARD: "true"
-      TRAEFIK_API_INSECURE: "true" # Be careful with this in production!
+      # Insecure API is ENABLED so the Homepage widget can read it, but the :8080
+      # entrypoint port is NOT published to the host (see `ports:`), so it is only
+      # reachable over the internal `traefik` docker network — not from the LAN.
+      # Human dashboard access is via the websecure `traefik-dashboard` router
+      # (api@internal) behind Authelia forward-auth + lan-only (see labels below).
+      TRAEFIK_API_INSECURE: "true"
       TRAEFIK_API_DEBUG: "false"
       TRAEFIK_LOG_LEVEL: "INFO"
       TRAEFIK_ACCESSLOG: "true"
@@ -132,14 +137,21 @@ services:
       traefik-socket-proxy:
         condition: service_healthy
     networks:
-      - traefik-internal
-      - traefik
+      traefik-internal:
+      traefik:
+        # Resolve the public auth hostname to this container *inside* the docker
+        # network, so server-to-server OIDC calls (e.g. WUD discovering
+        # id.${DOMAIN_NAME}) hit Traefik:443 directly instead of hairpinning to
+        # the host IP 10.10.1.13:443 (which is refused from the docker bridge).
+        # The wildcard *.${DOMAIN_NAME} cert + the id.${DOMAIN_NAME} router on
+        # websecure handle TLS and routing to Authelia.
+        aliases:
+          - "id.${DOMAIN_NAME}"
     ports:
       - 80:80
       - 443:443
       - 9514:9514
       - 9515:9515
-      - 8281:8080
     volumes:
       - /opt/docker/traefik/traefik_certs:/certs
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
@@ -148,14 +160,27 @@ services:
       - /tmp
     logging: *default-logging
     labels:
+      # --- Dashboard exposed via Traefik (api@internal) behind Authelia ---
+      # exposedbydefault=false, so the container must opt in.
+      traefik.enable: "true"
+      traefik.http.routers.traefik-dashboard.rule: "Host(`traefik.${DOMAIN_NAME}`)"
+      traefik.http.routers.traefik-dashboard.entrypoints: "websecure"
+      traefik.http.routers.traefik-dashboard.tls: "true"
+      traefik.http.routers.traefik-dashboard.tls.certresolver: "letsencrypt"
+      traefik.http.routers.traefik-dashboard.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.traefik-dashboard.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.traefik-dashboard.service: "api@internal"
+      traefik.http.routers.traefik-dashboard.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
       homepage.group: "Infrastructure"
       homepage.name: "Traefik"
       homepage.icon: "traefik.png"
-      homepage.href: "http://10.10.1.13:8281"
+      homepage.href: "https://traefik.${DOMAIN_NAME}"
       homepage.description: "HTTP reverse proxy"
-      homepage.siteMonitor: "http://10.10.1.13:8281"
+      homepage.siteMonitor: "https://traefik.${DOMAIN_NAME}"
+      # Widget reaches the API over the internal traefik docker network (the :8080
+      # insecure entrypoint), since the public router is gated by Authelia.
       homepage.widget.type: "traefik"
-      homepage.widget.url: "http://10.10.1.13:8281"
+      homepage.widget.url: "http://traefik:8080"
       homepage.widget.fields: "['routers', 'services', 'middleware']"
       wud.watch: "true"
       wud.display.name: "Traefik"

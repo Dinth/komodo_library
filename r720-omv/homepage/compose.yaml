@@ -1,6 +1,7 @@
 x-versions:
   homepage: &homepage-version "ghcr.io/gethomepage/homepage:v1.13.1"
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.1"
+  selector: &selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -8,6 +9,16 @@ x-logging: &default-logging
     max-size: "10m"
     max-file: "3"
 
+# Per-user Homepage boards on a SINGLE hostname (fp.${DOMAIN_NAME}).
+#
+# Homepage is not multi-user, so each board is its own container. A single
+# Traefik router fronts fp.${DOMAIN_NAME} behind Authelia forward-auth; the
+# homepage-selector (nginx) then picks the right backend from the *trusted*
+# Remote-User header that Authelia injects. Routing on Remote-User is safe here
+# (unlike the old per-router HeaderRegexp design) because authelia-auth runs
+# first and overwrites any client-supplied value from the session, and the
+# secHeaders middleware strips inbound Remote-* headers. Add a user = add one
+# map line in the `homepage_selector` config + one backend container.
 x-homepage-common: &homepage-common
   image: *homepage-version
   ipc: private
@@ -27,9 +38,10 @@ x-homepage-common: &homepage-common
   logging: *default-logging
   depends_on:
     - homepage-socket-proxy
+  # Internal-only backends now: reached by the selector over the homepage
+  # network, no longer on the traefik network and no Traefik routers of their own.
   networks:
     - homepage
-    - traefik
 
 services:
   homepage-socket-proxy:
@@ -70,6 +82,55 @@ services:
     networks:
       - homepage
 
+  # Single public entrypoint for fp.${DOMAIN_NAME}. Authelia authenticates and
+  # injects Remote-User; nginx forwards to the matching board container.
+  homepage-selector:
+    image: *selector-version
+    container_name: homepage-selector
+    hostname: homepage-selector
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64M
+    configs:
+      - source: homepage_selector
+        target: /etc/nginx/conf.d/default.conf
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+    depends_on:
+      - homepage-michal
+      - homepage-paulina
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz | grep -q ok || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    networks:
+      - homepage
+      - traefik
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.homepage.rule: "Host(`fp.${DOMAIN_NAME}`)"
+      traefik.http.routers.homepage.entrypoints: "websecure"
+      traefik.http.routers.homepage.tls: "true"
+      traefik.http.routers.homepage.tls.certresolver: "letsencrypt"
+      traefik.http.routers.homepage.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.homepage.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.homepage.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.homepage.loadbalancer.server.port: "8080"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/nginx/nginx/releases'
+      wud.display.name: 'Homepage - Selector'
+      wud.display.icon: 'sh:nginx'
+
   homepage-michal:
     <<: *homepage-common
     container_name: homepage-michal
@@ -79,29 +140,6 @@ services:
     volumes:
       - /opt/docker/homepage/homepage_config_michal:/app/config
     labels:
-      # --- Traefik routing for michal (highest priority) ---
-      traefik.enable: "true"
-      traefik.http.routers.homepage-michal.rule: "Host(`fp.${DOMAIN_NAME}`) && HeaderRegexp(`Remote-User`, `^michal$$`)"
-      traefik.http.routers.homepage-michal.priority: "110"
-      traefik.http.routers.homepage-michal.entrypoints: "websecure"
-      traefik.http.routers.homepage-michal.tls: "true"
-      traefik.http.routers.homepage-michal.tls.certresolver: "letsencrypt"
-      traefik.http.routers.homepage-michal.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.homepage-michal.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.homepage-michal.middlewares: "secHeaders@file"
-      traefik.http.routers.homepage-michal.service: "homepage-michal"
-      traefik.http.services.homepage-michal.loadbalancer.server.port: "3000"
-      # --- Default fallback router (lowest priority) ---
-      traefik.http.routers.homepage-default.rule: "Host(`fp.${DOMAIN_NAME}`)"
-      traefik.http.routers.homepage-default.priority: "100"
-      traefik.http.routers.homepage-default.entrypoints: "websecure"
-      traefik.http.routers.homepage-default.tls: "true"
-      traefik.http.routers.homepage-default.tls.certresolver: "letsencrypt"
-      traefik.http.routers.homepage-default.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.homepage-default.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.homepage-default.middlewares: "secHeaders@file,authelia-auth@docker"
-      traefik.http.routers.homepage-default.service: "homepage-michal"
-      # --- WUD labels ---
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -117,24 +155,49 @@ services:
     volumes:
       - /opt/docker/homepage/homepage_config_paulina:/app/config
     labels:
-      # --- Traefik routing for paulina ---
-      traefik.enable: "true"
-      traefik.http.routers.homepage-paulina.rule: "Host(`fp.${DOMAIN_NAME}`) && HeaderRegexp(`Remote-User`, `^paulina$$`)"
-      traefik.http.routers.homepage-paulina.priority: "110"
-      traefik.http.routers.homepage-paulina.entrypoints: "websecure"
-      traefik.http.routers.homepage-paulina.tls: "true"
-      traefik.http.routers.homepage-paulina.tls.certresolver: "letsencrypt"
-      traefik.http.routers.homepage-paulina.tls.domains[0].main: "${DOMAIN_NAME}"
-      traefik.http.routers.homepage-paulina.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.homepage-paulina.middlewares: "secHeaders@file"
-      traefik.http.routers.homepage-paulina.service: "homepage-paulina"
-      traefik.http.services.homepage-paulina.loadbalancer.server.port: "3000"
-      # --- WUD labels ---
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/gethomepage/homepage/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Homepage - Paulina'
       wud.display.icon: 'sh:homepage'
+
+configs:
+  # nginx picks the board from the Authelia-injected Remote-User. $$ escapes the
+  # leading $ so Komodo/Compose passes nginx variables through literally.
+  homepage_selector:
+    content: |
+      map $$http_upgrade $$connection_upgrade {
+          default upgrade;
+          ''      close;
+      }
+      map $$http_remote_user $$board {
+          default "";
+          michal  "homepage-michal:3000";
+          paulina "homepage-paulina:3000";
+      }
+      server {
+          listen 8080;
+          resolver 127.0.0.11 valid=30s ipv6=off;
+
+          location = /healthz {
+              access_log off;
+              add_header Content-Type text/plain;
+              return 200 "ok\n";
+          }
+
+          location / {
+              # Unknown / unmapped user -> 403 (Remote-User is trusted: set by
+              # authelia-auth, with client values stripped by secHeaders).
+              if ($$board = "") { return 403; }
+              proxy_pass http://$$board$$request_uri;
+              proxy_http_version 1.1;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+              proxy_set_header Upgrade $$http_upgrade;
+              proxy_set_header Connection $$connection_upgrade;
+          }
+      }
 
 networks:
   homepage:
