@@ -520,6 +520,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    ports:
+      - 11011:11011
     environment:
       TZ: "${TZ}"
       PORT: "11011"
