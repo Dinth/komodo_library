@@ -523,8 +523,8 @@ services:
     environment:
       TZ: "${TZ}"
       PORT: "11011"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
       TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?"
       TRIGGERS__CONTENTBLOCKER: "0 0/5 * * * ?"
       TRIGGERS__DOWNLOADCLEANER: "0 0 * * * ?"
