@@ -16,8 +16,10 @@ services:
     restart: unless-stopped
     entrypoint: ['/init']
     working_dir: /opt/frigate
-    # NOTE: privileged required for GPU/device access
-    privileged: true
+    # No privileged: it bypasses the nvidia runtime hook and lets the container
+    # see ALL GPUs (CUDA then picks the faster RTX 5000), defeating the device
+    # pin below. runtime:nvidia + the cap_add set + NVIDIA_VISIBLE_DEVICES give
+    # GPU access non-privileged, so the device_ids pin actually restricts to GPU 0.
     runtime: nvidia
     shm_size: "16gb"
     mem_limit: 32G
