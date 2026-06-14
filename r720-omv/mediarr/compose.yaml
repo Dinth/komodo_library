@@ -522,6 +522,9 @@ services:
         max-file: "3"
     environment:
       TZ: "${TZ}"
+      PORT: "11011"
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
       TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?"
       TRIGGERS__CONTENTBLOCKER: "0 0/5 * * * ?"
       TRIGGERS__DOWNLOADCLEANER: "0 0 * * * ?"
@@ -576,6 +579,8 @@ services:
     networks:
       - mediarr
     restart: unless-stopped
+    volumes:
+      - /opt/docker/mediarr/cleanuparr_config:/config
   #############################################################################
   # Flareresolverr (Networked via Gluetun)
   # CAPTCHA resolver for Prowlarr
