@@ -101,6 +101,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    # Pin id.* to Traefik on the LAN so WUD's startup OIDC discovery + back-channel
+    # token calls never depend on external DNS / NAT-reflection. Without this the
+    # discovery fetch fails intermittently on restart and WUD drops the OIDC button,
+    # leaving an empty login page (no basic-auth fallback is configured).
+    extra_hosts:
+      - "id.${DOMAIN_NAME}:10.10.1.13"
     depends_on:
       wud-socket-proxy:
         condition: service_healthy
