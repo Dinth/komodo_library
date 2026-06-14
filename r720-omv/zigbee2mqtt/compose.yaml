@@ -1,5 +1,5 @@
 x-versions:
-  zigbee2mqtt: &zigbee2mqtt-version "ghcr.io/koenkk/zigbee2mqtt:2.10.1"
+  zigbee2mqtt: &zigbee2mqtt-version "ghcr.io/koenkk/zigbee2mqtt:2.12.0"
 
 x-logging: &default-logging
   driver: "json-file"
