@@ -39,8 +39,10 @@ services:
       resources:
         reservations:
           devices:
+            # Pin NVENC transcoding to GPU 0 (Tesla T4), shared with Frigate.
+            # Leave the RTX 5000 (GPU 1) dedicated to Ollama.
             - driver: nvidia
-              count: all
+              device_ids: ["GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"]
               capabilities: [video]
     environment:
       TZ: "${TZ}"
