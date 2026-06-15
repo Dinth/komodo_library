@@ -1,6 +1,6 @@
 x-versions:
   influxdb: &influxdb-version "influxdb:2.9.1-alpine"
-  telegraf-version: &telegraf-version "telegraf:1.38-alpine"
+  telegraf-version: &telegraf-version "telegraf:1.39-alpine"
   unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v2.21.0"
 
 services:
