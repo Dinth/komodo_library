@@ -104,7 +104,7 @@ services:
       resources:
         limits:
           memory: 1G
-    mem_limit: 1G
+    mem_limit: 2G
     cap_drop:
       - ALL
     cap_add:
