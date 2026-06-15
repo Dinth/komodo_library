@@ -1,6 +1,6 @@
 x-versions:
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.1"
-  traefik: &traefik-version "traefik:v3.7.1"
+  traefik: &traefik-version "traefik:v3.7.5"
 
 x-logging: &default-logging
   driver: "json-file"
