@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.1"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.2"
   backrest: &backrest-version "garethgeorge/backrest:v1.13.0-alpine"
 
 x-logging: &default-logging
