@@ -1,5 +1,5 @@
 x-versions:
-  dawarich: &dawarich-version "freikin/dawarich:1.7.10"
+  dawarich: &dawarich-version "freikin/dawarich:1.8.1"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
   postgis: &postgis-version "postgis/postgis:17-3.6-alpine"
 services:
