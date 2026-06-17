@@ -32,6 +32,29 @@ services:
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_USERS_DEFAULT_THEME: "dark"
       TZ: "${TZ}"
+      # --- Public URL (behind Traefik) — required so OAuth redirect_uri is correct ---
+      GF_SERVER_ROOT_URL: "https://grafana.${DOMAIN_NAME}"
+      # --- Authelia OIDC (generic OAuth) ---
+      # Local admin login form is intentionally left enabled as a break-glass
+      # fallback (and the Homepage widget authenticates via the admin account).
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_NAME: "Authelia"
+      GF_AUTH_GENERIC_OAUTH_ICON: "signin"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${GRAFANA_OIDC_CLIENT_SECRET}"
+      GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email groups offline_access"
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "https://id.${DOMAIN_NAME}/api/oidc/authorization"
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "https://id.${DOMAIN_NAME}/api/oidc/token"
+      GF_AUTH_GENERIC_OAUTH_API_URL: "https://id.${DOMAIN_NAME}/api/oidc/userinfo"
+      GF_AUTH_GENERIC_OAUTH_USE_PKCE: "true"
+      GF_AUTH_GENERIC_OAUTH_USE_REFRESH_TOKEN: "true"
+      GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: "preferred_username"
+      GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH: "name"
+      GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: "email"
+      GF_AUTH_GENERIC_OAUTH_GROUPS_ATTRIBUTE_PATH: "groups"
+      # admins group -> full Grafana (server) admin; everyone else -> read-only Viewer
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'admins') && 'GrafanaAdmin' || 'Viewer'"
+      GF_AUTH_GENERIC_OAUTH_ALLOW_ASSIGN_GRAFANA_ADMIN: "true"
       # Signal delivery target (signal-cli-rest-api /v2/send) — consumed by the
       # provisioned "signal" contact point via $__env{} interpolation.
       SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
@@ -39,10 +62,15 @@ services:
     hostname: grafana
     ipc: private
     mem_limit: 1G
+    # Pin id.* to Traefik on the LAN so Grafana's OIDC back-channel calls (token,
+    # userinfo, JWKS) never depend on external DNS / NAT-reflection — same rationale
+    # as the WUD stack. Without this, OIDC login can fail intermittently after a
+    # restart.
+    extra_hosts:
+      - "id.${DOMAIN_NAME}:10.10.1.13"
     networks:
       - monitoring
-    ports:
-      - "3003:3000/tcp"
+      - traefik
     volumes:
       - /opt/docker/grafana-prometheus/grafana_storage:/var/lib/grafana
       - /opt/docker/grafana-prometheus/grafana_provisioning/datasources:/etc/grafana/provisioning/datasources:ro
@@ -60,15 +88,26 @@ services:
       wud.display.name: "Grafana"
       wud.display.icon: "si:grafana"
       wud.link.template: 'https://github.com/grafana/grafana/releases/tag/v$${major}.$${minor}.$${patch}'
+      # --- Traefik router (TLS, NO forward-auth: Grafana drives its own OIDC flow) ---
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.grafana.rule: "Host(`grafana.${DOMAIN_NAME}`)"
+      traefik.http.routers.grafana.entrypoints: "websecure"
+      traefik.http.routers.grafana.tls: "true"
+      traefik.http.routers.grafana.tls.certresolver: "letsencrypt"
+      traefik.http.routers.grafana.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.grafana.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.grafana.middlewares: "secHeaders@file,lan-only@file"
+      traefik.http.services.grafana.loadbalancer.server.port: "3000"
       homepage.group: "Infrastructure"
       homepage.name: "Grafana"
       homepage.icon: "grafana.png"
-      homepage.href: "http://10.10.1.13:3003"
-      homepage.siteMonitor: "http://10.10.1.13:3003/api/health"
+      homepage.href: "https://grafana.${DOMAIN_NAME}"
+      homepage.siteMonitor: "https://grafana.${DOMAIN_NAME}/api/health"
       homepage.description: "Monitoring dashboards"
       homepage.weight: 0
       homepage.widget.type: "grafana"
-      homepage.widget.url: "http://10.10.1.13:3003"
+      homepage.widget.url: "https://grafana.${DOMAIN_NAME}"
       homepage.widget.username: "admin"
       homepage.widget.password: "${GRAFANA_PASSWORD}"
     logging:
@@ -457,4 +496,7 @@ networks:
         - subnet: 10.56.0.0/16
   openwebui:
     name: openwebui
+    external: true
+  traefik:
+    name: traefik
     external: true
