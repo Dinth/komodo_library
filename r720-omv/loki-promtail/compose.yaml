@@ -100,10 +100,6 @@ services:
     image: *alloy-version
     container_name: alloy
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1G
     mem_limit: 2G
     cap_drop:
       - ALL
