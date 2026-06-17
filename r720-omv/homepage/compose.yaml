@@ -40,8 +40,11 @@ x-homepage-common: &homepage-common
     - homepage-socket-proxy
   # Internal-only backends now: reached by the selector over the homepage
   # network, no longer on the traefik network and no Traefik routers of their own.
+  # Also on `monitoring` so the Grafana widget/siteMonitor can reach grafana:3000
+  # directly (its public route is lan-only and 403s container-sourced requests).
   networks:
     - homepage
+    - monitoring
 
 services:
   homepage-socket-proxy:
@@ -205,4 +208,7 @@ networks:
     driver: bridge
     external: false
   traefik:
+    external: true
+  monitoring:
+    name: monitoring
     external: true

@@ -103,11 +103,15 @@ services:
       homepage.name: "Grafana"
       homepage.icon: "grafana.png"
       homepage.href: "https://grafana.${DOMAIN_NAME}"
-      homepage.siteMonitor: "https://grafana.${DOMAIN_NAME}/api/health"
+      # siteMonitor + widget are server-side calls from the Homepage backends; keep
+      # them on the internal monitoring network so they bypass the lan-only-gated
+      # Traefik route (which would 403 a container-sourced request). href stays
+      # public for the browser link.
+      homepage.siteMonitor: "http://grafana:3000/api/health"
       homepage.description: "Monitoring dashboards"
       homepage.weight: 0
       homepage.widget.type: "grafana"
-      homepage.widget.url: "https://grafana.${DOMAIN_NAME}"
+      homepage.widget.url: "http://grafana:3000"
       homepage.widget.username: "admin"
       homepage.widget.password: "${GRAFANA_PASSWORD}"
     logging:
