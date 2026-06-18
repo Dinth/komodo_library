@@ -69,7 +69,7 @@ services:
       MONGO_PORT: "27017"
       MONGO_DBNAME: "unifi"
       MEM_LIMIT: "1024"
-      MEM_STARTUP: "1024"
+      MEM_STARTUP: "512"
     volumes:
       - ./config:/config
     ports:
