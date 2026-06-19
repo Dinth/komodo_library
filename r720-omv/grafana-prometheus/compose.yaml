@@ -508,7 +508,7 @@ services:
     environment:
       TZ: "${TZ}"
       HA_WS_URL: "ws://10.10.1.11:8123/api/websocket"
-      HA_TOKEN: "${HASS_TOKEN}"
+      HA_TOKEN: "${PROMETHEUS_HASS_TOKEN}"
       # Cardinality guard: drop a (device × proxy) series after this many
       # seconds with no advert (bounds BLE MAC-rotation churn).
       DEVICE_TTL_SECONDS: "300"
