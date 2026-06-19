@@ -490,6 +490,56 @@ services:
         max-size: "5m"
         max-file: "2"
 
+  # Home Assistant Bluetooth exporter — subscribes to the HA WebSocket
+  # bluetooth advertisement + connection-allocation streams and exposes them
+  # as Prometheus metrics (the per-device×proxy RSSI map, advert rate, and
+  # per-proxy connection slots — none of which come through HA's filtered
+  # /api/prometheus export). Locally-built image (see ./ha-bt-exporter +
+  # builds.toml); WUD can't track a local tag so watch is off.
+  ha-bluetooth-exporter:
+    container_name: ha-bluetooth-exporter
+    image: ha-bluetooth-exporter:latest
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: "${TZ}"
+      HA_WS_URL: "ws://10.10.1.11:8123/api/websocket"
+      HA_TOKEN: "${HASS_TOKEN}"
+      # Cardinality guard: drop a (device × proxy) series after this many
+      # seconds with no advert (bounds BLE MAC-rotation churn).
+      DEVICE_TTL_SECONDS: "300"
+      # Optional knobs (left at defaults): ADDRESS_INCLUDE_REGEX, CONNECTABLE_ONLY,
+      # LOG_ADVERTS (stdout→Loki, off — noisy), LOG_LEVEL.
+    hostname: ha-bluetooth-exporter
+    ipc: private
+    mem_limit: 128M
+    networks:
+      - monitoring
+    ports: []
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:9110/metrics')\""
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      wud.watch: "false"
+      homepage.group: "Infrastructure"
+      homepage.name: "HA Bluetooth Exporter"
+      homepage.icon: "mdi:bluetooth"
+      homepage.description: "HA BLE advert/RSSI metrics"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
 networks:
   monitoring:
     name: monitoring
