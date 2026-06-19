@@ -498,9 +498,14 @@ services:
   # builds.toml); WUD can't track a local tag so watch is off.
   ha-bluetooth-exporter:
     container_name: ha-bluetooth-exporter
+    # Built by Compose from ./ha-bt-exporter at deploy time (the Dockerfile +
+    # exporter.py are committed, so they're in the stack clone). image: just
+    # pins the local tag; pull_policy:never stops the stack-wide `compose pull`
+    # from trying to fetch this non-registry image and aborting the deploy.
+    build:
+      context: ./ha-bt-exporter
+      dockerfile: Dockerfile
     image: ha-bluetooth-exporter:latest
-    # Locally-built image (Komodo Build, see builds.toml) — no registry to pull
-    # from, so never attempt a pull or the whole-stack `compose pull` aborts.
     pull_policy: never
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"

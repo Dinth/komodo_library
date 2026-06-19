@@ -38,25 +38,3 @@ include_latest_tag = true
 include_version_tags = false
 include_commit_tag = false
 webhook_enabled = true
-
-##
-
-[[build]]
-name = "ha-bluetooth-exporter"
-tags = ["builds", "grafana-prometheus"]
-description = "Local image for the HA Bluetooth → Prometheus exporter (WS advertisement/connection-allocation streams). Run as a service in the grafana-prometheus stack."
-[build.config]
-builder = "r720-omv"
-git_provider = "github.com"
-git_account = "michal@gawronskikot.com"
-git_https = true
-repo = "Dinth/komodo_library"
-branch = "main"
-build_path = "r720-omv/grafana-prometheus/ha-bt-exporter"
-dockerfile_path = "Dockerfile"
-image_name = "ha-bluetooth-exporter"
-auto_increment_version = false
-include_latest_tag = true
-include_version_tags = false
-include_commit_tag = false
-webhook_enabled = true
