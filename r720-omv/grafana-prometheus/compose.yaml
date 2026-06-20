@@ -71,6 +71,14 @@ services:
     networks:
       - monitoring
       - traefik
+    # Raw API port for machine-to-machine clients that can't reach the internal
+    # `monitoring` network (i.e. LAN devices / other hosts). The browser UI goes
+    # through grafana.${DOMAIN_NAME} with OIDC SSO; this port carries no separate
+    # auth bypass because Grafana authenticates every request itself — API
+    # clients must present a service-account token (same model as mcp-grafana).
+    # Only reachable on the LAN (pfSense does not forward 3003).
+    ports:
+      - "3003:3000/tcp"
     volumes:
       - /opt/docker/grafana-prometheus/grafana_storage:/var/lib/grafana
       - /opt/docker/grafana-prometheus/grafana_provisioning/datasources:/etc/grafana/provisioning/datasources:ro
