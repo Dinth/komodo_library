@@ -9,7 +9,7 @@ services:
     ipc: private
     command: ['valkey-server','--save','30','1','--loglevel','warning']
     restart: unless-stopped
-    mem_limit: 128M
+    mem_limit: 1G
     networks:
       - dawarich
     volumes:
