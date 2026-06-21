@@ -70,7 +70,7 @@ services:
     hostname: dawarich-postgis
     image: *postgis-version
     ipc: private
-    mem_limit: 1G
+    mem_limit: 1536M
     healthcheck:
       test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]
       interval: 10s
