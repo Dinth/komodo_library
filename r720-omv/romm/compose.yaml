@@ -119,7 +119,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 2G
+    mem_limit: 4G
     environment:
       DB_HOST: "romm-mariadb"
       DB_NAME: "romm"
