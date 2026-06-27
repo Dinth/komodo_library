@@ -25,7 +25,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512M
+    mem_limit: 1G
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DB_PASSWORD}
