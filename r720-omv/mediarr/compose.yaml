@@ -8,7 +8,7 @@ x-versions:
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
-  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.9.13"
+  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.9.14"
   radarr: &radarr-version "lscr.io/linuxserver/radarr:6.2.1"
   sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.19"
 services:
