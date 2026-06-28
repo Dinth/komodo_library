@@ -159,6 +159,9 @@ services:
     mem_limit: 4g
     networks:
       - monitoring
+      # Joined so Prometheus can scrape Traefik's /metrics on traefik:8080 (that
+      # endpoint is only on the traefik network, not published to the host).
+      - traefik
     ports:
       - "9090:9090/tcp"
     volumes:
