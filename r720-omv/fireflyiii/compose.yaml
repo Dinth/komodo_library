@@ -1,6 +1,6 @@
 x-versions:
   fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.6.3"
-  fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.3.2"
+  fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.3.3"
 
 x-logging: &default-logging
   driver: "json-file"
