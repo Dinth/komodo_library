@@ -1,5 +1,5 @@
 x-versions:
-  frigate: &frigate-version "ghcr.io/blakeblackshear/frigate:0.17.1-tensorrt"
+  frigate: &frigate-version "ghcr.io/blakeblackshear/frigate:0.17.2-tensorrt"
 
 x-logging: &default-logging
   driver: "json-file"
