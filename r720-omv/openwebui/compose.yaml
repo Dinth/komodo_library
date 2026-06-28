@@ -115,11 +115,7 @@ services:
     hostname: ollama-metrics
     image: *ollama-metrics-version
     ipc: private
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: '512M'
+    mem_limit: 512M
     depends_on:
       ollama:
         condition: service_healthy

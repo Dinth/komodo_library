@@ -32,11 +32,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: '1G'
+    mem_limit: 1G
     environment:
       NEXTAUTH_SECRET: "${KARAKEEP_SECRET}"
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
@@ -116,11 +112,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: '1G'
+    mem_limit: 1G
     environment:
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       MEILI_NO_ANALYTICS: "true"
@@ -166,11 +158,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: '512M'
+    mem_limit: 512M
     command:
       - --no-sandbox
       - --disable-gpu

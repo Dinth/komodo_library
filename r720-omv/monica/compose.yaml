@@ -25,13 +25,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1g
-        reservations:
-          memory: 512m
+    mem_limit: 1g
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"

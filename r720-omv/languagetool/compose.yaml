@@ -36,11 +36,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 412m
-    memswap_limit: 500m
+    mem_limit: 1G
     environment:
       LANGUAGE: "en_GB:en"
       EXTRAOPTIONS: "-Xmx382M"

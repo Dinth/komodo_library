@@ -36,13 +36,8 @@ services:
       - /opt/docker/boinc/boinc_config:/config
     ports:
       - 8080:8080
-    deploy:
-      resources:
-        limits:
-          cpus: "4"
-          memory: "4096M"
-        reservations:
-          memory: 128M
+    cpus: 4
+    mem_limit: 4G
     restart: unless-stopped
     networks:
       - boinc

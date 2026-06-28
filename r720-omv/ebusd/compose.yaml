@@ -18,11 +18,7 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-          cpus: '0.50'
+    mem_limit: 128M
     environment:
       EBUSD_MQTTINT: "/etc/ebusd/mqtt-hassio.cfg"
       EBUSD_MQTTJSON: "true"

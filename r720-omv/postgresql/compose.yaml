@@ -26,12 +26,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 256m
+    mem_limit: 4G
     environment:
       POSTGRES_PASSWORD: "${POSTGRES_ADMIN_PASS}"
       PGDATA: "/var/lib/postgresql/data"

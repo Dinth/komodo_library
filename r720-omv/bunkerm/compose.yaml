@@ -60,7 +60,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 256M
+    mem_limit: 768M
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:2000 || exit 1"]
       interval: 30s
