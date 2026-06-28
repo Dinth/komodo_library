@@ -13,9 +13,12 @@ This is a **Komodo stack library** — a Git-based source of truth for Docker Co
   `<server>/<stack>/`, hand off to it — it carries the full security-hardening +
   Traefik + WUD + `x-versions`/`x-logging` convention block and the correct
   `<server>/<stack>/compose.yaml` layout. Don't reimplement the conventions inline.
-- **Validate every compose file before committing** — mirror CI locally:
-  - `yamllint <file>`
-  - `docker compose -f <file> config -q` (stub required `${VAR}`s inline if interpolation errors)
+- **Validate every compose file before committing.** `yamllint` is installed —
+  just run `yamllint <file>`. Do **not** pip-install a linter, run a Docker
+  container, or write your own YAML-parsing script to lint a config file.
+  - `docker compose -f <file> config -q` adds schema validation, but only on a
+    host where `docker` exists (the servers, not the workstation) — `command -v
+    docker` first and skip it if absent. CI runs it regardless on push.
   - Files are named `compose.yaml` (never `docker-compose.yml`).
 
 ## Repository Structure
