@@ -4,7 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Purpose
 
-This is a **Komodo stack library** — a Git-based source of truth for Docker Compose stack definitions deployed via [Komodo](https://komo.do/) to the `r720-omv` server (`10.10.1.13`).
+This is a **Komodo stack library** — a Git-based source of truth for Docker Compose stack definitions deployed via [Komodo](https://komo.do/) to the `r720-omv` server (`10.10.1.13`) and `r230-nixos` (`10.10.1.12`).
+
+## Agent & Tooling
+
+- **Compose work → delegate to the `compose-stack` subagent** (opencode: the
+  docker/compose agent). For creating or editing any `compose.yaml` under
+  `<server>/<stack>/`, hand off to it — it carries the full security-hardening +
+  Traefik + WUD + `x-versions`/`x-logging` convention block and the correct
+  `<server>/<stack>/compose.yaml` layout. Don't reimplement the conventions inline.
+- **Validate every compose file before committing** — mirror CI locally:
+  - `yamllint <file>`
+  - `docker compose -f <file> config -q` (stub required `${VAR}`s inline if interpolation errors)
+  - Files are named `compose.yaml` (never `docker-compose.yml`).
 
 ## Repository Structure
 
