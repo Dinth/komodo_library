@@ -1,5 +1,8 @@
 x-versions:
-  vdirsyncer-version: &vdirsyncer-version bleala/vdirsyncer:latest
+  # Base image the local patched image is built FROM (see Dockerfile).
+  # Releases: https://github.com/Bleala/Vdirsyncer-DOCKERIZED/releases
+  # Bump this + redeploy (rebuild) to update; the Location-header patch re-applies.
+  vdirsyncer-base: &vdirsyncer-base "bleala/vdirsyncer:2.6.1"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -12,7 +15,12 @@ x-vdirsyncer-env: &vdirsyncer-env
 
 services:
   vdirsyncer:
-    image: *vdirsyncer-version
+    build:
+      context: .
+      args:
+        BASE_IMAGE: *vdirsyncer-base
+    image: vdirsyncer-patched:2.6.1
+    pull_policy: never
     container_name: vdirsyncer
     ipc: private
     restart: unless-stopped
@@ -32,11 +40,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks: [vdirsyncer]
     logging: *default-logging
-    labels:
-      wud.watch: "true"
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/bleala/vdirsyncer-docker/releases"
-      wud.display.name: "vdirsyncer"
+    # WUD disabled: the running image is a locally-built patched tag, not a
+    # registry tag, so WUD can't watch it. Restore these (and revert the
+    # build:/image: block to a plain `image: *vdirsyncer-base`) once the
+    # upstream Location-header fix ships and the patch is no longer needed.
+    # labels:
+    #   wud.watch: "true"
+    #   wud.tag.include: '^\d+\.\d+\.\d+$$'
+    #   wud.display.name: "vdirsyncer"
+    #   wud.link.template: 'https://github.com/Bleala/Vdirsyncer-DOCKERIZED/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   vdirsyncer:
