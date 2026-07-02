@@ -19,7 +19,10 @@ services:
       context: .
       args:
         BASE_IMAGE: *vdirsyncer-base
-    image: vdirsyncer-patched:2.6.1
+    # Bump the -pN suffix whenever the Dockerfile patches change: a
+    # Dockerfile-only edit doesn't change the compose, so Komodo reuses the
+    # cached image and never rebuilds. A new tag forces a fresh build.
+    image: vdirsyncer-patched:2.6.1-p2
     pull_policy: never
     container_name: vdirsyncer
     ipc: private
