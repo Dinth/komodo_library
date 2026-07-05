@@ -26,7 +26,17 @@ services:
       EBUSD_MQTTHOST: "10.10.1.11"
       EBUSD_MQTTPORT: "1883"
       EBUSD_MQTTCLIENTID: "ebusd"
-      EBUSD_MQTTVAR: "filter-direction=r|u|^w"
+      # filter-name extends the stock mqtt-hassio.cfg whitelist (stock list up to
+      # "error") — without a name match, a message is never announced to HA nor
+      # auto-polled. Additions: flame/pressure/modulation/ionisation (burner &
+      # water pressure), statenumber (boiler S.xx code), fanspeed, flowrate,
+      # waterflow (DHW tap draw), gasvalve, positionvalveset (heating<->DHW
+      # diverter), demand, heatingswitch (winter mode), blocktime (anti-cycling),
+      # partload, fuel (VRC700 gas consumption sums), maintenance, globalsystemoff.
+      EBUSD_MQTTVAR: "filter-direction=r|u|^w,filter-name=status|temp|humidity|yield|count|energy|power|runtime|hours|starts|mode|curve|^load$|^party$|sensor|timer|error|flame|pressure|modulation|ionisation|statenumber|fanspeed|flowrate|waterflow|^gasvalve$|positionvalveset|demand|heatingswitch|blocktime|partload|fuel|maintenance|globalsystemoff"
+      # Retain data topics so entity states survive HA restarts (most ebusd
+      # messages are polled slowly; without retain they sit "unknown" for hours).
+      EBUSD_MQTTRETAIN: ""
       EBUSD_MQTTLOG: ""
       EBUSD_ACCESSLEVEL: "*"
       EBUSD_SCANCONFIG: ""
