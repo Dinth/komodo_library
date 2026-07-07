@@ -27,7 +27,7 @@ services:
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "${INFLUXDB_TOKEN}"
       DOCKER_INFLUXDB_INIT_ORG: "wickhay"
       DOCKER_INFLUXDB_INIT_BUCKET: "home_assistant"
-      DOCKER_INFLUXDB_INIT_RETENTION: "30d"
+      DOCKER_INFLUXDB_INIT_RETENTION: "2920d"  # 8y — matches live home_assistant bucket (init-only; inert unless volume rebuilt)
       INFLUXDB_HTTP_AUTH_ENABLED: "true"
       TZ: "${TZ}"
     hostname: influxdb
