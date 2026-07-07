@@ -88,6 +88,11 @@ services:
       DB_PASSWORD: "${MONICA_DB_PASS}"
       APP_URL: "https://monica.${DOMAIN_NAME}"
       APP_TRUSTED_PROXIES: "*"
+      # Force the filesystem cache store: the DB default needs a `cache_locks`
+      # table that this Monica (Laravel 9) never migrated, which crashes the
+      # scheduler's onOneServer mutex. File cache lives in the shared storage
+      # volume, so web + cron stay consistent.
+      CACHE_DRIVER: "file"
     depends_on:
       monica-mariadb:
         condition: service_healthy
@@ -120,6 +125,58 @@ services:
       homepage.href: "https://monica.${DOMAIN_NAME}"
       homepage.description: "Personal CRM"
       homepage.siteMonitor: "https://monica.${DOMAIN_NAME}"
+
+  # Runs the Laravel scheduler (busybox crond -> `artisan schedule:run` every
+  # minute), which fires `send:reminders` hourly to repopulate reminder_outbox.
+  # Without this the dashboard "Events in the next 3 months" silently empties as
+  # the pre-computed outbox rows drain. Same image as `monica`, no web port.
+  monica-cron:
+    image: *monica-version
+    container_name: monica-cron
+    hostname: monica-cron
+    command: ["cron.sh"]
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
+    environment:
+      APP_KEY: "${MONICA_APP_KEY}"
+      DB_HOST: "monica-mariadb"
+      DB_USERNAME: "monica"
+      DB_PASSWORD: "${MONICA_DB_PASS}"
+      APP_URL: "https://monica.${DOMAIN_NAME}"
+      APP_TRUSTED_PROXIES: "*"
+      CACHE_DRIVER: "file"
+    depends_on:
+      monica-mariadb:
+        condition: service_healthy
+      monica:
+        condition: service_started
+    volumes:
+      - /opt/docker/monica/monica_data:/var/www/html/storage
+    networks:
+      - monica
+    logging: *default-logging
+    labels:
+      wud.watch: "false"
 
 networks:
   monica:
