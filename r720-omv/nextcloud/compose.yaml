@@ -3,6 +3,7 @@ x-versions:
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
   imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:latest"
   collabora: &collabora-version "collabora/code:25.04.7.2.1"
+  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.128.1"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -250,6 +251,56 @@ services:
       wud.display.icon: "sh:nextcloud"
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: "https://github.com/nextcloud/server/releases/tag/v$${major}.$${minor}.$${patch}"
+
+  nextcloud-mcp:
+    image: *nextcloud-mcp-version
+    container_name: nextcloud-mcp
+    hostname: nextcloud-mcp
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      # Multi-user: each client sends its own NC user + app-password via
+      # HTTP Basic auth on every request. NEXTCLOUD_USERNAME/PASSWORD must be
+      # UNSET for this mode to engage.
+      MCP_DEPLOYMENT_MODE: "multi_user_basic"
+      NEXTCLOUD_HOST: "https://nc.${DOMAIN_NAME}"
+      HOME: "/tmp"
+      PYTHONDONTWRITEBYTECODE: "1"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "python3 -c \"import socket; socket.create_connection(('127.0.0.1', 8000), 3)\" || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      # MCP-server port pool (513x); not exposed via Traefik.
+      # streamable-http endpoint at /mcp.
+      - 5136:8000/tcp
+    networks:
+      - nextcloud
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    labels:
+      wud.watch: "true"
+      wud.display.name: "Nextcloud - MCP"
+      wud.display.icon: "sh:nextcloud"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/cbcoutinho/nextcloud-mcp-server/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   nextcloud:
