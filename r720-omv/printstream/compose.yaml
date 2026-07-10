@@ -1,16 +1,272 @@
-## Add your compose file here
+# PrintStream — Bambu Lab 3D-printer monitor/controller
+# https://github.com/PrintStreamApp/printstream
+# NOTE: upstream currently publishes the app/bridge/slicer images only as :latest
+# (single v0.1.0-beta tag, no clean semver stream yet). WUD watches latest/digest;
+# the semver tag.include/link.template below are future-proofing for when a proper
+# release stream lands.
+x-versions:
+  printstream: &printstream-version "ghcr.io/printstreamapp/printstream:latest"
+  printstream-slicer: &printstream-slicer-version "ghcr.io/printstreamapp/printstream-slicer:latest"
+  postgres: &postgres-version "postgres:16-bookworm"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  printstream-db:
+    image: *postgres-version
+    container_name: printstream-db
+    hostname: printstream-db
+    ipc: private
+    restart: unless-stopped
+    entrypoint: ['docker-entrypoint.sh']
+    command: ['postgres']
+    # postgres drops privileges to the postgres user itself — do NOT set user:
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 64m
+    environment:
+      POSTGRES_DB: "printstream"
+      POSTGRES_USER: "printstream"
+      POSTGRES_PASSWORD: "${PRINTSTREAM_DB_PASS}"
+      PGUSER: "printstream"
+      TZ: "${TZ}"
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready', '-U', 'printstream', '-d', 'printstream']
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - /opt/docker/printstream/postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - printstream
+      - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+-bookworm$$'
+      wud.display.name: "PrintStream - Postgres"
+      wud.display.icon: "sh:postgresql"
 
-# networks:
-#   default: {}
+  printstream-api:
+    image: *printstream-version
+    container_name: printstream-api
+    hostname: printstream-api
+    ipc: private
+    restart: unless-stopped
+    # node runtime image — mirror the adventurelog-web/server cap set to start cleanly
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 512M
+    environment:
+      NODE_ENV: "production"
+      API_PORT: "4000"
+      DATABASE_URL: "postgresql://printstream:${PRINTSTREAM_DB_PASS}@printstream-db:5432/printstream?schema=public"
+      CLIENT_ORIGIN: "https://print.${DOMAIN_NAME}"
+      PUBLIC_BASE_URL: "https://print.${DOMAIN_NAME}"
+      LIBRARY_DIR: "/data/library"
+      BRIDGE_RELEASES_DIR: "/data/bridge-releases"
+      PLUGINS_DIR: "/data/plugins"
+      SLICER_SERVICE_URL: "http://printstream-slicer:4010"
+      SLICER_SERVICE_TOKEN: "${PRINTSTREAM_SLICER_TOKEN}"
+      DISCOVERY_PORT: "2021"
+      MANAGED_BRIDGE: "true"
+      # api provisions the managed-bridge token into /run/provision on boot; if the
+      # PUID:PGID user can't write there, chown /opt/docker/printstream/provision to it.
+      MANAGED_BRIDGE_TOKEN_FILE: "/run/provision/managed-bridge-token"
+      SECRETS_KEY: "${PRINTSTREAM_SECRETS_KEY}"
+      TRUST_PROXY: "1"
+      TZ: "${TZ}"
+    depends_on:
+      printstream-db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:4000/api/health/ready']
+      interval: 15s
+      retries: 5
+      start_period: 40s
+      timeout: 10s
+    volumes:
+      - /opt/docker/printstream/data:/data
+      - /opt/docker/printstream/provision:/run/provision
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - printstream
+      - traefik
+      - slicer-internal
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.printstream.rule: "Host(`print.${DOMAIN_NAME}`)"
+      traefik.http.routers.printstream.entrypoints: "websecure"
+      traefik.http.routers.printstream.tls: "true"
+      traefik.http.routers.printstream.tls.certresolver: "letsencrypt"
+      traefik.http.routers.printstream.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.printstream.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.printstream.middlewares: "secHeaders@file"
+      traefik.http.services.printstream.loadbalancer.server.port: "4000"
+      homepage.group: "Home"
+      homepage.name: "PrintStream"
+      homepage.icon: "printstream.png"
+      homepage.href: "https://print.${DOMAIN_NAME}"
+      homepage.description: "3D printer control"
+      homepage.siteMonitor: "https://print.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.display.name: "PrintStream - API"
+      wud.display.icon: "sh:bambulab"
+      wud.link.template: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
 
-# volumes:
-#   data:
+  printstream-slicer:
+    image: *printstream-slicer-version
+    container_name: printstream-slicer
+    hostname: printstream-slicer
+    init: true
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 1G
+    environment:
+      SLICER_PORT: "4010"
+      SLICER_SERVICE_TOKEN: "${PRINTSTREAM_SLICER_TOKEN}"
+      SLICER_WORK_DIR: "/work"
+      SLICER_BAMBUSTUDIO_HOME_DIR: "/work/bambustudio-home"
+      SLICER_BAMBUSTUDIO_DATA_DIR: "/work/bambustudio-data"
+      SLICER_ENABLE_PIPE_PROGRESS: "true"
+      TZ: "${TZ}"
+    volumes:
+      - /opt/docker/printstream/slicer_work:/work
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - slicer-internal
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.display.name: "PrintStream - Slicer"
+      wud.display.icon: "sh:bambulab"
+      wud.link.template: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
+
+  printstream-bridge:
+    image: *printstream-version
+    container_name: printstream-bridge
+    hostname: printstream-bridge
+    command: ["bridge"]
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - AUDIT_WRITE
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - MKNOD
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SETFCAP
+      - SETGID
+      - SETPCAP
+      - SETUID
+      - SYS_CHROOT
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 256m
+    environment:
+      NODE_ENV: "production"
+      BRIDGE_SERVER_URL: "http://printstream-api:4000"
+      DISCOVERY_PORT: "2021"
+      BRIDGE_LIBRARY_DIR: "/data/library"
+      BRIDGE_NAME: "PrintStream Bridge"
+      BRIDGE_STATE_FILE: "/data/bridge-state.json"
+      MANAGED_BRIDGE_TOKEN_FILE: "/run/provision/managed-bridge-token"
+      TZ: "${TZ}"
+    depends_on:
+      printstream-api:
+        condition: service_healthy
+    volumes:
+      - /opt/docker/printstream/bridge_data:/data
+      - /opt/docker/printstream/provision:/run/provision:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - printstream
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.display.name: "PrintStream - Bridge"
+      wud.display.icon: "sh:bambulab"
+      wud.link.template: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
+
+networks:
+  printstream:
+    external: false
+    name: printstream
+    driver: bridge
+  slicer-internal:
+    external: false
+    name: printstream-slicer-internal
+    driver: bridge
+    internal: true
+  adminer:
+    external: true
+  traefik:
+    external: true
