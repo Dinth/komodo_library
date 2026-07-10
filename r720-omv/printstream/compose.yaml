@@ -54,7 +54,7 @@ services:
       start_period: 30s
       timeout: 10s
     volumes:
-      - /opt/docker/printstream/postgres_data:/var/lib/postgresql/data
+      - /opt/docker/printstream/printstream_postgres_data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     networks:
       - printstream
@@ -108,7 +108,7 @@ services:
       DISCOVERY_PORT: "2021"
       MANAGED_BRIDGE: "true"
       # api provisions the managed-bridge token into /run/provision on boot; if the
-      # PUID:PGID user can't write there, chown /opt/docker/printstream/provision to it.
+      # PUID:PGID user can't write there, chown /opt/docker/printstream/printstream_provision to it.
       MANAGED_BRIDGE_TOKEN_FILE: "/run/provision/managed-bridge-token"
       SECRETS_KEY: "${PRINTSTREAM_SECRETS_KEY}"
       TRUST_PROXY: "1"
@@ -123,8 +123,8 @@ services:
       start_period: 40s
       timeout: 10s
     volumes:
-      - /opt/docker/printstream/data:/data
-      - /opt/docker/printstream/provision:/run/provision
+      - /opt/docker/printstream/printstream_data:/data
+      - /opt/docker/printstream/printstream_provision:/run/provision
       - /etc/localtime:/etc/localtime:ro
     networks:
       - printstream
@@ -190,7 +190,7 @@ services:
       SLICER_ENABLE_PIPE_PROGRESS: "true"
       TZ: "${TZ}"
     volumes:
-      - /opt/docker/printstream/slicer_work:/work
+      - /opt/docker/printstream/printstream_slicer_work:/work
       - /etc/localtime:/etc/localtime:ro
     networks:
       - slicer-internal
@@ -243,8 +243,8 @@ services:
       printstream-api:
         condition: service_healthy
     volumes:
-      - /opt/docker/printstream/bridge_data:/data
-      - /opt/docker/printstream/provision:/run/provision:ro
+      - /opt/docker/printstream/printstream_bridge_data:/data
+      - /opt/docker/printstream/printstream_provision:/run/provision:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
       - printstream
