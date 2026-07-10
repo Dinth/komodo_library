@@ -17,6 +17,13 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    # Stock nginx runs privileged setup as root; ALL-dropped caps break it.
+    cap_add:
+      - CHOWN             # chown cache dirs on startup (fixes emerg crash-loop)
+      - SETUID            # master drops workers to the nginx user
+      - SETGID
+      - DAC_OVERRIDE      # write pid/temp files
+      - NET_BIND_SERVICE  # bind :80
     mem_limit: 512M
     healthcheck:
       test: 'curl --fail --insecure --location --silent --show-error http://localhost:80/'
