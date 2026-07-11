@@ -139,7 +139,7 @@ services:
       traefik.http.routers.printstream.tls.certresolver: "letsencrypt"
       traefik.http.routers.printstream.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.printstream.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.printstream.middlewares: "secHeaders@file"
+      traefik.http.routers.printstream.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.printstream.loadbalancer.server.port: "4000"
       homepage.group: "Home"
       homepage.name: "PrintStream"
