@@ -61,7 +61,7 @@ services:
     ports:
       - 3000:3000/tcp
     volumes:
-      - /opt/docker/openwebui/karakeep_data:/data
+      - /opt/docker/karakeep/karakeep_data:/data
     logging: *default-logging
     labels:
       traefik.enable: "true"
@@ -126,7 +126,7 @@ services:
     networks:
       - karakeep
     volumes:
-      - /opt/docker/openwebui/meilisearch_data:/meili_data
+      - /opt/docker/karakeep/meilisearch_data:/meili_data
     logging: *default-logging
     labels:
       wud.watch: "true"

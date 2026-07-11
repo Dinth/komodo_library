@@ -124,7 +124,9 @@ services:
       TZ: "${TZ}"
       HOSTNAME: "r720-omv" 
     healthcheck:
-      test: ["CMD", "alloy validate /etc/alloy/config.alloy || exit 1"]
+      # Image (ubuntu, no curl/wget) — probe the running server's readiness
+      # endpoint via bash's /dev/tcp instead of validating the config file.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/12345 && printf 'GET /-/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
       interval: 30s
       timeout: 5s
       retries: 3

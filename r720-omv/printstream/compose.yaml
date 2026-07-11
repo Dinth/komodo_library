@@ -48,7 +48,7 @@ services:
       PGUSER: "printstream"
       TZ: "${TZ}"
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready', '-U', 'printstream', '-d', 'printstream']
+      test: ['CMD-SHELL', 'pg_isready -U printstream -d printstream']
       interval: 10s
       retries: 5
       start_period: 30s
