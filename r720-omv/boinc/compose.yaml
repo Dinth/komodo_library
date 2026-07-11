@@ -37,6 +37,12 @@ services:
     ports:
       - 8080:8080
     cpus: 4
+    # Minimum scheduler weight: BOINC only gets CPU cycles no other cgroup
+    # wants — true idle-priority crunching with zero impact on other services.
+    # BOINC's own "suspend when CPU busy" pref is disabled (it reads HOST-wide
+    # /proc/stat in a container, so it never ran); the kernel arbitrates instead.
+    # cc_config.xml pins ncpus=4 so BOINC schedules only its actual quota.
+    cpu_shares: 2
     mem_limit: 4G
     restart: unless-stopped
     networks:

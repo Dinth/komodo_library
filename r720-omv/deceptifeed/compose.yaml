@@ -40,6 +40,9 @@ services:
       traefik.http.routers.deceptifeed-https.service: "deceptifeed-https-svc"
       traefik.http.services.deceptifeed-https-svc.loadbalancer.server.port: "8443"
       traefik.http.services.deceptifeed-https-svc.loadbalancer.server.scheme: "https"
+      # Self-signed cert on :8443 — skip verify for this backend only (global
+      # insecureSkipVerify was removed from the traefik stack).
+      traefik.http.services.deceptifeed-https-svc.loadbalancer.serverstransport: "insecure-backend@file"
       traefik.http.routers.deceptifeed-https.tls: "true"
       traefik.http.routers.deceptifeed-https.tls.certresolver: "letsencrypt"
       traefik.http.routers.deceptifeed-https.tls.domains[0].main: "${DOMAIN_NAME}"

@@ -1,4 +1,7 @@
 x-versions:
+  # Not pinned: upstream builds :latest from master ahead of its CalVer tags
+  # (v2025.6.6 is the newest version tag but :latest is a newer build), so a
+  # version pin would be a downgrade. WUD digest-watches :latest instead.
   pinchflat: &pinchflat-version "ghcr.io/kieraneglin/pinchflat:latest"
 
 x-logging: &default-logging
@@ -52,6 +55,7 @@ services:
       homepage.href: "http://10.10.1.13:8945"
       homepage.siteMonitor: "http://10.10.1.13:8945"
       wud.watch: 'true'
+      wud.watch.digest: 'true'
       wud.display.icon: 'sh-pinchflat'
       wud.display.name: 'Pinchflat'
       wud.tag.include: '^v\d+\.\d+\.\d+$$'

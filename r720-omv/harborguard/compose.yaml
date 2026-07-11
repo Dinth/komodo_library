@@ -1,4 +1,5 @@
 x-versions:
+  # Upstream publishes only sha-* tags — no version stream to pin; digest watch.
   harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest"
   postgres: &postgres-version "postgres:18.4-alpine"
 
@@ -38,7 +39,7 @@ services:
     labels:
       wud.display.name: "HarbourGuard"
       wud.display.icon: "sh-harbourguard"
-      wud.digest: "true"
+      wud.watch.digest: "true"
       wud.watch: "true"
 
   harborguard-postgres:

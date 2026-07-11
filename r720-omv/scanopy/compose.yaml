@@ -19,9 +19,16 @@ services:
     image: *scanopy-daemon-version
     container_name: scanopy-daemon
     network_mode: host
-    privileged: true
-    ports:
-      - 60073:60073
+    # Not privileged: LAN scanning needs raw sockets + net admin, nothing more.
+    # host netns stays (required for discovery); `ports:` removed — it is
+    # ignored/invalid under host networking.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     restart: unless-stopped
     mem_limit: 1G
     environment:

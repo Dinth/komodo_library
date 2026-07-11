@@ -118,7 +118,9 @@ services:
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_IDLETIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_WRITETIMEOUT: "1200s"
-      TRAEFIK_SERVERSTRANSPORT_INSECURESKIPVERIFY: "true"
+      # Backend TLS is verified by default. The only self-signed backend
+      # (deceptifeed :8443) opts out via the insecure-backend@file
+      # serversTransport defined in traefik_dynamic.yml.
       # --- Providers Configuration ---
       # Docker Provider
       TRAEFIK_PROVIDERS_DOCKER: "true"

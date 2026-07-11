@@ -116,6 +116,9 @@ services:
       wud.display.icon: "sh-qbittorrent"
       wud.display.name: "QBittorrent"
       wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
+      # 5.2.2 regression: WebUI unreachable on the bridge IP after any VPN
+      # reconnect — hold at 5.2.1 and never propose 5.2.2.
+      wud.tag.exclude: '^v?5\.2\.2$$'
       wud.tag.include: '^v?\d\.\d+\.\d+$$'
       wud.watch: "true"
 
@@ -523,55 +526,12 @@ services:
     ports:
       - 11011:11011
     environment:
+      # v2 only reads TZ/PORT/PUID/PGID from env — all other settings live in
+      # the web UI (SQLite on /config); the old v1 *__ vars are silently ignored.
       TZ: "${TZ}"
       PORT: "11011"
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
-      TRIGGERS__QUEUECLEANER: "0 0/5 * * * ?"
-      TRIGGERS__CONTENTBLOCKER: "0 0/5 * * * ?"
-      TRIGGERS__DOWNLOADCLEANER: "0 0 * * * ?"
-      QUEUECLEANER__ENABLED: "true"
-      QUEUECLEANER__RUNSEQUENTIALLY: "true"
-      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: "5"
-      QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE: "false"
-      QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE: "false"
-      QUEUECLEANER__STALLED_MAX_STRIKES: "5"
-      QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS: "false"
-      QUEUECLEANER__STALLED_IGNORE_PRIVATE: "false"
-      QUEUECLEANER__STALLED_DELETE_PRIVATE: "false"
-      CONTENTBLOCKER__ENABLED: "true"
-      CONTENTBLOCKER__IGNORE_PRIVATE: "false"
-      CONTENTBLOCKER__DELETE_PRIVATE: "false"
-      DOWNLOADCLEANER__ENABLED: "true"
-      DOWNLOADCLEANER__DELETE_PRIVATE: "false"
-      DOWNLOAD_CLIENT: "qBittorrent"
-      QBITTORRENT__URL: "http://10.10.1.13:8008"
-      QBITTORRENT__USERNAME: "${QBITTORRENT__USERNAME}"
-      QBITTORRENT__PASSWORD: "${QBITTORRENT__PASSWORD}"
-      DOWNLOADCLEANER__CATEGORIES__0__NAME: "sonarr"
-      DOWNLOADCLEANER__CATEGORIES__0__MAX_RATIO: "0.1"
-      DOWNLOADCLEANER__CATEGORIES__0__MIN_SEED_TIME: "0"
-      DOWNLOADCLEANER__CATEGORIES__0__MAX_SEED_TIME: "10"
-      DOWNLOADCLEANER__CATEGORIES__1__NAME: "radarr"
-      DOWNLOADCLEANER__CATEGORIES__1__MAX_RATIO: "0.1"
-      DOWNLOADCLEANER__CATEGORIES__1__MIN_SEED_TIME: "0"
-      DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME: "10"
-      SONARR__ENABLED: "true"
-      SONARR__SEARCHTYPE: "Episode"
-      SONARR__BLOCK__TYPE: "blacklist"
-      SONARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
-      SONARR__INSTANCES__0__URL: "http://sonarr:8989"
-      SONARR__INSTANCES__0__APIKEY: "${SONARR__INSTANCES__0__APIKEY}"
-      RADARR__ENABLED: "true"
-      RADARR__BLOCK__TYPE: "blacklist"
-      RADARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
-      RADARR__INSTANCES__0__URL: "http://radarr:7878"
-      RADARR__INSTANCES__0__APIKEY: "${RADARR__INSTANCES__0__APIKEY}"
-      LIDARR__ENABLED: "true"
-      LIDARR__BLOCK__TYPE: "blacklist"
-      LIDARR__BLOCK__PATH: "https://raw.githubusercontent.com/Cleanuparr/Cleanuparr/refs/heads/main/blacklist"
-      LIDARR__INSTANCES__0__URL: "http://lidarr:8686"
-      LIDARR__INSTANCES__0__APIKEY: "${LIDARR__INSTANCES__0__APIKEY}"
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'

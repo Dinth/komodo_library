@@ -1,7 +1,8 @@
 x-versions:
   nextcloud: &nextcloud-version "linuxserver/nextcloud:34.0.1"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
-  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:latest"
+  # Upstream tags are build datestamps (no semver).
+  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20260702_083546"
   collabora: &collabora-version "collabora/code:25.04.7.2.1"
   nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.128.1"
 
@@ -91,7 +92,8 @@ services:
     labels:
       wud.display.name: "Nextcloud - Imaginary"
       wud.display.icon: "sh:nextcloud"
-      wud.watch: "false"
+      wud.watch: "true"
+      wud.tag.include: '^\d{8}_\d{6}$$'
 
   nextcloud-collabora:
     image: *collabora-version

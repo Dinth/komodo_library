@@ -77,11 +77,6 @@ services:
       wud.link.template: 'https://github.com/babybuddy/babybuddy/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Babybuddy"
       wud.display.icon: "sh-baby-buddy"
-      repliqate.enabled: 'true'
-      repliqate.engine: "restic"
-      repliqate.schedule: "@weekly 3am"
-      repliqate.backup_id: babybuddy
-      repliqate.retention: "30d"
 
 networks:
   babybuddy:
