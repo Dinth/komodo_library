@@ -34,8 +34,9 @@ services:
       PASSWORD: #optional
     volumes:
       - /opt/docker/boinc/boinc_config:/config
-    ports:
-      - 8080:8080
+    # No host port publish: the linuxserver KasmVNC GUI refuses plain-HTTP access
+    # from anything but localhost ("requires a secure connection"). It is reached
+    # via the Traefik TLS route below (browser gets a secure context) instead.
     cpus: 4
     # Minimum scheduler weight: BOINC only gets CPU cycles no other cgroup
     # wants — true idle-priority crunching with zero impact on other services.
@@ -47,6 +48,7 @@ services:
     restart: unless-stopped
     networks:
       - boinc
+      - traefik
     logging: *default-logging
     labels:
       wud.watch: "true"
@@ -54,15 +56,29 @@ services:
       wud.link.template: 'https://github.com/BOINC/boinc/releases/tag/client_release%2F$${major}.$${minor}%2F$${major}.$${minor}.$${patch}'
       wud.display.name: 'BOINC'
       wud.display.icon: 'sh:boinc'
+      # KasmVNC web GUI behind Traefik TLS (provides the secure context the client
+      # requires) + Authelia forward-auth + lan-only — it is a full remote desktop.
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.boinc.rule: "Host(`boinc.${DOMAIN_NAME}`)"
+      traefik.http.routers.boinc.entrypoints: "websecure"
+      traefik.http.routers.boinc.tls: "true"
+      traefik.http.routers.boinc.tls.certresolver: "letsencrypt"
+      traefik.http.routers.boinc.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.boinc.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.boinc.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.services.boinc.loadbalancer.server.port: "8080"
       homepage.group: "Infrastructure"
       homepage.name: "BOINC"
       homepage.icon: "sh:boinc"
-      homepage.href: "http://10.10.1.13:8080"
+      homepage.href: "https://boinc.${DOMAIN_NAME}"
       homepage.description: "Distributed computing"
-      homepage.siteMonitor: "http://10.10.1.13:8080"
+      homepage.siteMonitor: "https://boinc.${DOMAIN_NAME}"
 
 networks:
   boinc:
     driver: bridge
     name: boinc
     external: false
+  traefik:
+    external: true
