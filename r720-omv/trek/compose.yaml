@@ -46,9 +46,11 @@ services:
       # First-boot only (ignored once a user exists).
       ADMIN_EMAIL: "${ADMIN_EMAIL}"
       ADMIN_PASSWORD: "${TREK_ADMIN_PASS}"
-      # Set true if you want TREK to reach Immich/other services on the LAN
-      # (RFC-1918 is blocked by default as SSRF protection).
-      # ALLOW_INTERNAL_NETWORK: "true"
+      # Required for OIDC: TREK reaches Authelia at id.${DOMAIN_NAME}, which the
+      # traefik-network alias resolves to Traefik's internal (RFC-1918) IP. TREK's
+      # SSRF guard blocks RFC-1918 by default, silently killing OIDC discovery
+      # (request never leaves the container). Also lets TREK reach LAN Immich etc.
+      ALLOW_INTERNAL_NETWORK: "true"
       # --- Authelia SSO (OIDC) — 'trek' client registered in Authelia's
       # configuration.yml; redirect URI <APP_URL>/api/auth/oidc/callback. Scopes
       # openid/email/profile. Password login stays enabled alongside SSO (set
