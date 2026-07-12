@@ -35,6 +35,10 @@ services:
       - /opt/docker/fgc/fgc_data:/fgc/data
       - /etc/localtime:/etc/localtime:ro
     environment:
+      # Password-gate the VNC server + noVNC (5900/6080) — without it anyone on the
+      # LAN can watch/drive the browser logged into the store accounts. Classic VNC
+      # auth truncates to 8 chars, so only the first 8 are significant.
+      VNC_PASSWORD: "${FGC_VNC_PASSWORD}"
       # Common credentials (used as fallback for per-service overrides)
       EMAIL: "${ADMIN_EMAIL}"
       PASSWORD: "${FGC_PASSWORD}"
