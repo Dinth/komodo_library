@@ -462,6 +462,13 @@ services:
       - ":5133"
       - "--enabled-tools"
       - "search,dashboard,datasources,prometheus,loki,alerting,annotations,navigation"
+      # DNS-rebinding Host allowlist (added in 0.17.x). Without it the default is
+      # loopback-only, so LAN access via 10.10.1.13:5133 (Claude .mcp.json) and
+      # in-cluster mcp-grafana:5133 (OpenWebUI's MCP client) are both rejected
+      # with "forbidden: host not allowed". Only literal "*" is a wildcard, so
+      # list the real Host values explicitly (all on :5133).
+      - "--allowed-hosts"
+      - "10.10.1.13:5133,mcp-grafana:5133,localhost:5133,127.0.0.1:5133"
     cap_drop:
       - ALL
     security_opt:
