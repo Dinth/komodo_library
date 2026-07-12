@@ -1,16 +1,103 @@
-## Add your compose file here
+x-versions:
+  trek: &trek-version "mauriceboe/trek:3.3.0"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
-  hello_world:
-    image: hello-world
-    # networks:
-    #   - default
-    # ports:
-    #   - 3000:3000
-    # volumes:
-    #   - data:/data
+  trek:
+    image: *trek-version
+    container_name: trek
+    hostname: trek
+    ipc: private
+    restart: unless-stopped
+    # Upstream ships a read-only rootfs and drops privileges itself via the
+    # CHOWN/SETUID/SETGID caps (chowns the data/uploads mounts then su's to its
+    # app user) — so do NOT set user:, and keep read_only + these caps.
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 1G
+    tmpfs:
+      - /tmp:noexec,nosuid,size=128m
+    environment:
+      NODE_ENV: "production"
+      PORT: "3000"
+      TZ: "${TZ}"
+      LOG_LEVEL: "info"
+      # Encrypts stored secrets. openssl rand -hex 32. Losing it makes stored
+      # third-party tokens (Immich etc.) unreadable — keep it stable.
+      ENCRYPTION_KEY: "${TREK_ENCRYPTION_KEY}"
+      # Behind the Traefik TLS proxy: trust one proxy hop, force HTTPS + secure
+      # cookies, and pin the public origin for CORS and email/notification links.
+      APP_URL: "https://trek.${DOMAIN_NAME}"
+      ALLOWED_ORIGINS: "https://trek.${DOMAIN_NAME}"
+      FORCE_HTTPS: "true"
+      TRUST_PROXY: "1"
+      # First-boot only (ignored once a user exists).
+      ADMIN_EMAIL: "${ADMIN_EMAIL}"
+      ADMIN_PASSWORD: "${TREK_ADMIN_PASS}"
+      # Set true if you want TREK to reach Immich/other services on the LAN
+      # (RFC-1918 is blocked by default as SSRF protection).
+      # ALLOW_INTERNAL_NETWORK: "true"
+      # --- Authelia SSO (OIDC) — 'trek' client registered in Authelia's
+      # configuration.yml; redirect URI <APP_URL>/api/auth/oidc/callback. Scopes
+      # openid/email/profile. Password login stays enabled alongside SSO (set
+      # OIDC_ONLY: "true" to disable password login/registration).
+      OIDC_ISSUER: "https://id.${DOMAIN_NAME}"
+      OIDC_CLIENT_ID: "trek"
+      OIDC_CLIENT_SECRET: "${TREK_OIDC_CLIENT_SECRET}"
+      OIDC_DISPLAY_NAME: "Authelia"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    volumes:
+      - /opt/docker/trek/trek_data:/app/data
+      - /opt/docker/trek/trek_uploads:/app/uploads
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - trek
+      - traefik
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.trek.rule: "Host(`trek.${DOMAIN_NAME}`)"
+      traefik.http.routers.trek.entrypoints: "websecure"
+      traefik.http.routers.trek.tls: "true"
+      traefik.http.routers.trek.tls.certresolver: "letsencrypt"
+      traefik.http.routers.trek.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.trek.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.trek.middlewares: "secHeaders@file"
+      traefik.http.services.trek.loadbalancer.server.port: "3000"
+      homepage.group: "Home"
+      homepage.name: "TREK"
+      homepage.icon: "sh-trek.png"
+      homepage.href: "https://trek.${DOMAIN_NAME}"
+      homepage.description: "Travel & trip planner"
+      homepage.siteMonitor: "https://trek.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "TREK"
+      wud.display.icon: "sh-trek"
+      wud.link.template: "https://github.com/mauriceboe/TREK/releases/tag/v$${major}.$${minor}.$${patch}"
 
-# networks:
-#   default: {}
-
-# volumes:
-#   data:
+networks:
+  trek:
+    name: trek
+    driver: bridge
+    external: false
+  traefik:
+    external: true
