@@ -41,6 +41,10 @@ services:
       NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
       OLLAMA_NUM_PARALLEL: "1"
       OLLAMA_MAX_LOADED_MODELS: "2"
+      # Default context floor so a model reached without an explicit num_ctx
+      # doesn't silently sit at 4k. Per-model num_ctx (24k for the 14B-Q6) is set
+      # in OpenWebUI's Advanced Params and overrides this.
+      OLLAMA_CONTEXT_LENGTH: "8192"
       OLLAMA_KEEP_ALIVE: "30m"
       OLLAMA_DEBUG: "1"
       OLLAMA_FLASH_ATTENTION: "1"
