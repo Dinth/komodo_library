@@ -64,7 +64,6 @@ services:
       NOTIFY: "${FGC_NOTIFY}"
       NOTIFY_ATTACH_SCREENSHOTS: "1" # Attach screenshots to failure notifications
       TZ: "${TZ}"
-      DEBUG: "1"
     labels:
       wud.watch: "true"
       wud.tag.include: '^latest$$'
