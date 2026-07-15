@@ -47,7 +47,9 @@ services:
       NOVNC_PORT: "7080"
       VNC_PASSWORD: "${FGC_VNC_PASSWORD}"
       # --- Scheduler ---
-      SCHEDULER_HOURS: "24"
+      # Remaster builds an APScheduler cron trigger `hour=*/N`, so N must be <= 23
+      # (a cron step can't exceed the 0-23 hour range). 12 = runs at 00:00 & 12:00.
+      SCHEDULER_HOURS: "12"
       # --- Store selection ---
       # Microsoft Rewards is NOT supported by the remaster (dropped from feldorn).
       # Steam omitted: the remaster claims Steam via account login, and no Steam
