@@ -179,7 +179,10 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    # No user: pin — the BambuStudio CLI symlinks versioned profiles into the
+    # image's own root-owned /opt/printstream-slicers (not a bind mount) at
+    # startup, so it must run as the image default (root) like upstream's
+    # compose; forcing PUID:PGID fails with EPERM on that profile setup.
     mem_limit: 1G
     environment:
       SLICER_PORT: "4010"
