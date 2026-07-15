@@ -1,6 +1,6 @@
 x-versions:
   homepage: &homepage-version "ghcr.io/gethomepage/homepage:v1.13.2"
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.2"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.3"
   selector: &selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
 
 x-logging: &default-logging
