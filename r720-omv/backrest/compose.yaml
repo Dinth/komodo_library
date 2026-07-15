@@ -1,6 +1,6 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.2"
-  backrest: &backrest-version "garethgeorge/backrest:v1.13.0-alpine"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.3"
+  backrest: &backrest-version "garethgeorge/backrest:v1.14.1-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
