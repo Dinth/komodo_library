@@ -54,16 +54,23 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     mem_limit: 512M
     ports: ["4888:8080"]
+    # --catalog paths MUST resolve under ~/.docker/mcp/catalogs/ (HOME=/ in this
+    # image), hence the single-file mount below -- an absolute /mcp path is
+    # rejected. --registry has no such constraint. Signature verification wants
+    # every image digest-pinned, which the locally-built mitmproxy-mcp/mcpmqtt
+    # images cannot satisfy.
     command:
       - "--transport=sse"
       - "--port=8080"
-      - "--catalog=/mcp/registry.yaml"
+      - "--catalog=custom.yaml"
       - "--registry=/mcp/registry.yaml"
+      - "--verify-signatures=false"
     environment:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
     volumes:
       - /opt/docker/mcp-gateway/mcp-gateway_config:/mcp:ro
+      - /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml:/.docker/mcp/catalogs/custom.yaml:ro
       - /opt/docker/mcp-gateway/mcp-gateway_certs:/certs:ro
       - /opt/docker:/opt/docker:ro
       - /etc/localtime:/etc/localtime:ro
