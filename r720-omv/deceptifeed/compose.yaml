@@ -1,5 +1,5 @@
 x-versions:
-  deceptifeed: &deceptifeed-version "deceptifeed/server:0.68.0"
+  deceptifeed: &deceptifeed-version "deceptifeed/server:0.69.0"
 
 x-logging: &default-logging
   driver: "json-file"
