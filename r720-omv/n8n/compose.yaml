@@ -1,5 +1,5 @@
 x-versions:
-  n8n: &n8n-version "n8nio/n8n:1.117.1"
+  n8n: &n8n-version "n8nio/n8n:2.31.1"
 
 x-logging: &default-logging
   driver: "json-file"
