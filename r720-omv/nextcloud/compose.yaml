@@ -4,7 +4,7 @@ x-versions:
   # Upstream tags are build datestamps (no semver).
   imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20260702_083546"
   collabora: &collabora-version "collabora/code:25.04.7.2.1"
-  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.139.3"
+  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.140.0"
 
 x-logging: &default-logging
   driver: "json-file"
