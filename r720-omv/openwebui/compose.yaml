@@ -8,6 +8,10 @@ x-versions:
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.2"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main"
+  # all-features is the ONLY published variant compiled with the channel-signal
+  # Cargo feature (channels are compile-time features; latest/main lack Signal).
+  zeroclaw: &zeroclaw-version "ghcr.io/zeroclaw-labs/zeroclaw:all-features-v0.8.3"
+  zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
 
 services:
   ollama:
@@ -562,6 +566,113 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/openwebui/crawl4ai_data:/data
+  # ZeroClaw's Signal channel requires the NATIVE signal-cli HTTP daemon API
+  # (/api/v1/rpc JSON-RPC + /api/v1/events SSE), which the bbernhard REST API in
+  # the signal-rest-api stack does not expose. This sidecar reuses the same
+  # trusted image with the entrypoint overridden to run signal-cli directly,
+  # holding a second LINKED DEVICE of the same Signal account (+447583662275).
+  # WUD/Grafana notification sends via the signal-rest-api stack are untouched.
+  zeroclaw-signal-cli:
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    command: ["--config", "/signal-data", "daemon", "--http", "0.0.0.0:8686"]
+    container_name: zeroclaw-signal-cli
+    entrypoint: ["signal-cli"]
+    environment:
+      JAVA_OPTS: "-Xmx256m"
+      TZ: "${TZ}"
+    hostname: zeroclaw-signal-cli
+    image: *zeroclaw-signal-cli-version
+    ipc: private
+    mem_limit: 768M
+    healthcheck:
+      # Image is Ubuntu-based, bash exists.
+      test: ["CMD-SHELL", "bash -c 'cat < /dev/null > /dev/tcp/127.0.0.1/8686' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Internal daemon; 0.0.0.0 bind is only within the bridge network — no
+    # published ports.
+    networks:
+      - openwebui
+    labels:
+      # Deliberate deviation: this image is already version-watched in the
+      # signal-rest-api stack — avoid duplicate update notifications.
+      wud.watch: "false"
+    restart: unless-stopped
+    # Running directly as the target user bypasses the image's root setpriv
+    # entrypoint, so NO cap_add is needed (unlike the signal-rest-api stack).
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    volumes:
+      - /opt/docker/openwebui/zeroclaw-signal-cli_data:/signal-data
+  # ZeroClaw personal AI agent — Signal <-> local Ollama, security-first
+  # OpenClaw alternative. Configuration is NOT env-driven; it lives at
+  # /zeroclaw-data/.zeroclaw/config.toml on the bind mount. Gateway/dashboard
+  # deliberately stays on its default 127.0.0.1 bind inside the container (no
+  # ZEROCLAW_gateway__allow_public_bind), so it is unreachable from outside the
+  # container — admin via `docker exec zeroclaw zeroclaw <cmd>`.
+  zeroclaw:
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    container_name: zeroclaw
+    environment:
+      # Image sets HOME itself, but keep it explicit because user: is overridden.
+      HOME: "/zeroclaw-data"
+      # Read by ZeroClaw's web_search tool.
+      SEARXNG_INSTANCE_URL: "https://search.${DOMAIN_NAME}"
+      TZ: "${TZ}"
+    hostname: zeroclaw
+    image: *zeroclaw-version
+    ipc: private
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: '1G'
+    depends_on:
+      ollama:
+        condition: service_healthy
+      zeroclaw-signal-cli:
+        condition: service_healthy
+    healthcheck:
+      # Exec form is mandatory: minimal stagex filesystem with NO shell.
+      test: ["CMD", "zeroclaw", "status", "--format=exit-code"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # openwebui network only (reaches ollama:11434 and zeroclaw-signal-cli:8686
+    # in-network). No published ports, no Traefik network/labels — deliberate,
+    # the only user surface is Signal.
+    networks:
+      - openwebui
+    labels:
+      wud.watch: "true"
+      wud.display.name: "ZeroClaw"
+      wud.display.icon: "sh:robot"
+      wud.tag.include: '^all-features-v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v$${major}.$${minor}.$${patch}"
+    restart: unless-stopped
+    tmpfs:
+      - /tmp
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    volumes:
+      - /opt/docker/openwebui/zeroclaw_data:/zeroclaw-data
 networks:
   openwebui:
     name: openwebui
