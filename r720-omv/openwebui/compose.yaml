@@ -7,9 +7,12 @@ x-versions:
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.2"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main"
-  # all-features is the ONLY published variant compiled with the channel-signal
-  # Cargo feature (channels are compile-time features; latest/main lack Signal).
-  zeroclaw: &zeroclaw-version "ghcr.io/zeroclaw-labs/zeroclaw:all-features-v0.8.3"
+  # LOCAL BUILD: no published ZeroClaw image is compiled with the channel-signal
+  # Cargo feature (channels are compile-time features; upstream's all-features
+  # variant exists only in its CI matrix, not on ghcr). Built from the pinned
+  # git tag via the build: block on the service — bump the git ref there AND
+  # this local tag together.
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.3-signal"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
 
 services:
@@ -586,6 +589,15 @@ services:
       TZ: "${TZ}"
     hostname: zeroclaw
     image: *zeroclaw-version
+    # Local image (see x-versions note): pull_policy:never keeps the stack-wide
+    # compose pull from aborting on it; compose builds it on first deploy
+    # (Rust workspace — expect a long first build, cached afterwards). Feature
+    # flags = upstream v0.8.3 default (dist) set + channel-signal.
+    pull_policy: never
+    build:
+      context: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.3"
+      args:
+        ZEROCLAW_CARGO_FLAGS: "--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,whatsapp-web,channel-signal"
     ipc: private
     deploy:
       resources:
@@ -615,11 +627,9 @@ services:
     networks:
       - openwebui
     labels:
-      wud.watch: "true"
-      wud.display.name: "ZeroClaw"
-      wud.display.icon: "sh:robot"
-      wud.tag.include: '^all-features-v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v$${major}.$${minor}.$${patch}"
+      # Locally built image — WUD cannot watch it. Version bumps are manual:
+      # update the build context git ref + local tag in x-versions together.
+      wud.watch: "false"
     restart: unless-stopped
     tmpfs:
       - /tmp
