@@ -573,10 +573,14 @@ services:
       - /opt/docker/openwebui/zeroclaw-signal-cli_data:/signal-data
   # ZeroClaw personal AI agent — Signal <-> local Ollama, security-first
   # OpenClaw alternative. Configuration is NOT env-driven; it lives at
-  # /zeroclaw-data/.zeroclaw/config.toml on the bind mount. Gateway/dashboard
-  # deliberately stays on its default 127.0.0.1 bind inside the container (no
-  # ZEROCLAW_gateway__allow_public_bind), so it is unreachable from outside the
-  # container — admin via `docker exec zeroclaw zeroclaw <cmd>`.
+  # /zeroclaw-data/.zeroclaw/config.toml on the bind mount.
+  #
+  # TEMPORARY: the built-in web dashboard is exposed on the LAN at
+  # http://10.10.1.13:42617 (see the gateway env + published port below).
+  # ZeroClaw's own pairing/bearer auth stays ON (require_pairing defaults
+  # true) — the first-run pairing code is printed in the container log. This
+  # is plain HTTP, so the token crosses the LAN unencrypted; for anything
+  # permanent, move it behind Traefik + Authelia and drop the published port.
   zeroclaw:
     cap_drop:
       - ALL
@@ -588,6 +592,12 @@ services:
       HOME: "/zeroclaw-data"
       # Read by ZeroClaw's web_search tool.
       SEARXNG_INSTANCE_URL: "https://search.${DOMAIN_NAME}"
+      # TEMPORARY web dashboard exposure. The gateway binds 127.0.0.1 by
+      # default and refuses a non-local bind unless allow_public_bind is set;
+      # both are needed for the published port to reach it. Pairing auth is
+      # left at its secure default (require_pairing = true).
+      ZEROCLAW_gateway__allow_public_bind: "true"
+      ZEROCLAW_gateway__host: "0.0.0.0"
       TZ: "${TZ}"
     hostname: zeroclaw
     image: *zeroclaw-version
@@ -624,10 +634,12 @@ services:
         max-size: "10m"
         max-file: "3"
     # openwebui network only (reaches ollama:11434 and zeroclaw-signal-cli:8686
-    # in-network). No published ports, no Traefik network/labels — deliberate,
-    # the only user surface is Signal.
+    # in-network). No Traefik network/labels yet — the published port below is
+    # the TEMPORARY dashboard access described in the header comment.
     networks:
       - openwebui
+    ports:
+      - 42617:42617/tcp
     labels:
       # Locally built image — WUD cannot watch it. Version bumps are manual:
       # update the build context git ref + local tag in x-versions together.
