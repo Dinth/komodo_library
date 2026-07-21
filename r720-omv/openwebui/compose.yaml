@@ -7,14 +7,13 @@ x-versions:
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.2"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main"
-  # LOCAL BUILD: no published ZeroClaw image is compiled with the channel-signal
-  # Cargo feature (channels are compile-time features; upstream's all-features
-  # variant exists only in its CI matrix, not on ghcr). Built from the pinned
-  # git tag via the build: block on the service using Dockerfile.debian — the
-  # default Dockerfile produces a distroless image with NO shell, which breaks
-  # the agent's shell tool ("runtime.shell sh not found"); the Debian variant
-  # ships bash/git/curl. Bump the git ref in build.context AND this tag together.
-  zeroclaw: &zeroclaw-version "zeroclaw:0.8.3-signal-debian"
+  # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
+  # default distroless image has NO shell and breaks the agent's shell tool;
+  # the local Dockerfile.debian build (to add channel-signal) fails to compile
+  # (upstream only CI-builds Dockerfile/Containerfile, not Dockerfile.debian).
+  # This published tag has NO channel-signal — fine while access is via the
+  # web dashboard; revisit a signal-capable build if we return to Signal.
+  zeroclaw: &zeroclaw-version "ghcr.io/zeroclaw-labs/zeroclaw:v0.8.3-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
 
 services:
@@ -601,16 +600,6 @@ services:
       TZ: "${TZ}"
     hostname: zeroclaw
     image: *zeroclaw-version
-    # Local image (see x-versions note): pull_policy:never keeps the stack-wide
-    # compose pull from aborting on it; compose builds it on first deploy
-    # (Rust workspace — expect a long first build, cached afterwards). Feature
-    # flags = upstream v0.8.3 default (dist) set + channel-signal.
-    pull_policy: never
-    build:
-      context: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.3"
-      dockerfile: Dockerfile.debian
-      args:
-        ZEROCLAW_CARGO_FLAGS: "--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,whatsapp-web,channel-signal"
     ipc: private
     deploy:
       resources:
@@ -641,9 +630,11 @@ services:
     ports:
       - 42617:42617/tcp
     labels:
-      # Locally built image — WUD cannot watch it. Version bumps are manual:
-      # update the build context git ref + local tag in x-versions together.
-      wud.watch: "false"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+-debian$$'
+      wud.display.name: "ZeroClaw"
+      wud.display.icon: "sh:robot"
+      wud.link.template: "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v$${major}.$${minor}.$${patch}"
     restart: unless-stopped
     tmpfs:
       - /tmp
