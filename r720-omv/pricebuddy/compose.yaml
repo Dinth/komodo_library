@@ -130,6 +130,7 @@ services:
     image: *scraper-version
     container_name: pricebuddy-scraper
     hostname: pricebuddy-scraper
+    init: true
     ipc: private
     restart: unless-stopped
     cap_add:
@@ -141,7 +142,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    mem_limit: 4G
     networks:
       - pricebuddy
     logging: *default-logging
