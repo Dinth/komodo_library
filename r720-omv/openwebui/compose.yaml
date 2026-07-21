@@ -597,6 +597,11 @@ services:
       # left at its secure default (require_pairing = true).
       ZEROCLAW_gateway__allow_public_bind: "true"
       ZEROCLAW_gateway__host: "0.0.0.0"
+      # Allow admin actions (daemon reload, Settings/config writes) from the
+      # paired remote dashboard — otherwise they 403 (admin is localhost-only
+      # by default). Safe here because pairing/bearer auth is still required;
+      # drop this together with the exposure when moving behind Authelia.
+      ZEROCLAW_gateway__allow_remote_admin: "true"
       TZ: "${TZ}"
     hostname: zeroclaw
     image: *zeroclaw-version
