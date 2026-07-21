@@ -3,6 +3,7 @@ x-versions:
   misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.44
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.9
   misp-mariadb-version: &misp-mariadb-version mariadb:11.4
+  misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.0-alpine
   mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:12.2.3
 
 x-logging: &default-logging
@@ -57,27 +58,32 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE, FOWNER]
-    mem_limit: 2G
+    mem_limit: 4G
     cpus: 2.0
     ports: ["8081:80"]
+    # Env var names below are the ones ghcr.io/misp/misp-docker/misp-core
+    # actually reads in /entrypoint.sh - anything else is silently ignored.
     environment:
-      - PUID=${DOCKER_PUID}
-      - PGID=${DOCKER_PGID}
       - ADMIN_PASSWORD=${SECOPS_MISP_ADMIN_PASSWORD}
-      - MISP_BASEURL=http://10.10.1.13:8081
+      - BASE_URL=http://10.10.1.13:8081
+      # Served over plain HTTP on :8081; without this nginx 301s to
+      # https://10.10.1.13/ (port stripped) and the UI is unreachable.
+      - DISABLE_SSL_REDIRECT=true
       - MYSQL_HOST=misp-mariadb
-      - MYSQL_LOGIN=misp
+      - MYSQL_USER=misp
       - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
       - MYSQL_DATABASE=misp
-      - MISP_MODULES_ENABLE=true
-      - MISP_MODULES_URL=http://misp-modules
-      - MISP_MODULES_PORT=6666
+      # Redis is mandatory: workers and PHP sessions both live in it.
+      - REDIS_HOST=misp-valkey
+      - REDIS_PORT=6379
+      - ENABLE_REDIS_EMPTY_PASSWORD=true
+      - MISP_MODULES_FQDN=http://misp-modules
       # Reduce worker counts to minimize idle CPU (default is 5 each)
-      - WORKERS_DEFAULT=1
-      - WORKERS_EMAIL=1
-      - WORKERS_CACHE=1
-      - WORKERS_PRIO=1
-      - WORKERS_UPDATE=1
+      - NUM_WORKERS_DEFAULT=1
+      - NUM_WORKERS_EMAIL=1
+      - NUM_WORKERS_CACHE=1
+      - NUM_WORKERS_PRIO=1
+      - NUM_WORKERS_UPDATE=1
     volumes:
       - /opt/docker/secops/misp_config:/var/www/MISP/app/Config
       - /opt/docker/secops/misp_files:/var/www/MISP/app/files
@@ -86,7 +92,14 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       misp-mariadb: { condition: service_healthy }
+      misp-valkey: { condition: service_healthy }
       misp-modules: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/users/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
     networks: [secops]
     logging: *default-logging
     labels:
@@ -122,6 +135,34 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/MISP/misp-modules/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "MISP Modules"
+  misp-valkey:
+    image: *misp-valkey-version
+    container_name: misp-valkey
+    hostname: misp-valkey
+    ipc: private
+    restart: unless-stopped
+    command: ['valkey-server', '--save', '30', '1', '--loglevel', 'warning']
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, SETGID, SETUID]
+    mem_limit: 512M
+    volumes:
+      - /opt/docker/secops/misp-valkey:/data
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks: [secops]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+-alpine$$'
+      wud.display.name: "MISP Valkey"
+      wud.link.template: "https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}"
+
   misp-mariadb:
     image: *misp-mariadb-version
     container_name: misp-mariadb
