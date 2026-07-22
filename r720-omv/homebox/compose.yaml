@@ -1,0 +1,104 @@
+# Homebox — home inventory & organisation (sysadminsmedia maintained fork)
+# https://github.com/sysadminsmedia/homebox
+#
+# Single service, SQLite backend (the upstream default — no external DB needed;
+# HBOX_DATABASE_DRIVER defaults to sqlite3 and the image already pins
+# HBOX_DATABASE_SQLITE_PATH=/data/homebox.db with WAL + busy_timeout).
+# Attachments/thumbnails also live under /data via the image's baked
+# HBOX_STORAGE_CONN_STRING=file:///?no_tmp_dir=true + HBOX_STORAGE_PREFIX_PATH=data.
+#
+# GHCR tags are bare semver (0.26.2) — there is no "v" prefix on the image tags,
+# only on the git tags, hence the wud.link.template below re-adds the v.
+x-versions:
+  homebox: &homebox-version "ghcr.io/sysadminsmedia/homebox:0.26.2"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  homebox:
+    image: *homebox-version
+    container_name: homebox
+    hostname: homebox
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Static Go binary, binds an unprivileged port (7745) and only writes to the
+    # /data bind mount — no caps needed. Ensure
+    # /opt/docker/homebox/homebox/data is owned by DOCKER_PUID:DOCKER_PGID.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      HBOX_MODE: "production"
+      HBOX_WEB_PORT: "7745"
+      # Max attachment upload in MB (default 10 is far too small for receipts/manuals).
+      HBOX_WEB_MAX_UPLOAD_SIZE: "512"
+      HBOX_LOG_LEVEL: "info"
+      HBOX_LOG_FORMAT: "json"
+      # Single-household instance behind Authelia — nobody self-registers.
+      HBOX_OPTIONS_ALLOW_REGISTRATION: "false"
+      HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID: "true"
+      # Behind Traefik: honour X-Forwarded-Proto/-Host so generated absolute
+      # URLs stay https. HBOX_OPTIONS_HOSTNAME is a BARE host — the code does
+      # scheme + "://" + hostname, so a full URL here would double the scheme.
+      HBOX_OPTIONS_TRUST_PROXY: "true"
+      HBOX_OPTIONS_HOSTNAME: "inventory.${DOMAIN_NAME}"
+      # WUD already tracks releases; no phone-home / analytics.
+      HBOX_OPTIONS_GITHUB_RELEASE_CHECK: "false"
+      HBOX_OPTIONS_ALLOW_ANALYTICS: "false"
+      HBOX_THUMBNAIL_ENABLED: "true"
+      # REQUIRED: the binary refuses to start if this is < 32 bytes. HMAC pepper
+      # for stored API-key hashes. openssl rand -base64 48. Must stay stable —
+      # rotating it invalidates every issued API key.
+      HBOX_AUTH_API_KEY_PEPPER: "${HOMEBOX_API_KEY_PEPPER}"
+      HBOX_AUTH_RATE_LIMIT_ENABLED: "true"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "-", "http://127.0.0.1:7745/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    volumes:
+      - /opt/docker/homebox/homebox/data:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - homebox
+      - traefik
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.homebox.rule: "Host(`inventory.${DOMAIN_NAME}`)"
+      traefik.http.routers.homebox.entrypoints: "websecure"
+      traefik.http.routers.homebox.tls: "true"
+      traefik.http.routers.homebox.tls.certresolver: "letsencrypt"
+      traefik.http.routers.homebox.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.homebox.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.homebox.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.homebox.loadbalancer.server.port: "7745"
+      homepage.group: "Home"
+      homepage.name: "Homebox"
+      homepage.icon: "sh-homebox.png"
+      homepage.href: "https://inventory.${DOMAIN_NAME}"
+      homepage.description: "Home inventory and asset tracking"
+      homepage.siteMonitor: "https://inventory.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "Homebox"
+      wud.display.icon: "sh:homebox"
+      wud.link.template: "https://github.com/sysadminsmedia/homebox/releases/tag/v$${major}.$${minor}.$${patch}"
+
+networks:
+  homebox:
+    name: homebox
+    driver: bridge
+    external: false
+  traefik:
+    external: true
