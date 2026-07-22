@@ -31,7 +31,9 @@ services:
       HBOX_WEB_MAX_UPLOAD_SIZE: "512"
       HBOX_LOG_LEVEL: "info"
       HBOX_LOG_FORMAT: "json"
-      # Single-household instance behind Authelia — nobody self-registers.
+      # Stays false: OIDC login auto-provisions the user and their group and
+      # never consults this flag (LoginOIDC -> registerOIDCUser), so SSO is the
+      # only way an account gets created. Local password signup stays shut.
       HBOX_OPTIONS_ALLOW_REGISTRATION: "false"
       HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID: "true"
       # Behind Traefik: honour X-Forwarded-Proto/-Host so generated absolute
@@ -48,6 +50,19 @@ services:
       # rotating it invalidates every issued API key.
       HBOX_AUTH_API_KEY_PEPPER: "${HOMEBOX_API_KEY_PEPPER}"
       HBOX_AUTH_RATE_LIMIT_ENABLED: "true"
+      # --- SSO against Authelia -------------------------------------------
+      # First login through here creates the account + its "Home" group, which
+      # is how the instance gets bootstrapped at all.
+      HBOX_OIDC_ENABLED: "true"
+      HBOX_OIDC_ISSUER_URL: "https://id.${DOMAIN_NAME}"
+      HBOX_OIDC_CLIENT_ID: "homebox"
+      HBOX_OIDC_CLIENT_SECRET: "${HOMEBOX_OIDC_CLIENT_SECRET}"
+      HBOX_OIDC_SCOPE: "openid profile email"
+      HBOX_OIDC_BUTTON_TEXT: "Sign in with Authelia"
+      # Flip to "true" once SSO is confirmed working — it then skips Homebox's
+      # own login page entirely. Left false for the first deploy so a broken
+      # OIDC config still leaves a reachable page to read the error on.
+      HBOX_OIDC_AUTO_REDIRECT: "false"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "-", "http://127.0.0.1:7745/api/v1/status"]
       interval: 30s
@@ -57,6 +72,11 @@ services:
     volumes:
       - /opt/docker/homebox/homebox/data:/data
       - /etc/localtime:/etc/localtime:ro
+    # OIDC discovery runs against the public issuer hostname from inside the
+    # container; pin it to the host so it doesn't depend on external DNS
+    # hairpinning. Same pin WUD needs — without it discovery fails at boot.
+    extra_hosts:
+      - "id.${DOMAIN_NAME}:10.10.1.13"
     networks:
       - homebox
       - traefik
