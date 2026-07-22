@@ -1,14 +1,3 @@
-# Homebox — home inventory & organisation (sysadminsmedia maintained fork)
-# https://github.com/sysadminsmedia/homebox
-#
-# Single service, SQLite backend (the upstream default — no external DB needed;
-# HBOX_DATABASE_DRIVER defaults to sqlite3 and the image already pins
-# HBOX_DATABASE_SQLITE_PATH=/data/homebox.db with WAL + busy_timeout).
-# Attachments/thumbnails also live under /data via the image's baked
-# HBOX_STORAGE_CONN_STRING=file:///?no_tmp_dir=true + HBOX_STORAGE_PREFIX_PATH=data.
-#
-# GHCR tags are bare semver (0.26.2) — there is no "v" prefix on the image tags,
-# only on the git tags, hence the wud.link.template below re-adds the v.
 x-versions:
   homebox: &homebox-version "ghcr.io/sysadminsmedia/homebox:0.26.2"
 
