@@ -80,6 +80,9 @@ services:
     networks:
       - homebox
       - traefik
+      # Joined so the gateway-spawned homebox-mcp container can reach the
+      # API at http://homebox:7745 by name (gateway spawns servers here).
+      - mcp-gateway
     logging: *default-logging
     labels:
       traefik.enable: "true"
@@ -110,4 +113,7 @@ networks:
     driver: bridge
     external: false
   traefik:
+    external: true
+  mcp-gateway:
+    name: mcp-gateway
     external: true
