@@ -68,6 +68,12 @@ services:
     environment:
       TZ: "${TZ}"
       DOCKER_HOST: "tcp://mcp-gateway-socket-proxy:2375"
+      # Pin the SSE/HTTP bearer token to a stable value. Without this the
+      # gateway generates a NEW random token on every boot, silently breaking
+      # every network client (local Claude, OpenWebUI, ZeroClaw) on each
+      # restart. Set MCP_GATEWAY_AUTH_TOKEN in Komodo to a long random string
+      # (e.g. `openssl rand -hex 32`); rotating it forces all clients to update.
+      MCP_GATEWAY_AUTH_TOKEN: "${MCP_GATEWAY_AUTH_TOKEN}"
     volumes:
       - /opt/docker/mcp-gateway/mcp-gateway_config:/mcp:ro
       - /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml:/.docker/mcp/catalogs/custom.yaml:ro
