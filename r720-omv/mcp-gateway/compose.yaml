@@ -1,6 +1,12 @@
 x-versions:
   mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.12.3
-  mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway:latest
+  # Pinned by DIGEST, not :latest. Komodo's Global Auto Update kept pulling new
+  # :latest builds that silently tightened validation (catalog paths, then
+  # bind-mount allow-lists), repeatedly breaking the gateway. A digest can't
+  # drift. To move deliberately: bump this to a new `docker/mcp-gateway@sha256:…`
+  # (get it from `docker buildx imagetools inspect docker/mcp-gateway:vX.Y.Z`),
+  # re-test, and commit. This is v0.x from 2026-07-23.
+  mcp-gateway-version: &mcp-gateway-version docker/mcp-gateway@sha256:f5a679a05fc39022a046167bef92aeeb01bcd59485ad27843ae5227db7950688
 
 x-logging: &default-logging
   driver: "json-file"
@@ -74,6 +80,12 @@ services:
       # restart. Set MCP_GATEWAY_AUTH_TOKEN in Komodo to a long random string
       # (e.g. `openssl rand -hex 32`); rotating it forces all clients to update.
       MCP_GATEWAY_AUTH_TOKEN: "${MCP_GATEWAY_AUTH_TOKEN}"
+      # This gateway build refuses to spawn catalog servers whose bind mounts
+      # sit outside /tmp unless whitelisted. Our servers (containers-data,
+      # mcpmqtt, mitmproxy-mcp) mount under /opt/docker, so allow that root;
+      # mitmproxy needs write access to its own confdir.
+      MCP_GATEWAY_DOCKER_BIND_ALLOWED_PATHS: "/opt/docker"
+      MCP_GATEWAY_DOCKER_BIND_ALLOW_WRITABLE_PATHS: "/opt/docker/mcp-gateway/mitmproxy-mcp"
     volumes:
       - /opt/docker/mcp-gateway/mcp-gateway_config:/mcp:ro
       - /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml:/.docker/mcp/catalogs/custom.yaml:ro
