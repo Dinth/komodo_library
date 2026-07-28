@@ -53,11 +53,12 @@ services:
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
     healthcheck:
-      # Unauthenticated / returns 401 once TVH auth is configured, so a plain
-      # `curl -f` would flap to unhealthy the moment logins are turned on.
+      # / redirects to the UI entry point (302) when open, and returns 401/403
+      # once TVH auth is configured — so a plain `curl -f`, or matching only
+      # 200, reports a perfectly healthy server as down.
       test:
         - "CMD-SHELL"
-        - "curl -sS -o /dev/null -w '%{http_code}' http://localhost:9981/ | grep -qE '200|401|403'"
+        - "curl -sS -o /dev/null -w '%{http_code}' http://localhost:9981/ | grep -qE '200|302|401|403'"
       interval: 1m
       timeout: 15s
       retries: 3
