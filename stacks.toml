@@ -628,6 +628,24 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 ##
 
 [[stack]]
+name = "tvheadend"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/tvheadend"
+environment = """
+TZ=[[TZ]]
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+"""
+
+##
+
+[[stack]]
 name = "unifi"
 tags = ["needs-improvement", "stacks"]
 [stack.config]

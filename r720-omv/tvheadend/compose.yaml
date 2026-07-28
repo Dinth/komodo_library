@@ -1,0 +1,168 @@
+x-versions:
+  # LinuxServer publishes these from upstream VCS, not semver:
+  #   tvheadend -> version-<8-char git hash>
+  #   oscam     -> version-<OSCam SVN revision>
+  tvheadend: &tvheadend-version "linuxserver/tvheadend:version-fcd987f0"
+  oscam: &oscam-version "linuxserver/oscam:version-11966"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# s6-overlay (LinuxServer base) has to start as root to chown /config and drop
+# to PUID:PGID itself, so these two services set PUID/PGID rather than `user:`
+# — same deviation, and same capability set, as the jellyfin stack.
+x-lsio-caps: &lsio-caps
+  - AUDIT_WRITE
+  - CHOWN
+  - DAC_OVERRIDE
+  - FOWNER
+  - FSETID
+  - KILL
+  - SETFCAP
+  - SETGID
+  - SETPCAP
+  - SETUID
+  - SYS_CHROOT
+
+services:
+  tvheadend:
+    image: *tvheadend-version
+    container_name: tvheadend
+    hostname: tvheadend
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add: *lsio-caps
+    mem_limit: 2G
+    # /dev/dvb/adapter*/* are root:video 0660. A container started with a
+    # numeric uid:gid inherits NO supplementary groups from the host, so the
+    # host-side membership of `media` in `video` does not carry over — gid 44
+    # must be granted explicitly or every frontend open returns EACCES.
+    group_add:
+      - "44"
+    devices:
+      - /dev/dvb:/dev/dvb
+    environment:
+      TZ: "${TZ}"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+    healthcheck:
+      # Unauthenticated / returns 401 once TVH auth is configured, so a plain
+      # `curl -f` would flap to unhealthy the moment logins are turned on.
+      test:
+        - "CMD-SHELL"
+        - "curl -sS -o /dev/null -w '%{http_code}' http://localhost:9981/ | grep -qE '200|401|403'"
+      interval: 1m
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    volumes:
+      - /opt/docker/tvheadend/tvheadend/config:/config
+      - /Data/LiveTV:/recordings
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - tvheadend
+      - traefik
+    logging: *default-logging
+    labels:
+      # Only the browser UI goes through Traefik/Authelia. Jellyfin reaches
+      # TVH directly over the shared `traefik` docker network on
+      # tvheadend:9981 (HTTP) / tvheadend:9982 (HTSP), so forward-auth here
+      # cannot break playback or EPG grabbing.
+      traefik.enable: "true"
+      traefik.http.routers.tvheadend.rule: "Host(`tvh.${DOMAIN_NAME}`)"
+      traefik.http.routers.tvheadend.entrypoints: "websecure"
+      traefik.http.routers.tvheadend.tls: "true"
+      traefik.http.routers.tvheadend.tls.certresolver: "letsencrypt"
+      traefik.http.routers.tvheadend.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.tvheadend.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.tvheadend.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.tvheadend.loadbalancer.server.port: "9981"
+      homepage.group: "Media"
+      homepage.name: "TVHeadend"
+      homepage.icon: "tvheadend.png"
+      homepage.href: "https://tvh.${DOMAIN_NAME}"
+      homepage.description: "Live TV & DVR backend"
+      homepage.siteMonitor: "https://tvh.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.display.name: "TVHeadend"
+      wud.display.icon: "sh:tvheadend"
+      # Git hashes carry no ordering, so WUD cannot tell "newer" from
+      # "different" — but LinuxServer only ever publishes forward, so any tag
+      # that isn't the pinned one is in fact an update.
+      wud.tag.include: '^version-[0-9a-f]{8}$$'
+
+  oscam:
+    image: *oscam-version
+    container_name: oscam
+    hostname: oscam
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add: *lsio-caps
+    mem_limit: 256M
+    # A Phoenix/SmartReader USB reader goes here once one is fitted — use a
+    # /dev/serial/by-id/... path, never /dev/ttyUSB0, which is allocated in
+    # probe order and moves. Until then OSCam runs readerless: the web UI
+    # comes up and it can still act as a CCcam/newcamd *client*.
+    # devices:
+    #   - /dev/serial/by-id/usb-XXXX:/dev/ttyUSB0
+    environment:
+      TZ: "${TZ}"
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "curl -sS -o /dev/null -w '%{http_code}' http://localhost:8888/ | grep -qE '200|401'"
+      interval: 1m
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - /opt/docker/tvheadend/oscam/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - tvheadend
+      - traefik
+    logging: *default-logging
+    labels:
+      # LAN-only on top of Authelia: the OSCam UI exposes reader/card state and
+      # has no business being reachable from outside.
+      traefik.enable: "true"
+      traefik.http.routers.oscam.rule: "Host(`oscam.${DOMAIN_NAME}`)"
+      traefik.http.routers.oscam.entrypoints: "websecure"
+      traefik.http.routers.oscam.tls: "true"
+      traefik.http.routers.oscam.tls.certresolver: "letsencrypt"
+      traefik.http.routers.oscam.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.oscam.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.oscam.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.services.oscam.loadbalancer.server.port: "8888"
+      homepage.group: "Media"
+      homepage.name: "OSCam"
+      homepage.icon: "oscam.png"
+      homepage.href: "https://oscam.${DOMAIN_NAME}"
+      homepage.description: "Conditional-access server"
+      homepage.siteMonitor: "https://oscam.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.display.name: "OSCam"
+      wud.display.icon: "sh:oscam"
+      # OSCam SVN revisions are monotonic integers, so these do sort correctly.
+      wud.tag.include: '^version-\d+$$'
+
+networks:
+  tvheadend:
+    name: tvheadend
+    driver: bridge
+    external: false
+  traefik:
+    external: true
