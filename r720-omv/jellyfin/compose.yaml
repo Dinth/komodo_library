@@ -71,6 +71,10 @@ services:
       - /Data/DocumentaryShows:/documentary_shows
       - /Data/Movies:/movies
       - /Data/IT/pinchflat_downloads:/youtube
+      # TVHeadend's DVR output. Read-only on purpose: TVH owns recording and
+      # deletion (it is the only side that knows about EPG-triggered timers and
+      # in-progress recordings), Jellyfin just presents the finished files.
+      - /Data/LiveTV:/livetv:ro
     networks:
       - jellyfin
       - traefik
