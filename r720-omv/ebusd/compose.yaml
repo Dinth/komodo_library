@@ -27,9 +27,10 @@ services:
       EBUSD_MQTTPORT: "1883"
       EBUSD_MQTTCLIENTID: "ebusd"
       # NOTE: --mqttvar only parses a single NAME=VALUE assignment (a comma is
-      # NOT a separator), so only filter-direction lives here. The widened
-      # filter-name whitelist (flame, pressure, statenumber, fanspeed, fuel, ...)
-      # is set directly in /opt/docker/ebusd/ebusd_data/mqtt-hassio.cfg.
+      # NOT a separator), so only filter-direction lives here. The message
+      # filtering (filter-name, filter-non-name, filter-non-field) is set
+      # directly in /opt/docker/ebusd/ebusd_data/mqtt-hassio.cfg -- see the
+      # comments in that file for the 2026-07-28 trim rationale.
       EBUSD_MQTTVAR: "filter-direction=r|u|^w"
       # Retain data topics so entity states survive HA restarts (most ebusd
       # messages are polled slowly; without retain they sit "unknown" for hours).
@@ -37,7 +38,12 @@ services:
       EBUSD_MQTTLOG: ""
       EBUSD_ACCESSLEVEL: "*"
       EBUSD_SCANCONFIG: ""
-      EBUSD_POLLINTERVAL: "10"
+      # Poll cycle = (messages passing filter-name) x pollinterval.
+      # 2026-07-28: filter trimmed 300 -> 187 messages; 10 -> 8 s here takes the
+      # cycle from ~50 min to ~25 min. 5 s is the ebusd default and also safe;
+      # 8 is the conservative step. Do not go below 5 -- the eBUS is 2400 baud
+      # half-duplex and shared with the VRC700 controller.
+      EBUSD_POLLINTERVAL: "8"
       EBUSD_DEVICE: "ens:10.10.25.8:9999"
       EBUSD_MQTTUSER: "${EBUSD_MQTTUSER}"
       EBUSD_MQTTPASS: "${EBUSD_MQTTPASS}"
