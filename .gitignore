@@ -1,0 +1,6 @@
+# Claude Code per-user state. settings.local.json is the *local* settings
+# variant by design (personal permission allowlists, enabled MCP servers) and
+# scheduled_tasks.lock is transient. Shared project config belongs in
+# .claude/settings.json, which is not ignored.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
