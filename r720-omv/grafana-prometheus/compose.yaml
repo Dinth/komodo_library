@@ -131,7 +131,13 @@ services:
   prometheus:
     container_name: prometheus
     image: *prometheus-version
-    restart: unless-stopped
+    # `always`, not the usual `unless-stopped`. Prometheus has the slowest
+    # shutdown of any container here (TSDB/WAL flush), so an unclean host
+    # reboot can kill the daemon mid-stop; Docker then reconciles the
+    # container to exit code 255 and `unless-stopped` does NOT restore it.
+    # That happened on 2026-07-25: 150/152 containers came back, Prometheus
+    # stayed down for 12h and every alert rule went to Error state.
+    restart: always
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_add:
       - CHOWN
