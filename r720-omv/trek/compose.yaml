@@ -1,5 +1,5 @@
 x-versions:
-  trek: &trek-version "mauriceboe/trek:3.3.0"
+  trek: &trek-version "mauriceboe/trek:3.4.1"
 
 x-logging: &default-logging
   driver: "json-file"
