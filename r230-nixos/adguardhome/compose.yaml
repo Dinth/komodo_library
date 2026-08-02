@@ -1,5 +1,5 @@
 x-versions:
-  adguardhome: &adguardhome-version "adguard/adguardhome:v0.108.0-b.89"
+  adguardhome: &adguardhome-version "adguard/adguardhome:v0.108.0-b.90"
 
 x-logging: &default-logging
   driver: "json-file"
