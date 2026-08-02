@@ -1,6 +1,6 @@
 x-versions:
   mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
-  hortusfox: &hortusfox-version "ghcr.io/danielbrendel/hortusfox-web:v5.8"
+  hortusfox: &hortusfox-version "ghcr.io/danielbrendel/hortusfox-web:v5.9"
 
 x-logging: &default-logging
   driver: "json-file"
