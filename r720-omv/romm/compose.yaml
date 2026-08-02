@@ -1,13 +1,45 @@
 x-versions:
-  romm: &romm-version "rommapp/romm:5.0.0"
+  romm: &romm-version "rommapp/romm:5.1.0"
   mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
+  pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.6.3-ls75"
+  dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2606-ls77"
 
 x-logging: &default-logging
   driver: "json-file"
   options:
     max-size: "10m"
     max-file: "3"
+
+# Emulator-streaming containers (RomM 5.1.0 "Emulator Streaming"). These are
+# linuxserver.io images carrying a RomM broker Docker Mod: RomM POSTs launch /
+# save / volume commands to the broker on :8000 over the internal `romm`
+# network, while the browser loads the Selkies WebRTC desktop from :3000 via
+# Traefik. Both are pinned to GPU 1 (Quadro RTX 5000) by UUID.
+#
+# These are LinuxServer images: s6-overlay inits as root and drops to
+# PUID/PGID itself, so `user:` must NOT be set and the s6 capability set has to
+# stay. Everything else is dropped.
+x-emulator-common: &emulator-common
+  ipc: private
+  restart: unless-stopped
+  shm_size: "1gb"
+  cap_add:
+    - CHOWN
+    - SETGID
+    - SETUID
+    - DAC_OVERRIDE
+    - FOWNER
+    - KILL
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  logging: *default-logging
+
+x-emulator-gpu: &emulator-gpu
+  NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
+  NVIDIA_DRIVER_CAPABILITIES: "all"
 
 services:
   romm-mariadb:
@@ -132,6 +164,10 @@ services:
       HASHEOUS_API_ENABLED: "true"
       PLAYMATCH_API_ENABLED: "true"
       LAUNCHBOX_API_ENABLED: "true"
+      TGDB_API_ENABLED: "true"
+      # Shared secret for the emulator-streaming brokers. Must match
+      # BROKER_SECRET on every emulator container below.
+      STREAMING_BROKER_SECRET: "${ROMM_STREAMING_BROKER_SECRET}"
       ENABLE_SCHEDULED_UPDATE_LAUNCHBOX_METADATA: "true"
       SCHEDULED_UPDATE_LAUNCHBOX_METADATA_CRON: "0 5 * * 3"
       REDIS_HOST: "romm-valkey"
@@ -173,7 +209,27 @@ services:
       traefik.http.routers.romm.tls.certresolver: "letsencrypt"
       traefik.http.routers.romm.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.romm.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.romm.middlewares: "secHeaders@file"
+      # romm-csp MUST be listed first: Traefik applies response headers
+      # outermost-last, so the leading middleware wins and can overwrite the
+      # shared secHeaders CSP. Needed because the emulator-streaming player
+      # embeds the Selkies desktop in an <iframe> loaded by the BROWSER (not
+      # proxied by RomM), and secHeaders' `default-src 'self'` — which frame-src
+      # inherits — would block a cross-subdomain frame. Identical to secHeaders'
+      # policy otherwise, with frame-src added.
+      traefik.http.routers.romm.middlewares: "romm-csp,secHeaders@file"
+      traefik.http.middlewares.romm-csp.headers.customresponseheaders.Content-Security-Policy: >-
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: unpkg.com;
+        style-src 'self' 'unsafe-inline' blob: data: fonts.bunny.net unpkg.com;
+        img-src 'self' blob: data: https: i.ytimg.com cdn.jsdelivr.net ui-avatars.com m.media-amazon.com www.igdb.com;
+        font-src 'self' blob: data: fonts.bunny.net unpkg.com;
+        object-src 'none';
+        frame-ancestors 'self';
+        frame-src 'self' https://emu-pcsx2.${DOMAIN_NAME} https://emu-dolphin.${DOMAIN_NAME};
+        connect-src 'self' https: wss: blob: api.github.com;
+        form-action 'self';
+        media-src 'self' blob: data:;
+        worker-src 'self' blob: data:;
       traefik.http.services.romm.loadbalancer.server.port: "8080"
       homepage.group: "Media"
       homepage.name: "Romm"
@@ -190,6 +246,134 @@ services:
       wud.display.name: 'Romm'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/rommapp/romm/releases/tag/$${major}.$${minor}.$${patch}'
+
+  romm-pcsx2:
+    <<: *emulator-common
+    image: *pcsx2-version
+    container_name: romm-pcsx2
+    hostname: pcsx2
+    mem_limit: 6G
+    environment:
+      <<: *emulator-gpu
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+      TZ: "${TZ}"
+      DOCKER_MODS: "ghcr.io/loneangelfayt/pcsx2-romm-integration-mod:v1.3.3"
+      BROKER_SECRET: "${ROMM_STREAMING_BROKER_SECRET}"
+      # Must resolve to the identical path inside romm, or every launch 422s.
+      ROM_ROOT: "/romm/library"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"]
+              capabilities: [compute, utility, graphics, video, display]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    volumes:
+      - /opt/docker/romm/pcsx2/config:/config
+      - /Data/ROMs:/romm/library:ro
+      - /etc/localtime:/etc/localtime:ro
+    # Traefik fronts the Selkies desktop (:3000, plain HTTP inside) and terminates
+    # TLS with the wildcard cert, giving the secure context WebRTC requires. The
+    # broker (:8000) is never published — RomM reaches it at http://pcsx2:8000
+    # over the internal `romm` bridge.
+    networks:
+      - romm
+      - traefik
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.romm-pcsx2.rule: "Host(`emu-pcsx2.${DOMAIN_NAME}`)"
+      traefik.http.routers.romm-pcsx2.entrypoints: "websecure"
+      traefik.http.routers.romm-pcsx2.tls: "true"
+      traefik.http.routers.romm-pcsx2.tls.certresolver: "letsencrypt"
+      traefik.http.routers.romm-pcsx2.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.romm-pcsx2.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # Deliberately NOT secHeaders@file: it sets X-Frame-Options SAMEORIGIN,
+      # which browsers enforce in preference to CSP and would block RomM framing
+      # this desktop. emu-stream mirrors secHeaders minus the frame lockdown and
+      # widens frame-ancestors to the RomM origin. lan-only guards it, because
+      # Selkies is an unauthenticated full desktop — do not drop that.
+      traefik.http.routers.romm-pcsx2.middlewares: "emu-stream@docker,lan-only@file"
+      traefik.http.services.romm-pcsx2.loadbalancer.server.port: "3000"
+      traefik.http.middlewares.emu-stream.headers.contentTypeNosniff: "true"
+      traefik.http.middlewares.emu-stream.headers.browserXssFilter: "true"
+      traefik.http.middlewares.emu-stream.headers.forceSTSHeader: "true"
+      traefik.http.middlewares.emu-stream.headers.stsIncludeSubdomains: "true"
+      traefik.http.middlewares.emu-stream.headers.stsPreload: "true"
+      traefik.http.middlewares.emu-stream.headers.stsSeconds: "31536000"
+      # Defence-in-depth, mirroring secHeaders: a client must never be able to
+      # spoof the forward-auth identity headers.
+      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-User: ""
+      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Groups: ""
+      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Name: ""
+      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Email: ""
+      traefik.http.middlewares.emu-stream.headers.customresponseheaders.Content-Security-Policy: "frame-ancestors 'self' https://emu.${DOMAIN_NAME}"
+      wud.watch: "true"
+      wud.display.name: "Romm - PCSX2"
+      wud.display.icon: "sh-romm"
+      wud.tag.include: '^\d+\.\d+\.\d+-ls\d+$$'
+      wud.link.template: 'https://github.com/linuxserver/docker-pcsx2/releases/tag/$${major}.$${minor}.$${patch}-$${prerelease}'
+
+  romm-dolphin:
+    <<: *emulator-common
+    image: *dolphin-version
+    container_name: romm-dolphin
+    hostname: dolphin
+    mem_limit: 6G
+    environment:
+      <<: *emulator-gpu
+      PUID: "${MEDIA_PUID}"
+      PGID: "${MEDIA_PGID}"
+      TZ: "${TZ}"
+      DOCKER_MODS: "ghcr.io/loneangelfayt/dolphin-romm-integration-mod:v1.3.3"
+      BROKER_SECRET: "${ROMM_STREAMING_BROKER_SECRET}"
+      ROM_ROOT: "/romm/library"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"]
+              capabilities: [compute, utility, graphics, video, display]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    volumes:
+      - /opt/docker/romm/dolphin/config:/config
+      - /Data/ROMs:/romm/library:ro
+      - /etc/localtime:/etc/localtime:ro
+    # Broker (:8000) stays internal; RomM reaches it at http://dolphin:8000.
+    networks:
+      - romm
+      - traefik
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.romm-dolphin.rule: "Host(`emu-dolphin.${DOMAIN_NAME}`)"
+      traefik.http.routers.romm-dolphin.entrypoints: "websecure"
+      traefik.http.routers.romm-dolphin.tls: "true"
+      traefik.http.routers.romm-dolphin.tls.certresolver: "letsencrypt"
+      traefik.http.routers.romm-dolphin.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.romm-dolphin.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # emu-stream is defined once on romm-pcsx2 above; both routers share it.
+      traefik.http.routers.romm-dolphin.middlewares: "emu-stream@docker,lan-only@file"
+      traefik.http.services.romm-dolphin.loadbalancer.server.port: "3000"
+      wud.watch: "true"
+      wud.display.name: "Romm - Dolphin"
+      wud.display.icon: "sh-romm"
+      # LSIO tags Dolphin `2606-ls77`, which is not semver, so WUD cannot order
+      # candidates without a transform. Coerce <build>-ls<rev> -> <build>.<rev>.0.
+      wud.tag.include: '^\d+-ls\d+$$'
+      wud.tag.transform: '^(\d+)-ls(\d+)$$ => $$1.$$2.0'
+      wud.link.template: 'https://github.com/linuxserver/docker-dolphin/releases/tag/$${major}-ls$${minor}'
 
 networks:
   romm:
