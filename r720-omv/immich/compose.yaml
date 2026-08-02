@@ -1,7 +1,7 @@
 x-versions:
-  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v3.0.3"
-  immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v3.0.3-cuda"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
+  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v3.1.0"
+  immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v3.1.0-cuda"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.1-alpine"
   postgres: &postgres-version "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.3.0"
 
 x-logging: &default-logging
