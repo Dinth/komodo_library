@@ -2,7 +2,7 @@ x-versions:
   # LinuxServer publishes these from upstream VCS, not semver:
   #   tvheadend -> version-<8-char git hash>
   #   oscam     -> version-<OSCam SVN revision>
-  tvheadend: &tvheadend-version "linuxserver/tvheadend:version-fcd987f0"
+  tvheadend: &tvheadend-version "linuxserver/tvheadend:version-71159218"
   oscam: &oscam-version "linuxserver/oscam:version-11966"
 
 x-logging: &default-logging
