@@ -259,9 +259,9 @@ git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/esphome"
 environment = """
-TZ=[[TZ]]
-DOCKER_PUID=[[DOCKER_PUID]]
-DOCKER_PGID=[[DOCKER_PGID]]
+  TZ=[[TZ]]
+  DOCKER_PUID=[[DOCKER_PUID]]
+  DOCKER_PGID=[[DOCKER_PGID]]
 """
 
 ##
@@ -360,6 +360,8 @@ server = "r720-omv"
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/grafana-prometheus"
+registry_provider = "nvcr.io"
+registry_account = "$oauthtoken"
 environment = """
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
@@ -762,6 +764,21 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 ##
 
 [[stack]]
+name = "omnivore"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/omnivore"
+environment = """
+OMNIVORE_POSTGRES_PASS=[[OMNIVORE_POSTGRES_PASS]]
+OMNIVORE_JWT_SECRET=[[OMNIVORE_JWT_SECRET]]
+"""
+
+##
+
+[[stack]]
 name = "openttd"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
@@ -925,7 +942,6 @@ DOCKER_PGID=[[DOCKER_PGID]]
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
 ROMM_SCREENSCRAPER_PASS=[[ROMM_SCREENSCRAPER_PASS]]
-ROMM_STREAMING_BROKER_SECRET=[[ROMM_STREAMING_BROKER_SECRET]]
 """
 
 ##
@@ -997,6 +1013,20 @@ TZ=[[TZ]]
 MISP_DB_PASSWORD=[[MISP_DB_PASSWORD]]
 MISP_DB_ROOT_PASSWORD=[[MISP_DB_ROOT_PASSWORD]]
 SECOPS_MISP_ADMIN_PASSWORD=[[SECOPS_MISP_ADMIN_PASSWORD]]
+"""
+
+##
+
+[[stack]]
+name = "semaphore"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/semaphore"
+environment = """
+TZ=[[TZ]]
 """
 
 ##
