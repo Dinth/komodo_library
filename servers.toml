@@ -1,4 +1,13 @@
 [[server]]
+name = "r230-nixos"
+tags = ["servers"]
+[server.config]
+address = "10.10.1.12:8120"
+enabled = true
+
+##
+
+[[server]]
 name = "r720-omv"
 tags = ["servers"]
 [server.config]
