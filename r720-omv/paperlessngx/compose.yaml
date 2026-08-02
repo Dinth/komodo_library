@@ -1,7 +1,7 @@
 x-versions:
-  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:2.20.15"
+  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:3.0.5"
   postgres: &postgres-version "docker.io/postgres:18.4-alpine"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.0-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.1-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
