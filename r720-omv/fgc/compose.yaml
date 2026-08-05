@@ -2,7 +2,7 @@ x-versions:
   # Python remaster (nodriver + stealth CDP) — replaces feldorn/free-games-claimer
   # (Playwright), which was getting captcha-walled at Epic checkout. Public ghcr
   # image, so this stays pull-based (WUD-watchable); `build:` fallback not needed.
-  fgc: &fgc-version "ghcr.io/p-adamiec/free-games-claimer-remaster:v1.1"
+  fgc: &fgc-version "ghcr.io/p-adamiec/free-games-claimer-remaster:v1.5"
 
 x-logging: &default-logging
   driver: "json-file"
