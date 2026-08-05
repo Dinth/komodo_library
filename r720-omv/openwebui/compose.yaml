@@ -13,7 +13,7 @@ x-versions:
   # (upstream only CI-builds Dockerfile/Containerfile, not Dockerfile.debian).
   # This published tag has NO channel-signal — fine while access is via the
   # web dashboard; revisit a signal-capable build if we return to Signal.
-  zeroclaw: &zeroclaw-version "ghcr.io/zeroclaw-labs/zeroclaw:v0.8.3-debian"
+  zeroclaw: &zeroclaw-version "ghcr.io/zeroclaw-labs/zeroclaw:v0.8.4-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
 
 services:
