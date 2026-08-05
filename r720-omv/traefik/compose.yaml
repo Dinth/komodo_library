@@ -132,10 +132,19 @@ services:
       TRAEFIK_PROVIDERS_FILE_WATCH: "true"
       # --- Experimental Plugins ---
       # staticresponse: lets a router return an inline body (used to serve the
-      # mojeCERT domain-verification token over plain HTTP). Cached under
-      # /plugins-storage so a restart never depends on GitHub reachability.
-      TRAEFIK_EXPERIMENTAL_PLUGINS_STATICRESPONSE_MODULENAME: "github.com/jdel/staticresponse"
-      TRAEFIK_EXPERIMENTAL_PLUGINS_STATICRESPONSE_VERSION: "v0.0.1"
+      # mojeCERT domain-verification token on web + websecure).
+      # Loaded as a LOCAL plugin from vendored source, not downloaded. The remote
+      # form (experimental.plugins.*) re-fetches from plugins.traefik.io on every
+      # start and disables ALL plugins if that call exceeds its ~10s deadline —
+      # which is exactly what happened on 2026-08-04 13:24 ("Plugins are disabled
+      # because an error has occurred ... context deadline exceeded"), silently
+      # dropping the mojecert-verification router. /plugins-storage never cached
+      # anything, so the download was never actually optional. Local plugins are
+      # interpreted from disk by Yaegi with zero network dependency at boot.
+      # Source (v0.0.1, stdlib-only) lives at
+      #   /opt/docker/traefik/plugins-local/src/github.com/jdel/staticresponse/
+      # and must contain .traefik.yml + go.mod + staticresponse.go.
+      TRAEFIK_EXPERIMENTAL_LOCALPLUGINS_STATICRESPONSE_MODULENAME: "github.com/jdel/staticresponse"
       # --- Certificate Resolver (Let's Encrypt with Cloudflare DNS Challenge) ---
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: "${ADMIN_EMAIL}"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE: "/certs/acme.json"
@@ -171,6 +180,9 @@ services:
       - /opt/docker/traefik/traefik_certs:/certs
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
       - /opt/docker/traefik/traefik_plugins:/plugins-storage
+      # Vendored local plugin source (see EXPERIMENTAL_LOCALPLUGINS above).
+      # Read-only: Yaegi interprets the source in memory, nothing is written back.
+      - /opt/docker/traefik/plugins-local:/plugins-local:ro
     tmpfs:
       - /tmp
     logging: *default-logging
