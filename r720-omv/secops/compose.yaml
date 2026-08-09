@@ -2,7 +2,7 @@ x-versions:
   spiderfoot-version: &spiderfoot-version saidsef/spiderfoot:v4.0
   misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.44
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.9
-  misp-mariadb-version: &misp-mariadb-version mariadb:11.4
+  misp-mariadb-version: &misp-mariadb-version mariadb:12.3
   misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.1-alpine
   mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:12.2.3
 
@@ -178,6 +178,10 @@ services:
       - MYSQL_DATABASE=misp
       - MYSQL_USER=misp
       - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
+      # Runs mariadb-upgrade automatically when the image's major version moves
+      # ahead of the on-disk datadir; without it the server refuses to start
+      # on a major bump. Also keeps a pre-upgrade dump of the system tables.
+      - MARIADB_AUTO_UPGRADE=1
     volumes:
       - /opt/docker/secops/misp-mariadb:/var/lib/mysql
     healthcheck:

@@ -7,7 +7,7 @@
 x-versions:
   printstream: &printstream-version "ghcr.io/printstreamapp/printstream:latest"
   printstream-slicer: &printstream-slicer-version "ghcr.io/printstreamapp/printstream-slicer:latest"
-  postgres: &postgres-version "postgres:16-bookworm"
+  postgres: &postgres-version "postgres:18-bookworm"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -46,6 +46,10 @@ services:
       POSTGRES_USER: "printstream"
       POSTGRES_PASSWORD: "${PRINTSTREAM_DB_PASS}"
       PGUSER: "printstream"
+      # postgres:18 changed the image default to /var/lib/postgresql/18/docker
+      # and moved its VOLUME up to /var/lib/postgresql. Pin PGDATA back to the
+      # legacy path so the bind mount below still points at the live cluster.
+      PGDATA: "/var/lib/postgresql/data"
       TZ: "${TZ}"
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U printstream -d printstream']
