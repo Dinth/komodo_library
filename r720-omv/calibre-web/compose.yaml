@@ -1,5 +1,5 @@
 x-versions:
-  calibre-web: &calibre-web-version "linuxserver/calibre-web:0.6.26"
+  calibre-web: &calibre-web-version "linuxserver/calibre-web:0.6.27"
 
 x-logging: &default-logging
   driver: "json-file"
