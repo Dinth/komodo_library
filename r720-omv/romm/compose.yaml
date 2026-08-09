@@ -91,7 +91,10 @@ services:
       wud.display.name: "Romm - MariaDB"
       wud.display.icon: "sh-romm"
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      # No `v` prefix: LSIO publishes bare `11.4.8` alongside its `-r0-lsNNN`
+      # builds. `^v\d+\.\d+\.\d+$$` matched none of the 1310 published tags, so
+      # WUD silently tracked nothing here rather than reporting a bad candidate.
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
 
   romm-valkey:
@@ -370,9 +373,13 @@ services:
       wud.watch: "true"
       wud.display.name: "Romm - Dolphin"
       wud.display.icon: "sh-romm"
-      # LSIO tags Dolphin `2606-ls77`, which is not semver, so WUD cannot order
+      # LSIO tags Dolphin `2606-ls78`, which is not semver, so WUD cannot order
       # candidates without a transform. Coerce <build>-ls<rev> -> <build>.<rev>.0.
-      wud.tag.include: '^\d+-ls\d+$$'
+      # The build number must be exactly 4 digits (Dolphin's YYMM release
+      # scheme). A bare \d+ also matches the legacy dev-build tag
+      # `29498321-ls46`, which transforms to 29498321.46.0 and therefore sorts
+      # above every real release — WUD reported it as a permanent update.
+      wud.tag.include: '^\d{4}-ls\d+$$'
       wud.tag.transform: '^(\d+)-ls(\d+)$$ => $$1.$$2.0'
       wud.link.template: 'https://github.com/linuxserver/docker-dolphin/releases/tag/$${major}-ls$${minor}'
 

@@ -191,6 +191,16 @@ services:
       retries: 5
     networks: [secops]
     logging: *default-logging
+    labels:
+      # The r720-omv watcher runs WATCHALL=true, so this container is watched
+      # whether or not it is labelled. Without an include regex WUD considers
+      # every mariadb tag — which is why it kept offering the 13.x release
+      # candidates (13.0-rc, 13.0.1-ubi10-rc, ...) alongside the -noble/-ubi/
+      # -resolute variants. Only bare GA series tags match the pin above.
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+$$'
+      wud.display.name: "MISP - MariaDB"
+      wud.display.icon: "sh:mariadb"
 
   mitmproxy:
     image: *mitmproxy-version
