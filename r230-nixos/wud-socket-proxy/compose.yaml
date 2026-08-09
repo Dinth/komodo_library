@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.12.3"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.0"
 
 x-logging: &default-logging
   driver: "json-file"
