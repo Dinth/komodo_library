@@ -1,5 +1,5 @@
 x-versions:
-  babybuddy: &babybuddy-version "linuxserver/babybuddy:2.9.2"
+  babybuddy: &babybuddy-version "linuxserver/babybuddy:2.10.0"
 
 x-logging: &default-logging
   driver: "json-file"
