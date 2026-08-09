@@ -1,6 +1,6 @@
 x-versions:
   mongo: &mongo-version "docker.io/mongo:8.3.7"
-  unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.4.57"
+  unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.5.67"
   # Not pinned: :latest tracks main ahead of the version tags (0.7.0 is older
   # than the current :latest build) — a pin would be a downgrade. Digest watch.
   unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:latest"
