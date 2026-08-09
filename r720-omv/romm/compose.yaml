@@ -3,7 +3,7 @@ x-versions:
   mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.1-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.6.3-ls76"
-  dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2606-ls77"
+  dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2606-ls78"
 
 x-logging: &default-logging
   driver: "json-file"
