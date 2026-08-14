@@ -56,6 +56,14 @@ services:
       - 4747:8080/tcp
     volumes:
       - /opt/docker/fireflyiii/fireflyiii_upload:/var/www/html/storage/upload
+      # Laravel Passport signing keys. They live directly in storage/, which the
+      # image does NOT persist, so every container recreate regenerated them and
+      # silently invalidated every API token - which is what broke both data
+      # importers (HTTP 401 "Unauthenticated" on the nightly autoimport).
+      # Mounted read-only: Firefly calls "passport:keys" without --force and
+      # tolerates its failure, so the keys are never rewritten.
+      - /opt/docker/fireflyiii/oauth/oauth-private.key:/var/www/html/storage/oauth-private.key:ro
+      - /opt/docker/fireflyiii/oauth/oauth-public.key:/var/www/html/storage/oauth-public.key:ro
     networks:
       - fireflyiii
       - traefik
@@ -92,6 +100,12 @@ services:
     ipc: private
     restart: unless-stopped
     user: www-data
+    # The /import configs are owned michal:users (uid 1000, gid 100) so filebrowser
+    # can manage them, but this runs as www-data (uid 33) and so lands in "other",
+    # which the 2770 dirs deny - autoimport died on scandir(/import) before it read
+    # a single config. Join gid 100 to read them without moving or chowning anything.
+    group_add:
+      - "100"
     working_dir: /var/www/html
     cap_add:
       - AUDIT_WRITE
@@ -143,6 +157,10 @@ services:
     ipc: private
     restart: unless-stopped
     user: www-data
+    # See the paulina importer above: gid 100 ("users") is what makes the
+    # read-only /import bind mount readable to www-data.
+    group_add:
+      - "100"
     working_dir: /var/www/html
     cap_add:
       - AUDIT_WRITE
