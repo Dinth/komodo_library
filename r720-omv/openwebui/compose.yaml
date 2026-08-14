@@ -1,5 +1,5 @@
 x-versions:
-  ollama: &ollama-version "ollama/ollama:0.32.6"
+  ollama: &ollama-version "ollama/ollama:0.32.11"
   openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.11.0"
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
   comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:latest-cuda"
