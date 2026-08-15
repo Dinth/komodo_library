@@ -1,6 +1,6 @@
 x-versions:
-  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.33.1"
-  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.52.0"
+  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.33.2"
+  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.53.1"
   chrome: &chrome-version "gcr.io/zenika-hub/alpine-chrome:124"
 
 x-logging: &default-logging
