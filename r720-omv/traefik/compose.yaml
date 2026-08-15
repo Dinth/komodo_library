@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.0"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
   traefik: &traefik-version "traefik:v3.7.10"
 
 x-logging: &default-logging
