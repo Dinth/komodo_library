@@ -1,5 +1,5 @@
 x-versions:
-  mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.13.0
+  mcp-gateway-socket-proxy-version: &mcp-gateway-socket-proxy-version wollomatic/socket-proxy:1.13.1
   # Pinned by DIGEST, not :latest. Komodo's Global Auto Update kept pulling new
   # :latest builds that silently tightened validation (catalog paths, then
   # bind-mount allow-lists), repeatedly breaking the gateway. A digest can't
