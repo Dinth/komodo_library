@@ -36,7 +36,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    mem_limit: 4G
     environment:
       DB_CONNECTION: "pgsql"
       DB_PORT: "5432"
@@ -126,7 +126,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512M
+    mem_limit: 1G
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
       FIREFLY_III_URL: "http://fireflyiii:8080"
@@ -181,7 +181,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512M
+    mem_limit: 1G
     environment:
       FIREFLY_III_ACCESS_TOKEN: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
       FIREFLY_III_URL: "http://fireflyiii:8080"
