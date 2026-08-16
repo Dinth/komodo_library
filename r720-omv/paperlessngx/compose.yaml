@@ -28,9 +28,19 @@ services:
     deploy:
       resources:
         limits:
-          memory: 200m
+          memory: 1g
         reservations:
-          memory: 50m
+          memory: 256m
+    # PG18 auto-sizes shared_buffers/effective_cache_size from HOST RAM and
+    # ignores the cgroup limit — on this 24-core host it picked
+    # shared_buffers=160MB, leaving no room for backends, so the postmaster
+    # kept getting OOM-killed mid-upload. Pin both explicitly.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=192MB
+      - -c
+      - effective_cache_size=640MB
     environment:
       POSTGRES_DB: "paperlessngx"
       POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
