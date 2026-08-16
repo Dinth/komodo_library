@@ -28,7 +28,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2g
+          memory: 3g
         reservations:
           memory: 512m
     # PG18 auto-sizes shared_buffers/effective_cache_size from HOST RAM and
@@ -42,9 +42,11 @@ services:
       - -c
       - effective_cache_size=640MB
       # Parallel folder uploads need far more than the default 100 slots.
-      # Budget at 2g: 192MB shared + ~200 backends x ~5MB = ~1.2G.
+      # Sized against the app: ~11 pooled processes (6 granian, 3 celery, beat,
+      # consumer) x pool.max_size=20 = 220 worst case, under the 297 usable.
+      # Budget at 3g: 192MB shared + ~300 backends x ~5MB = ~1.7G.
       - -c
-      - max_connections=200
+      - max_connections=300
     environment:
       POSTGRES_DB: "paperlessngx"
       POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
@@ -132,7 +134,9 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 2G
+    # 6 granian workers (~200MB each) alongside 2 celery OCR workers needs more
+    # than the previous 2G.
+    mem_limit: 4G
     depends_on:
       paperlessngx-valkey:
         condition: service_healthy
@@ -156,7 +160,12 @@ services:
       # connection, which is what pushed postgres into the OOM above.
       PAPERLESS_TASK_WORKERS: "2"
       PAPERLESS_THREADS_PER_WORKER: "4"
-      PAPERLESS_WEBSERVER_WORKERS: "2"
+      # 6 granian workers x pool.max_size=20 = 120 concurrent upload slots.
+      # The web tier is the binding constraint: auditlog middleware takes a DB
+      # connection at the START of every request (for request.user) and holds it
+      # for the whole upload, so slots must scale with CONCURRENT uploads, not
+      # with DB speed. A folder much larger than ~120 files will still exhaust it.
+      PAPERLESS_WEBSERVER_WORKERS: "6"
       # Folder uploads POST every file in parallel and each request holds a
       # connection for the whole upload, so the pool has to be wide enough to
       # absorb the burst -- at max_size=8 requests queued past psycopg's fixed
