@@ -28,9 +28,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1g
+          memory: 2g
         reservations:
-          memory: 256m
+          memory: 512m
     # PG18 auto-sizes shared_buffers/effective_cache_size from HOST RAM and
     # ignores the cgroup limit — on this 24-core host it picked
     # shared_buffers=160MB, leaving no room for backends, so the postmaster
@@ -41,6 +41,10 @@ services:
       - shared_buffers=192MB
       - -c
       - effective_cache_size=640MB
+      # Parallel folder uploads need far more than the default 100 slots.
+      # Budget at 2g: 192MB shared + ~200 backends x ~5MB = ~1.2G.
+      - -c
+      - max_connections=200
     environment:
       POSTGRES_DB: "paperlessngx"
       POSTGRES_PASSWORD: "${PAPERLESSNGX_POSTGRES_PASS}"
@@ -153,12 +157,15 @@ services:
       PAPERLESS_TASK_WORKERS: "2"
       PAPERLESS_THREADS_PER_WORKER: "4"
       PAPERLESS_WEBSERVER_WORKERS: "2"
-      # Folder uploads POST every file in parallel and each request grabs its own
-      # connection, which blew past max_connections=100 ("sorry, too many clients
-      # already") and 500'd the batch. This caps psycopg's pool at 8 per process;
-      # with ~8 DB-connecting processes that tops out near 64. Excess requests
-      # now WAIT for a free connection instead of erroring.
-      PAPERLESS_DB_POOLSIZE: "8"
+      # Folder uploads POST every file in parallel and each request holds a
+      # connection for the whole upload, so the pool has to be wide enough to
+      # absorb the burst -- at max_size=8 requests queued past psycopg's fixed
+      # 30s wait and died with PoolTimeout. Sized against postgres'
+      # max_connections=200 below: ~8 DB-connecting processes x 20 = 160 < 197.
+      # Note PAPERLESS_DB_POOLSIZE is deprecated in v3 (removed in 3.2); the
+      # supported form is this comma-separated dot-notation string, NOT the JSON
+      # shown in the deprecation hint.
+      PAPERLESS_DB_OPTIONS: "pool.min_size=4,pool.max_size=20"
     ports:
       - "8583:8000"
     volumes:
