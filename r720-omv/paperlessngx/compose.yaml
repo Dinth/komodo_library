@@ -153,6 +153,12 @@ services:
       PAPERLESS_TASK_WORKERS: "2"
       PAPERLESS_THREADS_PER_WORKER: "4"
       PAPERLESS_WEBSERVER_WORKERS: "2"
+      # Folder uploads POST every file in parallel and each request grabs its own
+      # connection, which blew past max_connections=100 ("sorry, too many clients
+      # already") and 500'd the batch. This caps psycopg's pool at 8 per process;
+      # with ~8 DB-connecting processes that tops out near 64. Excess requests
+      # now WAIT for a free connection instead of erroring.
+      PAPERLESS_DB_POOLSIZE: "8"
     ports:
       - "8583:8000"
     volumes:
