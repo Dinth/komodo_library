@@ -147,6 +147,12 @@ services:
       PAPERLESS_ALLOWED_HOSTS: "papers.${DOMAIN_NAME},10.10.1.13"
       PAPERLESS_CORS_ALLOWED_HOSTS: "https://papers.${DOMAIN_NAME},http://10.10.1.13:8583"
       PAPERLESS_SECRET_KEY: "${PAPERLESSNGX_SECRET_KEY}"
+      # Pinned: defaults scale off the host's 24 cores (floor(sqrt(24))=4 task
+      # workers x floor(24/4)=6 threads), and every worker holds its own DB
+      # connection, which is what pushed postgres into the OOM above.
+      PAPERLESS_TASK_WORKERS: "2"
+      PAPERLESS_THREADS_PER_WORKER: "4"
+      PAPERLESS_WEBSERVER_WORKERS: "2"
     ports:
       - "8583:8000"
     volumes:
