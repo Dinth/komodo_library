@@ -1,5 +1,5 @@
 x-versions:
-  cronicle: &cronicle-version "peterbuga/cronicle-docker:0.9.80"
+  cronicle: &cronicle-version "peterbuga/cronicle-docker:0.9.107"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -17,9 +17,9 @@ services:
     ipc: private
     restart: unless-stopped
     working_dir: /opt/cronicle
-    entrypoint:
-      - docker-entrypoint.sh
-    command: ['node','bin/docker-entrypoint.js']
+#    entrypoint:
+#      - docker-entrypoint.sh
+#    command: ['node','bin/docker-entrypoint.js']
     cap_add:
       - AUDIT_WRITE
       - CHOWN
