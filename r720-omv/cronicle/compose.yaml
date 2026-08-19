@@ -51,6 +51,8 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /opt/docker/cronicle/cronicle_data:/opt/cronicle/data
+      - /opt/docker/cronicle/cronicle_logs:/opt/cronicle/logs
+      - /opt/docker/cronicle/cronicle_plugins:/opt/cronicle/plugins
       - /etc/localtime:/etc/localtime:ro
     networks:
       - cronicle
