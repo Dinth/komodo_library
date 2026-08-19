@@ -221,7 +221,13 @@ services:
       NORDIGEN_ID: "${FIREFLYIII_MICHAL_NORD_ID}"
       NORDIGEN_KEY: "${FIREFLYIII_MICHAL_NORD_KEY}"
       CAN_POST_AUTOIMPORT: "true"
-      IMPORT_DIR_ALLOWLIST: "/import"
+      # One subdirectory per bank, each driven by its own Cronicle event. A
+      # single /import run covering all six took 241s -> 264s -> 300s on
+      # successive nights and then hit nginx's 300s ceiling, returning 504.
+      # Cronicle recorded the failure and froze this event's scheduler cursor,
+      # so the import silently stopped running altogether. Split, each bank
+      # takes ~50s and one failing bank no longer stops the other five.
+      IMPORT_DIR_ALLOWLIST: "/import/santander,/import/amex,/import/barclaycard,/import/capitalone,/import/tesco,/import/mbank"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
     ports:
       - 4748:8080/tcp
