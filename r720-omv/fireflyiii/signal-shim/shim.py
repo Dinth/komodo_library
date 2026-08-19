@@ -33,6 +33,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -73,6 +74,23 @@ MAX_BODY_BYTES = 256 * 1024
 MAX_MESSAGE_CHARS = 4000
 
 
+# E.164: leading +, no leading zero, 7-15 digits. Group ids are long base64
+# strings and are accepted as-is.
+E164_RE = re.compile(r"^\+[1-9]\d{6,14}$")
+
+
+def mask(value: str) -> str:
+    """Redact a phone number for logging: keep enough to identify a typo."""
+    if len(value) <= 4:
+        return "*" * len(value)
+    return f"{value[:3]}…{value[-2:]} (len {len(value)})"
+
+
+def is_valid_target(value: str) -> bool:
+    """True for an E.164 number or something long enough to be a group id."""
+    return bool(E164_RE.match(value)) or (value.startswith("g") and len(value) > 20)
+
+
 def parse_routes() -> dict[str, list[str]]:
     """Build {token: [recipient, ...]} from SHIM_ROUTES, or the single-route env."""
     routes: dict[str, list[str]] = {}
@@ -89,7 +107,17 @@ def parse_routes() -> dict[str, list[str]]:
         if not token or not targets:
             LOG.warning("ignoring SHIM_ROUTES entry with empty token or recipients")
             continue
-        routes[token] = targets
+        valid = [t for t in targets if is_valid_target(t)]
+        for bad in [t for t in targets if not is_valid_target(t)]:
+            LOG.error(
+                "route %s…: recipient %s is not an E.164 number or group id - dropped",
+                token[:6],
+                mask(bad),
+            )
+        if not valid:
+            LOG.error("route %s…: no valid recipients left, route dropped", token[:6])
+            continue
+        routes[token] = valid
 
     if not routes and SHIM_TOKEN and SIGNAL_RECIPIENTS:
         routes[SHIM_TOKEN] = SIGNAL_RECIPIENTS
@@ -178,9 +206,18 @@ def send_to_signal(message: str, recipients: list[str]) -> None:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT) as response:
-        if response.status >= 300:
-            raise RuntimeError(f"signal-cli-rest-api returned HTTP {response.status}")
+    try:
+        with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT) as response:
+            if response.status >= 300:
+                raise RuntimeError(f"signal-cli-rest-api returned HTTP {response.status}")
+    except urllib.error.HTTPError as exc:
+        # The status alone is not actionable - signal-cli-rest-api explains the
+        # real problem (bad sender, unregistered recipient) in the body.
+        try:
+            detail = exc.read(2048).decode("utf-8", "replace").strip()
+        except Exception:  # noqa: BLE001 - never mask the original failure
+            detail = "<body unreadable>"
+        raise RuntimeError(f"HTTP {exc.code} from signal-cli-rest-api: {detail}") from exc
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -267,6 +304,15 @@ def main() -> None:
 
     if not SIGNAL_PHONE_NUMBER:
         LOG.error("SIGNAL_PHONE_NUMBER is required")
+        raise SystemExit(1)
+    if not E164_RE.match(SIGNAL_PHONE_NUMBER):
+        # Caught a real "SIGNAL_PHONE_NUMBER==+44..." typo in Komodo, which
+        # otherwise surfaced only as an opaque HTTP 400 at send time.
+        LOG.error(
+            "SIGNAL_PHONE_NUMBER is not a valid E.164 number: %s - "
+            "check for stray characters in the Komodo variable",
+            mask(SIGNAL_PHONE_NUMBER),
+        )
         raise SystemExit(1)
     if not ROUTES:
         LOG.error("no routes configured: set SHIM_ROUTES (or SHIM_TOKEN + SIGNAL_RECIPIENTS)")
