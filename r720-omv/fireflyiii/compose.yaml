@@ -50,8 +50,41 @@ services:
       ENABLE_EXTERNAL_RATES: "true"
       APP_URL: "https://finance.${DOMAIN_NAME}"
       TRUSTED_PROXIES: "*"
-      FIREFLY_III_LAYOUT: "v2"
+      SITE_OWNER: "michal@gawronskikot.com"
+      # v2 is a PARTIAL overlay, not a replacement: config/view.php stacks
+      # resources/views/v2 (50 files - accounts, transactions, administrations,
+      # dashboard) on top of the 148-file v1 tree. Every page v2 does not
+      # implement - budgets, bills, categories, reports, rules, piggy banks,
+      # recurring, tags, webhooks, profile - falls through to a v1 template
+      # rendered without its matching layout skeleton. That is what made the UI
+      # look broken. Upstream default is v1 and still calls v2 "very
+      # experimental ... be wary of data loss".
+      FIREFLY_III_LAYOUT: "v1"
       SESSION_DRIVER: "file"
+      # Two users on NVMe-backed storage: the file cache is fine here. Revisit
+      # redis only if page loads actually get slow.
+      CACHE_DRIVER: "file"
+      # Served only over HTTPS via Traefik, so the session cookie must be
+      # secure-flagged. "strict" samesite is known to break the login redirect,
+      # so lax is deliberate. PHP_SESSION_COOKIE_SECURE is the base image's own
+      # knob and defaults to false - it has to be set separately.
+      COOKIE_SECURE: "true"
+      COOKIE_SAMESITE: "lax"
+      PHP_SESSION_COOKIE_SECURE: "true"
+      # Audit logging is ON by default (AUDIT_LOG_LEVEL defaults to "info" when
+      # unset). Left at the default level, but pinned to stdout only: the
+      # default is ["audit_daily", "audit_stdout"], and audit_daily writes files
+      # inside the container that nothing rotates or reads. stdout reaches
+      # Alloy -> Loki like every other stack.
+      AUDIT_LOG_CHANNEL: "audit_stdout"
+      # Basildon, Essex.
+      MAP_DEFAULT_LAT: "51.5762"
+      MAP_DEFAULT_LONG: "0.4881"
+      MAP_DEFAULT_ZOOM: "12"
+      # Consumed by the /api/v1/cron/<token> endpoint that Cronicle calls
+      # nightly. Without it nothing fires bill reminders or auto-budget
+      # rollovers - last_rt_job sat at 0 since install.
+      STATIC_CRON_TOKEN: "${FIREFLYIII_STATIC_CRON_TOKEN}"
     ports:
       - 4747:8080/tcp
     volumes:
@@ -204,6 +237,68 @@ services:
       wud.display.name: "Firefly III Data importer"
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
+
+  fireflyiii-signal-shim:
+    # Firefly III 6.6.x can only notify over mail, Slack or Pushover - its ntfy
+    # channel is commented out upstream (issue 12083). This bridges Firefly's
+    # Slack notifications onto the signal-cli-rest-api that Grafana already
+    # uses. The hook is UrlValidator::isValidWebhookURL(), which accepts any
+    # URL ending in "/slack" as well as the real Slack/Discord prefixes - so no
+    # Slack account and no outbound internet access are involved.
+    #
+    # Built locally from the committed Dockerfile + shim.py (same pattern as
+    # grafana-prometheus/ha-bt-exporter): image: just pins the local tag, and
+    # pull_policy:never stops the stack-wide `compose pull` from trying to
+    # fetch this non-registry image and aborting the deploy.
+    build:
+      context: ./signal-shim
+      dockerfile: Dockerfile
+    image: fireflyiii-signal-shim:latest
+    pull_policy: never
+    container_name: fireflyiii-signal-shim
+    # Hyphens rather than the underscores the importers use: Firefly stores
+    # this as a URL, and PHP's filter_var()/parse_url reject underscores in
+    # hostnames.
+    hostname: fireflyiii-signal-shim
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64M
+    environment:
+      TZ: "${TZ}"
+      # Same published port Grafana's contact point posts to: signal-rest-api
+      # lives in another stack, so this avoids coupling the two networks.
+      SIGNAL_API_URL: "http://10.10.1.13:3162/v2/send"
+      # Sender only - reuses the number Grafana's contact point already sends
+      # from. NOTE: SIGNAL_TECH_ID is deliberately NOT reused as a recipient.
+      # It is a Signal *group* id, and routing per-user notifications into a
+      # shared group would publish one user's bill amounts and merchants to
+      # everyone in it.
+      SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
+      # Per-user routing. Firefly stores slack_webhook_url as a PER-USER
+      # preference, so each user gets their own URL; the token in the path
+      # selects the recipient. Every path still ends in "/slack", which is what
+      # Firefly's UrlValidator accepts, and an unknown token 404s.
+      # Format: "<token>:<recipient>[|<recipient>],<token2>:<recipient>"
+      SHIM_ROUTES: "${FIREFLYIII_SIGNAL_TOKEN_MICHAL}:${SIGNAL_MICHAL_ID},${FIREFLYIII_SIGNAL_TOKEN_PAULINA}:${SIGNAL_PAULINA_ID}"
+    networks:
+      - fireflyiii
+    ports: []
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/healthz')\""
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    labels:
+      wud.watch: "false"
 
 networks:
   fireflyiii:

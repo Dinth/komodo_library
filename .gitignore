@@ -4,3 +4,7 @@
 # .claude/settings.json, which is not ignored.
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+
+# Python bytecode from local syntax checks of the committed shim scripts.
+__pycache__/
+*.pyc
