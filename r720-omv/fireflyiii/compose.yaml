@@ -1,6 +1,7 @@
 x-versions:
   fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.6.6"
   fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.3.4"
+  fireflyiii-mcp: &fireflyiii-mcp-version "ghcr.io/daften/fireflyiii-mcp:0.4.2"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -305,6 +306,62 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "false"
+
+  fireflyiii-mcp:
+    image: *fireflyiii-mcp-version
+    container_name: fireflyiii-mcp
+    hostname: fireflyiii-mcp
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      # PAT-only mode: FIREFLY_OAUTH_CLIENT_ID is deliberately UNSET. Its
+      # absence is what disables the OAuth surface; the server then forwards
+      # each caller's `Authorization: Bearer <PAT>` straight to Firefly. So
+      # callers are separated BY TOKEN, matching the tj.user_id separation the
+      # data relies on - michal's and Paulina's tokens stay out of the stack.
+      FIREFLY_URL: "http://fireflyiii:8080"
+      # Same compose network, so the token never leaves the host and Traefik
+      # is not in the path.
+      MCP_PRESET: "default"
+      # Not cosmetic: the image ships ~140 tools in 14 groups and loading all
+      # of them floods a client's context before any work starts.
+      HOME: "/tmp"
+      NODE_ENV: "production"
+    tmpfs:
+      - /tmp
+    depends_on:
+      # service_started, NOT service_healthy: the fireflyiii service defines no
+      # healthcheck, so service_healthy would never be satisfied and this would
+      # never start. The MCP retries its upstream anyway.
+      - fireflyiii
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "node -e \"require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      # MCP-server port pool (513x); 5133-5136 taken. NOT exposed via Traefik.
+      - 5137:3000/tcp
+    networks:
+      - fireflyiii
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "Firefly III MCP"
+      wud.display.icon: "sh:firefly-iii"
+      wud.link.template: "https://github.com/daften/fireflyiii-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   fireflyiii:
