@@ -1,0 +1,67 @@
+x-versions:
+  fireflyiii-mcp: &fireflyiii-mcp-version "ghcr.io/daften/fireflyiii-mcp:0.4.2"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  fireflyiii-mcp:
+    image: *fireflyiii-mcp-version
+    container_name: fireflyiii-mcp
+    hostname: fireflyiii-mcp
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      # PAT-only mode: FIREFLY_OAUTH_CLIENT_ID is deliberately UNSET. With it
+      # absent the server stops serving the OAuth surface entirely and instead
+      # forwards each caller's `Authorization: Bearer <PAT>` straight to
+      # Firefly III. That keeps michal and Paulina separated by token rather
+      # than the server holding one identity - the same separation that
+      # `tj.user_id` enforces in SQL.
+      FIREFLY_URL: "http://fireflyiii:8080"
+      # Reached over the internal `fireflyiii` bridge, so the token never
+      # leaves the host and Traefik is not in the path.
+      MCP_PRESET: "default"
+      # Tool filtering is not cosmetic: this image ships ~140 tools across 14
+      # groups and loading all of them floods the client's context window
+      # before any work starts (see project_openclaw_equivalent_plan).
+      HOME: "/tmp"
+      NODE_ENV: "production"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "node -e \"require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      # MCP-server port pool (513x); 5133-5136 taken. NOT exposed via Traefik.
+      - 5137:3000/tcp
+    networks:
+      - fireflyiii
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "Firefly III MCP"
+      wud.display.icon: "sh:firefly-iii"
+      wud.link.template: "https://github.com/daften/fireflyiii-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
+
+networks:
+  fireflyiii:
+    name: fireflyiii
+    external: true
