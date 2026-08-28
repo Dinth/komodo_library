@@ -3,6 +3,13 @@
     "grafana": {
       "type": "http",
       "url": "http://10.10.1.13:5133/mcp"
+    },
+    "n8n": {
+      "type": "http",
+      "url": "http://10.10.1.13:5138/mcp",
+      "headers": {
+        "Authorization": "Bearer ${N8N_MCP_AUTH_TOKEN}"
+      }
     }
   }
 }

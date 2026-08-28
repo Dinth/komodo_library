@@ -1,5 +1,6 @@
 x-versions:
   n8n: &n8n-version "n8nio/n8n:2.36.6"
+  n8n-mcp: &n8n-mcp-version "ghcr.io/czlonkowski/n8n-mcp:2.74.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -97,6 +98,69 @@ services:
       homepage.icon: "n8n.png"
       homepage.href: "https://auto.${DOMAIN_NAME}"
       homepage.siteMonitor: "https://auto.${DOMAIN_NAME}"
+
+  n8n-mcp:
+    image: *n8n-mcp-version
+    container_name: n8n-mcp
+    hostname: n8n-mcp
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      MCP_MODE: "http"
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      NODE_ENV: "production"
+      LOG_LEVEL: "info"
+      # Mandatory in http mode - the entrypoint exits if it is unset. Minimum
+      # 32 characters; every request to /mcp must carry it as a bearer token.
+      AUTH_TOKEN: "${N8N_MCP_AUTH_TOKEN}"
+      # Same compose network, so the API key never leaves the host and Traefik
+      # is not in the path. Without these two the server still answers node
+      # documentation queries but loses the 16 workflow-management tools.
+      N8N_API_URL: "http://n8n:5678"
+      N8N_API_KEY: "${N8N_MCP_API_KEY}"
+      # Anonymous usage statistics are ON by default upstream.
+      N8N_MCP_TELEMETRY_DISABLED: "true"
+      HOME: "/tmp"
+    tmpfs:
+      - /tmp
+    # No mount on /app/data, deliberately. The image bakes in the node-reference
+    # SQLite database, and the runtime image cannot rebuild it (it ships no n8n
+    # packages) - it can only seed an empty volume once, from a pristine copy.
+    # A persisted volume would therefore pin the node data at whatever version
+    # first created it and go stale on every image bump. With no mount the
+    # database always tracks the image. It holds no user state, so there is
+    # nothing to persist. It is also a rollback-journal (not WAL) database, so
+    # SQLite opens it fine on the read-only filesystem.
+    depends_on:
+      n8n:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    ports:
+      # MCP-server port pool (513x); 5133-5137 taken. NOT exposed via Traefik.
+      - 5138:3000/tcp
+    networks:
+      - n8n
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "n8n MCP"
+      wud.display.icon: "sh:n8n"
+      wud.link.template: "https://github.com/czlonkowski/n8n-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   n8n:
