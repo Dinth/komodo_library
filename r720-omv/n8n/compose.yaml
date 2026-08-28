@@ -127,6 +127,14 @@ services:
       # documentation queries but loses the 16 workflow-management tools.
       N8N_API_URL: "http://n8n:5678"
       N8N_API_KEY: "${N8N_MCP_API_KEY}"
+      # Governs an SSRF gate that n8n-api-client.ts runs the base URL through,
+      # not just webhooks. It defaults to "strict", which blocks private IPs -
+      # so http://n8n:5678 is rejected and all 18 management tools fail with
+      # "SSRF protection: Private IP addresses not allowed" while the
+      # documentation tools keep working. Reaching a private address IS the
+      # design here. "permissive" still blocks cloud-metadata endpoints, and
+      # the server is LAN-only behind a bearer token.
+      WEBHOOK_SECURITY_MODE: "permissive"
       # Anonymous usage statistics are ON by default upstream.
       N8N_MCP_TELEMETRY_DISABLED: "true"
       HOME: "/tmp"
