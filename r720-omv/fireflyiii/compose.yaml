@@ -2,6 +2,7 @@ x-versions:
   fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.6.6"
   fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.3.4"
   fireflyiii-mcp: &fireflyiii-mcp-version "ghcr.io/daften/fireflyiii-mcp:0.4.2"
+  postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -117,15 +118,6 @@ services:
       wud.display.name: "Firefly III"
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/firefly-iii/firefly-iii/releases/v$${major}.$${minor}.$${patch}"
-      homepage.group: "Finance"
-      homepage.name: "Firefly III"
-      homepage.icon: "firefly.png"
-      homepage.href: "https://finance.${DOMAIN_NAME}"
-      homepage.siteMonitor: "https://finance.${DOMAIN_NAME}"
-      homepage.description: "Personal finance manager"
-      homepage.widget.type: "firefly"
-      homepage.widget.url: "http://10.10.1.13:4747"
-      homepage.widget.key: "${HOMEPAGE_MICHAL_FIREFLY_API}"
 
   fireflyiii_paulina_dataimporter:
     image: *fireflyiii-dataimporter-version
@@ -363,10 +355,58 @@ services:
       wud.display.icon: "sh:firefly-iii"
       wud.link.template: "https://github.com/daften/fireflyiii-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
 
+  fireflyiii-postgres:
+    image: *postgres-version
+    container_name: fireflyiii-postgres
+    hostname: fireflyiii-postgres
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      POSTGRES_DB: "fireflyiii"
+      POSTGRES_USER: "fireflyiii"
+      POSTGRES_PASSWORD: "${FIREFLYIII_DB_PASS}"
+      # postgres:18 defaults PGDATA to /var/lib/postgresql/18/docker and puts
+      # its VOLUME on /var/lib/postgresql, so a bind mount to .../data lands
+      # beside the cluster and initdb quietly creates an empty one. Pin it.
+      PGDATA: "/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    volumes:
+      - /opt/docker/fireflyiii/fireflyiii-postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - fireflyiii
+      - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^18\.\d+-alpine$$'
+      wud.display.name: "Firefly III PostgreSQL"
+      wud.display.icon: "sh:postgresql"
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+
 networks:
   fireflyiii:
     name: fireflyiii
     driver: bridge
     external: false
   traefik:
+    external: true
+  adminer:
     external: true
