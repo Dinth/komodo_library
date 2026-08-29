@@ -91,7 +91,21 @@ services:
       # lands in "$@" and the config path is never hardcoded here.
       - homebox-entrypoint
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "-", "http://127.0.0.1:7745/api/v1/status"]
+      # Two signals: the app answers, AND the OIDC provider actually came up.
+      # /api/v1/status is no use for the second — its oidc.enabled field
+      # mirrors config, not init state, so it reads 200/enabled with a dead
+      # provider. /users/login/oidc is the real tell: 302 when live, 500 when
+      # not. It builds that redirect from the CACHED discovery document and
+      # makes no call to Authelia, and --max-redirect=0 stops wget chasing it,
+      # so the probe stays local — an Authelia outage does NOT flip Homebox
+      # unhealthy. Assumes HBOX_OIDC_ENABLED stays "true"; if OIDC is ever
+      # turned off, drop the second clause or this fails forever.
+      test:
+        - CMD-SHELL
+        - >-
+          wget -q -T 5 -O /dev/null http://127.0.0.1:7745/api/v1/status &&
+          wget -q -T 5 --max-redirect=0 -S -O /dev/null
+          http://127.0.0.1:7745/api/v1/users/login/oidc 2>&1 | grep -q ' 302 '
       interval: 30s
       timeout: 10s
       retries: 3
@@ -112,6 +126,11 @@ services:
       - mcp-gateway
     logging: *default-logging
     labels:
+      # Watched by the autoheal stack: if the healthcheck above goes red —
+      # including the "started before Authelia and lost OIDC" case the
+      # entrypoint wait is there to prevent — autoheal restarts the container,
+      # which is the only thing that re-runs initOIDCProvider().
+      autoheal: "true"
       traefik.enable: "true"
       traefik.docker.network: "traefik"
       traefik.http.routers.homebox.rule: "Host(`inventory.${DOMAIN_NAME}`)"
