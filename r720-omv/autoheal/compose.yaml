@@ -1,0 +1,130 @@
+x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
+  # Upstream publishes semver tags to Docker Hub ONLY when a git tag is pushed,
+  # and the last one was 1.2.0 in 2021; `latest` is rebuilt nightly from main
+  # (last commit 2025-09-09) and carries fixes 1.2.0 lacks — the
+  # "container does not exist" guard, the `autoheal.stop.timeout` per-container
+  # label and AUTOHEAL_ONLY_MONITOR_RUNNING. So this pins the DIGEST rather
+  # than a semver tag: immutable like a version pin, but not five years stale.
+  # To bump: re-resolve the digest and edit it here (WUD reports the drift).
+  autoheal: &autoheal-version "willfarrell/autoheal:latest@sha256:1f4ca40fdf577381ae1292920bc1af39c1755939a2ecc0aedbe7b1eccdaa63f4"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # Autoheal only ever needs two calls: GET /containers/json (filtered to
+  # health=unhealthy) and POST /containers/<id>/restart. This proxy exposes
+  # exactly those and nothing else — notably NOT the create/exec/images verbs
+  # the wud socket-proxy allows — so a compromised autoheal can restart
+  # containers and learn nothing more. socket-proxy anchors every rule as
+  # ^...$ and matches the PATH only, so the ?filters= / ?t= query strings
+  # ride through untouched.
+  autoheal-socket-proxy:
+    image: *socket-proxy-version
+    container_name: autoheal-socket-proxy
+    ipc: private
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=autoheal'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(v[0-9.]+/)?containers/json'
+      - '-allowPOST=/(v[0-9.]+/)?containers/[a-zA-Z0-9_.-]+/restart'
+      - '-allowHEAD=/_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+      - '-allowhealthcheck'
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - autoheal
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "Docker Socket Proxy - Autoheal"
+      wud.display.icon: "mdi:connection"
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+
+  autoheal:
+    image: *autoheal-version
+    container_name: autoheal
+    hostname: autoheal
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Talks to the daemon over TCP via the proxy, never touches the socket
+    # itself, and writes nothing — so it needs no privileges at all.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 64M
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    environment:
+      TZ: "${TZ}"
+      # tcp:// makes the entrypoint swap curl's --unix-socket for a plain
+      # http:// endpoint (see the case statement in /docker-entrypoint).
+      DOCKER_SOCK: "tcp://autoheal-socket-proxy:2375"
+      # Opt-in only: a container is watched solely if it carries
+      # `autoheal: "true"`. Setting this to "all" would put EVERY unhealthy
+      # container on the restart list, including ones whose healthcheck is
+      # deliberately allowed to fail.
+      AUTOHEAL_CONTAINER_LABEL: "autoheal"
+      # Poll gap. 5s (the default) hammers the API for a condition that
+      # changes on the order of minutes.
+      AUTOHEAL_INTERVAL: "30"
+      # Don't act for the first 5 minutes after autoheal itself starts. On a
+      # host reboot everything is coming up at once and half the estate is
+      # legitimately unhealthy; without this, autoheal restarts containers
+      # that were seconds away from passing their own start_period.
+      AUTOHEAL_START_PERIOD: "300"
+      # Ignore containers that are paused/created/exited — only restart things
+      # that are actually running and failing.
+      AUTOHEAL_ONLY_MONITOR_RUNNING: "true"
+      # Grace period handed to POST /restart?t= for a clean SIGTERM shutdown.
+      # Override per container with the `autoheal.stop.timeout` label.
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: "30"
+      CURL_TIMEOUT: "30"
+    depends_on:
+      autoheal-socket-proxy:
+        condition: service_healthy
+    networks:
+      - autoheal
+    logging: *default-logging
+    labels:
+      # Deliberately NOT labelled autoheal=true — it cannot restart itself,
+      # and the image's own healthcheck (pgrep) plus restart: unless-stopped
+      # already covers it.
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: '^latest$$'
+      wud.display.name: "Autoheal"
+      wud.display.icon: "mdi:heart-pulse"
+      wud.link.template: "https://github.com/willfarrell/docker-autoheal"
+
+networks:
+  autoheal:
+    name: autoheal
+    driver: bridge
+    external: false
