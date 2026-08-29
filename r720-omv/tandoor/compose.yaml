@@ -1,5 +1,6 @@
 x-versions:
   tandoor: &tandoor-version "vabene1111/recipes:2.6.13"
+  postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -40,13 +41,16 @@ services:
     environment:
       DB_ENGINE: "django.db.backends.postgresql"
       SECRET_KEY: "${TANDOOR_SECRET_KEY}"
-      POSTGRES_HOST: "10.10.1.13"
+      POSTGRES_HOST: "tandoor-postgres"
       POSTGRES_PORT: "5432"
       POSTGRES_USER: "tandoor"
       POSTGRES_PASSWORD: "${TANDOOR_DB_PASSWORD}"
       POSTGRES_DB: "tandoor"
       ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},127.0.0.1"
       GUNICORN_MEDIA: "1"
+    depends_on:
+      tandoor-postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 | grep -q 'Login' || exit 1"]
       interval: 40s
@@ -88,10 +92,65 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$'
       wud.link.template: 'https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}'
 
+  tandoor-postgres:
+    image: *postgres-version
+    container_name: tandoor-postgres
+    hostname: tandoor-postgres
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      POSTGRES_DB: "tandoor"
+      POSTGRES_USER: "tandoor"
+      POSTGRES_PASSWORD: "${TANDOOR_DB_PASSWORD}"
+      # postgres:18 defaults PGDATA to /var/lib/postgresql/18/docker and puts
+      # its VOLUME on /var/lib/postgresql, so a bind mount to .../data lands
+      # beside the cluster and initdb quietly creates an empty one. Pin it.
+      PGDATA: "/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    volumes:
+      - /opt/docker/tandoor/tandoor-postgres_data:/var/lib/postgresql/data
+      # One-shot migration seed. The entrypoint runs *.sql here only when
+      # PGDATA is empty - this first start - so the dump from the shared
+      # postgresql instance lands before tandoor ever connects, leaving no
+      # window in which Django migrates an empty schema over the top.
+      # DELETE 01-tandoor.sql once the migration is verified: it would
+      # silently re-restore stale data if the data directory were ever reset.
+      - /opt/docker/tandoor/tandoor-postgres_initdb:/docker-entrypoint-initdb.d:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - tandoor
+      - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^18\.\d+-alpine$$'
+      wud.display.name: "Tandoor PostgreSQL"
+      wud.display.icon: "sh:postgresql"
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+
 networks:
   tandoor:
     external: false
     name: tandoor
     driver: bridge
   traefik:
+    external: true
+  adminer:
     external: true
