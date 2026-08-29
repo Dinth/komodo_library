@@ -42,7 +42,7 @@ services:
     environment:
       DB_CONNECTION: "pgsql"
       DB_PORT: "5432"
-      DB_HOST: "10.10.1.13"
+      DB_HOST: "fireflyiii-postgres"
       DB_DATABASE: "fireflyiii"
       DB_USERNAME: "fireflyiii"
       DB_PASSWORD: "${FIREFLYIII_DB_PASS}"
@@ -99,6 +99,9 @@ services:
       # tolerates its failure, so the keys are never rewritten.
       - /opt/docker/fireflyiii/oauth/oauth-private.key:/var/www/html/storage/oauth-private.key:ro
       - /opt/docker/fireflyiii/oauth/oauth-public.key:/var/www/html/storage/oauth-public.key:ro
+    depends_on:
+      fireflyiii-postgres:
+        condition: service_healthy
     networks:
       - fireflyiii
       - traefik
