@@ -5,6 +5,7 @@ x-versions:
   imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20260817_082005"
   collabora: &collabora-version "collabora/code:25.04.7.2.1"
   nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.181.0"
+  postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -304,10 +305,58 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/cbcoutinho/nextcloud-mcp-server/releases/tag/v$${major}.$${minor}.$${patch}"
 
+  nextcloud-postgres:
+    image: *postgres-version
+    container_name: nextcloud-postgres
+    hostname: nextcloud-postgres
+    ipc: private
+    restart: unless-stopped
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      POSTGRES_DB: "nextcloud"
+      POSTGRES_USER: "nextcloud"
+      POSTGRES_PASSWORD: "${NEXTCLOUD_DB_PASSWORD}"
+      # postgres:18 defaults PGDATA to /var/lib/postgresql/18/docker and puts
+      # its VOLUME on /var/lib/postgresql, so a bind mount to .../data lands
+      # beside the cluster and initdb quietly creates an empty one. Pin it.
+      PGDATA: "/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    volumes:
+      - /opt/docker/nextcloud/nextcloud-postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - nextcloud
+      - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^18\.\d+-alpine$$'
+      wud.display.name: "Nextcloud PostgreSQL"
+      wud.display.icon: "sh:postgresql"
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+
 networks:
   nextcloud:
     driver: bridge
     name: nextcloud
     external: false
   traefik:
+    external: true
+  adminer:
     external: true
