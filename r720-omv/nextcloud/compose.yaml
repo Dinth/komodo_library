@@ -2,9 +2,9 @@ x-versions:
   nextcloud: &nextcloud-version "linuxserver/nextcloud:34.0.3"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.1-alpine"
   # Upstream tags are build datestamps (no semver).
-  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20260817_082005"
+  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20260825_084538"
   collabora: &collabora-version "collabora/code:25.04.7.2.1"
-  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.181.0"
+  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.183.1"
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
