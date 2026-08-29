@@ -62,6 +62,23 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 ##
 
 [[stack]]
+name = "autoheal"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/autoheal"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
+"""
+
+##
+
+[[stack]]
 name = "babybuddy"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
