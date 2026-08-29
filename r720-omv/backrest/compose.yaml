@@ -107,12 +107,6 @@ services:
       - signal-rest-api
     logging: *default-logging
     labels:
-      homepage.group: "Infrastructure"
-      homepage.name: "Backrest"
-      homepage.icon: "sh-backrest.png"
-      homepage.href: "http://10.10.1.13:9898"
-      homepage.description: "Backup orchestrator (restic)"
-      homepage.siteMonitor: "http://10.10.1.13:9898"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+-alpine$$'
       wud.display.name: "Backrest"

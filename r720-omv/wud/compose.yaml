@@ -126,12 +126,6 @@ services:
       - traefik
     logging: *default-logging
     labels:
-      homepage.group: "Infrastructure"
-      homepage.name: "Whats up Docker?"
-      homepage.icon: "sh-whats-up-docker.png"
-      homepage.href: "https://wud.${DOMAIN_NAME}"
-      homepage.description: "Docker updates manager"
-      homepage.siteMonitor: "https://wud.${DOMAIN_NAME}"
       traefik.enable: "true"
       traefik.http.routers.wud.rule: "Host(`wud.${DOMAIN_NAME}`)"
       traefik.http.routers.wud.entrypoints: "websecure"

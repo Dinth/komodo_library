@@ -145,12 +145,6 @@ services:
       traefik.http.routers.printstream.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.printstream.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.printstream.loadbalancer.server.port: "4000"
-      homepage.group: "Home"
-      homepage.name: "PrintStream"
-      homepage.icon: "printstream.png"
-      homepage.href: "https://print.${DOMAIN_NAME}"
-      homepage.description: "3D printer control"
-      homepage.siteMonitor: "https://print.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "PrintStream - API"

@@ -49,11 +49,6 @@ services:
       - pinchflat
     logging: *default-logging
     labels:
-      homepage.group: "Media"
-      homepage.name: "Pinchflat"
-      homepage.icon: "sh-pinchflat.png"
-      homepage.href: "http://10.10.1.13:8945"
-      homepage.siteMonitor: "http://10.10.1.13:8945"
       wud.watch: 'true'
       wud.watch.digest: 'true'
       wud.display.icon: 'sh-pinchflat'

@@ -61,12 +61,6 @@ services:
       traefik.http.routers.vouchervault.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.vouchervault.middlewares: "secHeaders@file"
       traefik.http.services.vouchervault.loadbalancer.server.port: "8000"
-      homepage.group: "Home"
-      homepage.name: "Vouchervault"
-      homepage.icon: "sh-vouchervault.png"
-      homepage.href: "https://cards.${DOMAIN_NAME}"
-      homepage.description: "Loyalty cards manager"
-      homepage.siteMonitor: "https://cards.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/l4rm4nd/VoucherVault/releases/tag/v$${major}.$${minor}.$${patch}'

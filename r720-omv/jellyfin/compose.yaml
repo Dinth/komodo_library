@@ -93,21 +93,6 @@ services:
       traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains: "true"
       traefik.http.middlewares.jellyfin-mw.headers.STSPreload: "true"
       traefik.http.middlewares.jellyfin-mw.headers.customrequestheaders.X-Forwarded-Proto: "https"
-      homepage.group: "Media"
-      homepage.name: "Jellyfin"
-      homepage.icon: "jellyfin.png"
-      homepage.href: "https://jf.${DOMAIN_NAME}"
-      homepage.description: "Media streaming"
-      homepage.siteMonitor: "https://jf.${DOMAIN_NAME}"
-      homepage.widget.fields: "['movies', 'series', 'episodes', 'songs']"
-      homepage.widget.type: "jellyfin"
-      homepage.widget.url: "http://10.10.1.13:8096"
-      homepage.widget.key: "${HOMEPAGE_JELLYFIN_API}"
-      homepage.widget.enableBlocks: true
-      homepage.widget.enableNowPlaying: true
-      homepage.widget.enableUser: true
-      homepage.widget.showEpisodeNumber: true
-      homepage.widget.expandOneStreamToTwoRows: true
       wud.watch: "true"
       wud.display.name: "Jellyfin Server"
       wud.display.icon: "sh:jellyfin"

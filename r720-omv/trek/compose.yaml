@@ -84,12 +84,6 @@ services:
       traefik.http.routers.trek.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.trek.middlewares: "secHeaders@file"
       traefik.http.services.trek.loadbalancer.server.port: "3000"
-      homepage.group: "Home"
-      homepage.name: "TREK"
-      homepage.icon: "sh-trek.png"
-      homepage.href: "https://trek.${DOMAIN_NAME}"
-      homepage.description: "Travel & trip planner"
-      homepage.siteMonitor: "https://trek.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "TREK"

@@ -107,21 +107,10 @@ services:
       traefik.http.routers.grafana.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.grafana.middlewares: "secHeaders@file,lan-only@file"
       traefik.http.services.grafana.loadbalancer.server.port: "3000"
-      homepage.group: "Infrastructure"
-      homepage.name: "Grafana"
-      homepage.icon: "grafana.png"
-      homepage.href: "https://grafana.${DOMAIN_NAME}"
       # siteMonitor + widget are server-side calls from the Homepage backends; keep
       # them on the internal monitoring network so they bypass the lan-only-gated
       # Traefik route (which would 403 a container-sourced request). href stays
       # public for the browser link.
-      homepage.siteMonitor: "http://grafana:3000/api/health"
-      homepage.description: "Monitoring dashboards"
-      homepage.weight: 0
-      homepage.widget.type: "grafana"
-      homepage.widget.url: "http://grafana:3000"
-      homepage.widget.username: "admin"
-      homepage.widget.password: "${GRAFANA_PASSWORD}"
     logging:
       driver: "json-file"
       options:
@@ -187,13 +176,6 @@ services:
       wud.display.name: "Prometheus"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/prometheus/releases/tag/v$${major}.$${minor}.$${patch}'
-      homepage.group: "Infrastructure"
-      homepage.name: "Prometheus"
-      homepage.icon: "prometheus.png"
-      homepage.href: "http://10.10.1.13:9090"
-      homepage.siteMonitor: "http://10.10.1.13:9090/-/healthy"
-      homepage.description: "Metrics Scraper"
-      homepage.weight: 5
     logging:
       driver: "json-file"
       options:
@@ -246,10 +228,6 @@ services:
       wud.display.name: "Node Exporter"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/node_exporter/releases/tag/$${major}.$${minor}.$${patch}'
-      homepage.group: "Infrastructure"
-      homepage.name: "Node Exporter"
-      homepage.icon: "linux.png"
-      homepage.description: "Host Metrics"
     logging:
       driver: "json-file"
       options:
@@ -347,10 +325,6 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+-\d+\.\d+\.\d+-distroless$'
       wud.display.name: "DCGM Exporter"
       wud.display.icon: "si:nvidia"
-      homepage.group: "Infrastructure"
-      homepage.name: "DCGM Exporter"
-      homepage.icon: "si:nvidia"
-      homepage.description: "GPU Metrics"              
     ports: []
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9400/metrics | grep -q 'DCGM'"]
@@ -404,10 +378,6 @@ services:
       wud.display.name: "Blackbox Exporter"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/blackbox_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
-      homepage.group: "Infrastructure"
-      homepage.name: "Blackbox"
-      homepage.icon: "prometheus.png"
-      homepage.description: "Endpoint Probing"
     logging:
       driver: "json-file"
       options:
@@ -445,10 +415,6 @@ services:
       wud.display.name: "SNMP Exporter"
       wud.display.icon: "si:prometheus"
       wud.link.template: 'https://github.com/prometheus/snmp_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
-      homepage.group: "Infrastructure"
-      homepage.name: "SNMP Exporter"
-      homepage.icon: "prometheus.png"
-      homepage.description: "SNMP polling (switch, pfSense, iDRAC)"
     logging:
       driver: "json-file"
       options:
@@ -506,11 +472,6 @@ services:
       wud.link.template: 'https://github.com/grafana/mcp-grafana/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Grafana MCP"
       wud.display.icon: "si:grafana"
-      homepage.group: "Infrastructure"
-      homepage.name: "Grafana MCP"
-      homepage.icon: "grafana.png"
-      homepage.description: "AI Context Server"
-      homepage.weight: 10
     logging:
       driver: "json-file"
       options:
@@ -565,10 +526,6 @@ services:
       start_period: 15s
     labels:
       wud.watch: "false"
-      homepage.group: "Infrastructure"
-      homepage.name: "HA Bluetooth Exporter"
-      homepage.icon: "mdi:bluetooth"
-      homepage.description: "HA BLE advert/RSSI metrics"
     logging:
       driver: "json-file"
       options:

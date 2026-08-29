@@ -96,12 +96,6 @@ services:
       wud.display.name: "n8n"
       wud.display.icon: "sh:n8n"
       wud.link.template: "https://github.com/n8n-io/n8n/releases/tag/n8n%40$${major}.$${minor}.$${patch}"
-      homepage.group: "Infrastructure"
-      homepage.name: "n8n"
-      homepage.description: "Workflow automation"
-      homepage.icon: "n8n.png"
-      homepage.href: "https://auto.${DOMAIN_NAME}"
-      homepage.siteMonitor: "https://auto.${DOMAIN_NAME}"
 
   n8n-mcp:
     image: *n8n-mcp-version

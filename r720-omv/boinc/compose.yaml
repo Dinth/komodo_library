@@ -68,12 +68,6 @@ services:
       traefik.http.routers.boinc.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.boinc.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
       traefik.http.services.boinc.loadbalancer.server.port: "8080"
-      homepage.group: "Infrastructure"
-      homepage.name: "BOINC"
-      homepage.icon: "sh:boinc"
-      homepage.href: "https://boinc.${DOMAIN_NAME}"
-      homepage.description: "Distributed computing"
-      homepage.siteMonitor: "https://boinc.${DOMAIN_NAME}"
 
 networks:
   boinc:
