@@ -63,6 +63,33 @@ services:
       # own login page entirely. Left false for the first deploy so a broken
       # OIDC config still leaves a reachable page to read the error on.
       HBOX_OIDC_AUTO_REDIRECT: "false"
+    # Homebox tries OIDC discovery exactly 4 times over ~3s at boot; if
+    # Authelia isn't answering yet it logs "failed to initialize OIDC
+    # provider at startup", registers only the "local" provider and NEVER
+    # retries — every SSO click then 500s with
+    # {"error":"OIDC provider not available"} until the container is
+    # restarted by hand. Hit on 2026-08-16 (connection refused) and
+    # 2026-08-25 (Traefik 404 — no id.${DOMAIN_NAME} router yet), both
+    # host-wide restarts where Traefik/Authelia came up after Homebox.
+    # So block on discovery first (120s cap), then exec the real entrypoint.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        disco="$${HBOX_OIDC_ISSUER_URL}/.well-known/openid-configuration"
+        i=0
+        until wget -q -T 5 -O /dev/null "$$disco"; do
+          i=$$((i + 1))
+          if [ "$$i" -ge 40 ]; then
+            echo "homebox: OIDC discovery still down after 120s" >&2
+            break
+          fi
+          sleep 3
+        done
+        exec /app/api "$$@"
+      # Becomes $0 for the wrapper, so the image's own CMD (/data/config.yml)
+      # lands in "$@" and the config path is never hardcoded here.
+      - homebox-entrypoint
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "-", "http://127.0.0.1:7745/api/v1/status"]
       interval: 30s
@@ -95,12 +122,6 @@ services:
       traefik.http.routers.homebox.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.homebox.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.homebox.loadbalancer.server.port: "7745"
-      homepage.group: "Home"
-      homepage.name: "Homebox"
-      homepage.icon: "sh-homebox.png"
-      homepage.href: "https://inventory.${DOMAIN_NAME}"
-      homepage.description: "Home inventory and asset tracking"
-      homepage.siteMonitor: "https://inventory.${DOMAIN_NAME}"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Homebox"
