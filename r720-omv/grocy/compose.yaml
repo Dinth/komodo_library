@@ -1,5 +1,5 @@
 x-versions:
-  grocy: &grocy-version "linuxserver/grocy:4.6.0"
+  grocy: &grocy-version "linuxserver/grocy:4.7.0"
   grocy-mcp: &grocy-mcp-version "ghcr.io/saya6k/mcp-grocy-api:1.4.13"
 
 x-logging: &default-logging
