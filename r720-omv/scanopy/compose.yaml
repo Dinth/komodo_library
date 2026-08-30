@@ -2,6 +2,7 @@ x-versions:
   scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:v0.17.13
   scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:v0.17.13
   scanopy-postgres-version: &scanopy-postgres-version postgres:18.6-alpine
+  scanopy-snapshot-version: &scanopy-snapshot-version curlimages/curl:8.21.0
 
 x-logging: &default-logging
   driver: "json-file"
@@ -103,6 +104,10 @@ services:
       <<: *scanopy-env
       SCANOPY_DATABASE_URL: "postgresql://postgres:${SCANOPY_DB_PASS}@scanopy-postgres:5432/scanopy"
       SCANOPY_WEB_EXTERNAL_PATH: /app/static
+      # Single-user instance published straight onto the LAN: without this,
+      # anyone who can reach :60072 can create an account.
+      SCANOPY_DISABLE_REGISTRATION: "true"
+      SCANOPY_SNAPSHOT_RETENTION_DAYS_OVERRIDE: ${SCANOPY_SNAPSHOT_RETENTION_DAYS:-90}
       SCANOPY_PUBLIC_URL: ${SCANOPY_PUBLIC_URL:-http://10.10.1.13:${SCANOPY_SERVER_PORT:-60072}}
       SCANOPY_INTEGRATED_DAEMON_URL: http://169.254.0.1:${SCANOPY_DAEMON_PORT:-60073}
     volumes:
@@ -118,6 +123,55 @@ services:
       wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Server"
       wud.display.icon: "sh:scanopy"
+
+  # Scanopy takes topology snapshots only on demand — there is no built-in
+  # scheduler — so this fires POST /api/v1/snapshots once a week. Snapshots are
+  # what turn the inventory into change detection: each one closes the current
+  # entity rows so later scans diff against it. Checks every 10 min and fires in
+  # the 04:00 hour on Sundays, then sleeps an hour so it cannot double-fire;
+  # that keeps it aligned to wall-clock instead of drifting from container start.
+  scanopy-snapshot:
+    image: *scanopy-snapshot-version
+    container_name: scanopy-snapshot
+    depends_on:
+      scanopy-server: { condition: service_started }
+    environment:
+      TZ: "${TZ}"
+      SCANOPY_URL: http://scanopy-server:${SCANOPY_SERVER_PORT:-60072}
+      SCANOPY_NETWORK_ID: "81dfd914-2d19-49de-978c-87388da0b2bc"
+      SCANOPY_SNAPSHOT_KEY: "${SCANOPY_SNAPSHOT_KEY}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while :; do
+          if [ "$$(date +%u)" = "7" ] && [ "$$(date +%H)" = "04" ]; then
+            if curl -fsS -X POST "$$SCANOPY_URL/api/v1/snapshots" \
+                 -H "Authorization: Bearer $$SCANOPY_SNAPSHOT_KEY" \
+                 -H 'Content-Type: application/json' \
+                 -d "{\"network_id\":\"$$SCANOPY_NETWORK_ID\"}" >/dev/null; then
+              echo "[snapshot] taken $$(date -Iseconds)"
+            else
+              echo "[snapshot] FAILED $$(date -Iseconds)"
+            fi
+            sleep 3600
+          fi
+          sleep 600
+        done
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 32M
+    networks: [scanopy]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/curl/curl/releases"
+      wud.display.name: "Scanopy Snapshot Scheduler"
 
 networks:
   scanopy:
