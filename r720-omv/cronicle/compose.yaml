@@ -46,6 +46,14 @@ services:
       CRONICLE_foreground: "1"
       CRONICLE_base_app_url: "http://10.10.1.13:3012"
       CRONICLE_secret_key: "${CRONICLE_SECRET_KEY}"
+      # pfsense-backup.sh: encrypted router config -> /Data/IT (offsite).
+      # pfSense keeps revisions only on its own VM.
+      PFSENSE_HOST: "10.10.0.1"
+      PFSENSE_USER: "${PFSENSE_BACKUP_USER}"
+      PFSENSE_PASS: "${PFSENSE_BACKUP_PASS}"
+      PFSENSE_BACKUP_ENC: "${PFSENSE_BACKUP_ENC}"
+      PFSENSE_BACKUP_DIR: "/pfsense-backups"
+      PFSENSE_BACKUP_KEEP: "30"
     ports:
       - 3012:3012/tcp
     volumes:
@@ -53,6 +61,7 @@ services:
       - /opt/docker/cronicle/cronicle_data:/opt/cronicle/data
       - /opt/docker/cronicle/cronicle_logs:/opt/cronicle/logs
       - /opt/docker/cronicle/cronicle_plugins:/opt/cronicle/plugins
+      - /Data/IT/pfsense-backups:/pfsense-backups
       - /etc/localtime:/etc/localtime:ro
     networks:
       - cronicle
