@@ -44,7 +44,7 @@ services:
       # 8 is the conservative step. Do not go below 5 -- the eBUS is 2400 baud
       # half-duplex and shared with the VRC700 controller.
       EBUSD_POLLINTERVAL: "8"
-      EBUSD_DEVICE: "ens:10.10.25.8:9999"
+      EBUSD_DEVICE: "ens:10.25.0.8:9999"
       EBUSD_MQTTUSER: "${EBUSD_MQTTUSER}"
       EBUSD_MQTTPASS: "${EBUSD_MQTTPASS}"
     healthcheck:
