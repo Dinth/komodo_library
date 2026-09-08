@@ -1,5 +1,5 @@
 x-versions:
-  komodo-core: &komodo-core-version "ghcr.io/moghtech/komodo-core:2.3.2"
+  komodo-core: &komodo-core-version "ghcr.io/moghtech/komodo-core:2.3.3"
   mongo: &mongo-version "mongo:8.3.8"
 
 x-logging: &default-logging
