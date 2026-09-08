@@ -1,9 +1,9 @@
 x-versions:
   spiderfoot-version: &spiderfoot-version saidsef/spiderfoot:v4.0
-  misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.44
+  misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.45
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.9
   misp-mariadb-version: &misp-mariadb-version mariadb:12.3
-  misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.1-alpine
+  misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.2-alpine
   mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:12.2.3
 
 x-logging: &default-logging
