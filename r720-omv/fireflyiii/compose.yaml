@@ -275,12 +275,20 @@ services:
       # Same published port Grafana's contact point posts to: signal-rest-api
       # lives in another stack, so this avoids coupling the two networks.
       SIGNAL_API_URL: "http://10.10.1.13:3162/v2/send"
-      # Sender only - reuses the number Grafana's contact point already sends
-      # from. NOTE: SIGNAL_TECH_ID is deliberately NOT reused as a recipient.
-      # It is a Signal *group* id, and routing per-user notifications into a
-      # shared group would publish one user's bill amounts and merchants to
-      # everyone in it.
-      SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
+      # Sender only, and deliberately NOT the shared SIGNAL_PHONE_NUMBER that
+      # backrest, grafana-prometheus and wud still use: that one is michal's
+      # PERSONAL Signal account, which holds real personal groups and a linked
+      # ZeroClaw device. SIGNAL_BOT_NUMBER is the dedicated bot identity
+      # ("Wickhay HA Bot"), so Firefly's notifications arrive as a bot rather
+      # than as michal messaging himself. A separate variable keeps this stack
+      # independent of the other three, which move on their own schedule.
+      #
+      # No group membership is needed here - SHIM_ROUTES below targets personal
+      # numbers only. NOTE: SIGNAL_TECH_ID is deliberately NOT reused as a
+      # recipient. It is a Signal *group* id, and routing per-user
+      # notifications into a shared group would publish one user's bill
+      # amounts and merchants to everyone in it.
+      SIGNAL_PHONE_NUMBER: "${SIGNAL_BOT_NUMBER}"
       # Per-user routing. Firefly stores slack_webhook_url as a PER-USER
       # preference, so each user gets their own URL; the token in the path
       # selects the recipient. Every path still ends in "/slack", which is what
