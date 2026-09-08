@@ -1,8 +1,8 @@
 x-versions:
   romm: &romm-version "rommapp/romm:5.2.0"
   mariadb: &mariadb-version "linuxserver/mariadb:11.8.8"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.1-alpine"
-  pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.6.3-ls78"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
+  pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.1-ls80"
   dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2606-ls78"
 
 x-logging: &default-logging
