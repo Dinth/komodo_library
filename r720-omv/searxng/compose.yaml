@@ -74,6 +74,9 @@ services:
       # in Loki, so every search term would be retained for ~31 days. POST keeps
       # the query in the request body, where it is not logged.
       SEARXNG_METHOD: "POST"
+      # Fetch result images server-side so browsers never connect directly to
+      # the hosts behind search results. Costs bandwidth and some CPU here.
+      SEARXNG_IMAGE_PROXY: "true"
       # The limiter is the only rate limiting in front of this instance, and it
       # is a silent no-op without Valkey (searx/limiter.py: "The limiter
       # requires Valkey"). The settings file used to declare the connection
@@ -99,8 +102,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    ports:
-      - "9234:8080"
     volumes:
       - /opt/docker/searxng/searxng:/etc/searxng:rw
       # The image declares a VOLUME at /var/cache/searxng. Without a bind mount
