@@ -1,6 +1,6 @@
 x-versions:
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
-  wud: &wud-version "getwud/wud:8.3.1"
+  wud: &wud-version "getwud/wud:8.4.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -83,20 +83,16 @@ services:
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_CUSTOM_BRICKTRACKER_URL: "https://gitea.baerentsen.space"
-      # Signal notification on update via WUD's native command trigger. The WUD
-      # image ships node + curl (its healthcheck uses curl) and this service is on
-      # the signal-rest-api network, so it POSTs the JSON body /v2/send expects.
-      # The old http trigger crammed number/recipients/message into a GET query
-      # string, which failed WUD's URI validation (raw spaces) and signal-rest-api
-      # never accepts anyway (POST JSON only). node builds the body (JSON.stringify
-      # handles all escaping) and pulls the changelog link out of container_json's
-      # result.link (there is no result_link env var); curl reads it from stdin.
-      # The command has no '$' so compose passes it through untouched.
-      SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
-      SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
-      WUD_TRIGGER_COMMAND_SIGNAL_AUTO: "true"
-      WUD_TRIGGER_COMMAND_SIGNAL_CMD: |-
-        node -e 'var c={};try{c=JSON.parse(process.env.container_json||"{}")}catch(e){}var l=(c.result||{}).link||"";var m="WUD: "+(process.env.name||"container")+" update available: "+(process.env.update_kind_local_value||"")+" -> "+(process.env.update_kind_remote_value||"");if(l)m+="\n"+l;process.stdout.write(JSON.stringify({message:m,number:process.env.SIGNAL_PHONE_NUMBER,recipients:[process.env.SIGNAL_TECH_ID]}))' | curl -sS -m 15 -X POST http://signal-rest-api:8080/v2/send -H "Content-Type: application/json" --data-binary @-
+      # Signal notification on update via WUD's native Signal trigger (added in
+      # 8.4.0). It POSTs the same {message, number, recipients[]} body to
+      # signal-cli-rest-api's /v2/send that the previous hand-rolled command
+      # trigger built with node + curl, so this is a drop-in replacement. WUD's
+      # default simplebody already appends result.link (the changelog URL) when
+      # one is resolved, which is what the node script did by hand.
+      WUD_TRIGGER_SIGNAL_MAIN_URL: "http://signal-rest-api:8080"
+      WUD_TRIGGER_SIGNAL_MAIN_NUMBER: "${SIGNAL_PHONE_NUMBER}"
+      WUD_TRIGGER_SIGNAL_MAIN_RECIPIENTS: "${SIGNAL_TECH_ID}"
+      WUD_TRIGGER_SIGNAL_MAIN_AUTO: "true"
       WUD_AUTH_OIDC_AUTHELIA_DISCOVERY: "https://id.${DOMAIN_NAME}/.well-known/openid-configuration"
       WUD_AUTH_OIDC_AUTHELIA_CLIENTID: "my-wud-client-id"
       WUD_AUTH_OIDC_AUTHELIA_CLIENTSECRET: "${WUD_OIDC_CLIENT_SECRET}"
