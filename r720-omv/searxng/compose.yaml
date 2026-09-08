@@ -54,10 +54,11 @@ services:
     hostname: searxng
     ipc: private
     restart: unless-stopped
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
+    # The image ships no USER directive, so without this the whole stack —
+    # Granian and every worker — runs as root inside the container. 977 is the
+    # image's own `searxng` user and already owns both bind mounts, so the
+    # entrypoint's chown path is never needed and CHOWN/SETGID/SETUID can go.
+    user: "977:977"
     cap_drop:
       - ALL
     security_opt:
