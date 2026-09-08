@@ -100,8 +100,14 @@ services:
       traefik.http.routers.searxng.middlewares: "secHeaders@file"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/searxng/searxng/releases/tag/$${major}.$${minor}.$${patch}'
+      # SearXNG is a rolling release: it publishes no GitHub releases and no git
+      # tags at all, so the usual '^v\d+\.\d+\.\d+$' + /releases/tag/ pattern
+      # matched nothing and linked to a 404. Its Docker tags are
+      # YYYY.M.D-<short-commit>, which parses as semver with the commit as the
+      # prerelease part, so the date drives ordering and ${prerelease} gives the
+      # exact commit the image was built from.
+      wud.tag.include: '^\d{4}\.\d{1,2}\.\d{1,2}-[0-9a-f]{7,}$$'
+      wud.link.template: 'https://github.com/searxng/searxng/commit/$${prerelease}'
       wud.display.name: "Searxng"
       wud.display.icon: "sh-searxng"
 
