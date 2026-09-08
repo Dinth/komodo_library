@@ -62,8 +62,11 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512M
+    # 1 Granian worker measured at ~200 MB RSS, so the old 512M ceiling only
+    # held because GRANIAN_WORKERS was never set and Granian defaults to one.
+    mem_limit: 1G
     environment:
+      TZ: "${TZ}"
       SEARXNG_BASE_URL: "https://search.${DOMAIN_NAME}/"
       # Upstream flipped the default to GET in 2026 (searxng/searxng#3619).
       # With GET the query string lands in Traefik's access log and from there
@@ -80,8 +83,11 @@ services:
       SEARXNG_VALKEY_URL: "valkey://searxng-valkey:6379/0"
       # The image has run Granian, not uWSGI, since before the previous pin, so
       # the old UWSGI_WORKERS/UWSGI_THREADS vars were doing nothing at all.
-      # Granian defaults to a single worker.
-      GRANIAN_WORKERS: "${SEARXNG_WORKERS:-4}"
+      # Granian defaults to a single worker. WSGI concurrency is
+      # workers x blocking_threads, so 2 x 4 = 8 in-flight requests — enough for
+      # OpenWebUI's WEB_SEARCH_CONCURRENT_REQUESTS=10 without a 4-worker
+      # memory footprint.
+      GRANIAN_WORKERS: "${SEARXNG_WORKERS:-2}"
       GRANIAN_BLOCKING_THREADS: "${SEARXNG_THREADS:-4}"
     depends_on:
       searxng-valkey:
@@ -103,11 +109,11 @@ services:
     networks:
       - searxng
       - traefik
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "1"
+    # Was max-size 1m / max-file 1. A single 1 MB file rotates fast enough that
+    # lines can be lost before Alloy tails them — there were no searxng logs in
+    # Loki at all for the 30-31 Aug window, which made the scan that hit this
+    # container impossible to investigate after the fact.
+    logging: *default-logging
     labels:
       traefik.enable: "true"
       traefik.http.routers.searxng.rule: "Host(`search.${DOMAIN_NAME}`)"
