@@ -1,6 +1,6 @@
 x-versions:
-  authelia: &authelia-version "authelia/authelia:4.39.20"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.1-alpine"
+  authelia: &authelia-version "authelia/authelia:4.39.22"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
