@@ -1,10 +1,10 @@
 x-versions:
-  ollama: &ollama-version "ollama/ollama:0.33.2"
-  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.11.1"
+  ollama: &ollama-version "ollama/ollama:0.33.3"
+  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.11.3"
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
   comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:latest-cuda"
   comfyui-idle: &comfyui-idle-version "curlimages/curl:8.21.0"
-  crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.2"
+  crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.3"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main"
   # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
