@@ -1,5 +1,5 @@
 x-versions:
-  tandoor: &tandoor-version "vabene1111/recipes:2.6.13"
+  tandoor: &tandoor-version "vabene1111/recipes:2.6.15"
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
