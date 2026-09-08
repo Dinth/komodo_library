@@ -395,7 +395,12 @@ services:
       WEB_SEARCH_ENGINE: "searxng"
       WEB_SEARCH_RESULT_COUNT: 3
       WEB_SEARCH_CONCURRENT_REQUESTS: 10
-      SEARXNG_QUERY_URL: "https://search.${DOMAIN_NAME}/search?q=<query>"
+      # In-network, not https://search.${DOMAIN_NAME}. That router is behind
+      # Authelia forward-auth, which would redirect this to a login page; going
+      # direct also skips a hairpin out to the WAN and back, and keeps the
+      # generated queries out of Traefik's access log (they are GETs, so the
+      # search terms would otherwise sit in Loki for ~31 days).
+      SEARXNG_QUERY_URL: "http://searxng:8080/search?q=<query>"
       ENABLE_IMAGE_GENERATION: "true"
       IMAGE_GENERATION_ENGINE: "comfyui"
       COMFYUI_BASE_URL: "http://comfyui:8188"
@@ -583,8 +588,10 @@ services:
     environment:
       # Image sets HOME itself, but keep it explicit because user: is overridden.
       HOME: "/zeroclaw-data"
-      # Read by ZeroClaw's web_search tool.
-      SEARXNG_INSTANCE_URL: "https://search.${DOMAIN_NAME}"
+      # Read by ZeroClaw's web_search tool. In-network for the same reason as
+      # openwebui's SEARXNG_QUERY_URL: the public router is behind Authelia
+      # forward-auth. Requires the traefik network below to resolve `searxng`.
+      SEARXNG_INSTANCE_URL: "http://searxng:8080"
       # TEMPORARY web dashboard exposure. The gateway binds 127.0.0.1 by
       # default and refuses a non-local bind unless allow_public_bind is set;
       # both are needed for the published port to reach it. Pairing auth is
@@ -621,11 +628,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    # openwebui network only (reaches ollama:11434 and zeroclaw-signal-cli:8686
-    # in-network). No Traefik network/labels yet — the published port below is
-    # the TEMPORARY dashboard access described in the header comment.
+    # openwebui reaches ollama:11434 and zeroclaw-signal-cli:8686. traefik is
+    # joined for egress only — no router or labels — so the web_search tool can
+    # resolve searxng:8080 now that the public router requires Authelia. The
+    # published port below is still the TEMPORARY dashboard access described in
+    # the header comment.
     networks:
       - openwebui
+      - traefik
     ports:
       - 42617:42617/tcp
     labels:

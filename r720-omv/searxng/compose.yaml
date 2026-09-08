@@ -124,7 +124,11 @@ services:
       traefik.http.routers.searxng.tls.certresolver: "letsencrypt"
       traefik.http.routers.searxng.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.searxng.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.searxng.middlewares: "secHeaders@file"
+      # Authelia forward-auth. Covered by the existing '*.wickhay.uk' rules:
+      # one_factor from the local/tailscale networks, two_factor elsewhere.
+      # Machine consumers must not use this router — OpenWebUI and ZeroClaw
+      # reach SearXNG at http://searxng:8080 over the traefik docker network.
+      traefik.http.routers.searxng.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
       wud.watch: "true"
       # SearXNG is a rolling release: it publishes no GitHub releases and no git
