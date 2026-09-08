@@ -1,7 +1,7 @@
 x-versions:
   fireflyiii: &fireflyiii-version "fireflyiii/core:version-6.6.6"
   fireflyiii-dataimporter: &fireflyiii-dataimporter-version "fireflyiii/data-importer:version-2.3.4"
-  fireflyiii-mcp: &fireflyiii-mcp-version "ghcr.io/daften/fireflyiii-mcp:0.4.2"
+  fireflyiii-mcp: &fireflyiii-mcp-version "ghcr.io/daften/fireflyiii-mcp:0.4.4"
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
