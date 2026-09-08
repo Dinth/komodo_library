@@ -1,5 +1,5 @@
 x-versions:
-  searxng: &searxng-version "docker.io/searxng/searxng:2025.8.8-77f10f0"
+  searxng: &searxng-version "docker.io/searxng/searxng:2026.9.8-3fdc6d753"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
 
 x-logging: &default-logging
@@ -64,10 +64,25 @@ services:
       - no-new-privileges:true
     mem_limit: 512M
     environment:
-      SEARXNG_HOSTNAME: "https://search.${DOMAIN_NAME}/"
       SEARXNG_BASE_URL: "https://search.${DOMAIN_NAME}/"
-      UWSGI_WORKERS: "${SEARXNG_UWSGI_WORKERS:-4}"
-      UWSGI_THREADS: "${SEARXNG_UWSGI_THREADS:-4}"
+      # Upstream flipped the default to GET in 2026 (searxng/searxng#3619).
+      # With GET the query string lands in Traefik's access log and from there
+      # in Loki, so every search term would be retained for ~31 days. POST keeps
+      # the query in the request body, where it is not logged.
+      SEARXNG_METHOD: "POST"
+      # The limiter is the only rate limiting in front of this instance, and it
+      # is a silent no-op without Valkey (searx/limiter.py: "The limiter
+      # requires Valkey"). The settings file used to declare the connection
+      # under the pre-rename `redis:` key, which current SearXNG never reads —
+      # so the searxng-valkey container was running unused.
+      # Needs /etc/searxng/limiter.toml for trusted_proxies + pass_ip.
+      SEARXNG_LIMITER: "true"
+      SEARXNG_VALKEY_URL: "valkey://searxng-valkey:6379/0"
+      # The image has run Granian, not uWSGI, since before the previous pin, so
+      # the old UWSGI_WORKERS/UWSGI_THREADS vars were doing nothing at all.
+      # Granian defaults to a single worker.
+      GRANIAN_WORKERS: "${SEARXNG_WORKERS:-4}"
+      GRANIAN_BLOCKING_THREADS: "${SEARXNG_THREADS:-4}"
     depends_on:
       searxng-valkey:
         condition: service_healthy
@@ -81,6 +96,10 @@ services:
       - "9234:8080"
     volumes:
       - /opt/docker/searxng/searxng:/etc/searxng:rw
+      # The image declares a VOLUME at /var/cache/searxng. Without a bind mount
+      # every redeploy gets a fresh anonymous volume and the favicon/engine
+      # cache is thrown away. Must be owned by 977:977 (the container's user).
+      - /opt/docker/searxng/searxng-data:/var/cache/searxng:rw
     networks:
       - searxng
       - traefik
