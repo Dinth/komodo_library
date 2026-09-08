@@ -85,8 +85,14 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^17-\d+\.\d+-alpine$$'
+      # Rewrite 17-3.6-alpine -> 17.3.6 so the PostGIS version is actually
+      # comparable. Untransformed, semver coercion stops at the first
+      # non-digit and reduces every 17-x.y-alpine tag to 17.0.0 — WUD then
+      # has nothing to sort on and reports whichever tag the registry
+      # happens to list first (17-3.5-alpine) as an available "update".
+      wud.tag.transform: '^(\d+)-(\d+)\.(\d+)-alpine$$ => $$1.$$2.$$3'
       wud.display.name: "Dawarich - Postgis"
-      wud.display.icon: "sh-dawarich"  
+      wud.display.icon: "sh-dawarich"
     networks:
       - dawarich
     restart: unless-stopped

@@ -189,7 +189,18 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors\d+\.\d+\.\d+$$'
+      # pgvectors is pinned rather than globbed. The tag carries two
+      # independent versions and semver has only three numeric slots, so
+      # letting both float leaves ties (0.4.3-pgvectors0.2.0 vs
+      # 0.4.3-pgvectors0.3.0) that WUD breaks arbitrarily. Bump this when
+      # immich's own compose moves to a newer pgvectors.
+      wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors0\.3\.0$$'
+      # Rewrite 14-vectorchord0.4.3-pgvectors0.3.0 -> 0.4.3 so the
+      # vectorchord version is what gets compared. Untransformed, semver
+      # coercion stops at the first non-digit and reduces every tag to
+      # 14.0.0 — WUD then has nothing to sort on and reports an older
+      # vectorchord build as an available "update".
+      wud.tag.transform: '^14-vectorchord(\d+)\.(\d+)\.(\d+)\-pgvectors0\.3\.0$$ => $$1.$$2.$$3'
       wud.display.name: "Immich - Postgres"
       wud.display.icon: "sh-immich"
 
