@@ -21,21 +21,22 @@ services:
     hostname: pricebuddy
     ipc: private
     restart: unless-stopped
+    # Trimmed from the full 14-cap default set, which alongside cap_drop: ALL
+    # granted back everything it had just dropped — hardening in appearance
+    # only. What this image actually needs: NET_BIND_SERVICE to bind :80,
+    # SETUID/SETGID for supervisor to drop apache workers to www-data, and
+    # CHOWN/FOWNER/DAC_OVERRIDE for the `chmod -R 777 storage` that
+    # start-app.sh runs against the bind mount. KILL stays because supervisor
+    # signals children that are no longer running as root.
+    # Dropped: AUDIT_WRITE FSETID MKNOD NET_RAW SETFCAP SETPCAP SYS_CHROOT.
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
       - KILL
-      - MKNOD
       - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
@@ -83,8 +84,9 @@ services:
       # Boot does migrations, buddy:init-db, five cache builds and
       # regenerate-price-cache before supervisor ever starts apache.
       start_period: 180s
-    ports:
-      - 5757:80
+    # No published port. This served :80 in the clear on the LAN, bypassing
+    # TLS, letsencrypt and secHeaders@file, in parallel with the Traefik router
+    # below. Nothing was found using it.
     volumes:
       - /opt/docker/pricebuddy/pricebuddy_data:/app/storage
     networks:
@@ -136,7 +138,13 @@ services:
     environment:
       MYSQL_DIR: "/config"
       DATADIR: "/config/databases"
-      MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_PASS}"
+      # Its own secret rather than the app user's. Inert on the existing
+      # datadir — linuxserver's init-mariadb-initdb only runs when
+      # ${DATADIR}/mysql is absent, and root here authenticates via unix_socket
+      # anyway — but it means a rebuild or disaster-recovery re-init gives root
+      # a distinct password instead of handing out the application's.
+      # PRICEBUDDY_DB_ADMIN_PASS was already passed by Komodo and unreferenced.
+      MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_ADMIN_PASS}"
       MYSQL_DATABASE: "pricebuddy"
       MYSQL_USER: "pricebuddy"
       MYSQL_PASSWORD: "${PRICEBUDDY_DB_PASS}"
@@ -159,6 +167,10 @@ services:
       - adminer
     logging: *default-logging
     labels:
+      # The healthcheck above gates the app through depends_on, but nothing
+      # acted on it once running: a database that went unhealthy would just
+      # stay that way.
+      autoheal: "true"
       wud.display.name: "Pricebuddy - MariaDB"
       wud.display.icon: "sh:pricebuddy"
       wud.watch: "true"
@@ -174,6 +186,12 @@ services:
     hostname: pricebuddy-scraper
     init: true
     ipc: private
+    # Chrome puts renderer shared memory in /dev/shm, and Docker defaults that
+    # to 64MB. Exhausting it kills tabs rather than raising an error, which
+    # reaches pricebuddy as a page that scraped fine but had no price —
+    # indistinguishable from a genuinely price-less listing. Some of the
+    # "no price found" results may be this rather than the store's markup.
+    shm_size: 1gb
     restart: unless-stopped
     cap_add:
       - CHOWN
@@ -185,10 +203,22 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 4G
+    healthcheck:
+      # The API advertises GET /health at startup. Headless-Chrome services
+      # wedge rather than exit, and this one had nothing watching it: every
+      # product would fail with a cURL error from pricebuddy while docker
+      # still reported the container up — the same blind spot that let apache
+      # sit dead in the app container.
+      test: ["CMD-SHELL", "curl -sS -o /dev/null --max-time 5 http://127.0.0.1:3000/health || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - pricebuddy
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       # This image only ever tags two-part versions (v1.0), so the old
       # three-part '^v?\d+\.\d+\.\d+$' matched nothing at all.
