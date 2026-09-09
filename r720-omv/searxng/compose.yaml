@@ -103,7 +103,12 @@ services:
       # searx/limiter.py's filter_request() returns early for /healthz, before
       # the pass_ip logic that emits that line, so this silences it at source
       # instead of by lengthening the interval.
-      test: ["CMD", "wget", "-nv", "-t1", "--spider", "0.0.0.0:8080/healthz"]
+      # The X-Forwarded-For header is not decoration: botdetection's
+      # get_real_ip() runs before filter_request() reaches its /healthz
+      # early-return, and logs "X-Forwarded-For nor X-Real-IP header is set!"
+      # at ERROR for any request without one. The probe is a direct loopback
+      # connection with no proxy in front, so it has to supply its own.
+      test: ["CMD", "wget", "-nv", "-t1", "--spider", "--header=X-Forwarded-For: 127.0.0.1", "0.0.0.0:8080/healthz"]
       interval: 1m30s
       timeout: 10s
       retries: 3
