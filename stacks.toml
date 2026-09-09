@@ -1074,6 +1074,7 @@ run_directory = "r720-omv/signal-rest-api"
 environment = """
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+TZ=[[TZ]]
 """
 
 ##

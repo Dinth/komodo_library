@@ -1,5 +1,6 @@
 x-versions:
   signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.100"
+  apprise: &apprise-version "caronc/apprise:1.5.4"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -43,7 +44,70 @@ services:
       wud.display.icon: "sh:signal"
       wud.link.template: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}"
 
+  # Lives here rather than in its own stack because signal-cli is its only
+  # backend: the two version and deploy together, and apprise on its own would
+  # be an empty shell. PriceBuddy is the reason it exists — its notification
+  # methods are mail, database, pushover, gotify, apprise, telegram, discord
+  # and ntfy (app/Enums/NotificationMethods.php), with no native Signal — but
+  # it is a general fan-out, so other stacks can use it by joining the
+  # `apprise` network below and registering their own config key.
+  apprise:
+    image: *apprise-version
+    container_name: apprise
+    hostname: apprise
+    ipc: private
+    restart: unless-stopped
+    # The image ships no USER directive, so it would otherwise run as root and
+    # use PUID/PGID to drop afterwards. Starting as the docker user instead
+    # means no root phase at all, which removes the need for the CHOWN,
+    # DAC_OVERRIDE, SETUID and SETGID capabilities its entrypoint would want
+    # for fixing ownership. The three bind mounts below must already be owned
+    # by this uid:gid — the container can no longer correct them itself.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    environment:
+      TZ: "${TZ}"
+      # 'simple' writes each saved config as a plain file named after its key,
+      # so apprise_config/pricebuddy can be read and edited on disk. 'hash'
+      # obscures the filename, which would make the signal:// URL — and the
+      # phone numbers in it — awkward to audit or repair.
+      APPRISE_STATEFUL_MODE: "simple"
+      # A handful of notifications a day; one worker is ample.
+      APPRISE_WORKER_COUNT: "1"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
+    healthcheck:
+      # /status returns 200 when healthy and 417 when not, so -f is meaningful
+      # here (unlike pricebuddy's probe, where any response proves apache is up).
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null --max-time 5 http://127.0.0.1:8000/status || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - /opt/docker/signal-cli-api/apprise_config:/config
+      - /opt/docker/signal-cli-api/apprise_plugin:/plugin
+      - /opt/docker/signal-cli-api/apprise_attach:/attach
+    networks:
+      - signal-rest-api
+    logging: *default-logging
+    labels:
+      autoheal: "true"
+      # No Traefik router on purpose. The web UI is only needed to create or
+      # test a config, which /add and /notify do just as well from inside the
+      # network, and the stored configs hold phone numbers. Add a router behind
+      # authelia-auth@docker if managing several consumers by hand gets old.
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "Apprise"
+      wud.display.icon: "sh:apprise"
+      wud.link.template: "https://github.com/caronc/apprise-api/releases/tag/v$${major}.$${minor}.$${patch}"
+
 networks:
+  # Joined by wud, uptime-kuma, backrest and now pricebuddy (via apprise);
+  # fireflyiii uses the published port instead.
   signal-rest-api:
     name: signal-rest-api
     driver: bridge

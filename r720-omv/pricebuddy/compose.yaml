@@ -97,6 +97,9 @@ services:
       # other route in. Same approach as searxng: in-network rather than via a
       # public hostname, so the call skips a WAN hairpin and Traefik's log.
       - openwebui
+      # Price-drop and stock notifications reach Signal via apprise, which runs
+      # in the signal-rest-api stack and owns this network.
+      - signal-rest-api
     logging: *default-logging
     labels:
       # Without this the healthcheck above only reports the problem; autoheal
@@ -244,4 +247,6 @@ networks:
   # here as external. Deploy order matters only on a cold start: openwebui must
   # have created it first.
   openwebui:
+    external: true
+  signal-rest-api:
     external: true
