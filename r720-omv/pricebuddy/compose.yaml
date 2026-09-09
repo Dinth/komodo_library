@@ -90,6 +90,11 @@ services:
     networks:
       - pricebuddy
       - traefik
+      # Joined for egress only — no router, no labels. The AI provider talks to
+      # http://ollama:11434, and ollama sits on the openwebui network with no
+      # other route in. Same approach as searxng: in-network rather than via a
+      # public hostname, so the call skips a WAN hairpin and Traefik's log.
+      - openwebui
     logging: *default-logging
     labels:
       # Without this the healthcheck above only reports the problem; autoheal
@@ -204,4 +209,9 @@ networks:
   traefik:
     external: true
   adminer:
+    external: true
+  # Owned by the openwebui stack (declared there with name/driver), so joined
+  # here as external. Deploy order matters only on a cold start: openwebui must
+  # have created it first.
+  openwebui:
     external: true
