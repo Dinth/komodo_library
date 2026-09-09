@@ -37,6 +37,14 @@ services:
       - no-new-privileges:true
     mem_limit: 512M
     environment:
+      # /app/.env is neither baked into the image nor on a volume — only
+      # /app/storage is persisted — so start-app.sh regenerates it with a fresh
+      # `key:generate --force` every time the container is RECREATED (a plain
+      # restart keeps it). A rotated APP_KEY logs every session out and makes
+      # anything Laravel encrypted in the DB undecryptable. Passing it in as an
+      # env var pins it: Laravel's dotenv is immutable, so a real environment
+      # variable wins over the generated .env, and config:cache bakes this one.
+      APP_KEY: "${PRICEBUDDY_APP_KEY}"
       DB_HOST: "pricebuddy-mariadb"
       DB_USERNAME: "pricebuddy"
       DB_PASSWORD: "${PRICEBUDDY_DB_PASS}"
@@ -50,6 +58,26 @@ services:
     depends_on:
       pricebuddy-mariadb:
         condition: service_healthy
+    # The image runs apache, cron and queue-worker under supervisor. Only cron
+    # and queue-worker set autorestart=true; [program:apache2] sets neither
+    # autorestart nor startretries, so apache gets supervisor's default three
+    # attempts and then stays down for good — while the other two keep the
+    # container "up" and prices updating. Its supervisor log also defaults to a
+    # file rather than stdout, so nothing shows in `docker logs` either.
+    # Observed 2026-09-09: recreating pricebuddy-mariadb under a long-running
+    # app left :80 refusing connections for several minutes with nothing
+    # detecting or acting on it. No -f here on purpose: any HTTP response means
+    # apache is alive, so this trips only on a refused connection or a hang,
+    # and won't restart-loop on an app-level 4xx/5xx. autoheal restarts (rather
+    # than recreates) the container, so /app/.env and APP_KEY survive.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sS -o /dev/null --max-time 5 http://127.0.0.1:80/ || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      # Boot does migrations, buddy:init-db, five cache builds and
+      # regenerate-price-cache before supervisor ever starts apache.
+      start_period: 180s
     ports:
       - 5757:80
     volumes:
@@ -59,6 +87,10 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      # Without this the healthcheck above only reports the problem; autoheal
+      # is opt-in, so this is what actually restarts the container and brings
+      # apache back.
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.pricebuddy.rule: "Host(`prices.${DOMAIN_NAME}`)"
       traefik.http.routers.pricebuddy.entrypoints: "websecure"
