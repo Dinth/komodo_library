@@ -1,7 +1,7 @@
 x-versions:
   pricebuddy: &pricebuddy-version "jez500/pricebuddy:v1.0.54"
   mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
-  scraper: &scraper-version "jez500/seleniumbase-scrapper:latest"
+  scraper: &scraper-version "jez500/seleniumbase-scrapper:v1.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -115,9 +115,12 @@ services:
     logging: *default-logging
     labels:
       wud.display.name: "Pricebuddy - MariaDB"
-      wud.display.icon: "sh-pricebuddy"
+      wud.display.icon: "sh:pricebuddy"
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      # linuxserver/mariadb publishes bare versions (11.8.8), never v-prefixed,
+      # so the old '^v\d+\.\d+\.\d+$' matched zero tags and WUD silently had no
+      # candidate to compare against — the 11.4.8 -> 11.8.8 update went unseen.
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
 
   pricebuddy-scraper:
@@ -142,8 +145,14 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/amerkurev/scrapper/releases/tag/v$${major}.$${minor}.$${patch}'
+      # This image only ever tags two-part versions (v1.0), so the old
+      # three-part '^v?\d+\.\d+\.\d+$' matched nothing at all.
+      wud.tag.include: '^v\d+\.\d+$$'
+      # jez500/seleniumbase-scrapper is an API-compatible reimplementation of
+      # amerkurev/scrapper, not a rebuild of it — the old template pointed at
+      # upstream's releases, which have nothing to do with this image's tags.
+      # jez500's repo cuts tags but publishes no releases, hence /tree/.
+      wud.link.template: 'https://github.com/jez500/seleniumbase-scrapper/tree/v$${major}.$${minor}'
       wud.display.name: 'Pricebuddy Scrapper'
       wud.display.icon: 'sh:pricebuddy'
 
