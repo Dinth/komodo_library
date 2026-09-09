@@ -97,7 +97,13 @@ services:
       searxng-valkey:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-nv", "-t1", "--spider", "0.0.0.0:8080/"]
+      # /healthz rather than /. The limiter runs on every request, and probing
+      # / made it log "PASS 127.0.0.1/32: matched PASSLIST" at WARNING on each
+      # probe — roughly 960 lines a day into Loki for a check that was passing.
+      # searx/limiter.py's filter_request() returns early for /healthz, before
+      # the pass_ip logic that emits that line, so this silences it at source
+      # instead of by lengthening the interval.
+      test: ["CMD", "wget", "-nv", "-t1", "--spider", "0.0.0.0:8080/healthz"]
       interval: 1m30s
       timeout: 10s
       retries: 3
