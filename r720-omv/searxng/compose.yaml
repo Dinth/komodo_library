@@ -27,10 +27,16 @@ services:
       - no-new-privileges:true
     mem_limit: 128M
     healthcheck:
+      # interval was 1s — 86,400 process spawns a day for the life of the
+      # container. It was set that low so depends_on: service_healthy would
+      # gate quickly at boot, which start_interval does properly: probe every
+      # second while starting, then back off to 30s once healthy.
+      # start_interval needs Docker 25+.
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
-      start_period: 5s
+      start_period: 10s
+      start_interval: 1s
       timeout: 3s
-      interval: 1s
+      interval: 30s
       retries: 5
     volumes:
       - /opt/docker/searxng/valkey-data:/data
@@ -42,6 +48,10 @@ services:
         max-size: "1m"
         max-file: "1"
     labels:
+      # searxng depends_on this one as service_healthy, and the limiter is a
+      # silent no-op without it — so an unhealthy valkey degrades searxng
+      # without stopping it. Worth restarting rather than just observing.
+      autoheal: "true"
       wud.display.name: "Searxng - Valkey"
       wud.display.icon: "sh-searxng"
       wud.watch: "true"
@@ -128,6 +138,7 @@ services:
     # container impossible to investigate after the fact.
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.searxng.rule: "Host(`search.${DOMAIN_NAME}`)"
       traefik.http.routers.searxng.entrypoints: "websecure"
@@ -137,8 +148,13 @@ services:
       traefik.http.routers.searxng.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       # Authelia forward-auth. Covered by the existing '*.wickhay.uk' rules:
       # one_factor from the local/tailscale networks, two_factor elsewhere.
-      # Machine consumers must not use this router — OpenWebUI and ZeroClaw
-      # reach SearXNG at http://searxng:8080 over the traefik docker network.
+      # Machine consumers must not use this router — OpenWebUI, ZeroClaw and
+      # PriceBuddy all reach SearXNG at http://searxng:8080 over the traefik
+      # docker network. PriceBuddy is the easy one to miss: its SearXNG URL is
+      # a row in the application's own database (Settings -> Integrations ->
+      # SearchXNG), not compose env, so grepping this repo will not find it.
+      # It broke silently when this middleware was added, and the commit that
+      # added it recorded pricebuddy as a non-consumer on exactly that basis.
       traefik.http.routers.searxng.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
       wud.watch: "true"
