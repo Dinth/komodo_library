@@ -74,8 +74,17 @@ services:
             - driver: nvidia
               device_ids: ["GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"]
               capabilities: [compute,utility]
-    # Pin to NUMA node 0 (even threads only). 8 threads = matches cpus limit.
-    cpuset: "0,2,4,6,8,10,12,14"
+    # NUMA node 1 (odd CPUs), to sit on the same socket as this service's GPU.
+    # Verified 2026-09-09: card fc3316a9 is at 0000:42:00.0 with numa_node=1,
+    # and `lscpu -e=CPU,NODE` maps odd CPUs to node 1 (nproc=24). The previous
+    # even-CPU pin put the process on the *other* socket from its own GPU, so
+    # every kernel launch and sync crossed QPI — a cost paid once per generated
+    # token. Measured before the fix: qwen2.5:14b-instruct-q6_K at 4.95 tok/s
+    # (201ms/token) over a sustained 532-token generation, all 49 layers
+    # offloaded, card boosting to 1890MHz at 50C, GPU utilisation only 0-35% —
+    # a healthy GPU starved by host-side latency rather than compute-bound.
+    # 8 threads = matches cpus limit.
+    cpuset: "1,3,5,7,9,11,13,15"
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
@@ -209,8 +218,14 @@ services:
             - driver: nvidia
               device_ids: ["GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"]
               capabilities: [compute,utility]
-    # Pin to NUMA node 1 (odd threads) to avoid CPU-cache contention with ollama on NUMA 0
-    cpuset: "1,3,5,7"
+    # NUMA node 0 (even CPUs), to sit on the same socket as this service's GPU.
+    # Verified 2026-09-09: comfyui shares frigate's card (993cb9a5) at
+    # 0000:05:00.0 with numa_node=0. The previous odd-CPU pin had this the wrong
+    # way round as well — both this and ollama were cross-socket from their own
+    # GPUs, and the two pins were simply swapped. Distinct cores from ollama's
+    # node-1 set, so the cache separation the old comment wanted still holds.
+    # 4 threads = matches cpus limit.
+    cpuset: "0,2,4,6"
     healthcheck:
       # Generous start_period: first boot downloads the ~6.9 GB DreamShaper XL
       # Turbo checkpoint before ComfyUI answers on 8188.
