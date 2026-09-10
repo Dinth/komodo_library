@@ -127,12 +127,10 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
-      # Upstream defaults RAILS_ENV to development, which logs every SQL
-      # statement with its full geodata payload and skips eager loading.
-      # DOMAIN is required once this is production — without it the mailers
-      # raise on URL generation.
-      RAILS_ENV: "production"
-      DOMAIN: "traces.${DOMAIN_NAME}"
+      # NOTE: RAILS_ENV=production additionally requires the ActiveRecord
+      # encryption keys (OTP_ENCRYPTION_PRIMARY_KEY at least) to exist as
+      # Komodo variables — production boot aborts without them. Left in
+      # development until those are provisioned.
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost"
       DISTANCE_UNIT: "km"
@@ -218,11 +216,8 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
-      # Kept in step with dawarich-sidekiq; web and worker must agree on the
-      # environment. In production Rails also stops rendering explicit error
-      # detail, which this container serves to the internet via Traefik.
-      RAILS_ENV: "production"
-      DOMAIN: "traces.${DOMAIN_NAME}"
+      # See the note on dawarich-sidekiq: production needs the encryption
+      # keys provisioned first, and web and worker must move together.
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost,traces.${DOMAIN_NAME}"
       DISTANCE_UNIT: "km"
