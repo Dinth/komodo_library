@@ -43,8 +43,16 @@ services:
     environment:
       OLLAMA_HOST: "0.0.0.0"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
-      # Pin Ollama to GPU 1 (Quadro RTX 5000 — the faster card); leave the T4
-      # (GPU 0) for Frigate + ComfyUI + Jellyfin. Not privileged, so the pin bites.
+      # Pin Ollama to GPU 1 (Quadro RTX 5000); leave the T4 (GPU 0) for
+      # Frigate + ComfyUI + Jellyfin + Immich. Not privileged, so the pin bites.
+      # "The faster card" was the original justification and it was not true as
+      # configured: measured 2026-09-09, the T4 did 18.14 tok/s on qwen2.5:7b
+      # while this card managed 8.85 with identical settings. That was the
+      # thread-pool problem described at the cpuset below, not the hardware —
+      # once fixed it reached 21.20 and the premise holds again. Do not move
+      # ollama to the T4 on the strength of the old numbers: the 24/7 workloads
+      # belong on the 70W card, and putting them on a 230W one costs far more
+      # in continuous draw than the bursty LLM work gains.
       NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
       OLLAMA_NUM_PARALLEL: "1"
       OLLAMA_MAX_LOADED_MODELS: "2"
@@ -63,10 +71,30 @@ services:
     hostname: ollama
     image: *ollama-version
     ipc: private
+    # Relative scheduling weight, not a ceiling (cgroup v2 cpu.weight). The
+    # cpus limit below is aligned to the cpuset so it never binds first, which
+    # means when the host is quiet ollama gets all 12 of its cores — worth
+    # +11% (19.0 -> 21.2 tok/s, measured). This is what protects the host
+    # instead: at 512 against the default 1024, any other container wanting
+    # those cores gets roughly twice ollama's share, so a CPU spill is
+    # de-prioritised the moment anything else needs to run rather than being
+    # capped regardless of whether the machine is busy.
+    # Residual risk: shares only arbitrate contention. A spill starting on an
+    # idle host still takes all 12 cores until something competes. The cpuset
+    # is the hard bound — the 12 even cores on NUMA 0 are never touched.
+    cpu_shares: 512
     deploy:
       resources:
         limits:
-          cpus: '8.0'
+          # Was 8.0, chosen as a blast-radius limit for CPU spill rather than
+          # for performance. Raised to match the cpuset: the quota was binding
+          # before the core count did, and CFS enforces it per 100ms period, so
+          # bursts stalled until the next period even though
+          # container_cpu_cfs_throttled_seconds_total never left zero.
+          cpus: '12.0'
+          # 64G of ~150G physical, so this remains a real bound and is the
+          # protection that matters if a model spills its weights into host
+          # RAM. Unchanged.
           memory: '64G'
         reservations:
           memory: '8G'
@@ -83,8 +111,24 @@ services:
     # (201ms/token) over a sustained 532-token generation, all 49 layers
     # offloaded, card boosting to 1890MHz at 50C, GPU utilisation only 0-35% —
     # a healthy GPU starved by host-side latency rather than compute-bound.
-    # 8 threads = matches cpus limit.
-    cpuset: "1,3,5,7,9,11,13,15"
+    #
+    # The NUMA fix alone changed nothing. The actual cause was found later:
+    # llama.cpp sizes its thread pool from the CPUs it can see in
+    # /proc/cpuinfo (24 — a cpuset does not hide them) while confined to a
+    # fraction of them, so every synchronisation barrier waited on threads
+    # that could not be scheduled. strace showed 90% of syscall time in futex,
+    # 4354 waits per 10s at 1.83ms each; the GPU sat idle ~80% of each token.
+    # Setting num_thread=1 dropped that to 19 futex calls and 0.08s, and took
+    # qwen2.5:7b from 11.28 to 19.0 tok/s. Widening to all 12 NUMA-1 cores and
+    # lifting the quota took it to 21.20 — past the T4's 18.14, which is
+    # roughly what the two cards' memory bandwidths (448 vs 320 GB/s) predict.
+    #
+    # NOTE: num_thread=1 is baked into the model tags themselves, NOT here:
+    #   ollama create <tag> -f <(printf "FROM <tag>\nPARAMETER num_thread 1\n")
+    # applied to gemma4:e4b and qwen2.5:7b. That is the larger half of the win
+    # and it lives in /opt/docker/openwebui/ollama_data, unversioned. Any
+    # `ollama pull` of those tags reverts it.
+    cpuset: "1,3,5,7,9,11,13,15,17,19,21,23"
     labels:
       wud.watch: "true"
       wud.watch.digest: "true"
