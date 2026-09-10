@@ -127,11 +127,20 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
+      # Upstream defaults RAILS_ENV to development, which logs every SQL
+      # statement with its full geodata payload and skips eager loading.
+      # DOMAIN is required once this is production — without it the mailers
+      # raise on URL generation.
+      RAILS_ENV: "production"
+      DOMAIN: "traces.${DOMAIN_NAME}"
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost"
       DISTANCE_UNIT: "km"
       REDIS_URL: "redis://dawarich-valkey:6379"
-      BACKGROUND_PROCESSING_CONCURRENCY: "10"
+      # Must not exceed RAILS_MAX_THREADS, the ActiveRecord pool size, which
+      # is unset here and so defaults to 5. At 10 the worker ran twice that
+      # against a 5-connection pool.
+      BACKGROUND_PROCESSING_CONCURRENCY: "5"
       APPLICATION_PROTOCOL: "http"
       PHOTON_API_USE_HTTPS: "true"
       REVERSE_GEOCODING_ENABLED: "true"
@@ -143,7 +152,9 @@ services:
     hostname: dawarich-sidekiq
     image: *dawarich-version
     ipc: private
-    mem_limit: 512M
+    # 512M was killing the worker hourly mid-reverse-geocode; the OOM reports
+    # showed it dying at 507M RSS while still climbing.
+    mem_limit: 2G
     healthcheck:
       test: [ "CMD-SHELL", "pgrep -f sidekiq" ]
       interval: 10s
@@ -207,6 +218,11 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
+      # Kept in step with dawarich-sidekiq; web and worker must agree on the
+      # environment. In production Rails also stops rendering explicit error
+      # detail, which this container serves to the internet via Traefik.
+      RAILS_ENV: "production"
+      DOMAIN: "traces.${DOMAIN_NAME}"
       APPLICATION_HOST: "localhost"
       APPLICATION_HOSTS: "localhost,traces.${DOMAIN_NAME}"
       DISTANCE_UNIT: "km"
