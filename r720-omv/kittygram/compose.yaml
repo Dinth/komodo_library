@@ -150,10 +150,20 @@ services:
       # tables in it: api_codes (unused here), user_ids, and the user_ids_fts
       # trigram index -- and that index IS the search backend. Without Instagram
       # session cookies, lib/instagram/web/search.lua falls back to
-      # database_search(), which queries this FTS table, so search only ever
-      # finds accounts the instance has already fetched. The index is meant to
-      # accumulate as people browse; leaving it in the image threw that away on
-      # every rebuild and permanently reset search to empty.
+      # database_search(), which queries this FTS table.
+      #
+      # Do not expect that to make search useful. Measured 2026-09-10: viewing
+      # a profile does NOT index it -- user_ids stayed at 0 across /nasa and
+      # /bbcnews. The only writers are cache.bulk_save_users' three variants,
+      # from_comments, from_explore and from_topsearch, so what actually
+      # accumulates is the commenters on posts someone opened (14 rows from one
+      # post) plus explore items, and from_topsearch never runs without
+      # cookies. Nobody searches for those handles. Search on this instance is
+      # effectively dead by design; searxng is the search layer, via
+      # hostnames.replace, and kittygram is only the viewer.
+      #
+      # Persisted anyway because the table is real state that a rebuild
+      # silently discarded, and because api_codes lives here too.
       #
       # It has to be a file mount, not a directory: `lapis migrate` creates the
       # file at BUILD time and config.lua hardcodes it as "kittygram.sqlite"
