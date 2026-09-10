@@ -576,6 +576,25 @@ TZ=[[TZ]]
 
 ##
 
+# Depends on the "kittygram" Komodo Build (builds.toml) having produced
+# kittygram:latest on this server first — there is no registry to pull from.
+# poll_for_updates is off for the same reason: nothing upstream to poll.
+[[stack]]
+name = "kittygram"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/kittygram"
+environment = """
+KITTYGRAM_SECRET=[[KITTYGRAM_SECRET]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+TZ=[[TZ]]
+"""
+
+##
+
 [[stack]]
 name = "komodo"
 tags = ["stacks"]

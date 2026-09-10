@@ -1,0 +1,183 @@
+x-versions:
+  # Kittygram publishes no image anywhere -- not Docker Hub, not Codeberg
+  # packages -- and upstream's own compose.yaml carries a `build:` block rather
+  # than a registry reference. This tag is produced by the Komodo Build defined
+  # in ../../builds.toml, which builds codeberg.org/irelephant/kittygram@main on
+  # the r720-omv server-builder. "Updating" this service therefore means
+  # re-running that Build, not pulling a newer tag.
+  kittygram: &kittygram-version "kittygram:latest"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  kittygram-valkey:
+    image: *valkey-version
+    container_name: kittygram-valkey
+    hostname: kittygram-valkey
+    ipc: private
+    restart: unless-stopped
+    command: ['valkey-server', '--save', '30', '1', '--loglevel', 'warning']
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - CHOWN
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
+    healthcheck:
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 10s
+      start_interval: 1s
+      timeout: 3s
+      interval: 30s
+      retries: 5
+    volumes:
+      - /opt/docker/kittygram/valkey-data:/data
+    networks:
+      - kittygram
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    labels:
+      # Not decoration: Instagram rate-limits server IPs hard (an 11-minute
+      # sliding window, 194 requests). This cache is the only thing keeping the
+      # instance under that ceiling -- user_info is cached 24h, posts 1h,
+      # timelines 5m. Lose it and every page view becomes a fresh Instagram
+      # request, which is exactly how instances get blocked.
+      autoheal: "true"
+      wud.display.name: "Kittygram - Valkey"
+      wud.display.icon: "sh-valkey"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
+      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+
+  kittygram:
+    image: *kittygram-version
+    container_name: kittygram
+    hostname: kittygram
+    ipc: private
+    restart: unless-stopped
+    # Upstream's Dockerfile ships no USER directive, so the whole OpenResty
+    # stack would run as root. It does `chown -R nobody:nobody /app` on the way
+    # out, so 65534 already owns the working directory, the generated
+    # nginx.conf and the logs/ dir lapis writes its pidfile into. This deviates
+    # from the usual ${DOCKER_PUID} because nothing here is a bind mount whose
+    # ownership we control -- the paths that must be writable live inside the
+    # image and are owned by nobody.
+    #
+    # Running unprivileged is only possible because PORT is moved off 80 below;
+    # otherwise this would need NET_BIND_SERVICE handed back.
+    user: "65534:65534"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Four OpenResty workers at the upstream default; two is ample for a
+    # household and roughly halves the footprint. Media is proxied through the
+    # server, so this is streaming as well as rendering.
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      # nginx.example.conf binds `listen ${{PORT}}`, so moving off 80 is what
+      # lets the container drop root entirely (see `user:` above).
+      PORT: "8080"
+      NUM_WORKERS: "2"
+      REDIS_HOST: "kittygram-valkey"
+      REDIS_PORT: "6379"
+      # Docker's embedded DNS. OpenResty resolves Instagram's hosts itself from
+      # the Lua http client, so it needs a resolver explicitly -- it does not
+      # inherit /etc/resolv.conf for lua-resty-http lookups.
+      RESOLVER: "127.0.0.11"
+      CODE_CACHE: "on"
+      ALLOW_JSON: "false"
+      # Left off deliberately. Atom feeds turn one human reading a profile into
+      # a poller hitting it on a schedule, and feed volume is precisely what got
+      # Bibliogram blocked and then discontinued -- upstream cites that
+      # post-mortem as the reason this defaults to false. Turning it on would
+      # feed FreshRSS, but it would also spend the rate-limit budget that keeps
+      # interactive browsing working.
+      ENABLE_ATOM: "false"
+      # Only the API is gated by this; the web UI everyone actually uses is not.
+      # Kept on so the API is not open to the traefik network by default.
+      REQUIRE_API_TOKEN: "true"
+      # NOTE: of the variables above, only PORT, CODE_CACHE, ALLOW_JSON,
+      # RESOLVER, REDIS_HOST, REDIS_PORT, ENABLE_ATOM and BASE_ATOM_PATH are
+      # declared with `env` in nginx.example.conf. OpenResty scrubs the
+      # environment for worker processes, so anything outside that list -- SECRET
+      # included -- is read as nil in the workers and silently falls back to the
+      # value baked into config.example.lua. SECRET signs API tokens, so on this
+      # build it is effectively the upstream default string. That is tolerable
+      # only because the API needs a token, the router below requires Authelia,
+      # and nothing on the LAN is published. Do not expose this stack without
+      # fixing that upstream first.
+      SECRET: "${KITTYGRAM_SECRET}"
+      DEFAULT_THEME: "auto"
+    depends_on:
+      kittygram-valkey:
+        condition: service_healthy
+    healthcheck:
+      # /api/status is the one endpoint that proves the app is serving AND that
+      # Valkey is reachable, without making an Instagram request -- it returns
+      # the redis probe, the current rate-limit state and request counts. The
+      # obvious alternative, GET /, renders the popular index, which does hit
+      # Instagram on a cold cache; probing that every 60s would spend
+      # rate-limit budget on monitoring. It also needs no token (unlike the rest
+      # of /api/), so REQUIRE_API_TOKEN above does not break it.
+      test: ["CMD", "wget", "-nv", "-t1", "-O", "/dev/null", "http://127.0.0.1:8080/api/status"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # No bind mount. The only state outside Valkey is /app/kittygram.sqlite,
+    # which `lapis migrate` creates at BUILD time and which holds nothing but
+    # issued API tokens -- unused here. A rebuild resets it; that is harmless
+    # while the API is unused, but it is the thing to persist if that changes.
+    networks:
+      - kittygram
+      - traefik
+    logging: *default-logging
+    labels:
+      autoheal: "true"
+      traefik.enable: "true"
+      traefik.http.routers.kittygram.rule: "Host(`kittygram.${DOMAIN_NAME}`)"
+      traefik.http.routers.kittygram.entrypoints: "websecure"
+      traefik.http.routers.kittygram.tls: "true"
+      traefik.http.routers.kittygram.tls.certresolver: "letsencrypt"
+      traefik.http.routers.kittygram.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.kittygram.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # Same Authelia forward-auth as searxng, and for once that costs nothing
+      # in usability: this instance exists to be the target of searxng's
+      # hostnames.replace, so anyone arriving here clicked through from
+      # search.${DOMAIN_NAME} and already holds an Authelia session cookie for
+      # *.${DOMAIN_NAME}. They are carried straight through by SSO.
+      #
+      # It is also load-bearing rather than tidy-minded. An open Instagram
+      # frontend is an abuse magnet, and abuse here means Instagram rate-limits
+      # or blocks this server's IP -- which breaks the service for the family.
+      traefik.http.routers.kittygram.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.kittygram.loadbalancer.server.port: "8080"
+      # Locally built from a git ref, so there is no registry tag for WUD to
+      # compare against -- it would only ever report "kittygram:latest is
+      # kittygram:latest". Updates come from re-running the Komodo Build in
+      # ../../builds.toml against Codeberg main.
+      wud.watch: "false"
+      wud.display.name: "Kittygram"
+      wud.display.icon: "sh-instagram"
+
+networks:
+  kittygram:
+    name: kittygram
+    driver: bridge
+    external: false
+  traefik:
+    external: true
