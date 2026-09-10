@@ -145,10 +145,25 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-    # No bind mount. The only state outside Valkey is /app/kittygram.sqlite,
-    # which `lapis migrate` creates at BUILD time and which holds nothing but
-    # issued API tokens -- unused here. A rebuild resets it; that is harmless
-    # while the API is unused, but it is the thing to persist if that changes.
+    volumes:
+      # kittygram.sqlite is not just API tokens. migrations.lua creates three
+      # tables in it: api_codes (unused here), user_ids, and the user_ids_fts
+      # trigram index -- and that index IS the search backend. Without Instagram
+      # session cookies, lib/instagram/web/search.lua falls back to
+      # database_search(), which queries this FTS table, so search only ever
+      # finds accounts the instance has already fetched. The index is meant to
+      # accumulate as people browse; leaving it in the image threw that away on
+      # every rebuild and permanently reset search to empty.
+      #
+      # It has to be a file mount, not a directory: `lapis migrate` creates the
+      # file at BUILD time and config.lua hardcodes it as "kittygram.sqlite"
+      # relative to /app, with no env override in the docker config block.
+      # Seed it before first deploy or Docker will create a directory here and
+      # the app will fail to start:
+      #   docker cp kittygram:/app/kittygram.sqlite \
+      #     /opt/docker/kittygram/kittygram.sqlite
+      #   chown 65534:65534 /opt/docker/kittygram/kittygram.sqlite
+      - /opt/docker/kittygram/kittygram.sqlite:/app/kittygram.sqlite
     networks:
       - kittygram
       - traefik
