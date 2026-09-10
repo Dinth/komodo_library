@@ -63,6 +63,13 @@ services:
 
   kittygram:
     image: *kittygram-version
+    # kittygram:latest exists only in this host's local image store -- the
+    # Komodo Build puts it there and no registry has it. Without this, the
+    # stack-wide `compose pull` that Komodo runs before `up` tries to fetch it
+    # from Docker Hub, fails with "repository does not exist or may require
+    # docker login", and aborts the whole deploy (valkey included). Same
+    # reason ha-bluetooth-exporter carries it in the grafana-prometheus stack.
+    pull_policy: never
     container_name: kittygram
     hostname: kittygram
     ipc: private
