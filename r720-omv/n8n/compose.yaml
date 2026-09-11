@@ -1,6 +1,6 @@
 x-versions:
-  n8n: &n8n-version "n8nio/n8n:2.39.0"
-  n8n-mcp: &n8n-mcp-version "ghcr.io/czlonkowski/n8n-mcp:2.82.1"
+  n8n: &n8n-version "n8nio/n8n:2.39.2"
+  n8n-mcp: &n8n-mcp-version "ghcr.io/czlonkowski/n8n-mcp:2.84.0"
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
