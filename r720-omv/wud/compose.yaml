@@ -90,7 +90,7 @@ services:
       # default simplebody already appends result.link (the changelog URL) when
       # one is resolved, which is what the node script did by hand.
       WUD_TRIGGER_SIGNAL_MAIN_URL: "http://signal-rest-api:8080"
-      WUD_TRIGGER_SIGNAL_MAIN_NUMBER: "${SIGNAL_PHONE_NUMBER}"
+      WUD_TRIGGER_SIGNAL_MAIN_NUMBER: "${SIGNAL_BOT_NUMBER}"
       WUD_TRIGGER_SIGNAL_MAIN_RECIPIENTS: "${SIGNAL_TECH_ID}"
       WUD_TRIGGER_SIGNAL_MAIN_AUTO: "true"
       WUD_AUTH_OIDC_AUTHELIA_DISCOVERY: "https://id.${DOMAIN_NAME}/.well-known/openid-configuration"
