@@ -1,5 +1,5 @@
 x-versions:
-  freshrss: &freshrss-version "freshrss/freshrss:1.29.1"
+  freshrss: &freshrss-version "freshrss/freshrss:1.30.0"
   rss-bridge: &rss-bridge-version "rssbridge/rss-bridge:latest"
   postgres: &postgres-version "docker.io/postgres:18.3-alpine"
 
@@ -78,12 +78,17 @@ services:
     mem_limit: 1G
     environment:
       TRUSTED_PROXIES: "traefik"
+      # 1.30.0 blocks fetching from private/loopback addresses by default (SSRF
+      # hardening). Nine feeds point at the rss-bridge sidecar, so allowlist it.
+      # Whitespace-separated host:port entries; matched exactly against the
+      # resolved address and the URL's port.
+      INTERNAL_HOST_ALLOWLIST: "10.10.1.13:4746 freshrss-rssbridge:80"
       TZ: "${TZ}"
       BASE_URL: "https://rss.${DOMAIN_NAME}"
       CRON_MIN: "*/10"
       ADMIN_EMAIL: "ddd@ddd.pl"
-      ADMIN_PASSWORD: "freshrss"
-      ADMIN_API_PASSWORD: "freshrss"
+      ADMIN_PASSWORD: "${FRESHRSS_ADMIN_PASS}"
+      ADMIN_API_PASSWORD: "${FRESHRSS_ADMIN_API_PASS}"
       DB_TYPE: "pgsql"
       DB_HOST: ""
       DB_USER: "freshrss"
