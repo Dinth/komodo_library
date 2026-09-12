@@ -327,9 +327,16 @@ services:
     # Deliberately below ollama's 512: this is a background fallback job and
     # must never win CPU against work someone is actually waiting on.
     cpu_shares: 256
-    # Weights sit in VRAM, so this only has to cover the Python process and
-    # ffmpeg demuxing the episode audio.
-    mem_limit: 4G
+    # Was 4G, sized on the assumption that the weights live in VRAM so the host
+    # only pays for the Python process and ffmpeg. That is wrong: CTranslate2
+    # stages large-v3 through host RAM and keeps it there alongside the CUDA
+    # context. Measured 2026-09-12 on the first real transcription — 3.53G RSS,
+    # 3.59G working set, i.e. within ~450M of an OOM kill and tripping
+    # ContainerHighMemory at 90% of the old limit. Almost all of it is anonymous,
+    # not reclaimable page cache, so the headroom has to be real.
+    # Idle it returns to ~5M once MODEL_IDLE_TIMEOUT releases the model, so this
+    # ceiling is only touched during an actual transcription.
+    mem_limit: 8G
     deploy:
       resources:
         reservations:
