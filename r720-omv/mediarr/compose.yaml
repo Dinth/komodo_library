@@ -5,6 +5,7 @@ x-versions:
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.5.2"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.0"
+  whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
@@ -283,6 +284,84 @@ services:
       - /Data/Anime:/anime
       - /Data/Cartoons:/cartoons
       - /Data/CartoonMovies:/cartoon_movies
+  #############################################################################
+  # Whisper ASR Webservice
+  # Speech-to-text backend for Bazarr's Whisper provider. Last resort only:
+  # Bazarr reaches it when no real provider has a subtitle for an episode, so
+  # it is idle almost all of the time. Not published — Bazarr talks to it over
+  # the mediarr bridge at http://whisper:9000.
+  #############################################################################
+  whisper:
+    image: *whisper-version
+    container_name: whisper
+    hostname: whisper
+    restart: unless-stopped
+    ipc: private
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: "${TZ}"
+      ASR_ENGINE: "faster_whisper"
+      ASR_MODEL: "large-v3"
+      ASR_DEVICE: "cuda"
+      # The GPU default is float32, which would put large-v3 at roughly 10G of
+      # VRAM. float16 halves that at no meaningful accuracy cost on this model,
+      # and is what makes it co-tenantable with ollama on the same card.
+      ASR_QUANTIZATION: "float16"
+      # Weights land here rather than /root/.cache so the non-root user above
+      # can write them. large-v3 is ~3G, fetched once on first transcription.
+      # HF_HOME follows it because faster-whisper pulls via huggingface_hub.
+      ASR_MODEL_PATH: "/models"
+      HF_HOME: "/models"
+      # Hand the VRAM back after 5 minutes idle. This is the whole reason
+      # whisper can share fc3316a9 with ollama: subtitle work is bursty and
+      # rare, so outside an actual transcription the card is released.
+      MODEL_IDLE_TIMEOUT: "300"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+      # Same card as ollama (Quadro RTX 5000). Bursty work belongs on the 230W
+      # card per the reasoning in openwebui; the T4 keeps its 24/7 tenants.
+      NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
+    # Deliberately below ollama's 512: this is a background fallback job and
+    # must never win CPU against work someone is actually waiting on.
+    cpu_shares: 256
+    # Weights sit in VRAM, so this only has to cover the Python process and
+    # ffmpeg demuxing the episode audio.
+    mem_limit: 4G
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"]
+              capabilities: [compute,utility]
+    volumes:
+      - /opt/docker/mediarr/whisper_models:/models
+    networks:
+      - mediarr
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/docs')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      # Generous: a cold start can be pulling ~3G of weights before the service
+      # answers anything.
+      start_period: 600s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      wud.watch: "true"
+      # Tags are published in pairs (v1.10.0 and v1.10.0-gpu); this must only
+      # ever match the GPU build.
+      wud.tag.include: '^v?\d+\.\d+\.\d+-gpu$$'
+      wud.link.template: 'https://github.com/ahmetoner/whisper-asr-webservice/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Whisper ASR"
+      wud.display.icon: "si:openai"
   #############################################################################
   # Lidarr
   # Music collection manager
