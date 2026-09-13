@@ -5,15 +5,23 @@
 # Bazarr's whisperai provider only ever sends task/language/output/encode, and
 # the webservice has no env to change transcription defaults. Stock settings
 # (no VAD, segment-level timestamps, conditioning on previous text) invented
-# dialogue over music-only stretches and drifted cue timings by seconds. The
-# only change is the block of forced options in transcribe():
-#   vad_filter=True                      Silero VAD (bundled) drops non-speech
-#   word_timestamps=True                 cue start/end snapped to spoken words
-#   hallucination_silence_threshold=2.0  skip text invented over >2s of silence
-#   condition_on_previous_text=False     one hallucination can't seed the next
+# dialogue over music-only stretches and drifted cue timings by seconds.
 #
-# This file is tied to v1.10.0. On an image bump, re-diff it against the new
-# upstream file before deploying.
+# Two changes:
+# 1. Forced options in transcribe():
+#      vad_filter=True                      Silero VAD (bundled) drops non-speech
+#      word_timestamps=True                 cue start/end snapped to spoken words
+#      hallucination_silence_threshold=2.0  skip text invented over >2s of silence
+#      condition_on_previous_text=False     one hallucination can't seed the next
+# 2. WhisperModel.find_alignment is replaced with faster-whisper 1.2.1's own
+#    implementation plus the empty-alignment guard from upstream PR #1460
+#    (https://github.com/SYSTRAN/faster-whisper/pull/1460). Without it,
+#    word_timestamps 500s on some episodes with "IndexError: boolean index did
+#    not match indexed array" at time_indices[jumps]. Remove once the image
+#    ships a faster-whisper release containing #1460.
+#
+# This file is tied to v1.10.0 (faster-whisper 1.2.1). On an image bump,
+# re-diff both the engine file and find_alignment before deploying.
 
 import time
 from io import StringIO
@@ -26,6 +34,90 @@ from faster_whisper import WhisperModel
 from app.asr_models.asr_model import ASRModel
 from app.config import CONFIG
 from app.utils import ResultWriter, WriteJSON, WriteSRT, WriteTSV, WriteTXT, WriteVTT
+
+import numpy as np
+import faster_whisper.transcribe as _fw_transcribe
+
+
+# faster-whisper 1.2.1 find_alignment + PR #1460 guard (see header).
+def _find_alignment_guarded(
+    self,
+    tokenizer,
+    text_tokens,
+    encoder_output,
+    num_frames,
+    median_filter_width=7,
+):
+    if len(text_tokens) == 0:
+        return []
+
+    results = self.model.align(
+        encoder_output,
+        tokenizer.sot_sequence,
+        text_tokens,
+        num_frames,
+        median_filter_width=median_filter_width,
+    )
+    return_list = []
+    for result, text_token in zip(results, text_tokens):
+        text_token_probs = result.text_token_probs
+        alignments = result.alignments
+        if len(alignments) == 0:
+            # PATCH (upstream PR #1460): align() can return no alignment for a
+            # tiny window; give that segment no word timestamps instead of
+            # crashing on time_indices[jumps].
+            return_list.append([])
+            continue
+        text_indices = np.array([pair[0] for pair in alignments])
+        time_indices = np.array([pair[1] for pair in alignments])
+
+        words, word_tokens = tokenizer.split_to_word_tokens(
+            text_token + [tokenizer.eot]
+        )
+        if len(word_tokens) <= 1:
+            # return on eot only
+            # >>> np.pad([], (1, 0))
+            # array([0.])
+            # This results in crashes when we lookup jump_times with float, like
+            # IndexError: arrays used as indices must be of integer (or boolean) type
+            return_list.append([])
+            continue
+        word_boundaries = np.pad(
+            np.cumsum([len(t) for t in word_tokens[:-1]]), (1, 0)
+        )
+        if len(word_boundaries) <= 1:
+            return_list.append([])
+            continue
+
+        jumps = np.pad(np.diff(text_indices), (1, 0), constant_values=1).astype(
+            bool
+        )
+        jump_times = time_indices[jumps] / self.tokens_per_second
+        start_times = jump_times[word_boundaries[:-1]]
+        end_times = jump_times[word_boundaries[1:]]
+        word_probabilities = [
+            np.mean(text_token_probs[i:j])
+            for i, j in zip(word_boundaries[:-1], word_boundaries[1:])
+        ]
+
+        return_list.append(
+            [
+                dict(
+                    word=word,
+                    tokens=tokens,
+                    start=start,
+                    end=end,
+                    probability=probability,
+                )
+                for word, tokens, start, end, probability in zip(
+                    words, word_tokens, start_times, end_times, word_probabilities
+                )
+            ]
+        )
+    return return_list
+
+
+_fw_transcribe.WhisperModel.find_alignment = _find_alignment_guarded
 
 
 class FasterWhisperASR(ASRModel):
