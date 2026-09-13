@@ -328,6 +328,13 @@ services:
       # the home dir. The non-root user has no writable home (the container
       # already logs "Permission denied: '/.config'"), so point it at /models.
       TORCH_HOME: "/models/torch"
+      # whisperx's alignment step fetches nltk's punkt_tab on first use and nltk
+      # only downloads into NLTK_DATA if that dir already exists, else ~/nltk_data.
+      # With no writable home that became /nltk_data and every transcription
+      # returned 500 after the audio was processed. A home under /models (which
+      # exists and is writable) gives it /models/nltk_data, and also gives
+      # matplotlib its /.config.
+      HOME: "/models"
       # v1.10.0 + whisperx crash-loops at startup without this (upstream #383):
       # lightning 2.6 stopped hardcoding weights_only=False, pyannote 3.4 does
       # not pass it, so torch's weights_only=True default rejects the VAD
