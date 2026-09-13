@@ -12,7 +12,11 @@
 #      vad_filter=True                      Silero VAD (bundled) drops non-speech
 #      word_timestamps=True                 cue start/end snapped to spoken words
 #      hallucination_silence_threshold=2.0  skip text invented over >2s of silence
-#      condition_on_previous_text=False     one hallucination can't seed the next
+#    condition_on_previous_text is deliberately left at its default (True).
+#    Forcing it False (2026-09-13, 009-1 S01) stopped Whisper carrying
+#    punctuation/case between windows: 30-44% of cues came out as lowercase,
+#    unpunctuated 10s run-ons mixing speakers. VAD + the silence threshold are
+#    what curb looping hallucinations here.
 # 2. WhisperModel.find_alignment is replaced with faster-whisper 1.2.1's own
 #    implementation plus the empty-alignment guard from upstream PR #1460
 #    (https://github.com/SYSTRAN/faster-whisper/pull/1460). Without it,
@@ -159,7 +163,6 @@ class FasterWhisperASR(ASRModel):
         options_dict["vad_filter"] = True
         options_dict["word_timestamps"] = True
         options_dict["hallucination_silence_threshold"] = 2.0
-        options_dict["condition_on_previous_text"] = False
         with self.model_lock:
             segments = []
             text = ""

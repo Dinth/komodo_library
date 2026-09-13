@@ -356,10 +356,10 @@ services:
               capabilities: [compute,utility]
     volumes:
       - /opt/docker/mediarr/whisper_models:/models
-      # Forces vad_filter, word_timestamps, hallucination_silence_threshold and
-      # condition_on_previous_text=False on every request: Bazarr only sends
-      # task/language/output, and stock settings invent dialogue over music
-      # and drift cue timings. Pinned to v1.10.0; re-diff on any image bump.
+      # Forces vad_filter, word_timestamps and hallucination_silence_threshold
+      # on every request (Bazarr only sends task/language/output; stock settings
+      # invent dialogue over music and drift cue timings) and guards
+      # find_alignment (upstream PR #1460). Pinned to v1.10.0; re-diff on bump.
       - ./whisper/faster_whisper_engine.py:/app/app/asr_models/faster_whisper_engine.py:ro
     networks:
       - mediarr
