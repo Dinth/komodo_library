@@ -328,6 +328,15 @@ services:
       # the home dir. The non-root user has no writable home (the container
       # already logs "Permission denied: '/.config'"), so point it at /models.
       TORCH_HOME: "/models/torch"
+      # v1.10.0 + whisperx crash-loops at startup without this (upstream #383):
+      # lightning 2.6 stopped hardcoding weights_only=False, pyannote 3.4 does
+      # not pass it, so torch's weights_only=True default rejects the VAD
+      # checkpoint ("Unsupported global: omegaconf.listconfig.ListConfig").
+      # Only affects torch.load calls that leave weights_only unset; the files
+      # hitting it are the VAD model bundled in the image and the torchaudio
+      # alignment model from pytorch.org. Drop once whisperx >= 3.8 (pyannote 4)
+      # ships in the image.
+      TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD: "1"
       # Hand the VRAM back after 5 minutes idle. This is the whole reason
       # whisper can share fc3316a9 with ollama: subtitle work is bursty and
       # rare, so outside an actual transcription the card is released.
