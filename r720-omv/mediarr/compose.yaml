@@ -5,6 +5,8 @@ x-versions:
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.5.2"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.0"
+  # Bumping this tag requires re-diffing whisper/mbain_whisperx_engine.py
+  # against the new image (patched copy is bind-mounted over upstream's, #321).
   whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
@@ -304,7 +306,11 @@ services:
       - no-new-privileges:true
     environment:
       TZ: "${TZ}"
-      ASR_ENGINE: "faster_whisper"
+      # whisperx, not faster_whisper: Bazarr's whisperai provider never sends
+      # vad_filter, so faster_whisper transcribed music as garbage dialogue and
+      # its segment timings drifted by seconds. whisperx always runs pyannote
+      # VAD and does wav2vec2 forced alignment on every request.
+      ASR_ENGINE: "whisperx"
       ASR_MODEL: "large-v3"
       ASR_DEVICE: "cuda"
       # The GPU default is float32, which would put large-v3 at roughly 10G of
@@ -313,9 +319,15 @@ services:
       ASR_QUANTIZATION: "float16"
       # Weights land here rather than /root/.cache so the non-root user above
       # can write them. large-v3 is ~3G, fetched once on first transcription.
-      # HF_HOME follows it because faster-whisper pulls via huggingface_hub.
+      # HF_HOME follows it because whisperx pulls large-v3 via huggingface_hub,
+      # which reuses the Systran cache already sitting in /models.
       ASR_MODEL_PATH: "/models"
       HF_HOME: "/models"
+      # whisperx fetches the English alignment model (torchaudio
+      # WAV2VEC2_ASR_BASE_960H) into the torch hub cache, which defaults under
+      # the home dir. The non-root user has no writable home (the container
+      # already logs "Permission denied: '/.config'"), so point it at /models.
+      TORCH_HOME: "/models/torch"
       # Hand the VRAM back after 5 minutes idle. This is the whole reason
       # whisper can share fc3316a9 with ollama: subtitle work is bursty and
       # rare, so outside an actual transcription the card is released.
@@ -346,6 +358,13 @@ services:
               capabilities: [compute,utility]
     volumes:
       - /opt/docker/mediarr/whisper_models:/models
+      # Works around upstream bug #321
+      # https://github.com/ahmetoner/whisper-asr-webservice/issues/321
+      # Once MODEL_IDLE_TIMEOUT unloads the model, every later request fails
+      # with a TypeError until restart. The patched file is pinned to v1.10.0
+      # and must be re-diffed on any image bump. Remove this mount when #321
+      # is fixed.
+      - ./whisper/mbain_whisperx_engine.py:/app/app/asr_models/mbain_whisperx_engine.py:ro
     networks:
       - mediarr
     healthcheck:
@@ -363,6 +382,8 @@ services:
         max-file: "3"
     labels:
       wud.watch: "true"
+      # An update here is NOT a blind bump: re-diff the bind-mounted
+      # whisper/mbain_whisperx_engine.py against the new tag first (#321).
       # Tags are published in pairs (v1.10.0 and v1.10.0-gpu); this must only
       # ever match the GPU build.
       wud.tag.include: '^v?\d+\.\d+\.\d+-gpu$$'
