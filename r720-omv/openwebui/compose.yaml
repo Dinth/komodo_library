@@ -9,11 +9,12 @@ x-versions:
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main"
   # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
   # default distroless image has NO shell and breaks the agent's shell tool;
-  # the local Dockerfile.debian build (to add channel-signal) fails to compile
-  # (upstream only CI-builds Dockerfile/Containerfile, not Dockerfile.debian).
-  # This published tag has NO channel-signal — fine while access is via the
-  # web dashboard; revisit a signal-capable build if we return to Signal.
-  zeroclaw: &zeroclaw-version "ghcr.io/zeroclaw-labs/zeroclaw:v0.8.5-debian"
+  # the prebuilt ghcr images also lack the channel-signal Cargo feature. So this
+  # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream git
+  # tag with Dockerfile.debian + the dist feature set plus channel-signal. It
+  # builds fine at v0.8.5 (~40 min on omv). Manual bump: change the git ref in
+  # build.context AND this local tag together.
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
   zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
 
@@ -47,7 +48,15 @@ x-zeroclaw-common: &zeroclaw-common
     # or a container restart instead.
     ZEROCLAW_gateway__require_pairing: "false"
     TZ: "${TZ}"
+  # Local image: build: + image: + pull_policy: never keeps it reproducible if
+  # the image is ever pruned. Both instances share the same build and tag.
+  build:
+    context: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.5"
+    dockerfile: Dockerfile.debian
+    args:
+      ZEROCLAW_CARGO_FLAGS: "--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-git,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,whatsapp-web,channel-signal"
   image: *zeroclaw-version
+  pull_policy: never
   ipc: private
   deploy:
     resources:
@@ -649,8 +658,11 @@ services:
   # primary lives in the signal-rest-api stack) — deliberately NOT the personal
   # account, so the agent never sees personal messages.
   # WUD/Grafana notification sends via the signal-rest-api stack are untouched.
-  # Dormant until the zeroclaw image is built with the channel-signal feature;
-  # the prebuilt v0.8.5-debian image does not include it.
+  # Serves BOTH zeroclaw-michal and zeroclaw-paulina: concurrent
+  # /api/v1/events SSE listeners each receive every inbound message (verified),
+  # and ZeroClaw only calls send/sendTyping/sendReaction, so nothing consumes
+  # messages from the other. Each instance answers only its allowlisted sender
+  # via peer_groups in its own config.toml.
   zeroclaw-signal-cli:
     cap_drop:
       - ALL
@@ -692,9 +704,10 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - /opt/docker/openwebui/zeroclaw-signal-cli_data:/signal-data
-  # ZeroClaw personal AI agent — local Ollama, security-first OpenClaw
-  # alternative — ONE INSTANCE PER USER on a single hostname
-  # (https://zeroclaw.${DOMAIN_NAME}), same pattern as the homepage stack.
+  # ZeroClaw personal AI agent — Signal + web dashboard <-> local Ollama,
+  # security-first OpenClaw alternative — ONE INSTANCE PER USER on a single
+  # hostname (https://zeroclaw.${DOMAIN_NAME}), same pattern as the homepage
+  # stack.
   #
   # ZeroClaw has no user model, so isolation = one container each, with its
   # own data dir, memory and MCP set in its own
@@ -768,8 +781,9 @@ services:
       zeroclaw-signal-cli:
         condition: service_healthy
     labels:
-      wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+-debian$$'
+      # Deliberate deviation: local build, nothing to pull — watch upstream
+      # releases manually at the link below.
+      wud.watch: "false"
       wud.display.name: "ZeroClaw - Michal"
       wud.display.icon: "sh:robot"
       wud.link.template: "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v$${major}.$${minor}.$${patch}"
@@ -779,13 +793,14 @@ services:
     <<: *zeroclaw-common
     container_name: zeroclaw-paulina
     hostname: zeroclaw-paulina
-    # No Signal for Paulina — Ollama only.
     depends_on:
       ollama:
         condition: service_healthy
+      zeroclaw-signal-cli:
+        condition: service_healthy
     labels:
-      # Deliberate deviation: same image as zeroclaw-michal, which carries the
-      # update watch — avoid duplicate update notifications.
+      # Deliberate deviation: local build, nothing to pull — watch upstream
+      # releases manually at zeroclaw-michal's link.
       wud.watch: "false"
       wud.display.name: "ZeroClaw - Paulina"
       wud.display.icon: "sh:robot"
