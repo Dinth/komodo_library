@@ -1,5 +1,9 @@
 x-versions:
-  jellyfin: &jellyfin-version "linuxserver/jellyfin:10.11.11"
+  # LSIO's bare-version alias (`10.11.11`) only gets published for three-part
+  # upstream versions, and 12.0 dropped the patch component — there is no
+  # `linuxserver/jellyfin:12.0` tag to pin. Use the full build tag. It is also
+  # the immutable one: the bare alias floats across ls builds.
+  jellyfin: &jellyfin-version "linuxserver/jellyfin:12.0ubu2604-ls48"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -43,7 +47,13 @@ services:
             # Leave the RTX 5000 (GPU 1) dedicated to Ollama.
             - driver: nvidia
               device_ids: ["GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"]
-              capabilities: [video]
+              # `gpu`, not `video`: dockerd builds NVIDIA_DRIVER_CAPABILITIES
+              # from this list and appends it *after* the image env, so
+              # `[video]` was silently replacing LSIO's `compute,video,utility`
+              # and stripping CUDA. Tone mapping is CUDA-only on Linux, so it
+              # cannot have been working. `gpu` is not an NVIDIA capability, so
+              # dockerd sets nothing and the image default survives.
+              capabilities: [gpu]
     environment:
       TZ: "${TZ}"
       PUID: "${MEDIA_PUID}"
@@ -96,8 +106,16 @@ services:
       wud.watch: "true"
       wud.display.name: "Jellyfin Server"
       wud.display.icon: "sh:jellyfin"
-      wud.tag.include: '^v?(?:\d{1,2}\.){2}\d{1,2}$$'
-      wud.link.template: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}.$${patch}"
+      # 12.0 dropped the upstream patch component and LSIO tags the image
+      # `12.0ubu2604-ls48`, so the old three-part regex matched nothing and WUD
+      # went silent — it never reported 12.0 at all. Coerce
+      # <maj>.<min>ubu<rel>-ls<rev> -> <maj>.<min>.<rev> so the LSIO build
+      # counter orders as the semver patch.
+      wud.tag.include: '^\d+\.\d+ubu\d+-ls\d+$$'
+      wud.tag.transform: '^(\d+)\.(\d+)ubu\d+-ls(\d+)$$ => $$1.$$2.$$3'
+      # Upstream tags releases `v12.0` now, so major.minor only. $${patch} is
+      # the LSIO build counter here and would 404.
+      wud.link.template: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}"
 networks:
   jellyfin:
     name: jellyfin
