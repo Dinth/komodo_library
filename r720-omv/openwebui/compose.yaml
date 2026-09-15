@@ -10,11 +10,13 @@ x-versions:
   # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
   # default distroless image has NO shell and breaks the agent's shell tool;
   # the prebuilt ghcr images also lack the channel-signal Cargo feature. So this
-  # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream git
-  # tag with Dockerfile.debian + the dist feature set plus channel-signal. It
-  # builds fine at v0.8.5 (~40 min on omv). Manual bump: change the git ref in
-  # build.context AND this local tag together.
-  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-debian"
+  # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream v0.8.5
+  # tag via the in-repo wrapper at ./zeroclaw (Dockerfile + patches/), with the
+  # dist feature set plus channel-signal (~40 min on omv). It carries upstream
+  # PR #10845 (one summary line per deferred MCP tool) until a release includes
+  # it. Bump: change the tag in additional_contexts AND this image tag
+  # together, and check the patches still apply.
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p10845-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
   zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
 
@@ -50,9 +52,15 @@ x-zeroclaw-common: &zeroclaw-common
     TZ: "${TZ}"
   # Local image: build: + image: + pull_policy: never keeps it reproducible if
   # the image is ever pruned. Both instances share the same build and tag.
+  # The context is the local wrapper folder (same pattern as
+  # fireflyiii/signal-shim and grafana-prometheus/ha-bt-exporter); the upstream
+  # source arrives as the named context `upstream` so patches/ can be applied
+  # before cargo runs.
   build:
-    context: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.5"
-    dockerfile: Dockerfile.debian
+    context: ./zeroclaw
+    dockerfile: Dockerfile
+    additional_contexts:
+      upstream: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.5"
     args:
       ZEROCLAW_CARGO_FLAGS: "--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-git,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,whatsapp-web,channel-signal"
   image: *zeroclaw-version
