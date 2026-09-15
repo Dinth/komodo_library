@@ -23,6 +23,11 @@
 #    word_timestamps 500s on some episodes with "IndexError: boolean index did
 #    not match indexed array" at time_indices[jumps]. Remove once the image
 #    ships a faster-whisper release containing #1460.
+# 3. Long segments are split into word-timed sub-cues before writing. WriteSRT
+#    in app/utils.py emits one cue per segment and ignores word timings, so a
+#    passage Whisper leaves unpunctuated became a 10s wall of text. Cues now
+#    break after sentence punctuation, on a >=1s pause between words, or before
+#    84 chars / 7s. Segments without word timings are left as they are.
 #
 # This file is tied to v1.10.0 (faster-whisper 1.2.1). On an image bump,
 # re-diff both the engine file and find_alignment before deploying.
@@ -124,6 +129,52 @@ def _find_alignment_guarded(
 _fw_transcribe.WhisperModel.find_alignment = _find_alignment_guarded
 
 
+from dataclasses import replace
+
+# Readable-subtitle limits: two 42-char lines, ~7s on screen, break on a real pause.
+CUE_MAX_CHARS = 84
+CUE_MAX_SECONDS = 7.0
+CUE_PAUSE_SECONDS = 1.0
+CUE_MIN_CHARS_AT_SENTENCE_END = 15
+
+
+def _split_long_segments(segments):
+    """Split segments that are too long to read into word-timed sub-cues (see header)."""
+    out = []
+    for seg in segments:
+        words = [w for w in (seg.words or []) if w.word.strip()]
+        text = seg.text.strip()
+        if not words or (len(text) <= CUE_MAX_CHARS and seg.end - seg.start <= CUE_MAX_SECONDS):
+            out.append(seg)
+            continue
+        chunks, cur = [], []
+        for w in words:
+            if cur:
+                cur_text = "".join(x.word for x in cur).strip()
+                too_long = len(cur_text + w.word) > CUE_MAX_CHARS
+                too_slow = w.end - cur[0].start > CUE_MAX_SECONDS
+                paused = w.start - cur[-1].end >= CUE_PAUSE_SECONDS
+                sentence_end = cur_text[-1:] in ".!?…" and len(cur_text) >= CUE_MIN_CHARS_AT_SENTENCE_END
+                if too_long or too_slow or paused or sentence_end:
+                    chunks.append(cur)
+                    cur = []
+            cur.append(w)
+        if cur:
+            chunks.append(cur)
+        for chunk in chunks:
+            out.append(replace(
+                seg,
+                start=chunk[0].start,
+                end=max(chunk[-1].end, chunk[0].start + 0.3),
+                text="".join(x.word for x in chunk).strip(),
+                tokens=[],
+                words=chunk,
+            ))
+    for i, seg in enumerate(out, start=1):
+        seg.id = i
+    return out
+
+
 class FasterWhisperASR(ASRModel):
 
     def load_model(self):
@@ -170,7 +221,11 @@ class FasterWhisperASR(ASRModel):
             for segment in segment_generator:
                 segments.append(segment)
                 text = text + segment.text
-            result = {"language": options_dict.get("language", info.language), "segments": segments, "text": text}
+            result = {
+                "language": options_dict.get("language", info.language),
+                "segments": _split_long_segments(segments),
+                "text": text,
+            }
 
         output_file = StringIO()
         self.write_result(result, output_file, output)
