@@ -1,0 +1,55 @@
+From: Michal Gawronski-Kot <michal@gawronskikot.com>
+Subject: [PATCH] fix(agent): auto-activate deferred MCP tools called directly by name
+
+Local komodo_library patch on top of v0.8.5 (not upstream). When a model calls
+a deferred `<server>__<tool>` without calling tool_search first, activate it via
+the registered tool_search (`select:<name>`, same access policy) and execute it,
+instead of returning "Unknown tool".
+---
+--- a/crates/zeroclaw-runtime/src/agent/tool_execution.rs
++++ b/crates/zeroclaw-runtime/src/agent/tool_execution.rs
+@@ -171,7 +171,7 @@
+     }
+ 
+     let static_tool = find_tool(dispatch.tools_registry, call_name);
+-    let activated_arc = if static_tool.is_none() {
++    let mut activated_arc = if static_tool.is_none() {
+         match dispatch.activated_tools {
+             Some(at) => {
+                 let activated_tools = match at.lock() {
+@@ -201,6 +201,35 @@
+     } else {
+         None
+     };
++    // Local patch 0002 (komodo_library): a model that calls a deferred MCP tool
++    // (`<server>__<tool>`) by name before activating it gets it activated through
++    // the registered `tool_search` (`select:<name>`, same access policy and the
++    // same shared activated set) instead of an "Unknown tool" dead end. Small
++    // local models reliably skip the tool_search round-trip.
++    if static_tool.is_none() && activated_arc.is_none() && call_name.contains("__") {
++        if let (Some(at), Some(search)) = (
++            dispatch.activated_tools,
++            find_tool(dispatch.tools_registry, "tool_search"),
++        ) {
++            let _ = search
++                .execute(serde_json::json!({ "query": format!("select:{call_name}") }))
++                .await;
++            activated_arc = match at.lock() {
++                Ok(guard) => guard.get_resolved(call_name),
++                Err(poisoned) => poisoned.into_inner().get_resolved(call_name),
++            };
++            ::zeroclaw_log::record!(
++                INFO,
++                ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
++                    .with_category(::zeroclaw_log::EventCategory::Tool)
++                    .with_attrs(::serde_json::json!({
++                        "tool": call_name,
++                        "auto_activated": activated_arc.is_some(),
++                    })),
++                "deferred MCP tool called directly; auto-activation attempted via tool_search"
++            );
++        }
++    }
+     let Some(tool) = static_tool.or(activated_arc.as_deref()) else {
+         let reason = format!("Unknown tool: {call_name}");
+         let duration = start.elapsed();

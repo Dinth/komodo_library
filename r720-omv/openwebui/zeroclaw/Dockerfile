@@ -20,6 +20,12 @@
 #         only ever saw a truncated fragment of the prompt. tool_search still
 #         searches and returns the full descriptions. Drop this patch once a
 #         release contains it (v0.8.6+).
+#   0002  local, not upstream: when a model calls a deferred MCP tool
+#         (`<server>__<tool>`) by name without calling tool_search first, the
+#         agent activates it through the registered tool_search (`select:<name>`,
+#         same access policy) and runs it, instead of returning "Unknown tool".
+#         Benchmarks on 2026-09-15 showed gemma4:12b and qwen3.5:9b both call
+#         deferred tools directly first; qwen then gave up or invented answers.
 #
 # Bump procedure: change the tag in compose additional_contexts AND the image
 # tag together, re-diff upstream Dockerfile.debian for stage changes, and check

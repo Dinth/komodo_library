@@ -12,11 +12,13 @@ x-versions:
   # the prebuilt ghcr images also lack the channel-signal Cargo feature. So this
   # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream v0.8.5
   # tag via the in-repo wrapper at ./zeroclaw (Dockerfile + patches/), with the
-  # dist feature set plus channel-signal (~40 min on omv). It carries upstream
-  # PR #10845 (one summary line per deferred MCP tool) until a release includes
-  # it. Bump: change the tag in additional_contexts AND this image tag
-  # together, and check the patches still apply.
-  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p10845-debian"
+  # dist feature set plus channel-signal (~40 min on omv). It carries the local
+  # patches in ./zeroclaw/patches: 0001 upstream PR #10845 (one summary line
+  # per deferred MCP tool); 0002 local (auto-activate a deferred MCP tool the
+  # model calls directly by name via tool_search). The image tag no longer
+  # encodes individual patches. Bump: change the tag in additional_contexts
+  # AND this image tag together, and check the patches still apply.
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-patched-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
   zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
 
@@ -132,7 +134,10 @@ services:
       # in continuous draw than the bursty LLM work gains.
       NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
       OLLAMA_NUM_PARALLEL: "1"
-      OLLAMA_MAX_LOADED_MODELS: "2"
+      # HA's pinned gemma4:e4b + gemma4:12b-32k (ZeroClaw/Open WebUI/Karakeep)
+      # + nomic-embed-text (ZeroClaw memory) must coexist without evicting HA's
+      # model (~3.4 + 8.1 + 0.3 GB on the 16 GB RTX 5000).
+      OLLAMA_MAX_LOADED_MODELS: "3"
       # Default context floor so a model reached without an explicit num_ctx
       # doesn't silently sit at 4k. Per-model num_ctx (24k for the 14B-Q6) is set
       # in OpenWebUI's Advanced Params and overrides this.
