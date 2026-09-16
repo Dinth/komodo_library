@@ -1,0 +1,37 @@
+From: Michal Gawronski-Kot <michal@gawronskikot.com>
+Subject: [PATCH] fix(mcp): skip server notifications when reading an SSE tool response
+
+Local komodo_library patch on top of v0.8.5 (not upstream). Streamable-HTTP
+servers may emit notifications/* frames before the JSON-RPC response;
+JsonRpcResponse has all-optional fields so such a frame parsed as an empty
+response and the tool call failed with "outcome unknown" (Home Assistant
+ha_search, ~26s with a progress frame at ~1s).
+---
+--- a/crates/zeroclaw-tools/src/mcp_transport.rs
++++ b/crates/zeroclaw-tools/src/mcp_transport.rs
+@@ -1914,7 +1914,24 @@
+                 continue;
+             }
+             let json_str = extract_json_from_sse_text(trimmed);
+-            if let Ok(resp) = serde_json::from_str::<JsonRpcResponse>(json_str.as_ref()) {
++            // Local patch 0003 (komodo_library): skip server-initiated frames.
++            // A server may interleave `notifications/*` (e.g. progress logging)
++            // on the same stream before the response; those parse into
++            // `JsonRpcResponse` with every field `None` because `id`, `result`
++            // and `error` are all optional, so returning the first parseable
++            // frame surfaced a bogus empty response and the tool call failed
++            // with "outcome unknown". Home Assistant's ha_search does exactly
++            // this. Keep reading until a frame carries `id`, `result` or
++            // `error`.
++            if let Ok(value) = serde_json::from_str::<serde_json::Value>(json_str.as_ref())
++                && value.get("method").is_some()
++                && value.get("id").is_none()
++            {
++                continue;
++            }
++            if let Ok(resp) = serde_json::from_str::<JsonRpcResponse>(json_str.as_ref())
++                && (resp.id.is_some() || resp.result.is_some() || resp.error.is_some())
++            {
+                 return Ok(Some(resp));
+             }
+             continue;
