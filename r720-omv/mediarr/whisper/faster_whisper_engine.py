@@ -28,6 +28,11 @@
 #    passage Whisper leaves unpunctuated became a 10s wall of text. Cues now
 #    break after sentence punctuation, on a >=1s pause between words, or before
 #    84 chars / 7s. Segments without word timings are left as they are.
+# 4. A punctuated initial_prompt is used when the request has none. With
+#    condition_on_previous_text on, Whisper keeps whatever style the first
+#    window has: 009-1 S01E06 came out 20% unpunctuated on one run and 100%
+#    lowercase with no punctuation on the next, same settings. Priming the
+#    first window with normal sentence punctuation is the standard remedy.
 #
 # This file is tied to v1.10.0 (faster-whisper 1.2.1). On an image bump,
 # re-diff both the engine file and find_alignment before deploying.
@@ -131,6 +136,9 @@ _fw_transcribe.WhisperModel.find_alignment = _find_alignment_guarded
 
 from dataclasses import replace
 
+# Primes Whisper's first window with normal sentence punctuation (header item 4).
+DEFAULT_INITIAL_PROMPT = "Hello. Welcome back, everyone! Let's begin."
+
 # Readable-subtitle limits: two 42-char lines, ~7s on screen, break on a real pause.
 CUE_MAX_CHARS = 84
 CUE_MAX_SECONDS = 7.0
@@ -208,8 +216,8 @@ class FasterWhisperASR(ASRModel):
         options_dict = {"task": task}
         if language:
             options_dict["language"] = language
-        if initial_prompt:
-            options_dict["initial_prompt"] = initial_prompt
+        # Bazarr never sends a prompt; default to punctuated text (see header).
+        options_dict["initial_prompt"] = initial_prompt or DEFAULT_INITIAL_PROMPT
         # Forced regardless of the request: Bazarr cannot pass these (see header).
         options_dict["vad_filter"] = True
         options_dict["word_timestamps"] = True
