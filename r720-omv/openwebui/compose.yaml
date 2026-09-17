@@ -267,12 +267,13 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/metrics || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    # No healthcheck on purpose: the image is distroless — no shell and no
+    # wget — so any CMD-SHELL/CMD probe fails regardless of service state and
+    # Docker then reports the container unhealthy forever (32,456 failures over
+    # 11 days while the proxy was serving fine). Its own depends_on ollama
+    # (condition: service_healthy) is unaffected, and nothing depends on THIS
+    # container's health: no other service waits on it and it carries no
+    # autoheal label.
     logging:
       driver: json-file
       options:
