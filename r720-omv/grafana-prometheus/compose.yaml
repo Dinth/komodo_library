@@ -62,6 +62,8 @@ services:
     hostname: grafana
     ipc: private
     mem_limit: 1G
+    # Above the 1024 default so alert evaluation isn't starved under load.
+    cpu_shares: 2048
     # Pin id.* to Traefik on the LAN so Grafana's OIDC back-channel calls (token,
     # userinfo, JWKS) never depend on external DNS / NAT-reflection — same rationale
     # as the WUD stack. Without this, OIDC login can fail intermittently after a
@@ -153,6 +155,9 @@ services:
     hostname: prometheus
     ipc: private
     mem_limit: 4g
+    # Above the 1024 default: scraping and rule evaluation must stay on time,
+    # or a busy host manufactures its own "target down" alerts.
+    cpu_shares: 2048
     networks:
       - monitoring
       # Joined so Prometheus can scrape Traefik's /metrics on traefik:8080 (that
@@ -208,6 +213,9 @@ services:
     hostname: node-exporter
     ipc: private
     mem_limit: 128M
+    # Needs almost no CPU but must answer inside the 10s scrape timeout. Weight
+    # it high: losing the host exporter blinds us exactly when the box is busy.
+    cpu_shares: 4096
     networks:
       - monitoring
     ports: []
@@ -287,6 +295,8 @@ services:
         max-size: "5m"
         max-file: "2"
     mem_limit: 1g
+    # As node-exporter: keep container visibility alive under run-queue pressure.
+    cpu_shares: 4096
 
   dcgm-exporter:
     container_name: dcgm-exporter

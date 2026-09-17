@@ -23,6 +23,10 @@ services:
     runtime: nvidia
     shm_size: "16gb"
     mem_limit: 32G
+    # Real-time path: above the 1024 default so the detect/ffmpeg processes keep
+    # their deadlines during a host fork stampede, which is what turns into
+    # "camera has stopped reporting" alerts.
+    cpu_shares: 4096
     cap_add:
       - AUDIT_WRITE
       - CHOWN
