@@ -36,10 +36,12 @@ services:
       ALLOW_EMPTY_PASSWORD: "no"
       VALKEY_PASSWORD: "${NEXTCLOUD_VALKEY_PASS}"
     healthcheck:
+      # Fast probing only while starting (gates depends_on), 30s once healthy.
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
-      start_period: 5s
+      start_period: 10s
+      start_interval: 1s
       timeout: 3s
-      interval: 1s
+      interval: 30s
       retries: 5
     volumes:
       - /opt/docker/nextcloud/valkey_data:/data

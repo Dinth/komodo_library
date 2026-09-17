@@ -127,10 +127,12 @@ services:
       - no-new-privileges:true
     mem_limit: 128M
     healthcheck:
+      # Fast probing only while starting (gates depends_on), 30s once healthy.
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
-      start_period: 5s
+      start_period: 10s
+      start_interval: 1s
       timeout: 3s
-      interval: 1s
+      interval: 30s
       retries: 5
     volumes:
       - /opt/docker/immich/valkey-data:/data
