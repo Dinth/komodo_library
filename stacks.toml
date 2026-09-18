@@ -258,11 +258,15 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 name = "ebusd"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
-server = "r720-omv"
+# Moved off r720-omv 2026-09-18. ebusd talks to the eBUS adapter over TCP
+# (ens:10.25.0.8:9999) and publishes to MQTT on 10.10.1.11, so it has no
+# local hardware or socket dependency — and heating control has no business
+# sharing a host that spent two days power-limited to 187 MHz.
+server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
-run_directory = "r720-omv/ebusd"
+run_directory = "r230-nixos/ebusd"
 environment = """
 EBUSD_MQTTUSER="[[MQTT_USERNAME]]"
 EBUSD_MQTTPASS="[[MQTT_PASSWORD]]"
