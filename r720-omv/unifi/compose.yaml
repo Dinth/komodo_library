@@ -118,8 +118,7 @@ services:
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
       # Host header allow-list for mcp's own HTTP server, published on 5134.
-      # Follows the stack to r230, so 10.10.1.12.
-      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.12:*,localhost:*,127.0.0.1:*"
+      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13:*,localhost:*,127.0.0.1:*"
     ports:
       - "5134:3000"
     depends_on:

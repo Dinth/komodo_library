@@ -1186,21 +1186,17 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 name = "unifi"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
-# Moved off r720-omv 2026-09-19, organisationally: network management belongs
-# with the other infrastructure services on r230.
-#
-# NOT a drop-in move. Every adopted AP and switch has its inform URL pointed
-# at r720 (the controller publishes 8080 on host port 9080, so the URL is
-# http://10.10.1.13:9080/inform). After the move they will keep informing to
-# the old address and show as disconnected until each is re-pointed — either
-# `set-inform http://10.10.1.12:9080/inform` over SSH per device, or a DNS
-# override so the existing name resolves to r230. Also carries 1.6 GB of
-# state in /opt/docker/unifi that must be copied before first deploy.
-server = "r230-nixos"
+# Migration to r230 attempted 2026-09-19 and reverted the same night: the
+# controller re-initialised its database on every start because the restored
+# mongo data was paired with a wizard-created /config whose system.properties
+# said is_default=true. Data was recovered from restic snapshot ac7fb1ff
+# (backrest, 03:02 that morning) and the stack put back here. Retry via a .unf
+# export/restore rather than a file-level volume copy.
+server = "r720-omv"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
-run_directory = "r230-nixos/unifi"
+run_directory = "r720-omv/unifi"
 environment = """
 MONGO_PASS=[[UNIFI_MONGO_PASS]]
 TZ=[[TZ]]
