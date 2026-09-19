@@ -1,8 +1,8 @@
 x-versions:
   gluetun: &gluetun-version "qmcgaw/gluetun:v3.41.3"
   qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.2.1"
-  flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.0"
-  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.5.2"
+  flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
+  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.6.5"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.0"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
@@ -11,9 +11,9 @@ x-versions:
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
-  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.5"
-  radarr: &radarr-version "lscr.io/linuxserver/radarr:6.3.0"
-  sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.19"
+  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.6"
+  radarr: &radarr-version "lscr.io/linuxserver/radarr:6.4.4"
+  sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.20"
 services:
   #############################################################################
   # Gluetun VPN Gateway
