@@ -1185,11 +1185,21 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 name = "unifi"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
-server = "r720-omv"
+# Moved off r720-omv 2026-09-19, organisationally: network management belongs
+# with the other infrastructure services on r230.
+#
+# NOT a drop-in move. Every adopted AP and switch has its inform URL pointed
+# at r720 (the controller publishes 8080 on host port 9080, so the URL is
+# http://10.10.1.13:9080/inform). After the move they will keep informing to
+# the old address and show as disconnected until each is re-pointed — either
+# `set-inform http://10.10.1.12:9080/inform` over SSH per device, or a DNS
+# override so the existing name resolves to r230. Also carries 1.6 GB of
+# state in /opt/docker/unifi that must be copied before first deploy.
+server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
-run_directory = "r720-omv/unifi"
+run_directory = "r230-nixos/unifi"
 environment = """
 MONGO_PASS=[[UNIFI_MONGO_PASS]]
 TZ=[[TZ]]
@@ -1322,10 +1332,20 @@ MYANIMELIST_SECRET=[[MYANIMELIST_SECRET]]
 name = "zigbee2mqtt"
 tags = ["stacks"]
 [stack.config]
-server = "r720-omv"
+# Moved off r720-omv 2026-09-19. Same rationale as ebusd: the coordinator is
+# network-attached (configuration.yaml -> port: tcp://10.25.0.100:7638) with
+# no `devices:` entry, and MQTT is remote (10.10.1.11:1883), so nothing ties
+# it to r720. Home automation should not share a host that spent two days
+# power-limited to 187 MHz.
+#
+# Cutover: copy /opt/docker/zigbee2mqtt/zigbee2mqtt_data (158 MB, holds the
+# device pairing database) BEFORE first deploy, and stop the r720 instance
+# first — the coordinator accepts a single TCP connection, so two running
+# instances will fight over it.
+server = "r230-nixos"
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
-run_directory = "r720-omv/zigbee2mqtt"
+run_directory = "r230-nixos/zigbee2mqtt"
 environment = """
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
