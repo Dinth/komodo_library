@@ -4,7 +4,7 @@ x-versions:
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.6.5"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
-  bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.0"
+  bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.1"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
   # against the new image (patched copy is bind-mounted over upstream's).
   whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
