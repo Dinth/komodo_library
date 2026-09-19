@@ -1,5 +1,5 @@
 x-versions:
-  navidrome: &navidrome-version "deluan/navidrome:0.63.2"
+  navidrome: &navidrome-version "deluan/navidrome:0.64.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -36,10 +36,51 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 512M
+    environment:
+      # Experimental Jellyfin Music API, new in 0.64.0. Navidrome answers a
+      # subset of Jellyfin's REST API at /jellyfin on the same port, so
+      # Jellyfin music clients (Finamp, Jellify, Feishin, Symfonium) can point
+      # at Navidrome instead of the real Jellyfin server — same library, same
+      # users, same scrobbling. Off by default upstream.
+      ND_JELLYFIN_ENABLED: "true"
+      # Default is "Navidrome <version>", which changes on every upgrade and
+      # shows up as a renamed server in clients. Pin it.
+      ND_JELLYFIN_SERVERNAME: "Navidrome"
+      # ND_JELLYFIN_EXPOSEDPUBLICUSERS is deliberately left unset: it lists
+      # usernames on the client login screen, and this router is public.
+      #
+      # Scheduled DB backups. Play counts, ratings, starred items and playlists
+      # live only in this SQLite DB — none of it is reconstructible from the
+      # files under /music. Backrest snapshots /opt/docker, but copying a live
+      # SQLite file can catch it mid-write; this writes a consistent snapshot
+      # for Backrest to pick up. Cron runs in the container's TZ, hence TZ below.
+      TZ: "${TZ}"
+      ND_BACKUP_PATH: "/backup"
+      ND_BACKUP_SCHEDULE: "0 4 * * *"
+      ND_BACKUP_COUNT: "7"
+      # Sorts "Track 2" before "Track 10" instead of lexically. No rescan
+      # needed — it is a NATSORT collation applied at query time, not a stored
+      # sort key. That is also the catch: the collation cannot use the existing
+      # indexes, and upstream's own benchmarks show sort-heavy queries slowing
+      # by up to ~59x, which is why it ships off. Flip to "false" if browsing
+      # large artist/album lists gets sluggish.
+      ND_ENABLENATURALSORTING: "true"
+    healthcheck:
+      # /ping is unauthenticated. curl only exists in the image from 0.64.0
+      # onward (it was added for exactly this), so this check is tied to the
+      # version bump above — do not backport it to an older tag.
+      test: ["CMD", "curl", "-fs", "http://localhost:4533/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # Generous: an unhealthy container drops out of Traefik, and first start
+      # after the 0.64 ID migration is much slower than a normal boot.
+      start_period: 120s
     ports:
       - 4533:4533/tcp
     volumes:
       - /opt/docker/navidrome/navidrome_data:/data
+      - /opt/docker/navidrome/navidrome_backup:/backup
       - /Data/Music:/music:ro
     networks:
       - navidrome
