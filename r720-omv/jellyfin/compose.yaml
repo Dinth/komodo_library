@@ -3,7 +3,7 @@ x-versions:
   # upstream versions, and 12.0 dropped the patch component — there is no
   # `linuxserver/jellyfin:12.0` tag to pin. Use the full build tag. It is also
   # the immutable one: the bare alias floats across ls builds.
-  jellyfin: &jellyfin-version "linuxserver/jellyfin:12.0ubu2604-ls48"
+  jellyfin: &jellyfin-version "linuxserver/jellyfin:12.1ubu2604-ls50"
 
 x-logging: &default-logging
   driver: "json-file"
