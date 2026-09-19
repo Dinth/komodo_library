@@ -105,14 +105,21 @@ services:
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
       TZ: "${TZ}"
-      UNIFI_HOST: "10.10.1.13"
+      # Reach the controller by service name rather than the host IP. All three
+      # services share Compose's default network (this file declares none), so
+      # this resolves directly instead of hairpinning out to the host and back
+      # in via the published 8443 — and it survives the stack moving hosts,
+      # which the old hardcoded 10.10.1.13 did not.
+      UNIFI_HOST: "unifi-network-application"
       UNIFI_USERNAME: "mcp"
       UNIFI_PASSWORD: "${UNIFI_MCP_PASS}"
       UNIFI_PORT: "8443"
       UNIFI_SITE: "default"
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
-      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.13:*,localhost:*,127.0.0.1:*"
+      # Host header allow-list for mcp's own HTTP server, published on 5134.
+      # Follows the stack to r230, so 10.10.1.12.
+      UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.12:*,localhost:*,127.0.0.1:*"
     ports:
       - "5134:3000"
     depends_on:

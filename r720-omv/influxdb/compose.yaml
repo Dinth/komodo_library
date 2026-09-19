@@ -125,8 +125,12 @@ services:
       - no-new-privileges:true
     environment:
       TZ: "${TZ}"
-      # UniFi Controller configuration
-      UP_UNIFI_CONTROLLER_0_URL: "https://10.10.1.13:8443"
+      # UniFi Controller configuration.
+      # 10.10.1.12 (r230), not .13: the unifi stack moved to r230-nixos on
+      # 2026-09-19 while unpoller stayed here, so this crosses hosts. Deploy
+      # this stack only AFTER the controller is up on r230 — pointing it at an
+      # address with nothing listening just gaps the UniFi metrics until then.
+      UP_UNIFI_CONTROLLER_0_URL: "https://10.10.1.12:8443"
       UP_UNIFI_CONTROLLER_0_USER: "telegraf_monitor"
       UP_UNIFI_CONTROLLER_0_PASS: "${UNPOLLER_UNIFI_PASS}"
       UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "false"
