@@ -1,5 +1,5 @@
 x-versions:
-  cronicle: &cronicle-version "peterbuga/cronicle-docker:0.9.133"
+  cronicle: &cronicle-version "peterbuga/cronicle-docker:0.9.134"
 
 x-logging: &default-logging
   driver: "json-file"
