@@ -163,7 +163,10 @@ name = "backrest-r230"
 tags = ["stacks"]
 [stack.config]
 # Second Backrest instance, backing up r230's own /opt/docker. Mirrors the
-# r720-omv stack, minus the DB-dump hooks (no database runs on this host).
+# r720-omv stack, socket proxy and mongodump hook included: unifi moved here
+# on 2026-09-20, so /opt/docker/unifi/unifi_db is a live MongoDB in the backup
+# source. DOCKER_SOCKET_GID is pinned literally for the same reason as
+# wud-socket-proxy-r230 and autoheal-r230.
 #
 # The restic repo lives on r720's [IT] SMB share. Docker mounts the share
 # itself via a cifs volume, so nothing outside this repo has to be configured
@@ -179,6 +182,7 @@ repo = "Dinth/komodo_library"
 run_directory = "r230-nixos/backrest"
 environment = """
 TZ=[[TZ]]
+DOCKER_SOCKET_GID=131
 SIGNAL_PHONE_NUMBER=[[SIGNAL_PHONE_NUMBER]]
 SIGNAL_TECH_ID=[[SIGNAL_TECH_ID]]
 SMB_BACKUP_USER=[[SMB_BACKUP_USER]]

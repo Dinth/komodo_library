@@ -1,4 +1,5 @@
 x-versions:
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
   backrest: &backrest-version "garethgeorge/backrest:v1.14.1-alpine"
 
 x-logging: &default-logging
@@ -8,11 +9,61 @@ x-logging: &default-logging
     max-file: "3"
 
 services:
+  # Scoped Docker API for Backrest's pre-backup DB-dump hooks (docker exec into
+  # unifi-db). Read-only socket; only containers/exec endpoints.
+  #
+  # The existing wud-socket-proxy-r230 cannot serve this: its -allowfrom is an
+  # IP list (10.10.1.13, 10.10.1.11, 10.40.0.10) and a container on this host
+  # arrives from the docker bridge, and its allowPOST covers containers/* but
+  # not /exec/<id>/start, which `docker exec` needs.
+  backrest-socket-proxy:
+    image: *socket-proxy-version
+    container_name: backrest-socket-proxy
+    ipc: private
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=backrest'
+      - '-listenip=0.0.0.0'
+      # docker-cli prefixes paths with the negotiated API version (e.g.
+      # /v1.52/containers/...), so allow an optional /vX.Y/ prefix or every
+      # exec call 403s.
+      - '-allowGET=/(v[0-9.]+/)?(containers/.*|exec/.*|version|info|_ping)'
+      - '-allowPOST=/(v[0-9.]+/)?(containers/.*|exec/.*)'
+      - '-allowHEAD=/(v[0-9.]+/)?_ping'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+      - '-allowhealthcheck'
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Host-specific: r230's docker group GID is not the estate-wide
+    # [[DOCKER_SOCKET_GID]], so stacks.toml pins it literally, as
+    # wud-socket-proxy-r230 and autoheal-r230 already do.
+    user: "65534:${DOCKER_SOCKET_GID}"
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - backrest
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: 'Docker Socket Proxy - Backrest (r230-nixos)'
+      wud.display.icon: 'mdi:connection'
+
   # Mirror of the r720-omv backrest stack for this host's own /opt/docker.
-  # Deliberately simpler than r720's: none of the four stacks on r230
-  # (adguardhome, ebusd, wud-socket-proxy, zigbee2mqtt) runs a database, so
-  # there are no pre-backup dump hooks, and therefore no socket proxy and no
-  # /dumps mount. Add both back here if a DB ever lands on this host.
   backrest:
     image: *backrest-version
     container_name: backrest
@@ -31,8 +82,16 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 2G
+    depends_on:
+      backrest-socket-proxy:
+        condition: service_healthy
     environment:
       TZ: "${TZ}"
+      # docker-cli (bundled in the -alpine image) talks to the scoped proxy so
+      # the pre-backup hook can `docker exec unifi-db mongodump`. unifi moved
+      # to this host on 2026-09-20 (86e1d514), so /userdata/unifi/unifi_db is a
+      # LIVE MongoDB -- a file-level snapshot of it is not consistent.
+      DOCKER_HOST: "tcp://backrest-socket-proxy:2375"
       # Signal notification hook. r720 publishes signal-cli-rest-api on 3162,
       # but the `signal-rest-api` bridge the r720 backrest joins is host-local,
       # so this instance reaches it over the LAN instead. The hook script
@@ -55,6 +114,10 @@ services:
       - /opt/docker/backrest/config:/config
       - /opt/docker/backrest/data:/data
       - /opt/docker/backrest/cache:/cache
+      # DB dumps land here (written by the pre-backup hook); included in the
+      # backup because it lives under /opt/docker -> /userdata. NOT under
+      # backrest/ which is excluded.
+      - /opt/docker/db-dumps:/dumps
       # Backup SOURCE - this host's container bind-mount data, read-only.
       # Exclude /userdata/backrest in the Backrest plan, as r720 does.
       - /opt/docker:/userdata:ro
