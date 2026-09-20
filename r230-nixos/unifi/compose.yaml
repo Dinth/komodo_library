@@ -127,6 +127,10 @@ services:
       UNIFI_VERIFY_SSL: "false"
       UNIFI_MCP_HTTP_ENABLED: "true"
       # Host header allow-list for mcp's own HTTP server, published on 5134.
+      # Upstream defaults UNIFI_MCP_HOST to 127.0.0.1, so the server listened only
+      # inside the container and every connection to the published :5134 was
+      # refused — the long-standing "connection refused", on omv and here.
+      UNIFI_MCP_HOST: "0.0.0.0"
       UNIFI_MCP_ALLOWED_HOSTS: "10.10.1.12:*,localhost:*,127.0.0.1:*"
     ports:
       - "5134:3000"
