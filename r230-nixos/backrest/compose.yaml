@@ -58,18 +58,10 @@ services:
       # Backup SOURCE - this host's container bind-mount data, read-only.
       # Exclude /userdata/backrest in the Backrest plan, as r720 does.
       - /opt/docker:/userdata:ro
-      # Restic repository destination: r720's /Data/IT, exported over SMB and
-      # cifs-mounted on this host by NixOS at /mnt/r720-it.
-      #
-      # Its own repo directory, NOT r720's /Data/IT/Docker_backups/backrest:
-      # two Backrest instances managing one restic repo collide on prune.
-      #
-      # The NixOS mount MUST be a boot-time mount (nofail, _netdev) and NOT
-      # x-systemd.automount. Docker resolves bind mounts at container start and
-      # later mount events do not propagate into the container's namespace, so
-      # an automount that has not fired by then leaves /repos permanently empty
-      # inside the container for the life of that container.
-      - /mnt/r720-it/Docker_backups/backrest-r230:/repos
+      # Restic repository destination - see the `repos` volume below. Docker
+      # mounts r720's SMB share itself, so an unreachable share fails the
+      # container rather than silently presenting an empty directory.
+      - repos:/repos
       - /etc/localtime:/etc/localtime:ro
     networks:
       - backrest
@@ -80,6 +72,37 @@ services:
       wud.display.name: "Backrest (r230-nixos)"
       wud.display.icon: "sh:backrest"
       wud.link.template: "https://github.com/garethgeorge/backrest/releases/tag/v$${major}.$${minor}.$${patch}"
+
+volumes:
+  # The restic repository, on r720's [IT] SMB share (/Data/IT on that host).
+  #
+  # Docker mounts the share itself rather than relying on a host mount managed
+  # outside this repo. That is deliberate: if the share is unreachable the
+  # volume fails and the CONTAINER REFUSES TO START. A host bind mount fails
+  # the other way -- Docker resolves bind sources at container start and later
+  # mount events do not propagate into the namespace, so a mount that is not up
+  # in time leaves /repos an empty local directory for the life of the
+  # container. Backrest would then init a fresh repository on r230's root disk
+  # and report healthy backups going nowhere near r720.
+  #
+  # device points at the repo subdirectory, not the share root, so /repos is
+  # exactly the repository. cifs supports a path after the share name.
+  #
+  # Its own directory, NOT .../Docker_backups/backrest, which is r720's own
+  # repo: two Backrest instances managing one restic repo collide on prune.
+  #
+  # An IP is required -- the kernel cifs module cannot resolve hostnames, and
+  # there is no mount.cifs helper on this host to do it (Docker's local driver
+  # calls mount(2) directly, which is why none is needed).
+  #
+  # uid/gid 0 because backrest runs as root; on-disk ownership on r720 is
+  # decided by the SMB user, which is `backups` (valid_users on the [IT] share).
+  repos:
+    driver: local
+    driver_opts:
+      type: cifs
+      device: "//10.10.1.13/IT/Docker_backups/backrest-r230"
+      o: "username=${SMB_BACKUP_USER},password=${SMB_BACKUP_PASS},uid=0,gid=0,file_mode=0600,dir_mode=0700,vers=3.1.1"
 
 networks:
   backrest:

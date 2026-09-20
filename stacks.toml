@@ -165,10 +165,13 @@ tags = ["stacks"]
 # Second Backrest instance, backing up r230's own /opt/docker. Mirrors the
 # r720-omv stack, minus the DB-dump hooks (no database runs on this host).
 #
-# The restic repo still lives on r720: /Data/IT is exported over SMB and
-# cifs-mounted here at /mnt/r720-it by the NixOS host config, which is NOT
-# managed in this repo. The mount must exist and be a boot-time mount before
-# first deploy -- see the /repos comment in the compose file.
+# The restic repo lives on r720's [IT] SMB share. Docker mounts the share
+# itself via a cifs volume, so nothing outside this repo has to be configured
+# on the host, and an unreachable share fails the container instead of leaving
+# /repos an empty local directory -- see the volume comment in compose.yaml.
+#
+# SMB_BACKUP_USER / SMB_BACKUP_PASS are the `backups` account from the [IT]
+# share's valid_users. Both must exist as Komodo variables before first deploy.
 server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
@@ -178,6 +181,8 @@ environment = """
 TZ=[[TZ]]
 SIGNAL_PHONE_NUMBER=[[SIGNAL_PHONE_NUMBER]]
 SIGNAL_TECH_ID=[[SIGNAL_TECH_ID]]
+SMB_BACKUP_USER=[[SMB_BACKUP_USER]]
+SMB_BACKUP_PASS=[[SMB_BACKUP_PASS]]
 """
 
 ##
