@@ -6,7 +6,7 @@ x-versions:
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.6.1-4.8.4-distroless"
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
   snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.30.1"
-  mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:1.4.1"
+  mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:1.5.1"
 
 services:
   grafana:
