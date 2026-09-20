@@ -1237,17 +1237,25 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 name = "unifi"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
-# Migration to r230 attempted 2026-09-19 and reverted the same night: the
-# controller re-initialised its database on every start because the restored
-# mongo data was paired with a wizard-created /config whose system.properties
-# said is_default=true. Data was recovered from restic snapshot ac7fb1ff
-# (backrest, 03:02 that morning) and the stack put back here. Retry via a .unf
-# export/restore rather than a file-level volume copy.
-server = "r720-omv"
+# Moved off r720-omv 2026-09-20, second attempt. The 2026-09-19 attempt failed
+# because compose mounted the controller config as `./config` — a path relative
+# to Komodo's per-host stack checkout, which the repo does not track. On a new
+# host that directory was created empty, UniFi ran its setup wizard, wrote
+# is_default=true and wiped the correctly-restored Mongo database. Fixed in
+# 745184ed: /config is now /opt/docker/unifi/unifi_config, an absolute path that
+# travels with the data and is covered by Backrest. Verified on r720 before this
+# move — controller restarted on the new mount with uuid f426b4ab intact.
+#
+# Cutover: copy BOTH /opt/docker/unifi/unifi_db and /opt/docker/unifi/unifi_config
+# with the stack stopped on r720. The APs already inform to 10.10.1.12 (Override
+# Inform Host, set during the first attempt), so no AP change is needed for this
+# direction — but they were adopted by r230's throwaway wizard database, so
+# expect to re-adopt them against the restored one.
+server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
-run_directory = "r720-omv/unifi"
+run_directory = "r230-nixos/unifi"
 environment = """
 MONGO_PASS=[[UNIFI_MONGO_PASS]]
 TZ=[[TZ]]
