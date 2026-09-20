@@ -1,0 +1,88 @@
+x-versions:
+  backrest: &backrest-version "garethgeorge/backrest:v1.14.1-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # Mirror of the r720-omv backrest stack for this host's own /opt/docker.
+  # Deliberately simpler than r720's: none of the four stacks on r230
+  # (adguardhome, ebusd, wud-socket-proxy, zigbee2mqtt) runs a database, so
+  # there are no pre-backup dump hooks, and therefore no socket proxy and no
+  # /dumps mount. Add both back here if a DB ever lands on this host.
+  backrest:
+    image: *backrest-version
+    container_name: backrest
+    hostname: backrest
+    ipc: private
+    restart: unless-stopped
+    # Backup tool: runs as root with DAC_READ_SEARCH so it can READ every file
+    # under /opt/docker regardless of owner/mode (0600 configs, service-owned
+    # data) without the broader DAC_OVERRIDE write-bypass. cap_drop ALL keeps
+    # the rest off.
+    user: "0:0"
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_READ_SEARCH
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2G
+    environment:
+      TZ: "${TZ}"
+      # Signal notification hook. r720 publishes signal-cli-rest-api on 3162,
+      # but the `signal-rest-api` bridge the r720 backrest joins is host-local,
+      # so this instance reaches it over the LAN instead. The hook script
+      # configured in the Backrest UI must use this variable rather than the
+      # internal `signal-rest-api` hostname it uses on r720.
+      SIGNAL_API_URL: "http://10.10.1.13:3162"
+      SIGNAL_PHONE_NUMBER: "${SIGNAL_PHONE_NUMBER}"
+      SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9898/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      - "9898:9898/tcp"
+    volumes:
+      # Backrest's own state (defaults baked into the image: BACKREST_DATA=/data,
+      # BACKREST_CONFIG=/config/config.json, XDG_CACHE_HOME=/cache)
+      - /opt/docker/backrest/config:/config
+      - /opt/docker/backrest/data:/data
+      - /opt/docker/backrest/cache:/cache
+      # Backup SOURCE - this host's container bind-mount data, read-only.
+      # Exclude /userdata/backrest in the Backrest plan, as r720 does.
+      - /opt/docker:/userdata:ro
+      # Restic repository destination: r720's /Data/IT, exported over SMB and
+      # cifs-mounted on this host by NixOS at /mnt/r720-it.
+      #
+      # Its own repo directory, NOT r720's /Data/IT/Docker_backups/backrest:
+      # two Backrest instances managing one restic repo collide on prune.
+      #
+      # The NixOS mount MUST be a boot-time mount (nofail, _netdev) and NOT
+      # x-systemd.automount. Docker resolves bind mounts at container start and
+      # later mount events do not propagate into the container's namespace, so
+      # an automount that has not fired by then leaves /repos permanently empty
+      # inside the container for the life of that container.
+      - /mnt/r720-it/Docker_backups/backrest-r230:/repos
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - backrest
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+-alpine$$'
+      wud.display.name: "Backrest (r230-nixos)"
+      wud.display.icon: "sh:backrest"
+      wud.link.template: "https://github.com/garethgeorge/backrest/releases/tag/v$${major}.$${minor}.$${patch}"
+
+networks:
+  backrest:
+    driver: bridge
+    external: false
+    name: backrest

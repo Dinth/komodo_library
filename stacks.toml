@@ -79,6 +79,33 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 ##
 
 [[stack]]
+name = "autoheal-r230"
+tags = ["stacks"]
+[stack.config]
+# Second autoheal instance for r230. Identical compose to the r720 stack,
+# including the pinned image digest, so both hosts run the same build.
+#
+# DOCKER_SOCKET_GID is pinned literally rather than via [[DOCKER_SOCKET_GID]]:
+# r230's docker group GID differs from the estate-wide value, exactly as
+# wud-socket-proxy-r230 already handles it.
+#
+# Inert until a container on r230 carries `autoheal: "true"` — the instance
+# is opt-in by label. All five r230 stacks define a healthcheck and so are
+# eligible.
+server = "r230-nixos"
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r230-nixos/autoheal"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+DOCKER_SOCKET_GID=131
+"""
+
+##
+
+[[stack]]
 name = "babybuddy"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
@@ -125,6 +152,30 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/backrest"
 environment = """
 DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
+SIGNAL_PHONE_NUMBER=[[SIGNAL_PHONE_NUMBER]]
+SIGNAL_TECH_ID=[[SIGNAL_TECH_ID]]
+"""
+
+##
+
+[[stack]]
+name = "backrest-r230"
+tags = ["stacks"]
+[stack.config]
+# Second Backrest instance, backing up r230's own /opt/docker. Mirrors the
+# r720-omv stack, minus the DB-dump hooks (no database runs on this host).
+#
+# The restic repo still lives on r720: /Data/IT is exported over SMB and
+# cifs-mounted here at /mnt/r720-it by the NixOS host config, which is NOT
+# managed in this repo. The mount must exist and be a boot-time mount before
+# first deploy -- see the /repos comment in the compose file.
+server = "r230-nixos"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r230-nixos/backrest"
+environment = """
+TZ=[[TZ]]
 SIGNAL_PHONE_NUMBER=[[SIGNAL_PHONE_NUMBER]]
 SIGNAL_TECH_ID=[[SIGNAL_TECH_ID]]
 """
