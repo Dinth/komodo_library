@@ -73,7 +73,16 @@ services:
       MEM_LIMIT: "1024"
       MEM_STARTUP: "512"
     volumes:
-      - ./config:/config
+      # Absolute, NOT `./config`. A relative bind resolves against Komodo's
+      # per-host stack checkout (/etc/komodo/... on r720-omv, /var/lib/komodo/...
+      # on r230-nixos) and the repo tracks no config/ directory, so moving this
+      # stack to another host handed UniFi an EMPTY /config. It then ran the
+      # setup wizard, wrote is_default=true, concluded it was a fresh install
+      # and wiped the (correctly restored) Mongo database -- the 2026-09-19
+      # migration failure. The relative path also kept the live config outside
+      # /opt/docker, so Backrest never captured it: the directory it did back up
+      # here went stale on 2025-04-25 and carries a different controller uuid.
+      - /opt/docker/unifi/unifi_config:/config
     ports:
       - 8443:8443
       - 3478:3478/udp
