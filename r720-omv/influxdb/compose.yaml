@@ -125,10 +125,12 @@ services:
       - no-new-privileges:true
     environment:
       TZ: "${TZ}"
-      # UniFi Controller configuration. Back to .13: the 2026-09-19 move of the
-      # unifi stack to r230 was reverted the same night, so controller and
-      # unpoller are co-located here again.
-      UP_UNIFI_CONTROLLER_0_URL: "https://10.10.1.13:8443"
+      # UniFi Controller configuration. .12 (r230-nixos): the unifi stack moved
+      # there for good on 2026-09-20 (86e1d514) once the `./config` mount bug
+      # that wiped the database on the first attempt was fixed. unpoller stays
+      # here with influxdb and reaches the controller across the LAN, so this
+      # cannot use the container name the way unifi-network-mcp does.
+      UP_UNIFI_CONTROLLER_0_URL: "https://10.10.1.12:8443"
       UP_UNIFI_CONTROLLER_0_USER: "telegraf_monitor"
       UP_UNIFI_CONTROLLER_0_PASS: "${UNPOLLER_UNIFI_PASS}"
       UP_UNIFI_CONTROLLER_0_VERIFY_SSL: "false"
