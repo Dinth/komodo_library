@@ -111,6 +111,12 @@ services:
     tmpfs:
       - /tmp
       - /var/cache/nginx
+    volumes:
+      # Written by the cronicle stack's firefly_import_status job. Served back
+      # to the boards so the Firefly Importer tile can show one row per bank;
+      # nothing else on the LAN needs to serve it, and externally this path is
+      # behind the same Authelia chain as the boards.
+      - /opt/docker/homepage/status:/srv/status:ro
     depends_on:
       - homepage-michal
       - homepage-paulina
@@ -192,6 +198,16 @@ configs:
               access_log off;
               add_header Content-Type text/plain;
               return 200 "ok\n";
+          }
+
+          # Firefly import status for the boards' Firefly Importer tile.
+          # Exact-match location so it is matched before `location /`, which
+          # would otherwise 403 it: Homepage's widget proxy is server-side and
+          # carries no Remote-User.
+          location = /status/firefly_imports.json {
+              alias /srv/status/firefly_imports.json;
+              default_type application/json;
+              add_header Cache-Control "no-store" always;
           }
 
           location / {
