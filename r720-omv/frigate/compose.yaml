@@ -87,7 +87,7 @@ services:
       - /opt/docker/frigate/frigate_storage/frigate.db-wal:/media/frigate/frigate.db-wal
       - /opt/docker/frigate/frigate_storage/backup.db:/media/frigate/backup.db
     tmpfs:
-      - /tmp:size=4G,mode=1777
+      - /tmp:size=8G,mode=1777
     networks:
       - frigate
       - traefik
