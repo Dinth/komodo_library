@@ -22,7 +22,7 @@ services:
     # GPU access non-privileged, so the device_ids pin actually restricts to GPU 0.
     runtime: nvidia
     shm_size: "16gb"
-    mem_limit: 32G
+    mem_limit: 40G
     # Real-time path: above the 1024 default so the detect/ffmpeg processes keep
     # their deadlines during a host fork stampede, which is what turns into
     # "camera has stopped reporting" alerts.
