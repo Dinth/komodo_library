@@ -50,6 +50,17 @@ services:
       PFSENSE_BACKUP_ENC: "${PFSENSE_BACKUP_ENC}"
       PFSENSE_BACKUP_DIR: "/pfsense-backups"
       PFSENSE_BACKUP_KEEP: "30"
+      # firefly_import_status also builds this month's spent/earned/bills rows
+      # for the Firefly III tile. It has to happen here rather than in a
+      # Homepage customapi URL because /api/v1/summary/basic REQUIRES start+end
+      # scoped to the current month and Homepage has no date templating, so a
+      # hardcoded URL would freeze on the month it was written in. The two PATs
+      # are existing Komodo variables (same ones the data importers use); the
+      # job degrades to empty summary rows without them rather than failing.
+      # Not on the fireflyiii network, hence the published port.
+      FIREFLY_URL: "http://10.10.1.13:4747"
+      FIREFLY_TOKEN_MICHAL: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
+      FIREFLY_TOKEN_PAULINA: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
     ports:
       - 3012:3012/tcp
     volumes:
