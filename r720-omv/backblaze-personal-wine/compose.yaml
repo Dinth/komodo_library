@@ -41,7 +41,7 @@ services:
     # uploads, zero failures. The cost of an OOM is the aborted run's wasted
     # work, not a stalled backup. Do not add bztransmit to the healthcheck for
     # this reason; bzserv.exe is the correct persistent process to probe.
-    mem_limit: 8G
+    mem_limit: 12G
     command: ['/init']
     environment:
       USER_ID: "${DOCKER_PUID}"
