@@ -46,7 +46,13 @@ services:
       POSTGRES_USER: "tandoor"
       POSTGRES_PASSWORD: "${TANDOOR_DB_PASSWORD}"
       POSTGRES_DB: "tandoor"
-      ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},127.0.0.1"
+      # 10.10.1.13 is here for the Homepage tandoor widget. That widget proxies
+      # server-side from the board container, which is not on the tandoor or
+      # traefik network and whose resolver returns ENODATA for the public name,
+      # so it has to come in on the published port - which makes the Host header
+      # "10.10.1.13:1244". Without it Django answers every API call with an empty
+      # 400 page, which reads exactly like a bad API token but is not one.
+      ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},10.10.1.13,127.0.0.1"
       GUNICORN_MEDIA: "1"
     depends_on:
       tandoor-postgres:
