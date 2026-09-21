@@ -160,7 +160,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512M
+    mem_limit: 2G
     command:
       - --no-sandbox
       - --disable-gpu
