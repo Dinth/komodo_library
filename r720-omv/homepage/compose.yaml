@@ -131,6 +131,14 @@ services:
       - homepage
       - traefik
     labels:
+      # Docker Compose does NOT hash a `configs:` block's CONTENT into the
+      # service's config-hash, so editing the nginx config below changes
+      # nothing compose can see and `up -d` leaves the old container running -
+      # a redeploy that looks green and silently does nothing (cost three
+      # redeploys on 2026-09-22). The content only lands at container CREATION.
+      # BUMP THIS whenever homepage_selector's content changes: it is part of
+      # the service definition, so it moves the hash and forces the recreate.
+      config.revision: "2"
       traefik.enable: "true"
       traefik.http.routers.homepage.rule: "Host(`fp.${DOMAIN_NAME}`)"
       traefik.http.routers.homepage.entrypoints: "websecure"
