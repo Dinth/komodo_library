@@ -1,5 +1,5 @@
 x-versions:
-  trek: &trek-version "mauriceboe/trek:4.2.1"
+  trek: &trek-version "mauriceboe/trek:4.3.1"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -49,7 +49,8 @@ services:
       # Required for OIDC: TREK reaches Authelia at id.${DOMAIN_NAME}, which the
       # traefik-network alias resolves to Traefik's internal (RFC-1918) IP. TREK's
       # SSRF guard blocks RFC-1918 by default, silently killing OIDC discovery
-      # (request never leaves the container). Also lets TREK reach LAN Immich etc.
+      # (request never leaves the container). Also required by the Dawarich addon
+      # and Paperless-ngx/Nextcloud document sync (4.3.0+), and LAN Immich.
       ALLOW_INTERNAL_NETWORK: "true"
       # --- Authelia SSO (OIDC) — 'trek' client registered in Authelia's
       # configuration.yml; redirect URI <APP_URL>/api/auth/oidc/callback. Scopes
@@ -88,7 +89,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "TREK"
       wud.display.icon: "sh-trek"
-      wud.link.template: "https://github.com/mauriceboe/TREK/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.template: "https://github.com/liketrek/TREK/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   trek:
