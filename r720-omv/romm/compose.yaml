@@ -1,5 +1,8 @@
 x-versions:
-  romm: &romm-version "rommapp/romm:5.2.0"
+  # Full image, not `-slim`: slim ships no local js-dos runtime (it falls back
+  # to jsDelivr, which this stack's CSP does not allow as a script source) and
+  # no FAKE-08 at all, so PICO-8 simply would not play.
+  romm: &romm-version "rommapp/romm:5.3.0"
   mariadb: &mariadb-version "linuxserver/mariadb:11.8.8"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls82"
@@ -61,7 +64,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          # 2 cores rather than 1: RomM 5.3.0 defaults to four API workers and
+          # four scan workers, so this database now serves four times the
+          # concurrent connections it was sized for.
+          cpus: '2.0'
           memory: 3g
         reservations:
           memory: 512m
@@ -156,7 +162,10 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 4G
+    # Raised from 4G for 5.3.0: four API workers plus four scan workers now run
+    # where one of each did, and a scan additionally content-hashes ROMs and
+    # extracts title IDs from binaries.
+    mem_limit: 6G
     environment:
       DB_HOST: "romm-mariadb"
       DB_NAME: "romm"
@@ -183,7 +192,30 @@ services:
       ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: "true"
       RESCAN_ON_FILESYSTEM_CHANGE_DELAY: "5"
       SCAN_TIMEOUT: "28800"
+      # Also drives 5.3.0's sort/filter-by-game-length in the gallery, which
+      # reads the HowLongToBeat main-story time a scan matched.
       HLTB_API_ENABLED: "true"
+      # 5.3.0 demoscene metadata providers, all off upstream by default. Worth
+      # having here specifically for the Amiga and Commodore 64 folders — CSDb
+      # is C64-only, Demozoo and Pouet also cover X68000 and PC Engine
+      # productions. Steam (STEAM_API_ENABLED) is deliberately left off: it
+      # only serves the win/linux/mac platforms, none of which exist here.
+      DEMOZOO_API_ENABLED: "true"
+      POUET_API_ENABLED: "true"
+      CSDB_API_ENABLED: "true"
+      # 5.3.0 library-aware recommendations: a nightly index built from this
+      # library's own metadata overlap and play history, surfaced as "Similar
+      # games" and a "Recommended for you" home row. Moved off the upstream
+      # 05:30 default so it never lands on the 05:00 Wednesday LaunchBox
+      # metadata refresh above, which is the heaviest job on this instance.
+      ENABLE_SCHEDULED_BUILD_RECOMMENDATIONS: "true"
+      SCHEDULED_BUILD_RECOMMENDATIONS_CRON: "30 6 * * *"
+      # 5.3.0 raised both of these from 1 to 4. Pinned explicitly rather than
+      # inherited, because the jump multiplies this container's resident memory
+      # and its MariaDB connection count — this service's mem_limit and the
+      # database cpu limit were both raised to match.
+      SCAN_WORKERS: "4"
+      WEB_SERVER_CONCURRENCY: "4"
       TZ: "${TZ}"
     healthcheck:
       test: curl -ILfSs http://localhost:8080/ || exit 1
