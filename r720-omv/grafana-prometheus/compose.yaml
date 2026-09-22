@@ -61,7 +61,7 @@ services:
       SIGNAL_TECH_ID: "${SIGNAL_TECH_ID}"
     hostname: grafana
     ipc: private
-    mem_limit: 1G
+    mem_limit: 2G
     # Above the 1024 default so alert evaluation isn't starved under load.
     cpu_shares: 2048
     # Pin id.* to Traefik on the LAN so Grafana's OIDC back-channel calls (token,
