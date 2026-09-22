@@ -61,6 +61,16 @@ services:
       FIREFLY_URL: "http://10.10.1.13:4747"
       FIREFLY_TOKEN_MICHAL: "${FIREFLYIII_MICHAL_ACCESS_TOKEN}"
       FIREFLY_TOKEN_PAULINA: "${FIREFLYIII_PAULINA_ACCESS_TOKEN}"
+      # monica_upcoming builds the next birthdays/anniversaries for the Monica
+      # tile. Monica has no Homepage widget and no endpoint that returns a flat
+      # upcoming list, so the job walks /api/reminders and works out each next
+      # occurrence itself. Not on the monica network, hence the published port.
+      # MONICA_TOKEN is a Passport personal access token for the michal user;
+      # both boards read the one file because both Monica users share account 1
+      # and therefore see the same contacts. Passport hardcodes a ONE YEAR
+      # lifetime, so this token dies 2027-09-21 and the job then fails loudly.
+      MONICA_URL: "http://10.10.1.13:5435"
+      MONICA_TOKEN: "${MONICA_HOMEPAGE_TOKEN}"
     ports:
       - 3012:3012/tcp
     volumes:
@@ -75,11 +85,11 @@ services:
       # the stack's old "cant be run as user" note was actually about.
       - /opt/docker/cronicle/cronicle_queue:/opt/cronicle/queue
       - /Data/IT/pfsense-backups:/pfsense-backups
-      # firefly_import_status writes firefly_imports.json here; the
-      # homepage-selector nginx serves the same directory read-only so the
-      # Homepage boards can render one tile per import. Cronicle's REST API
-      # cannot filter history by event and get_master_state has no timestamps,
-      # so the job reads the per-event history out of the store instead.
+      # firefly_import_status and monica_upcoming write their JSON here; the
+      # homepage-selector nginx serves those files read-only so the Homepage
+      # boards can render them. Cronicle's REST API cannot filter history by
+      # event and get_master_state has no timestamps, so the firefly job reads
+      # the per-event history out of the store instead.
       - /opt/docker/homepage/status:/status
       - /etc/localtime:/etc/localtime:ro
     networks:

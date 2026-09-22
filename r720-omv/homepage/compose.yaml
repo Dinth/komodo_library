@@ -200,12 +200,20 @@ configs:
               return 200 "ok\n";
           }
 
-          # Firefly import status for the boards' Firefly Importer tile.
-          # Exact-match location so it is matched before `location /`, which
-          # would otherwise 403 it: Homepage's widget proxy is server-side and
-          # carries no Remote-User.
+          # Status documents the cronicle stack writes for the boards' tiles.
+          # Exact-match locations so they are matched before `location /`, which
+          # would otherwise 403 them: Homepage's widget proxy is server-side and
+          # carries no Remote-User. Listed one by one rather than serving
+          # /srv/status as a directory, so a file dropped in there is never
+          # exposed by accident.
           location = /status/firefly_imports.json {
               alias /srv/status/firefly_imports.json;
+              default_type application/json;
+              add_header Cache-Control "no-store" always;
+          }
+
+          location = /status/monica_upcoming.json {
+              alias /srv/status/monica_upcoming.json;
               default_type application/json;
               add_header Cache-Control "no-store" always;
           }
