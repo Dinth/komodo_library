@@ -217,6 +217,7 @@ services:
       SCAN_WORKERS: "4"
       WEB_SERVER_CONCURRENCY: "4"
       TZ: "${TZ}"
+      STEAMGRIDDB_API_KEY: "${ROMM_STEAMGRIDDB_API_KEY}"
     healthcheck:
       test: curl -ILfSs http://localhost:8080/ || exit 1
       interval: 30s
