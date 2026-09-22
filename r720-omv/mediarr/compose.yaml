@@ -629,7 +629,14 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    # 3G, not 1G: FlareSolverr starts one headless Chrome per in-flight solve
+    # and each wants ~350-500 MB, so 1G served exactly one. A four-wide burst
+    # from Prowlarr on 2026-09-22 12:05 drove the queue to depth 4, the cgroup
+    # OOM killer took three chromium children (Chrome tags renderers
+    # oom_score_adj:300, so the RSS in the kill lines is misleadingly small)
+    # and every request failed with "Error starting Chrome: chrome not
+    # reachable" then a 60s timeout. Isolated solves never had a problem.
+    mem_limit: 3G
     command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
     container_name: flaresolverr
     healthcheck:

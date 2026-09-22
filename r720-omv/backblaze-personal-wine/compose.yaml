@@ -31,9 +31,13 @@ services:
       - NET_BIND_SERVICE
     cap_drop:
       - ALL
-    # 8G, not 6G: the cgroup OOM killer took bztransmit64.exe at 6.08 GB on
-    # 2026-09-17, against a ~4.2 GB steady state. The transmit process grows
-    # with the backup set, so 6G was marginal.
+    # 16G, not 10G: the cgroup OOM killer took bztransmit64.exe at 10.26 GB on
+    # 2026-09-22, having taken it at 6.08 GB on 2026-09-17 against a ~4.2 GB
+    # steady state. The peak tracks the size of the backup set, not the volume
+    # of a single run: bztransmit loads the whole file index into RAM every
+    # time, and that set is now 3,386,727 file ids across 278 bz_done_ files,
+    # ~4.0 GB of bzdata/bzbackup/bzdatacenter on disk. Expect to revisit this
+    # as the set grows; trimming it with exclude rules is the real fix.
     #
     # Backups do recover on their own: bztransmit is transient by design (runs
     # a sync, writes its stats, releases a four-hour lock, exits), so the next
@@ -41,7 +45,7 @@ services:
     # uploads, zero failures. The cost of an OOM is the aborted run's wasted
     # work, not a stalled backup. Do not add bztransmit to the healthcheck for
     # this reason; bzserv.exe is the correct persistent process to probe.
-    mem_limit: 10G
+    mem_limit: 16G
     command: ['/init']
     environment:
       USER_ID: "${DOCKER_PUID}"
