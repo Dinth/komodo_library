@@ -82,16 +82,6 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 name = "autoheal-r230"
 tags = ["stacks"]
 [stack.config]
-# Second autoheal instance for r230. Identical compose to the r720 stack,
-# including the pinned image digest, so both hosts run the same build.
-#
-# DOCKER_SOCKET_GID is pinned literally rather than via [[DOCKER_SOCKET_GID]]:
-# r230's docker group GID differs from the estate-wide value, exactly as
-# wud-socket-proxy-r230 already handles it.
-#
-# Inert until a container on r230 carries `autoheal: "true"` — the instance
-# is opt-in by label. All five r230 stacks define a healthcheck and so are
-# eligible.
 server = "r230-nixos"
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
@@ -162,19 +152,6 @@ SIGNAL_TECH_ID=[[SIGNAL_TECH_ID]]
 name = "backrest-r230"
 tags = ["stacks"]
 [stack.config]
-# Second Backrest instance, backing up r230's own /opt/docker. Mirrors the
-# r720-omv stack, socket proxy and mongodump hook included: unifi moved here
-# on 2026-09-20, so /opt/docker/unifi/unifi_db is a live MongoDB in the backup
-# source. DOCKER_SOCKET_GID is pinned literally for the same reason as
-# wud-socket-proxy-r230 and autoheal-r230.
-#
-# The restic repo lives on r720's [IT] SMB share. Docker mounts the share
-# itself via a cifs volume, so nothing outside this repo has to be configured
-# on the host, and an unreachable share fails the container instead of leaving
-# /repos an empty local directory -- see the volume comment in compose.yaml.
-#
-# SMB_BACKUP_USER / SMB_BACKUP_PASS are the `backups` account from the [IT]
-# share's valid_users. Both must exist as Komodo variables before first deploy.
 server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
@@ -323,10 +300,6 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 name = "ebusd"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
-# Moved off r720-omv 2026-09-18. ebusd talks to the eBUS adapter over TCP
-# (ens:10.25.0.8:9999) and publishes to MQTT on 10.10.1.11, so it has no
-# local hardware or socket dependency — and heating control has no business
-# sharing a host that spent two days power-limited to 187 MHz.
 server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
@@ -645,9 +618,6 @@ TZ=[[TZ]]
 
 ##
 
-# Depends on the "kittygram" Komodo Build (builds.toml) having produced
-# kittygram:latest on this server first — there is no registry to pull from.
-# poll_for_updates is off for the same reason: nothing upstream to poll.
 [[stack]]
 name = "kittygram"
 tags = ["stacks"]
@@ -1064,6 +1034,7 @@ MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
 ROMM_SCREENSCRAPER_PASS=[[ROMM_SCREENSCRAPER_PASS]]
 ROMM_STREAMING_BROKER_SECRET=[[ROMM_STREAMING_BROKER_SECRET]]
+ROMM_STEAMGRIDDB_API_KEY=[[ROMM_STEAMGRIDDB_API_KEY]]
 """
 
 ##
@@ -1257,20 +1228,6 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 name = "unifi"
 tags = ["needs-improvement", "stacks"]
 [stack.config]
-# Moved off r720-omv 2026-09-20, second attempt. The 2026-09-19 attempt failed
-# because compose mounted the controller config as `./config` — a path relative
-# to Komodo's per-host stack checkout, which the repo does not track. On a new
-# host that directory was created empty, UniFi ran its setup wizard, wrote
-# is_default=true and wiped the correctly-restored Mongo database. Fixed in
-# 745184ed: /config is now /opt/docker/unifi/unifi_config, an absolute path that
-# travels with the data and is covered by Backrest. Verified on r720 before this
-# move — controller restarted on the new mount with uuid f426b4ab intact.
-#
-# Cutover: copy BOTH /opt/docker/unifi/unifi_db and /opt/docker/unifi/unifi_config
-# with the stack stopped on r720. The APs already inform to 10.10.1.12 (Override
-# Inform Host, set during the first attempt), so no AP change is needed for this
-# direction — but they were adopted by r230's throwaway wizard database, so
-# expect to re-adopt them against the restored one.
 server = "r230-nixos"
 poll_for_updates = true
 git_account = "michal@gawronskikot.com"
@@ -1408,16 +1365,6 @@ MYANIMELIST_SECRET=[[MYANIMELIST_SECRET]]
 name = "zigbee2mqtt"
 tags = ["stacks"]
 [stack.config]
-# Moved off r720-omv 2026-09-19. Same rationale as ebusd: the coordinator is
-# network-attached (configuration.yaml -> port: tcp://10.25.0.100:7638) with
-# no `devices:` entry, and MQTT is remote (10.10.1.11:1883), so nothing ties
-# it to r720. Home automation should not share a host that spent two days
-# power-limited to 187 MHz.
-#
-# Cutover: copy /opt/docker/zigbee2mqtt/zigbee2mqtt_data (158 MB, holds the
-# device pairing database) BEFORE first deploy, and stop the r720 instance
-# first — the coordinator accepts a single TCP connection, so two running
-# instances will fight over it.
 server = "r230-nixos"
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
