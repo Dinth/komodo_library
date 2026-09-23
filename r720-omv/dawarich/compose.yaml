@@ -1,5 +1,5 @@
 x-versions:
-  dawarich: &dawarich-version "freikin/dawarich:1.14.5"
+  dawarich: &dawarich-version "freikin/dawarich:1.15.2"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   postgis: &postgis-version "postgis/postgis:17-3.6-alpine"
 services:
@@ -174,7 +174,7 @@ services:
     labels:
       wud.display.icon: "sh:dawarich"
       wud.display.name: "Dawarich Sidekiq"
-      wud.link.template: 'https://github.com/Freika/dawarich/releases/v$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/Freika/dawarich/releases/tag/$${major}.$${minor}.$${patch}'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.watch: "true"
     logging:
@@ -226,7 +226,9 @@ services:
       REDIS_URL: "redis://dawarich-valkey:6379"
       MIN_MINUTES_SPENT_IN_CITY: "120"
       TIME_ZONE: "${TZ}"
-      PHOTON_API_USE_HTTP: "true"
+      # Was PHOTON_API_USE_HTTP, which Dawarich does not read: the web container
+      # fell back to the false default and sent the Photon key over plain HTTP.
+      PHOTON_API_USE_HTTPS: "true"
       APPLICATION_PROTOCOL: "http"
       REVERSE_GEOCODING_ENABLED: "true"
       PHOTON_API_HOST: "photon.dawarich.app"
