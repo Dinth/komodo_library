@@ -1,5 +1,5 @@
 x-versions:
-  searxng: &searxng-version "docker.io/searxng/searxng:2026.9.22-b3c389529"
+  searxng: &searxng-version "docker.io/searxng/searxng:2026.9.23-d63bbef7a"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
 
 x-logging: &default-logging
