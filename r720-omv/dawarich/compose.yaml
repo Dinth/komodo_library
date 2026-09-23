@@ -129,12 +129,23 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
-      # NOTE: RAILS_ENV=production additionally requires the ActiveRecord
-      # encryption keys (OTP_ENCRYPTION_PRIMARY_KEY at least) to exist as
-      # Komodo variables — production boot aborts without them. Left in
-      # development until those are provisioned.
+      # Production: web and worker must move together and share these secrets.
+      # Development mode ran on the dev encryption keys published in Dawarich's
+      # source, reloaded code on demand and logged every SQL query. The switch
+      # signs everyone out, and secrets saved in Settings under the dev keys
+      # read as blank and must be entered again (the Photon key comes from env).
+      # Every Komodo variable below must exist before deploying: an unresolved
+      # one interpolates to "" and Rails treats that as a set (empty) key.
+      RAILS_ENV: "production"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
+      OTP_ENCRYPTION_PRIMARY_KEY: "${OTP_ENCRYPTION_PRIMARY_KEY}"
+      OTP_ENCRYPTION_DETERMINISTIC_KEY: "${OTP_ENCRYPTION_DETERMINISTIC_KEY}"
+      OTP_ENCRYPTION_KEY_DERIVATION_SALT: "${OTP_ENCRYPTION_KEY_DERIVATION_SALT}"
       APPLICATION_HOST: "localhost"
-      APPLICATION_HOSTS: "localhost"
+      APPLICATION_HOSTS: "localhost,10.10.1.13,traces.${DOMAIN_NAME}"
+      # Background jobs read it for users without a timezone of their own;
+      # the worker had none and fell back to UTC.
+      TIME_ZONE: "${TZ}"
       DISTANCE_UNIT: "km"
       REDIS_URL: "redis://dawarich-valkey:6379"
       # Must not exceed RAILS_MAX_THREADS, the ActiveRecord pool size, which
@@ -218,10 +229,17 @@ services:
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_NAME: "dawarich"
-      # See the note on dawarich-sidekiq: production needs the encryption
-      # keys provisioned first, and web and worker must move together.
+      # See the note on dawarich-sidekiq: same secrets, moved together.
+      RAILS_ENV: "production"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
+      OTP_ENCRYPTION_PRIMARY_KEY: "${OTP_ENCRYPTION_PRIMARY_KEY}"
+      OTP_ENCRYPTION_DETERMINISTIC_KEY: "${OTP_ENCRYPTION_DETERMINISTIC_KEY}"
+      OTP_ENCRYPTION_KEY_DERIVATION_SALT: "${OTP_ENCRYPTION_KEY_DERIVATION_SALT}"
       APPLICATION_HOST: "localhost"
-      APPLICATION_HOSTS: "localhost,traces.${DOMAIN_NAME}"
+      # Production enforces this list (development let any IP through). The
+      # LAN IP keeps the published :4745 port working for anything that still
+      # posts there directly instead of via Traefik.
+      APPLICATION_HOSTS: "localhost,10.10.1.13,traces.${DOMAIN_NAME}"
       DISTANCE_UNIT: "km"
       REDIS_URL: "redis://dawarich-valkey:6379"
       MIN_MINUTES_SPENT_IN_CITY: "120"
