@@ -2,7 +2,7 @@ x-versions:
   # Full image, not `-slim`: slim ships no local js-dos runtime (it falls back
   # to jsDelivr, which this stack's CSP does not allow as a script source) and
   # no FAKE-08 at all, so PICO-8 simply would not play.
-  romm: &romm-version "rommapp/romm:5.3.0"
+  romm: &romm-version "rommapp/romm:5.3.1"
   mariadb: &mariadb-version "linuxserver/mariadb:11.8.8"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls82"
