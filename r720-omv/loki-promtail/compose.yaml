@@ -73,8 +73,7 @@ services:
     ipc: private
     networks:
       - monitoring
-    ports: 
-      - 3100:3100
+      - traefik
     healthcheck:
       test: ["CMD", "/usr/bin/loki", "-health"]
       start_period: 30s
@@ -85,6 +84,14 @@ services:
       - /opt/docker/loki-promtail/loki-config.yml:/etc/loki/local-config.yml:ro
       - /opt/docker/loki-promtail/loki_storage:/loki
     labels:
+      # http://10.10.1.13:3100 (log shippers on other hosts) is served by Traefik's loki entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.enable: "true"
+      traefik.http.routers.loki.entrypoints: "loki"
+      traefik.http.routers.loki.rule: "PathPrefix(`/`)"
+      traefik.http.routers.loki.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.loki.service: "loki"
+      traefik.http.services.loki.loadbalancer.server.port: "3100"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Loki"
@@ -118,7 +125,7 @@ services:
     command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting" ]
     environment:
       TZ: "${TZ}"
-      HOSTNAME: "r720-omv" 
+      HOSTNAME: "r720-omv"
     healthcheck:
       # Image (ubuntu, no curl/wget) — probe the running server's readiness
       # endpoint via bash's /dev/tcp instead of validating the config file.
@@ -129,7 +136,7 @@ services:
     volumes:
       - /opt/docker/loki-promtail/config.alloy:/etc/alloy/config.alloy:ro
       - /var/log:/var/log:ro
-      - /var/log/journal:/var/log/journal:ro 
+      - /var/log/journal:/var/log/journal:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /opt/docker/loki-promtail/alloy-storage:/var/lib/alloy
     labels:
@@ -146,4 +153,6 @@ networks:
   monitoring:
     name: monitoring
     driver: bridge
+    external: true
+  traefik:
     external: true

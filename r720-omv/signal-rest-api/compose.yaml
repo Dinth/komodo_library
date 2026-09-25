@@ -32,12 +32,19 @@ services:
       #AUTO_RECEIVE_SCHEDULE: "0 22 * * *" #enable this parameter on demand
     volumes:
       - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
-    ports:
-      - 3162:8080/tcp
     networks:
       - signal-rest-api
+      - traefik
     logging: *default-logging
     labels:
+      # http://10.10.1.13:3162 (HA, pfSense, fireflyiii, Grafana) is served by Traefik's signal entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.enable: "true"
+      traefik.http.routers.signal-rest-api.entrypoints: "signal"
+      traefik.http.routers.signal-rest-api.rule: "PathPrefix(`/`)"
+      traefik.http.routers.signal-rest-api.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.signal-rest-api.service: "signal-rest-api"
+      traefik.http.services.signal-rest-api.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+$$'
       wud.display.name: "Signal Rest API"
@@ -112,3 +119,5 @@ networks:
     name: signal-rest-api
     driver: bridge
     external: false
+  traefik:
+    external: true

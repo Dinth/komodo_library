@@ -163,8 +163,6 @@ services:
       # Joined so Prometheus can scrape Traefik's /metrics on traefik:8080 (that
       # endpoint is only on the traefik network, not published to the host).
       - traefik
-    ports:
-      - "9090:9090/tcp"
     volumes:
       - /opt/docker/grafana-prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - /opt/docker/grafana-prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
@@ -176,6 +174,14 @@ services:
       retries: 3
       start_period: 30s
     labels:
+      # http://10.10.1.13:9090 (HA/Proxmox remote-write, desktops) is served by Traefik's prometheus entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.enable: "true"
+      traefik.http.routers.prometheus.entrypoints: "prometheus"
+      traefik.http.routers.prometheus.rule: "PathPrefix(`/`)"
+      traefik.http.routers.prometheus.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.prometheus.service: "prometheus"
+      traefik.http.services.prometheus.loadbalancer.server.port: "9090"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Prometheus"

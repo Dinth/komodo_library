@@ -215,6 +215,14 @@ services:
     # `ollama pull` of those tags reverts it.
     cpuset: "1,3,5,7,9,11,13,15,17,19,21,23"
     labels:
+      # http://10.10.1.13:11435 (desktops) is served by Traefik's ollama entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.enable: "true"
+      traefik.http.routers.ollama.entrypoints: "ollama"
+      traefik.http.routers.ollama.rule: "PathPrefix(`/`)"
+      traefik.http.routers.ollama.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.ollama.service: "ollama"
+      traefik.http.services.ollama.loadbalancer.server.port: "11434"
       wud.watch: "true"
       wud.display.name: "Ollama"
       wud.display.icon: "sh:ollama"
@@ -233,8 +241,7 @@ services:
         max-file: "3"
     networks:
       - openwebui
-    ports:
-      - 11435:11434/tcp
+      - traefik
     restart: unless-stopped
     volumes:
       - /opt/docker/openwebui/ollama_data:/root/.ollama
@@ -283,9 +290,16 @@ services:
         max-file: "3"
     networks:
       - openwebui
-    ports:
-      - 11434:8080/tcp
+      - traefik
     labels:
+      # http://10.10.1.13:11434 (desktops, Prometheus) is served by Traefik's ollamametrics entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.enable: "true"
+      traefik.http.routers.ollama-metrics.entrypoints: "ollamametrics"
+      traefik.http.routers.ollama-metrics.rule: "PathPrefix(`/`)"
+      traefik.http.routers.ollama-metrics.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.ollama-metrics.service: "ollama-metrics"
+      traefik.http.services.ollama-metrics.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^latest$$'
       wud.watch.digest: "true"
@@ -378,8 +392,7 @@ services:
       wud.link.template: "https://github.com/ai-dock/comfyui/releases"
     networks:
       - openwebui
-    ports:
-      - 8188:8188/tcp
+    # No published port: only OpenWebUI uses it, as http://comfyui:8188.
     volumes:
       - /opt/docker/openwebui/comfyui_workspace:/workspace
     restart: unless-stopped

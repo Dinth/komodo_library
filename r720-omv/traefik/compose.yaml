@@ -122,6 +122,25 @@ services:
       TRAEFIK_ENTRYPOINTS_MCPGROCY_ADDRESS: ":5135"
       TRAEFIK_ENTRYPOINTS_MCPGRAFANA_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_MCPGROCY_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      # LAN services with no auth of their own (Frigate API/go2rtc/RTSP, Signal
+      # REST, Ollama, Loki, Prometheus) keep their http://10.10.1.13:<port> URLs,
+      # but Traefik owns the ports so trusted-allowlist can refuse the IoT,
+      # GUEST, CCTV, MEDIA, MGMT and LTE VLANs. RTSP is a TCP entrypoint.
+      TRAEFIK_ENTRYPOINTS_FRIGATEAPI_ADDRESS: ":5000"
+      TRAEFIK_ENTRYPOINTS_GO2RTC_ADDRESS: ":1984"
+      TRAEFIK_ENTRYPOINTS_FRIGATERTSP_ADDRESS: ":8554"
+      TRAEFIK_ENTRYPOINTS_SIGNAL_ADDRESS: ":3162"
+      TRAEFIK_ENTRYPOINTS_OLLAMA_ADDRESS: ":11435"
+      TRAEFIK_ENTRYPOINTS_OLLAMAMETRICS_ADDRESS: ":11434"
+      TRAEFIK_ENTRYPOINTS_LOKI_ADDRESS: ":3100"
+      TRAEFIK_ENTRYPOINTS_PROMETHEUS_ADDRESS: ":9090"
+      TRAEFIK_ENTRYPOINTS_FRIGATEAPI_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_GO2RTC_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_SIGNAL_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_OLLAMA_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_OLLAMAMETRICS_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_LOKI_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_PROMETHEUS_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
       # Trust Cloudflare IPs for X-Forwarded-* headers (real client IP extraction)
@@ -190,6 +209,14 @@ services:
       - 9515:9515
       - 5133:5133
       - 5135:5135
+      - 5000:5000
+      - 1984:1984
+      - 8554:8554
+      - 3162:3162
+      - 11435:11435
+      - 11434:11434
+      - 3100:3100
+      - 9090:9090
     volumes:
       - /opt/docker/traefik/traefik_certs:/certs
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
@@ -219,6 +246,11 @@ services:
       # LAN URLs) arrive from this network's gateway, 10.55.0.1, so it is listed.
       # Defined here rather than on an MCP container so it never disappears
       # while one of them is down.
+      # Everything trusted to reach the no-auth LAN services: the LAN (servers,
+      # Home Assistant, pfSense), workstations, Tailscale, and Docker (the
+      # traefik network gateway 10.55.0.1 is where hairpinned containers appear).
+      traefik.http.middlewares.trusted-allowlist.ipallowlist.sourcerange: "10.10.0.0/16,10.40.0.0/16,100.64.0.0/10,10.55.0.1/32,172.16.0.0/12,192.168.0.0/16,10.224.0.0/12,169.254.0.0/16"
+      traefik.tcp.middlewares.trusted-allowlist-tcp.ipallowlist.sourcerange: "10.10.0.0/16,10.40.0.0/16,100.64.0.0/10,10.55.0.1/32,172.16.0.0/12,192.168.0.0/16,10.224.0.0/12,169.254.0.0/16"
       traefik.http.middlewares.mcp-allowlist.ipallowlist.sourcerange: "10.40.0.0/16,10.10.0.1/32,10.55.0.1/32,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16,10.224.0.0/12,169.254.0.0/16"
       # Widget reaches the API over the internal traefik docker network (the :8080
       # insecure entrypoint), since the public router is gated by Authelia.

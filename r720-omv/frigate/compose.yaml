@@ -68,9 +68,6 @@ services:
     devices:
       - /dev/bus/usb:/dev/bus/usb
     ports:
-      - 5000:5000/tcp
-      - 1984:1984/tcp
-      - 8554:8554/tcp
       - 8555:8555/tcp
       - 8555:8555/udp
       - 8971:8971/tcp
@@ -93,6 +90,25 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      # http://10.10.1.13:5000 (Home Assistant, Prometheus) is served by Traefik's frigateapi entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.http.routers.frigate-api.entrypoints: "frigateapi"
+      traefik.http.routers.frigate-api.rule: "PathPrefix(`/`)"
+      traefik.http.routers.frigate-api.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.frigate-api.service: "frigate-api"
+      traefik.http.services.frigate-api.loadbalancer.server.port: "5000"
+      # http://10.10.1.13:1984 (go2rtc) is served by Traefik's go2rtc entrypoint behind
+      # trusted-allowlist (LAN, workstations, Tailscale, Docker).
+      traefik.http.routers.frigate-go2rtc.entrypoints: "go2rtc"
+      traefik.http.routers.frigate-go2rtc.rule: "PathPrefix(`/`)"
+      traefik.http.routers.frigate-go2rtc.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.frigate-go2rtc.service: "frigate-go2rtc"
+      traefik.http.services.frigate-go2rtc.loadbalancer.server.port: "1984"
+      traefik.tcp.routers.frigate-rtsp.entrypoints: "frigatertsp"
+      traefik.tcp.routers.frigate-rtsp.rule: "HostSNI(`*`)"
+      traefik.tcp.routers.frigate-rtsp.middlewares: "trusted-allowlist-tcp@docker"
+      traefik.tcp.routers.frigate-rtsp.service: "frigate-rtsp"
+      traefik.tcp.services.frigate-rtsp.loadbalancer.server.port: "8554"
       traefik.enable: "true"
       traefik.http.routers.frigate.entrypoints: websecure
       traefik.http.routers.frigate.rule: Host(`cctv.${DOMAIN_NAME}`)
@@ -101,6 +117,7 @@ services:
       traefik.http.routers.frigate.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.frigate.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.frigate.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.routers.frigate.service: "frigate"
       #traefik.http.services.frigate.loadbalancer.server.port: "8971"
       traefik.http.services.frigate.loadbalancer.server.port: "5000"
       traefik.docker.network: "traefik"
