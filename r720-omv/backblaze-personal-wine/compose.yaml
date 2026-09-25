@@ -1,5 +1,6 @@
 x-versions:
   backblaze: &backblaze-version "tessypowder/backblaze-personal-wine:ubuntu22"
+  busybox: &busybox-version "busybox:1.37.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -104,6 +105,67 @@ services:
       wud.tag.include: '^ubuntu22$$'
       wud.link.template: "https://github.com/JonathanTreffler/backblaze-personal-wine-container/releases"
       wud.display.name: "Blackblaze"
+      wud.display.icon: "sh-backblaze"
+
+  # Publishes Backblaze's own status files as Prometheus metrics via
+  # node-exporter's textfile collector (--collector.textfile.directory in
+  # grafana-prometheus). Grafana alerts on them; the key one is D:'s
+  # selected-file count, which sat at 0 from May to September unnoticed.
+  backblaze-exporter:
+    image: *busybox-version
+    container_name: backblaze-exporter
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    network_mode: none
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 32M
+    volumes:
+      - /opt/docker/backblaze-personal-wine/backblaze_data/wine/drive_c/ProgramData/Backblaze/bzdata:/bzdata:ro
+      - /opt/docker/node-exporter/textfile:/textfile
+    command:
+      - sh
+      - -c
+      - |
+          B=/bzdata; R=$$B/bzreports; T=/textfile/backblaze.prom
+          # m NAME VALUE: emit only when VALUE is a number, so a missing file drops one
+          # series instead of breaking the whole file for node-exporter.
+          m() { case "$$2" in ''|*[!0-9]*) ;; *) echo "$$1 $$2" ;; esac; }
+          attr() { sed -n "s/.* $$1=\"\([0-9]*\)\".*/\1/p" | head -1; }
+          while :; do
+            {
+              m backblaze_heartbeat_timestamp_seconds "$$(tr -dc 0-9 < $$R/bzserv_heartbeat.txt | sed 's/...$$//')"
+              m backblaze_last_backup_completed_timestamp_seconds "$$(tr -d '\r' < $$R/bzstat_lastbackupcompleted.xml | attr gmt_millis | sed 's/...$$//')"
+              m backblaze_last_upload_timestamp_seconds "$$(stat -c %Y "$$(ls -t $$B/bzbackup/bzdatacenter/bz_done_*.dat | head -1)")"
+              tr -d '\r' < $$B/bzinfo.xml | sed -n 's/.*bzVolumeGuid="\([^"]*\)" mountPointPath="\([A-Za-z]\):.*/\1 \2/p' |
+              while read g d; do
+                d=$$(echo "$$d" | tr A-Z a-z)
+                t=$$(tr -d '\r' < $$R/bzstat_totalbackup.xml | grep "\"$$g\"")
+                r=$$(tr -d '\r' < $$R/bzstat_remainingbackup.xml | grep "\"$$g\"")
+                m "backblaze_selected_files{drive=\"$$d\"}" "$$(echo "$$t" | attr pervol_sel_for_backup_numfiles)"
+                m "backblaze_selected_bytes{drive=\"$$d\"}" "$$(echo "$$t" | attr pervol_sel_for_backup_numbytes)"
+                m "backblaze_remaining_files{drive=\"$$d\"}" "$$(echo "$$r" | attr pervol_remaining_files_numfiles)"
+                m "backblaze_remaining_bytes{drive=\"$$d\"}" "$$(echo "$$r" | attr pervol_remaining_files_numbytes)"
+              done
+            } > $$T.tmp && mv $$T.tmp $$T
+            sleep 300
+          done
+    healthcheck:
+      test: ["CMD-SHELL", "[ -n \"$$(find /textfile/backblaze.prom -mmin -15)\" ]"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://busybox.net/"
+      wud.display.name: "Backblaze exporter (busybox)"
       wud.display.icon: "sh-backblaze"
 
 networks:

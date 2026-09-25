@@ -208,6 +208,8 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|var/lib/docker/containers|var/lib/docker/overlay2|run/docker/netns/.+)($$|/)'
       - '--collector.netclass.ignored-devices=^(veth.*|br-.*|docker.*|lo)$$'
       - '--collector.netdev.device-exclude=^(veth.*|br-.*|docker.*|lo)$$'
+      # *.prom files written by other stacks (e.g. backblaze-exporter).
+      - '--collector.textfile.directory=/host/opt/docker/node-exporter/textfile'
     environment:
       TZ: "${TZ}"
     hostname: node-exporter
