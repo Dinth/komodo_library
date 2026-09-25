@@ -1,6 +1,8 @@
 x-versions:
   spiderfoot-version: &spiderfoot-version saidsef/spiderfoot:v4.0
   misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.47
+  # Same tag as misp-core: the nginx image ships that release's webroot.
+  misp-nginx-version: &misp-nginx-version ghcr.io/misp/misp-docker/misp-nginx:v2.5.47
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.10
   misp-mariadb-version: &misp-mariadb-version mariadb:12.3
   misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.2-alpine
@@ -31,7 +33,9 @@ services:
       - /opt/docker/secops/spiderfoot:/var/lib/spiderfoot
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:5001"]
+      # 127.0.0.1, not localhost: busybox wget tries ::1 first and SpiderFoot
+      # only listens on IPv4, so "localhost" is always connection refused.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5001"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -54,15 +58,20 @@ services:
     cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE, FOWNER]
     mem_limit: 4G
     cpus: 2.0
-    ports: ["8081:80"]
+    # No ports: since misp-docker split nginx out (2026-07), misp-core only
+    # runs PHP-FPM on :9002; misp-nginx below serves the UI on :8081.
     # Env var names below are the ones ghcr.io/misp/misp-docker/misp-core
     # actually reads in /entrypoint.sh - anything else is silently ignored.
     environment:
       - ADMIN_PASSWORD=${SECOPS_MISP_ADMIN_PASSWORD}
       - BASE_URL=http://10.10.1.13:8081
-      # Served over plain HTTP on :8081; without this nginx 301s to
-      # https://10.10.1.13/ (port stripped) and the UI is unreachable.
-      - DISABLE_SSL_REDIRECT=true
+      # FPM on TCP :9002 (and status on :9003) for misp-nginx; the default is
+      # a unix socket, which the separate nginx container can't reach.
+      - PHP_LISTEN_FPM=true
+      - FASTCGI_LISTEN_STATUS=misp-core:9003
+      # Served over plain HTTP, so session cookies must not be Secure-only or
+      # the browser drops them and every login bounces back to the form.
+      - PHP_SESSION_COOKIE_SECURE=false
       - MYSQL_HOST=misp-mariadb
       - MYSQL_USER=misp
       - MYSQL_PASSWORD=${MISP_DB_PASSWORD}
@@ -89,7 +98,8 @@ services:
       misp-valkey: { condition: service_healthy }
       misp-modules: { condition: service_started }
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/users/login"]
+      # Upstream's check: FPM accepting connections (there's no HTTP here).
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/9002"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -101,6 +111,49 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/MISP/MISP/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "MISP Core"
+      wud.display.icon: "sh:misp"
+  # Web front for misp-core (upstream split it out in 2026-07). Serves the
+  # static webroot itself and hands PHP to misp-core:9002. No certs are
+  # mounted, so it listens on plain HTTP 8080 (matching the http BASE_URL).
+  misp-nginx:
+    image: *misp-nginx-version
+    container_name: misp-nginx
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    user: nginx
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    mem_limit: 128M
+    ports: ["8081:8080"]
+    tmpfs:
+      - /etc/nginx/conf.d:mode=0755,uid=101,gid=101
+      - /var/cache/nginx:mode=0755,uid=101,gid=101
+      - /tmp:mode=1777
+    environment:
+      - TZ=${TZ}
+      - BASE_URL=http://10.10.1.13:8081
+      - FASTCGI_LISTEN=misp-core:9002
+      - FASTCGI_LISTEN_STATUS=misp-core:9003
+    volumes:
+      # Custom logos live in the webroot, which nginx (not FPM) now serves.
+      - /opt/docker/secops/misp_customimages:/var/www/MISP/app/webroot/img/custom:ro
+    depends_on:
+      misp-core: { condition: service_healthy }
+    healthcheck:
+      # Upstream's check, against nginx's internal status listener.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8081; printf 'GET / HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; head -1 <&3 | grep -q 200"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks: [secops]
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/MISP/MISP/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: "MISP Web"
       wud.display.icon: "sh:misp"
   misp-modules:
     image: *misp-modules-version
