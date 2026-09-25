@@ -478,7 +478,9 @@ services:
       ollama:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9099/models"]
+      # /models needs the pipelines API key (403 without it); / is open and
+      # returns {"status":true}.
+      test: ["CMD", "curl", "-f", "http://localhost:9099/"]
       interval: 30s
       timeout: 10s
       retries: 3

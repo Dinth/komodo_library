@@ -337,7 +337,9 @@ services:
       wud.display.icon: "si:nvidia"
     ports: []
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9400/metrics | grep -q 'DCGM'"]
+      # The distroless image has bash but no wget/curl/grep, so speak HTTP
+      # over bash's /dev/tcp and check the status line with builtins only.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9400 && printf 'GET /metrics HTTP/1.0\\r\\n\\r\\n' >&3 && read -r l <&3 && [[ $$l == *' 200 '* ]]"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -377,7 +379,9 @@ services:
     command:
       - '--config.file=/etc/blackbox_exporter/config.yml'
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9115/metrics | grep -q 'blackbox_exporter_version'"]
+      # /-/healthy is the exporter's own liveness endpoint; wget exits non-zero
+      # on any non-2xx. (The old check grepped for a metric that doesn't exist.)
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9115/-/healthy"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -471,7 +475,9 @@ services:
       - openwebui
     healthcheck:
       # Image (debian-slim) has no curl/wget — use bash's /dev/tcp against /healthz.
-      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/5133 && printf 'GET /healthz HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
+      # Must send a Host header that --allowed-hosts accepts (403 otherwise), and
+      # the image has no grep, so the status line is checked with bash builtins.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/5133 && printf 'GET /healthz HTTP/1.0\\r\\nHost: 127.0.0.1:5133\\r\\n\\r\\n' >&3 && read -r l <&3 && [[ $$l == *' 200 '* ]]"]
       interval: 30s
       timeout: 10s
       retries: 3

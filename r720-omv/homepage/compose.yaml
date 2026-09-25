@@ -58,13 +58,16 @@ services:
     container_name: homepage-socket-proxy
     ipc: private
     command:
-      - '-loglevel=debug'
+      - '-loglevel=info'
       - '-allowfrom=homepage-michal,homepage-paulina'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(version|containers/.*)'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'
+      # Serves the 127.0.0.1:55555/health endpoint ./healthcheck probes;
+      # without it the container is permanently unhealthy.
+      - '-allowhealthcheck'
     restart: unless-stopped
     read_only: true
     mem_limit: 64M
