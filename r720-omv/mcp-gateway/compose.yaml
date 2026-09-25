@@ -28,9 +28,11 @@ services:
     user: "65534:${DOCKER_SOCKET_GID}"
     command:
       - '-loglevel=info'
-      # Only the gateway itself: homebox and the gateway-spawned MCP containers
-      # share this network, and containers/create here is root on the host.
-      - '-allowfrom=mcp-gateway'
+      # Any container on this network, not just the gateway: the gateway-spawned
+      # docker MCP server calls the API through this proxy from a dynamic IP
+      # (limiting it to mcp-gateway broke it on 2026-09-25). That server is a
+      # container-management tool by design, so the POST rules are its point.
+      - '-allowfrom=0.0.0.0/0'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)|/version'
       - '-allowHEAD=/_ping'

@@ -215,10 +215,11 @@ services:
       # Who may use the unauthenticated MCP entrypoints: the WORKSTATIONS VLAN,
       # Tailscale clients (pfSense SNATs them to its LAN address 10.10.0.1;
       # 100.64/10 covers them should SNAT be switched off) and Docker's own
-      # address pools, so in-cluster clients that hairpin via 10.10.1.13 work.
+      # address pools. Containers that hairpin via 10.10.1.13 (zeroclaw uses the
+      # LAN URLs) arrive from this network's gateway, 10.55.0.1, so it is listed.
       # Defined here rather than on an MCP container so it never disappears
       # while one of them is down.
-      traefik.http.middlewares.mcp-allowlist.ipallowlist.sourcerange: "10.40.0.0/16,10.10.0.1/32,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16,10.224.0.0/12,169.254.0.0/16"
+      traefik.http.middlewares.mcp-allowlist.ipallowlist.sourcerange: "10.40.0.0/16,10.10.0.1/32,10.55.0.1/32,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16,10.224.0.0/12,169.254.0.0/16"
       # Widget reaches the API over the internal traefik docker network (the :8080
       # insecure entrypoint), since the public router is gated by Authelia.
       wud.watch: "true"
