@@ -61,11 +61,18 @@ services:
       VNC_LISTENING_PORT: "5900"
       VNC_PASSWORD: ""
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f '[b]zserv.exe' > /dev/null || (kill $(pgrep -f 'sleep infinity') 2>/dev/null; exit 1)"]
+      # Unhealthy when the bzserv backup service isn't running (e.g. after the
+      # client's own auto-update stops it, as on 2026-09-23); autoheal then
+      # restarts the whole container, which brings wine + bzserv back.
+      # The old check killed `sleep infinity`, but its own command line
+      # contained that string, so it killed itself (exit 143) and bounced the
+      # UI every minute without ever restarting bzserv.
+      test: ["CMD", "pgrep", "-f", "[b]zserv.exe"]
       interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 120s
+      # Wine + the service take a few minutes to come up after a restart.
+      start_period: 600s
     ports:
       - 5800:5800/tcp
     volumes:
@@ -75,6 +82,7 @@ services:
       - backblaze-personal-wine
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
       # The image runs the mutable `ubuntu22` tag, so only its digest is
