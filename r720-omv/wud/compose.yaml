@@ -101,13 +101,10 @@ services:
       # administrator. Members of Authelia's `admins` group get `admin`; anyone
       # else who authenticates falls back to DEFAULTROLE (`ro` by default). WUD
       # appends the `groups` scope itself once a group mapping is set.
+      # Deliberately no local admin: a password login would bypass Authelia's
+      # 2FA. If OIDC discovery fails at startup, recover over SSH (restart the
+      # container) rather than through a break-glass account.
       WUD_AUTH_OIDC_AUTHELIA_ADMINGROUP: "admins"
-      # Break-glass local admin for when OIDC discovery fails at startup. WUD
-      # then drops the OIDC strategy, skips the auto-redirect and shows the
-      # basic login. WUD_PASSWORD is the htpasswd hash that used to feed
-      # WUD_AUTH_BASIC_BASIC_HASH; ADMIN_HASH accepts htpasswd or bcrypt hashes.
-      WUD_AUTH_ADMIN_USER: "dinth"
-      WUD_AUTH_ADMIN_HASH: "${WUD_PASSWORD}"
     healthcheck:
       test: curl --fail http://localhost:3000/health || exit 1
       interval: 10s
@@ -117,7 +114,7 @@ services:
     # Pin id.* to Traefik on the LAN so WUD's startup OIDC discovery + back-channel
     # token calls never depend on external DNS / NAT-reflection. Without this the
     # discovery fetch fails intermittently on restart and WUD drops the OIDC button,
-    # leaving only the break-glass local admin login.
+    # leaving an empty login page (no local login is configured).
     extra_hosts:
       - "id.${DOMAIN_NAME}:10.10.1.13"
     depends_on:
