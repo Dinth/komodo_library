@@ -81,6 +81,8 @@ services:
       WUD_WATCHER_R230NIXOS_DELAY: "3d"
       WUD_SERVER_FEATURE_DELETE: "false"
       WUD_LOG_LEVEL: "info"
+      # Nothing scrapes WUD, so don't serve /metrics (on by default).
+      WUD_PROMETHEUS_ENABLED: "false"
       # Registry keys are WUD_REGISTRY_<TYPE>_<NAME>_<KEY>; without the NAME
       # segment WUD registers empty registries called "login"/"token" and
       # stays anonymous (100 pulls / 6h instead of 200).
