@@ -322,22 +322,6 @@ EBUSD_MQTTPASS="[[MQTT_PASSWORD]]"
 ##
 
 [[stack]]
-name = "esphome"
-tags = ["stacks"]
-[stack.config]
-server = "r720-omv"
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/esphome"
-environment = """
-  TZ=[[TZ]]
-  DOCKER_PUID=[[DOCKER_PUID]]
-  DOCKER_PGID=[[DOCKER_PGID]]
-"""
-
-##
-
-[[stack]]
 name = "fireflyiii"
 tags = ["stacks", "needs-improvement"]
 [stack.config]
@@ -963,21 +947,6 @@ TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
 PIPED_DB_PASS=[[PIPED_DB_PASS]]
-"""
-
-##
-
-[[stack]]
-name = "postgresql"
-tags = ["stacks", "needs-improvement"]
-[stack.config]
-server = "r720-omv"
-poll_for_updates = true
-git_account = "michal@gawronskikot.com"
-repo = "Dinth/komodo_library"
-run_directory = "r720-omv/postgresql"
-environment = """
-POSTGRES_ADMIN_PASS=[[POSTGRES_ADMIN_PASS]]
 """
 
 ##
