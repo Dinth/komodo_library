@@ -85,7 +85,7 @@ services:
       wud.watch: "true"
       wud.display.name: "Tandoor"
       wud.display.icon: "sh:tandoor-recipes"
-      wud.tag.include: '^\d+\.\d+\.\d+$'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/TandoorRecipes/recipes/releases/tag/$${major}.$${minor}.$${patch}'
 
   tandoor-postgres:

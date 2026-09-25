@@ -1,7 +1,7 @@
 x-versions:
   homepage: &homepage-version "ghcr.io/gethomepage/homepage:v2.4.0"
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
-  selector: &selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
+  selector: &selector-version "nginxinc/nginx-unprivileged:1.27.5-alpine"
 
 x-logging: &default-logging
   driver: "json-file"

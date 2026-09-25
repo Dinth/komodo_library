@@ -148,6 +148,8 @@ services:
       traefik.http.routers.collabora.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.docker.network: "traefik"
       wud.watch: "true"
+      wud.link.template: "https://www.collaboraonline.com/code/"
+      wud.tag.include: '^\d+\.\d+\.\d+\.\d+\.\d+$$'
       wud.display.name: "Nextcloud - Collabora"
       wud.display.icon: "si:collaboraonline"
 
@@ -247,7 +249,7 @@ services:
       wud.watch: "true"
       wud.display.name: "NextCloud"
       wud.display.icon: "sh:nextcloud"
-      wud.tag.include: '^\d+\.\d+\.\d+$'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/nextcloud/server/releases/tag/v$${major}.$${minor}.$${patch}"
 
   nextcloud-mcp:

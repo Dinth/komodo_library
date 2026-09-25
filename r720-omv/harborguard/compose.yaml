@@ -1,6 +1,7 @@
 x-versions:
   # Upstream publishes only sha-* tags — no version stream to pin; digest watch.
-  harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest"
+  # Only latest/main/v0.2b are published: pinned by digest.
+  harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest@sha256:706d6f34eee522fc6824fda772be68a0777c7f1e7cfbfa4954f97afde064187c"
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
@@ -41,6 +42,7 @@ services:
       wud.display.icon: "sh-harbourguard"
       wud.watch.digest: "true"
       wud.watch: "true"
+      wud.tag.include: '^latest$$'
 
   harborguard-postgres:
     image: *postgres-version

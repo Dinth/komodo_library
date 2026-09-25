@@ -5,8 +5,8 @@
 # the semver tag.include/link.template below are future-proofing for when a proper
 # release stream lands.
 x-versions:
-  printstream: &printstream-version "ghcr.io/printstreamapp/printstream:latest"
-  printstream-slicer: &printstream-slicer-version "ghcr.io/printstreamapp/printstream-slicer:latest"
+  printstream: &printstream-version "ghcr.io/printstreamapp/printstream:1.3.14"
+  printstream-slicer: &printstream-slicer-version "ghcr.io/printstreamapp/printstream-slicer:1.3.14"
   postgres: &postgres-version "postgres:18-bookworm"
 
 x-logging: &default-logging

@@ -1,6 +1,8 @@
 x-versions:
   freshrss: &freshrss-version "freshrss/freshrss:1.30.0"
-  rss-bridge: &rss-bridge-version "rssbridge/rss-bridge:latest"
+  # The newest date tag (2025-08-05) is a year behind :latest, so pin the
+  # digest of the build that runs instead of downgrading.
+  rss-bridge: &rss-bridge-version "rssbridge/rss-bridge:latest@sha256:606896116558c57e3d381dec6874457f7a69216103d77c78b5bd38b92b251902"
   postgres: &postgres-version "docker.io/postgres:18.3-alpine"
 
 x-logging: &default-logging
@@ -19,7 +21,8 @@ services:
     mem_limit: 1G
     entrypoint: ["sh", "-c", "/app/bin/cache-clear && exec /app/docker-entrypoint.sh"]
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/80 && echo HTTP OK || echo HTTP FAIL'"]
+      # The old check echoed "HTTP FAIL" and still exited 0, so it never failed.
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/80"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -31,6 +34,13 @@ services:
     networks:
       - freshrss
     logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.watch.digest: "true"
+      wud.tag.include: '^latest$$'
+      wud.link.template: "https://github.com/RSS-Bridge/rss-bridge/commits/master"
+      wud.display.name: "RSS-Bridge"
+      wud.display.icon: "sh:rss-bridge"
 
   freshrss-postgres:
     image: *postgres-version
@@ -63,7 +73,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^17\.\d+-alpine$$'
+      wud.tag.include: '^18\.\d+-alpine$$'
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "FreshRSS - Postgres"
       wud.display.icon: "sh-freshrss"

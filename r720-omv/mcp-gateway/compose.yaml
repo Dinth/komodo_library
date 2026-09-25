@@ -36,7 +36,7 @@ services:
       - '-allowhealthcheck'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
-      - '-shutdowngracetime=10'     
+      - '-shutdowngracetime=10'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks: [mcp-gateway]
@@ -49,6 +49,9 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+      wud.display.name: "Docker Socket Proxy - MCP Gateway"
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
 
   mcp-gateway:
     image: *mcp-gateway-version

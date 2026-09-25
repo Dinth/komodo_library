@@ -1,8 +1,9 @@
 x-versions:
-  # Not pinned: upstream builds :latest from master ahead of its CalVer tags
-  # (v2025.6.6 is the newest version tag but :latest is a newer build), so a
-  # version pin would be a downgrade. WUD digest-watches :latest instead.
-  pinchflat: &pinchflat-version "ghcr.io/kieraneglin/pinchflat:latest"
+  # Pinned by digest, not a version tag: upstream builds :latest from master
+  # ahead of its CalVer tags (v2025.6.6 is the newest tag but :latest is a
+  # newer build), so a version pin would be a downgrade. WUD digest-watches
+  # :latest; bump by replacing the digest.
+  pinchflat: &pinchflat-version "ghcr.io/kieraneglin/pinchflat:latest@sha256:01b4f98aabaf3f5fe394213f7a32578c9e84e42080f52e2f8334021a4473b202"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -53,8 +54,8 @@ services:
       wud.watch.digest: 'true'
       wud.display.icon: 'sh-pinchflat'
       wud.display.name: 'Pinchflat'
-      wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/kieraneglin/pinchflat/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^latest$$'
+      wud.link.template: "https://github.com/kieraneglin/pinchflat/commits/master"
 
 networks:
   pinchflat:

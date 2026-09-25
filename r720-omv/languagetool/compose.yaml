@@ -59,7 +59,7 @@ services:
       traefik.http.routers.languagetool.middlewares: "secHeaders@file"
       traefik.http.services.languagetool.loadbalancer.server.port: "8010"
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      wud.tag.include: '^\d+\.\d+$$'
       wud.link.template: 'https://github.com/languagetool-org/languagetool/releases/tag/v$${major}.$${minor}'
       wud.display.name: 'Languagetool'
       wud.display.icon: 'sh:languagetool'

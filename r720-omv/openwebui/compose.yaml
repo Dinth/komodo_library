@@ -1,12 +1,15 @@
 x-versions:
   ollama: &ollama-version "ollama/ollama:0.34.3"
   openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.11.4"
-  ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest"
-  comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:latest-cuda"
+  # No version tags upstream (latest/main/nightly only): pinned by digest.
+  ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest@sha256:3dd32882666cf0e77272086446b5639c636fb090ac9ea629c11874200c629164"
+  # latest-cuda resolved to this tag and has not moved since 2024-09 (ai-dock
+  # stopped publishing), so pin what actually runs.
+  comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-base-22.04-v0.2.2"
   comfyui-idle: &comfyui-idle-version "curlimages/curl:8.22.0"
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.3"
   # Upstream publishes no releases/version tags — :main is the only stream.
-  openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main"
+  openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main@sha256:b48e9bc338ce2be0acfbeff01810db72408a12f07739f9e3879c1f2b00952d6e"
   # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
   # default distroless image has NO shell and breaks the agent's shell tool;
   # the prebuilt ghcr images also lack the channel-signal Cargo feature. So this
@@ -20,7 +23,7 @@ x-versions:
   # AND this image tag together, and check the patches still apply.
   zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-patched-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
-  zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27-alpine"
+  zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27.5-alpine"
 
 # Shared definition for the per-user ZeroClaw instances (zeroclaw-michal,
 # zeroclaw-paulina) — see the design comment above zeroclaw-selector.
@@ -284,6 +287,7 @@ services:
       - 11434:8080/tcp
     labels:
       wud.watch: "true"
+      wud.tag.include: '^latest$$'
       wud.watch.digest: "true"
       wud.display.name: "Ollama Metrics Proxy"
       wud.display.icon: "sh:chart"
@@ -367,7 +371,8 @@ services:
         max-file: "3"
     labels:
       wud.watch: "true"
-      wud.watch.digest: "true"
+      wud.tag.include: '^v2-cuda-12\.1\.1-base-22\.04-v\d+\.\d+\.\d+$$'
+      wud.watch.digest: "false"
       wud.display.name: "ComfyUI"
       wud.display.icon: "sh:comfyui"
       wud.link.template: "https://github.com/ai-dock/comfyui/releases"
@@ -497,7 +502,7 @@ services:
       wud.watch.digest: "true"
       wud.display.name: "OpenWebUI Pipelines"
       wud.display.icon: "sh:open-webui"
-      wud.tag.include: '^v\d+\.\d+\.\d+$'
+      wud.tag.include: '^main$$'
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - /opt/docker/openwebui/openwebui-pipelines_data:/app/pipelines
@@ -592,7 +597,7 @@ services:
       wud.watch: "true"
       wud.display.name: "OpenWebUI Server - AI agent manager"
       wud.display.icon: "sh:open-webui"
-      wud.tag.include: '^v\d+\.\d+\.\d+$'
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/open-webui/open-webui/releases/tag/v$${major}.$${minor}.$${patch}"
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"

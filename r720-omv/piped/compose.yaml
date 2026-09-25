@@ -1,7 +1,9 @@
 x-versions:
-  piped-backend-version: &piped-backend-version 1337kavin/piped:latest
-  piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest
-  piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest
+  # Piped publishes no version tags (only latest and JVM variants), so all
+  # three are pinned by digest; WUD watches the latest digest for drift.
+  piped-backend-version: &piped-backend-version 1337kavin/piped:latest@sha256:7747e19ee501c0a3afa94dd3d6e982dd4247f1babe03fb515b4a0f0b87f82b2e
+  piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest@sha256:e10c9474fdea1ddf09267a57c24d25a8c20ffbd96ac356db4b71d821f898e702
+  piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest@sha256:762a8d18f458a4e74fb581dc01c711e83624142f392132db7f4620fdfddad4f1
   piped-postgres-version: &piped-postgres-version postgres:18.6-alpine
 
 x-logging: &default-logging
@@ -41,8 +43,9 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/TeamPiped/Piped/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.watch.digest: "true"
+      wud.tag.include: '^latest$$'
+      wud.link.template: "https://github.com/TeamPiped/Piped/commits/master"
       wud.display.name: "Piped Backend"
 
   piped-proxy:
@@ -70,6 +73,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+      wud.watch.digest: "true"
       wud.tag.include: '^latest$$'
       wud.link.template: "https://github.com/TeamPiped/Piped-Proxy/releases"
       wud.display.name: "Piped Proxy"
@@ -95,8 +99,9 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/TeamPiped/Piped-Frontend/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.watch.digest: "true"
+      wud.tag.include: '^latest$$'
+      wud.link.template: "https://github.com/TeamPiped/Piped/commits/master"
       wud.display.name: "Piped Frontend"
       wud.display.icon: "sh:piped"
 

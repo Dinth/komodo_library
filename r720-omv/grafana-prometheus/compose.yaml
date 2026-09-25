@@ -334,7 +334,7 @@ services:
               capabilities: [gpu]
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+-\d+\.\d+\.\d+-distroless$'
+      wud.tag.include: '^\d+\.\d+\.\d+-\d+\.\d+\.\d+-distroless$$'
       wud.display.name: "DCGM Exporter"
       wud.display.icon: "si:nvidia"
     ports: []

@@ -3,7 +3,7 @@ x-versions:
   unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.6.106"
   # Not pinned: :latest tracks main ahead of the version tags (0.7.0 is older
   # than the current :latest build) — a pin would be a downgrade. Digest watch.
-  unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:latest"
+  unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:0.32.10"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -139,7 +139,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.watch.digest: "true"
+      wud.watch.digest: "false"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/sirkirby/unifi-network-mcp/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'UniFi Network MCP'
