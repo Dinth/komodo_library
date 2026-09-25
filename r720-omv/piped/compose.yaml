@@ -42,6 +42,7 @@ services:
       retries: 5
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^latest$$'
@@ -72,6 +73,7 @@ services:
       retries: 3
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^latest$$'

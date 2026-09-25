@@ -75,6 +75,7 @@ services:
       - /opt/docker/karakeep/karakeep_data:/data
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.karakeep.rule: "Host(`keep.${DOMAIN_NAME}`)"
       traefik.http.routers.karakeep.entrypoints: "websecure"
@@ -178,6 +179,7 @@ services:
       - karakeep
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.display.name: "KaraKeep - Chrome headless"
       wud.display.icon: "sh:karakeep"

@@ -38,6 +38,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.omnitools.rule: "Host(`omnitools.${DOMAIN_NAME}`)"
       traefik.http.routers.omnitools.entrypoints: "websecure"

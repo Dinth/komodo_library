@@ -106,11 +106,17 @@ services:
       # Override per container with the `autoheal.stop.timeout` label.
       AUTOHEAL_DEFAULT_STOP_TIMEOUT: "30"
       CURL_TIMEOUT: "30"
+      # Every restart (or failed restart) is posted to the Signal tech group
+      # through apprise's stateful "autoheal" config key
+      # (/opt/docker/signal-cli-api/apprise_config/autoheal.cfg).
+      APPRISE_URL: "http://apprise:8000/notify/autoheal"
     depends_on:
       autoheal-socket-proxy:
         condition: service_healthy
     networks:
       - autoheal
+      # apprise lives in the signal-rest-api stack and owns this network.
+      - signal-rest-api
     logging: *default-logging
     labels:
       # Deliberately NOT labelled autoheal=true — it cannot restart itself,
@@ -128,3 +134,5 @@ networks:
     name: autoheal
     driver: bridge
     external: false
+  signal-rest-api:
+    external: true

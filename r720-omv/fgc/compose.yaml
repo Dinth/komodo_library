@@ -84,6 +84,7 @@ services:
       DEBUG: "0" # no more Playwright-Inspector hang on failure
       DRYRUN: "0"
     labels:
+      autoheal: "true"
       wud.watch: "true"
       # Upstream tags are 2-part (v1.1), so no $${patch} component here.
       wud.tag.include: '^v\d+\.\d+$$'

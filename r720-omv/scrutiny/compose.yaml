@@ -23,7 +23,7 @@ services:
       - SYS_ADMIN
     cap_drop:
       - ALL
-    security_opt: 
+    security_opt:
       - no-new-privileges:true
     command:
       - /entrypoint-collector.sh
@@ -132,6 +132,7 @@ services:
       start_period: 30s
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+\-web$$'
       wud.display.name: "Scrutiny"

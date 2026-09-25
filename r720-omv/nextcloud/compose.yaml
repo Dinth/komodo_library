@@ -96,6 +96,7 @@ services:
         max-size: "5m"
         max-file: "2"
     labels:
+      autoheal: "true"
       wud.display.name: "Nextcloud - Imaginary"
       wud.display.icon: "sh:nextcloud"
       wud.watch: "true"
@@ -296,6 +297,7 @@ services:
         max-size: "5m"
         max-file: "2"
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.display.name: "Nextcloud - MCP"
       wud.display.icon: "sh:nextcloud"

@@ -570,6 +570,7 @@ git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/influxdb"
 environment = """
+DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 TZ=[[TZ]]
 INFLUXDB_PASSWORD=[[INFLUXDB_PASSWORD]]
 INFLUXDB_TOKEN=[[INFLUXDB_TOKEN]]

@@ -35,6 +35,7 @@ services:
       - freshrss
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.tag.include: '^latest$$'
@@ -141,6 +142,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.freshrss.rule: "Host(`rss.${DOMAIN_NAME}`)"
       traefik.http.routers.freshrss.entrypoints: "websecure"

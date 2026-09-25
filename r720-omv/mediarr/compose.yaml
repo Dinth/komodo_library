@@ -167,6 +167,7 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
+      autoheal: "true"
       wud.display.icon: "sh-prowlarr"
       wud.display.name: "Prowlarr"
       wud.link.template: "https://github.com/Prowlarr/Prowlarr/releases/tag/v$${major}.$${minor}.$${patch}"
@@ -175,7 +176,7 @@ services:
   #############################################################################
   # Recommendarr
   # AI powered media recommendation engine
-  #############################################################################      
+  #############################################################################
   recommendarr:
     cap_add:
       - CHOWN
@@ -210,6 +211,7 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
@@ -225,7 +227,7 @@ services:
   #############################################################################
   # Bazarr
   # Subtitle manager and downloader
-  #############################################################################      
+  #############################################################################
   bazarr:
     cap_add:
       - AUDIT_WRITE
@@ -272,6 +274,7 @@ services:
     image: *bazarr-version
     ipc: private
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -437,6 +440,7 @@ services:
     image: *lidarr-version
     ipc: private
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?[0-7]\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Lidarr/Lidarr/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -552,6 +556,7 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Nikorag/iplayarr/releases/tag/$${major}.$${minor}.$${patch}'
@@ -610,6 +615,7 @@ services:
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Cleanuparr/Cleanuparr/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -623,7 +629,7 @@ services:
   #############################################################################
   # Flareresolverr (Networked via Gluetun)
   # CAPTCHA resolver for Prowlarr
-  #############################################################################    
+  #############################################################################
   flaresolverr:
     cap_drop:
       - ALL
@@ -649,6 +655,7 @@ services:
     image: *flaresolverr-version
     ipc: private
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/FlareSolverr/FlareSolverr/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -707,6 +714,7 @@ services:
     image: *radarr-version
     ipc: private
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Radarr/Radarr/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -763,6 +771,7 @@ services:
     image: *sonarr-version
     ipc: private
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/sonarr/sonarr/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -790,7 +799,7 @@ services:
       - /opt/docker/mediarr/sonarr_config:/config
       - /Data/Unsorted:/downloads
       - /Data/TVShows:/tv
-    
+
 networks:
   mediarr:
     external: false

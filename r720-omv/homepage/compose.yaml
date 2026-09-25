@@ -134,6 +134,7 @@ services:
       - homepage
       - traefik
     labels:
+      autoheal: "true"
       # Docker Compose does NOT hash a `configs:` block's CONTENT into the
       # service's config-hash, so editing the nginx config below changes
       # nothing compose can see and `up -d` leaves the old container running -

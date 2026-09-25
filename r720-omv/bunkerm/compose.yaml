@@ -41,6 +41,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.mqtt-explorer.rule: "Host(`mqtt.${DOMAIN_NAME}`)"
       traefik.http.routers.mqtt-explorer.entrypoints: "websecure"
@@ -98,6 +99,7 @@ services:
       - bunkerm
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "BunkerM"

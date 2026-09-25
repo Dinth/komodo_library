@@ -50,6 +50,7 @@ services:
       - netbootxyz
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+-nbxyz\d+$$'
       # Rewrite 0.7.6-nbxyz18 -> 0.7.6-18 so the build counter is a *numeric*

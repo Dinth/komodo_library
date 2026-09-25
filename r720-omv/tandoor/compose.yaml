@@ -73,6 +73,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.tandoor.entrypoints: websecure
       traefik.http.routers.tandoor.rule: Host(`recipes.${DOMAIN_NAME}`)

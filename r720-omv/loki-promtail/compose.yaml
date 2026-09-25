@@ -141,6 +141,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /opt/docker/loki-promtail/alloy-storage:/var/lib/alloy
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Grafana Alloy"

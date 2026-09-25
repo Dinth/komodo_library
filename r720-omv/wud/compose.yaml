@@ -145,6 +145,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.wud.rule: "Host(`wud.${DOMAIN_NAME}`)"
       traefik.http.routers.wud.entrypoints: "websecure"

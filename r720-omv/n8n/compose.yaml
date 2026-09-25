@@ -82,6 +82,7 @@ services:
       - cloudflared
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.n8n.rule: "Host(`auto.${DOMAIN_NAME}`)"
       traefik.http.routers.n8n.entrypoints: "websecure"
@@ -162,6 +163,7 @@ services:
       - n8n
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "n8n MCP"

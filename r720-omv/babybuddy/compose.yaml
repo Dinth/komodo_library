@@ -57,6 +57,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.babybuddy.rule: "Host(`baby.${DOMAIN_NAME}`)"
       traefik.http.routers.babybuddy.entrypoints: "websecure"

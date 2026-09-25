@@ -97,6 +97,7 @@ services:
       start_period: 15s
     logging: *default-logging
     labels:
+      autoheal: "true"
       # Reached at http://10.10.1.13:5135/mcp through Traefik's
       # mcpgrocy entrypoint, which applies mcp-allowlist (no published port).
       traefik.enable: "true"

@@ -42,6 +42,7 @@ services:
     networks: [secops]
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+$$'
       wud.display.name: "SpiderFoot"
@@ -150,6 +151,7 @@ services:
     networks: [secops]
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/MISP/MISP/releases/tag/$${major}.$${minor}.$${patch}"
@@ -172,6 +174,7 @@ services:
       retries: 3
       start_period: 15s
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/MISP/misp-modules/releases/tag/$${major}.$${minor}.$${patch}"
@@ -273,6 +276,7 @@ services:
     networks: [secops]
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "mitmproxy"

@@ -54,6 +54,7 @@ services:
       start_period: 30s
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"

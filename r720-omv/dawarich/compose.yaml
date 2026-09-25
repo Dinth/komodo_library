@@ -29,7 +29,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
-    healthcheck: 
+    healthcheck:
       # Fast probing only while starting (gates depends_on), 30s once healthy.
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
       start_period: 10s
@@ -183,6 +183,7 @@ services:
 #        condition: service_healthy
 #        restart: true
     labels:
+      autoheal: "true"
       wud.display.icon: "sh:dawarich"
       wud.display.name: "Dawarich Sidekiq"
       wud.link.template: 'https://github.com/Freika/dawarich/releases/tag/$${major}.$${minor}.$${patch}'

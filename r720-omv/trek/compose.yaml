@@ -75,6 +75,7 @@ services:
       - traefik
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.docker.network: "traefik"
       traefik.http.routers.trek.rule: "Host(`trek.${DOMAIN_NAME}`)"

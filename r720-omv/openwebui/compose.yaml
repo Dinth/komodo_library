@@ -511,6 +511,7 @@ services:
     networks:
       - openwebui
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.watch.digest: "true"
       wud.display.name: "OpenWebUI Pipelines"
@@ -598,6 +599,7 @@ services:
     ports:
       - 3311:8080/tcp
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.openwebai.rule: "Host(`ai.${DOMAIN_NAME}`)"
       traefik.http.routers.openwebai.entrypoints: "websecure"
@@ -674,6 +676,7 @@ services:
     networks:
       - openwebui
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/unclecode/crawl4ai/releases/tag/v$${major}.$${minor}.$${patch}'
@@ -790,6 +793,7 @@ services:
       - openwebui
       - traefik
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.zeroclaw.rule: "Host(`zeroclaw.${DOMAIN_NAME}`)"
       traefik.http.routers.zeroclaw.entrypoints: "websecure"
@@ -814,6 +818,7 @@ services:
       zeroclaw-signal-cli:
         condition: service_healthy
     labels:
+      autoheal: "true"
       # Deliberate deviation: local build, nothing to pull — watch upstream
       # releases manually at the link below.
       wud.watch: "false"
@@ -832,6 +837,7 @@ services:
       zeroclaw-signal-cli:
         condition: service_healthy
     labels:
+      autoheal: "true"
       # Deliberate deviation: local build, nothing to pull — watch upstream
       # releases manually at zeroclaw-michal's link.
       wud.watch: "false"

@@ -84,6 +84,7 @@ services:
       - signal-rest-api
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: 'true'
       wud.display.icon: 'sh-uptime-kuma'
       wud.display.name: 'Uptime Kuma'

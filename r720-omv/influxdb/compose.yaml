@@ -1,9 +1,56 @@
 x-versions:
   influxdb: &influxdb-version "influxdb:2.9.1-alpine"
   telegraf-version: &telegraf-version "telegraf:1.40-alpine"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
   unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v2.21.0"
 
 services:
+  # Read-only Docker API for telegraf's docker input (per-container health
+  # and state, scraped by Prometheus for the ContainerUnhealthy alert).
+  telegraf-socket-proxy:
+    image: *socket-proxy-version
+    container_name: telegraf-socket-proxy
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=telegraf'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(v[0-9.]+/)?(containers/json|containers/[^/]+/(json|stats)|info|version|_ping)'
+      - '-allowHEAD=/(v[0-9.]+/)?_ping'
+      - '-allowhealthcheck'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - telegraf-docker
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: "Docker Socket Proxy - Telegraf"
+      wud.display.icon: "mdi:connection"
+
   influxdb:
     container_name: influxdb
     image: *influxdb-version
@@ -82,6 +129,7 @@ services:
     ipc: private
     networks:
       - monitoring
+      - telegraf-docker
     ports: []
     volumes:
       - /opt/docker/influxdb-telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
@@ -89,6 +137,8 @@ services:
       influxdb:
         condition: service_healthy
         restart: true
+      telegraf-socket-proxy:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:5435/health || exit 1"]
       interval: 60s
@@ -96,6 +146,7 @@ services:
       retries: 3
       start_period: 30s
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+-alpine$$'
       wud.display.name: "Telegraf"
@@ -166,6 +217,7 @@ services:
       retries: 3
       start_period: 30s
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.display.name: "UnPoller"
       wud.display.icon: "si:ubiquiti"
@@ -182,3 +234,7 @@ networks:
     name: monitoring
     driver: bridge
     external: true
+  telegraf-docker:
+    name: telegraf-docker
+    driver: bridge
+    internal: true

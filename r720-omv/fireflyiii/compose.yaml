@@ -360,6 +360,7 @@ services:
       - fireflyiii
     logging: *default-logging
     labels:
+      autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III MCP"

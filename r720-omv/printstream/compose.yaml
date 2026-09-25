@@ -136,6 +136,7 @@ services:
       - slicer-internal
     logging: *default-logging
     labels:
+      autoheal: "true"
       traefik.enable: "true"
       traefik.http.routers.printstream.rule: "Host(`print.${DOMAIN_NAME}`)"
       traefik.http.routers.printstream.entrypoints: "websecure"
