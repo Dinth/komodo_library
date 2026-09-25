@@ -17,8 +17,8 @@ services:
       - '-allowfrom=10.10.1.13/32,10.10.1.11/32,10.40.0.10/32,wud'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(v[0-9.]+/)?(containers/.*|images/.*|events|info|version)'
-      - '-allowPOST=/(containers/.*|images/.*)'
-      - '-allowDELETE=/(containers/.*|images/.*)'
+      # Read-only: WUD only watches (its sole trigger is Signal) and never
+      # updates containers itself; Komodo does the deploys.
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
