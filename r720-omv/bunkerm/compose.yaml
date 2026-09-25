@@ -31,14 +31,25 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-    ports:
-      - "4000:4000/tcp"
+    # No published port: the UI can publish to any MQTT topic (Zigbee devices
+    # included) and has no auth of its own configured, so it is reached only
+    # as https://mqtt.${DOMAIN_NAME} behind Authelia and lan-only.
     volumes:
       - "/opt/docker/bunkerm/mqtt-explorer_config:/mqtt-explorer/config"
     networks:
       - bunkerm
+      - traefik
     logging: *default-logging
     labels:
+      traefik.enable: "true"
+      traefik.http.routers.mqtt-explorer.rule: "Host(`mqtt.${DOMAIN_NAME}`)"
+      traefik.http.routers.mqtt-explorer.entrypoints: "websecure"
+      traefik.http.routers.mqtt-explorer.tls: "true"
+      traefik.http.routers.mqtt-explorer.tls.certresolver: "letsencrypt"
+      traefik.http.routers.mqtt-explorer.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.mqtt-explorer.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.mqtt-explorer.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.services.mqtt-explorer.loadbalancer.server.port: "4000"
       wud.watch: "true"
       wud.tag.include: '^browser-\d+\.\d+\.\d+$$'
       wud.display.name: "MQTT Explorer"
@@ -94,6 +105,8 @@ services:
       wud.link.template: "https://github.com/bunkeriot/BunkerM/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
+  traefik:
+    external: true
   bunkerm:
     name: bunkerm
     driver: bridge

@@ -212,6 +212,7 @@ git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/bunkerm"
 environment = """
+DOMAIN_NAME=[[DOMAIN_NAME]]
 TZ=[[TZ]]
 """
 
