@@ -49,7 +49,12 @@ services:
     mem_limit: 16G
     command: ['/init']
     environment:
-      USER_ID: "${DOCKER_PUID}"
+      # crashplan (1006:users) is the host's read-only backup user: /Data's ACLs
+      # give it r-x everywhere, while they deliberately deny the `docker` user
+      # (DOCKER_PUID, which every other container runs as) on Photos and Other.
+      # Running as DOCKER_PUID (2026-06-04 to 2026-09-25) silently skipped both.
+      # The image chowns /config to USER_ID on start (TAKE_CONFIG_OWNERSHIP).
+      USER_ID: "1006"
       GROUP_ID: "${DOCKER_PGID}"
       UMASK: "0022"
       # Must be a locale the image ships (only C.utf8 / en_US.utf8). en_GB.UTF-8
@@ -94,8 +99,8 @@ services:
       # 2026-05-21 and expired the whole /Data backup ("drive has not been
       # seen in 30 days"). startapp.sh replaces that symlink on each start.
       # /Data/.bzvol (Backblaze's volume id, v0019145e...) must be owned by
-      # USER_ID (1003); it was still 1000-owned from the 2023 install and
-      # unreadable after USER_ID moved to DOCKER_PUID on 2026-06-04.
+      # USER_ID (1006:100); it was still 1000-owned from the 2023 install and
+      # unreadable after USER_ID moved off 1000 on 2026-06-04.
       - /Data:/drive_d
     networks:
       - backblaze-personal-wine
