@@ -287,7 +287,7 @@ services:
       PUID: "${MEDIA_PUID}"
       PGID: "${MEDIA_PGID}"
       TZ: "${TZ}"
-      DOCKER_MODS: "ghcr.io/loneangelfayt/pcsx2-romm-integration-mod:v1.3.3"
+      DOCKER_MODS: "ghcr.io/loneangelfayt/pcsx2-romm-integration-mod:v1.4.2"
       BROKER_SECRET: "${ROMM_STREAMING_BROKER_SECRET}"
       # Must resolve to the identical path inside romm, or every launch 422s.
       ROM_ROOT: "/romm/library"
