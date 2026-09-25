@@ -93,6 +93,36 @@ services:
       NEXTCLOUD_CALENDARS: >-
         michal/personal/calendar_michal.ics,
         paulina/personal/calendar_paulina.ics
+      # pricebuddy_deals ranks the tracked products for the PriceBuddy tile.
+      # The ranking is PriceBuddy's own deal score, which lives in the
+      # product's insights_cache - hidden on the model, so absent from the
+      # list endpoint and only reachable one product at a time through
+      # /api/products/{id}?include=insights. Homepage's customapi is one URL
+      # per widget and cannot rank or join, hence the job.
+      #
+      # Reached over the pricebuddy network rather than a published port: that
+      # stack deliberately publishes none, so the app stays behind Traefik's
+      # TLS and secHeaders instead of also answering :80 in the clear on the
+      # LAN. Joining the network is what makes `http://pricebuddy` resolvable.
+      #
+      # Accounts are separate, like the calendars above and unlike Monica:
+      # pricebuddy is genuinely multi-user and every query it runs is scoped
+      # with `where('user_id', auth()->id())`, so each owner is fetched as
+      # ITSELF and gets its own file. Neither board shows the other's shopping
+      # list, and a dead token costs only that one tile.
+      #
+      # The tokens are Sanctum keys minted under Settings -> API Keys, each
+      # scoped to product:pagination and product:detail only - they can read
+      # that account's catalogue and nothing else. Revocable there per user.
+      #
+      # <owner>/<output-file>, comma separated. Adding an account is one more
+      # token variable plus one more entry here.
+      PRICEBUDDY_URL: "http://pricebuddy:80"
+      PRICEBUDDY_TOKEN_MICHAL: "${PRICEBUDDY_TOKEN_MICHAL}"
+      PRICEBUDDY_TOKEN_PAULINA: "${PRICEBUDDY_TOKEN_PAULINA}"
+      PRICEBUDDY_ACCOUNTS: >-
+        michal/pricebuddy_deals_michal.json,
+        paulina/pricebuddy_deals_paulina.json
     ports:
       - 3012:3012/tcp
     volumes:
@@ -107,8 +137,8 @@ services:
       # the stack's old "cant be run as user" note was actually about.
       - /opt/docker/cronicle/cronicle_queue:/opt/cronicle/queue
       - /Data/IT/pfsense-backups:/pfsense-backups
-      # firefly_import_status, monica_upcoming and nextcloud_calendar write
-      # their status documents here; the
+      # firefly_import_status, monica_upcoming, nextcloud_calendar and
+      # pricebuddy_deals write their status documents here; the
       # homepage-selector nginx serves those files read-only so the Homepage
       # boards can render them. Cronicle's REST API cannot filter history by
       # event and get_master_state has no timestamps, so the firefly job reads
@@ -117,6 +147,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - cronicle
+      # Egress only - no router, no labels, nothing on the other side depends
+      # on this. Owned by the pricebuddy stack, so on a cold start that one
+      # has to have been deployed first for this to resolve.
+      - pricebuddy
     logging: *default-logging
     labels:
       wud.watch: "true"
@@ -129,3 +163,5 @@ networks:
   cronicle:
     name: cronicle
     driver: bridge
+  pricebuddy:
+    external: true
