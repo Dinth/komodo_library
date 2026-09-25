@@ -467,14 +467,13 @@ services:
       TZ: "${TZ}"
     expose:
       - 5133
-    ports:
-      - 5133:5133/tcp
     hostname: mcp-grafana
     ipc: private
     mem_limit: 256M
     networks:
       - monitoring
       - openwebui
+      - traefik
     healthcheck:
       # Image (debian-slim) has no curl/wget — use bash's /dev/tcp against /healthz.
       # Must send a Host header that --allowed-hosts accepts (403 otherwise), and
@@ -485,6 +484,13 @@ services:
       retries: 3
       start_period: 10s
     labels:
+      # Reached at http://10.10.1.13:5133/mcp through Traefik's
+      # mcpgrafana entrypoint, which applies mcp-allowlist (no published port).
+      traefik.enable: "true"
+      traefik.http.routers.mcp-grafana.entrypoints: "mcpgrafana"
+      traefik.http.routers.mcp-grafana.rule: "PathPrefix(`/`)"
+      traefik.http.routers.mcp-grafana.middlewares: "mcp-allowlist@docker"
+      traefik.http.services.mcp-grafana.loadbalancer.server.port: "5133"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/grafana/mcp-grafana/releases/tag/v$${major}.$${minor}.$${patch}'

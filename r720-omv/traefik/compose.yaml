@@ -113,6 +113,15 @@ services:
       TRAEFIK_ENTRYPOINTS_WAZUHAGENT_ADDRESS: ":9514"
       TRAEFIK_ENTRYPOINTS_WAZUHENROLL_ADDRESS: ":9515"
       # Websecure (HTTPS) EntryPoint on port 443
+      # MCP servers with no client auth of their own (grafana, grocy) keep their historical LAN URLs
+      # (http://10.10.1.13:<port>/mcp, as configured in Claude Desktop), but
+      # Traefik now owns the ports so the mcp-allowlist middleware can refuse
+      # anything outside the workstation VLAN and Tailscale. Streamable HTTP
+      # holds responses open, so the timeouts mirror websecure's.
+      TRAEFIK_ENTRYPOINTS_MCPGRAFANA_ADDRESS: ":5133"
+      TRAEFIK_ENTRYPOINTS_MCPGROCY_ADDRESS: ":5135"
+      TRAEFIK_ENTRYPOINTS_MCPGRAFANA_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      TRAEFIK_ENTRYPOINTS_MCPGROCY_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
       # Trust Cloudflare IPs for X-Forwarded-* headers (real client IP extraction)
@@ -179,6 +188,8 @@ services:
       - 443:443
       - 9514:9514
       - 9515:9515
+      - 5133:5133
+      - 5135:5135
     volumes:
       - /opt/docker/traefik/traefik_certs:/certs
       - /opt/docker/traefik/traefik_dynamic.yml:/traefik_dynamic.yml:ro
@@ -201,6 +212,13 @@ services:
       traefik.http.routers.traefik-dashboard.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.traefik-dashboard.service: "api@internal"
       traefik.http.routers.traefik-dashboard.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      # Who may use the unauthenticated MCP entrypoints: the WORKSTATIONS VLAN,
+      # Tailscale clients (pfSense SNATs them to its LAN address 10.10.0.1;
+      # 100.64/10 covers them should SNAT be switched off) and Docker's own
+      # address pools, so in-cluster clients that hairpin via 10.10.1.13 work.
+      # Defined here rather than on an MCP container so it never disappears
+      # while one of them is down.
+      traefik.http.middlewares.mcp-allowlist.ipallowlist.sourcerange: "10.40.0.0/16,10.10.0.1/32,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16,10.224.0.0/12,169.254.0.0/16"
       # Widget reaches the API over the internal traefik docker network (the :8080
       # insecure entrypoint), since the public router is gated by Authelia.
       wud.watch: "true"
