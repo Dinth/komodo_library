@@ -47,6 +47,10 @@ services:
     # registry tag, so WUD can't watch it. Restore these (and revert the
     # build:/image: block to a plain `image: *vdirsyncer-base`) once the
     # upstream Location-header fix ships and the patch is no longer needed.
+    # The watchers use WATCHALL, so opting out needs an explicit label;
+    # otherwise WUD looks the local image up on Docker Hub and gets a 401.
+    labels:
+      wud.watch: "false"
     # labels:
     #   wud.watch: "true"
     #   wud.tag.include: '^\d+\.\d+\.\d+$$'

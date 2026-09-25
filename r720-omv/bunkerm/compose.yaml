@@ -82,7 +82,6 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "BunkerM"
       wud.display.icon: "sh:bunkerm"

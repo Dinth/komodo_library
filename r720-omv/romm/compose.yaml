@@ -271,7 +271,6 @@ services:
         worker-src 'self' blob: data:;
       traefik.http.services.romm.loadbalancer.server.port: "8080"
       wud.watch: 'true'
-      wud.watch.digest: "true"
       wud.display.icon: 'sh-romm'
       wud.display.name: 'Romm'
       wud.tag.include: '^\d+\.\d+\.\d+$$'

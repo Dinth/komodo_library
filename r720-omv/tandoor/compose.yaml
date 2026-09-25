@@ -83,7 +83,6 @@ services:
       traefik.http.routers.tandoor.middlewares: "secHeaders@file"
       traefik.http.services.tandoor.loadbalancer.server.port: "80"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.display.name: "Tandoor"
       wud.display.icon: "sh:tandoor-recipes"
       wud.tag.include: '^\d+\.\d+\.\d+$'

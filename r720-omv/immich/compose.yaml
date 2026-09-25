@@ -70,7 +70,6 @@ services:
       traefik.http.routers.immich.middlewares: "secHeaders@file"
       traefik.http.services.immich.loadbalancer.server.port: "2283"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.display.icon: "sh-immich"
       wud.display.name: "Immich Server"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'

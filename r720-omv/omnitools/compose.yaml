@@ -48,7 +48,6 @@ services:
       traefik.http.routers.omnitools.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.omnitools.loadbalancer.server.port: "80"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.display.icon: "sh-omnitools"
       wud.display.name: "Omni Tools"
       wud.tag.include: '^\d+\.\d+\.\d+$'
