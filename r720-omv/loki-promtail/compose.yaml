@@ -116,7 +116,8 @@ services:
       - "1514:1514/tcp"
       - "1515:1515/udp"
       - "1515:1515/tcp"
-      - "12345:12345/tcp"
+      # 12345 (Alloy UI/debug API, self-metrics) is not published: nothing
+      # outside the container uses it. Open the UI with `ssh -L 12345:<alloy IP>:12345`.
     depends_on:
       loki:
         condition: service_healthy
