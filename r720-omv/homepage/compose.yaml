@@ -138,7 +138,7 @@ services:
       # redeploys on 2026-09-22). The content only lands at container CREATION.
       # BUMP THIS whenever homepage_selector's content changes: it is part of
       # the service definition, so it moves the hash and forces the recreate.
-      config.revision: "2"
+      config.revision: "3"
       traefik.enable: "true"
       traefik.http.routers.homepage.rule: "Host(`fp.${DOMAIN_NAME}`)"
       traefik.http.routers.homepage.entrypoints: "websecure"
@@ -209,21 +209,26 @@ configs:
           }
 
           # Status documents the cronicle stack writes for the boards' tiles.
-          # Exact-match locations so they are matched before `location /`, which
-          # would otherwise 403 them: Homepage's widget proxy is server-side and
-          # carries no Remote-User. Listed one by one rather than serving
-          # /srv/status as a directory, so a file dropped in there is never
-          # exposed by accident.
-          location = /status/firefly_imports.json {
-              alias /srv/status/firefly_imports.json;
-              default_type application/json;
+          # One prefix location rather than an exact-match line per file: the
+          # content of a `configs:` block is only materialised when the
+          # container is CREATED, so every new file used to mean a compose edit,
+          # a config.revision bump and a redeploy. Now dropping a file in
+          # /opt/docker/homepage/status is enough. autoindex is off by default,
+          # so the directory itself is not browsable - but everything in it IS
+          # readable by anything that can reach homepage-selector, because this
+          # sits in front of the `location /` board check below. Homepage's
+          # widget proxy is server-side and carries no Remote-User, so it cannot
+          # pass that check. Put nothing in that directory that is not meant to
+          # be shared between the boards.
+          location /status/ {
+              alias /srv/status/;
+              autoindex off;
               add_header Cache-Control "no-store" always;
-          }
-
-          location = /status/monica_upcoming.json {
-              alias /srv/status/monica_upcoming.json;
-              default_type application/json;
-              add_header Cache-Control "no-store" always;
+              types {
+                  application/json json;
+                  text/calendar    ics;
+              }
+              default_type application/octet-stream;
           }
 
           location / {

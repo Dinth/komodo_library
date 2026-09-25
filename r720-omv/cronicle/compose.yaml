@@ -71,6 +71,28 @@ services:
       # lifetime, so this token dies 2027-09-21 and the job then fails loudly.
       MONICA_URL: "http://10.10.1.13:5435"
       MONICA_TOKEN: "${MONICA_HOMEPAGE_TOKEN}"
+      # nextcloud_calendar publishes each board's Nextcloud calendar as a plain
+      # .ics the Homepage calendar widget can read. The widget's `ical`
+      # integration has no auth fields and sends no Authorization header, so the
+      # authenticated CalDAV fetch has to happen here.
+      #
+      # Calendars are per-user - unlike Monica, where both boards share
+      # account 1 and one file serves both - so every owner is fetched as
+      # ITSELF, with its own app password. Deliberately not via Nextcloud
+      # calendar sharing: a board should not break because someone revoked a
+      # share, and neither of them should have to share a calendar with the
+      # other just to see it on their own dashboard. These are dedicated
+      # "Homepage calendar tile" app passwords, revocable per user under
+      # Settings -> Security without touching vdirsyncer's separate one.
+      #
+      # <owner>/<calendar-uri>/<output-file>, comma separated. Adding a user is
+      # one more variable plus one more entry here.
+      NEXTCLOUD_URL: "http://10.10.1.13:1357"
+      NEXTCLOUD_CALDAV_PASSWORD_MICHAL: "${NEXTCLOUD_CALDAV_PASSWORD_MICHAL}"
+      NEXTCLOUD_CALDAV_PASSWORD_PAULINA: "${NEXTCLOUD_CALDAV_PASSWORD_PAULINA}"
+      NEXTCLOUD_CALENDARS: >-
+        michal/personal/calendar_michal.ics,
+        paulina/personal/calendar_paulina.ics
     ports:
       - 3012:3012/tcp
     volumes:
@@ -85,7 +107,8 @@ services:
       # the stack's old "cant be run as user" note was actually about.
       - /opt/docker/cronicle/cronicle_queue:/opt/cronicle/queue
       - /Data/IT/pfsense-backups:/pfsense-backups
-      # firefly_import_status and monica_upcoming write their JSON here; the
+      # firefly_import_status, monica_upcoming and nextcloud_calendar write
+      # their status documents here; the
       # homepage-selector nginx serves those files read-only so the Homepage
       # boards can render them. Cronicle's REST API cannot filter history by
       # event and get_master_state has no timestamps, so the firefly job reads
