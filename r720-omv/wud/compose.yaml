@@ -74,6 +74,11 @@ services:
       # Staggered 30 min after r720 so the two scans don't hit the same
       # registries at once; running together caused nightly GHCR/LSCR 429s.
       WUD_WATCHER_R230NIXOS_CRON: '30 1 * * *'
+      # Cool-down: only report a release once it has been out for 3 days, so
+      # quick follow-up patches (e.g. 9.0.0 -> 9.0.2 within a day) collapse
+      # into one notification. Per-container override: wud.watch.delay.
+      WUD_WATCHER_R720OMV_DELAY: "3d"
+      WUD_WATCHER_R230NIXOS_DELAY: "3d"
       WUD_SERVER_FEATURE_DELETE: "false"
       WUD_LOG_LEVEL: "info"
       # Registry keys are WUD_REGISTRY_<TYPE>_<NAME>_<KEY>; without the NAME
@@ -89,7 +94,9 @@ services:
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
       WUD_REGISTRY_LSCR_PRIVATE_CONCURRENCY: "1"
-      WUD_REGISTRY_CUSTOM_BRICKTRACKER_URL: "https://gitea.baerentsen.space"
+      # Gitea provider, not custom: Gitea's registry needs the /v2/token
+      # bearer handshake (anonymous is fine), which custom doesn't do (401).
+      WUD_REGISTRY_GITEA_BRICKTRACKER_URL: "https://gitea.baerentsen.space"
       # Signal notification on update via WUD's native Signal trigger (added in
       # 8.4.0). It POSTs the same {message, number, recipients[]} body to
       # signal-cli-rest-api's /v2/send that the previous hand-rolled command
@@ -146,7 +153,6 @@ services:
       traefik.http.routers.wud.middlewares: "secHeaders@file,lan-only@file"
       traefik.http.services.wud.loadbalancer.server.port: "3000"
       wud.watch: "true"
-      wud.watch.digest: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: "https://github.com/getwud/wud/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "Whats Up Docker?"
