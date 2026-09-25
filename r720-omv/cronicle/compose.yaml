@@ -123,6 +123,20 @@ services:
       PRICEBUDDY_ACCOUNTS: >-
         michal/pricebuddy_deals_michal.json,
         paulina/pricebuddy_deals_paulina.json
+      # backblaze_status turns the Backblaze client's on-disk state into the
+      # JSON its Homepage tile reads. Backblaze Personal has no API at all -
+      # the Wine client keeps everything in small XML and text files under
+      # bzdata, which is why this reads a read-only bind mount rather than a
+      # URL, and why there is no token here to leak.
+      #
+      # It reports ONE VOLUME. bzdata carries two: C: is Wine's own drive_c
+      # (~4,500 files, 1.3 GB) and D: is /Data, the reason the backup exists.
+      # Backblaze's combined <totals> line stays comfortably non-zero when D:
+      # drops out entirely, which is how D: sat unbacked-up from May to
+      # 2026-09-23 with nothing showing it. Per volume that failure reads as
+      # "0 files" and the tile turns red.
+      BACKBLAZE_DATA: "/bzdata"
+      BACKBLAZE_VOLUME: "D:"
     ports:
       - 3012:3012/tcp
     volumes:
@@ -137,12 +151,17 @@ services:
       # the stack's old "cant be run as user" note was actually about.
       - /opt/docker/cronicle/cronicle_queue:/opt/cronicle/queue
       - /Data/IT/pfsense-backups:/pfsense-backups
-      # firefly_import_status, monica_upcoming, nextcloud_calendar and
-      # pricebuddy_deals write their status documents here; the
-      # homepage-selector nginx serves those files read-only so the Homepage
-      # boards can render them. Cronicle's REST API cannot filter history by
-      # event and get_master_state has no timestamps, so the firefly job reads
-      # the per-event history out of the store instead.
+      # backblaze_status reads this; :ro because nothing here should ever write
+      # to another app's live state, and the job only needs bzreports/,
+      # bzfilelists/ and bzvolumes.xml. Owned by the same uid:gid this
+      # container runs as, so no permission juggling.
+      - /opt/docker/backblaze-personal-wine/backblaze_data/wine/drive_c/ProgramData/Backblaze/bzdata:/bzdata:ro
+      # firefly_import_status, monica_upcoming, nextcloud_calendar,
+      # pricebuddy_deals and backblaze_status write their status documents
+      # here; the homepage-selector nginx serves those files read-only so the
+      # Homepage boards can render them. Cronicle's REST API cannot filter
+      # history by event and get_master_state has no timestamps, so the firefly
+      # job reads the per-event history out of the store instead.
       - /opt/docker/homepage/status:/status
       - /etc/localtime:/etc/localtime:ro
     networks:
