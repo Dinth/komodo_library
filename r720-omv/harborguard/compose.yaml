@@ -1,6 +1,6 @@
 x-versions:
-  # Upstream publishes only sha-* tags — no version stream to pin; digest watch.
   # Only latest/main/v0.2b are published: pinned by digest.
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
   harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest@sha256:706d6f34eee522fc6824fda772be68a0777c7f1e7cfbfa4954f97afde064187c"
   postgres: &postgres-version "postgres:18.6-alpine"
 
@@ -11,6 +11,52 @@ x-logging: &default-logging
     max-file: "3"
 
 services:
+  # harborguard shells out to the docker CLI and skopeo (docker-daemon:), both
+  # of which follow DOCKER_HOST. Images may be read, pulled, loaded, tagged and
+  # removed (scans and the patcher); containers are read-only, so it can no
+  # longer create one, which was root on the host via the raw socket.
+  harborguard-socket-proxy:
+    image: *socket-proxy-version
+    container_name: harborguard-socket-proxy
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    command:
+      - '-loglevel=info'
+      - '-allowfrom=harborguard'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(v[0-9.]+/)?(containers/json|containers/[^/]+/json|images/.*|distribution/.*|info|version|_ping)'
+      - '-allowHEAD=/(v[0-9.]+/)?_ping'
+      - '-allowPOST=/(v[0-9.]+/)?images/.*'
+      - '-allowDELETE=/(v[0-9.]+/)?images/.*'
+      - '-allowhealthcheck'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - harborguard
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: "Docker Socket Proxy - Harborguard"
+      wud.display.icon: "mdi:connection"
+
   harborguard:
     image: *harborguard-version
     ipc: private
@@ -23,13 +69,14 @@ services:
       PORT: "3005"
       DATABASE_URL: "postgresql://harborguard:${HARBORGUARD_DB_PASS}@harborguard-postgres:5432/harborguard"
       HEALTH_CHECK_ENABLED: "true"
+      DOCKER_HOST: "tcp://harborguard-socket-proxy:2375"
     depends_on:
       harborguard-postgres:
         condition: service_healthy
+      harborguard-socket-proxy:
+        condition: service_healthy
     ports:
       - "3005:3005"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - harborguard
     logging:
