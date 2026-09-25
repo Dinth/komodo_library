@@ -65,23 +65,30 @@ services:
       WUD_WATCHER_R720OMV_HOST: wud-socket-proxy
       WUD_WATCHER_R720OMV_PORT: "2375"
       WUD_WATCHER_R720OMV_WATCHALL: "true"
-      WUD_WATCHER_R720OMV_SOCKET: "tcp://wud-socket-proxy:2375"
       WUD_WATCHER_R720OMV_WATCHEVENTS: "false"
       WUD_WATCHER_R720OMV_CRON: '0 1 * * *'
       WUD_WATCHER_R230NIXOS_HOST: 10.10.1.12
       WUD_WATCHER_R230NIXOS_PORT: "2377"
       WUD_WATCHER_R230NIXOS_WATCHALL: "true"
-      WUD_WATCHER_R230NIXOS_SOCKET: "tcp://10.10.1.12:2377"
       WUD_WATCHER_R230NIXOS_WATCHEVENTS: "false"
-      WUD_WATCHER_R230NIXOS_CRON: '0 1 * * *'
+      # Staggered 30 min after r720 so the two scans don't hit the same
+      # registries at once; running together caused nightly GHCR/LSCR 429s.
+      WUD_WATCHER_R230NIXOS_CRON: '30 1 * * *'
       WUD_SERVER_FEATURE_DELETE: "false"
-      WUD_LOG_LEVEL: "debug"
-      WUD_REGISTRY_HUB_LOGIN: "${WUD_DOCKERHUB_USER}"
-      WUD_REGISTRY_HUB_TOKEN: "${WUD_DOCKERHUB_TOKEN}"
+      WUD_LOG_LEVEL: "info"
+      # Registry keys are WUD_REGISTRY_<TYPE>_<NAME>_<KEY>; without the NAME
+      # segment WUD registers empty registries called "login"/"token" and
+      # stays anonymous (100 pulls / 6h instead of 200).
+      WUD_REGISTRY_HUB_PUBLIC_LOGIN: "${WUD_DOCKERHUB_USER}"
+      WUD_REGISTRY_HUB_PUBLIC_PASSWORD: "${WUD_DOCKERHUB_TOKEN}"
+      # GHCR and LSCR (a GHCR front) share one GitHub PAT, so their rate
+      # limits stack; one request at a time each keeps the scan under them.
       WUD_REGISTRY_GHCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_GHCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
+      WUD_REGISTRY_GHCR_PRIVATE_CONCURRENCY: "1"
       WUD_REGISTRY_LSCR_PRIVATE_USERNAME: "${ADMIN_EMAIL}"
       WUD_REGISTRY_LSCR_PRIVATE_TOKEN: "${WUD_GHCR_TOKEN}"
+      WUD_REGISTRY_LSCR_PRIVATE_CONCURRENCY: "1"
       WUD_REGISTRY_CUSTOM_BRICKTRACKER_URL: "https://gitea.baerentsen.space"
       # Signal notification on update via WUD's native Signal trigger (added in
       # 8.4.0). It POSTs the same {message, number, recipients[]} body to
@@ -123,7 +130,6 @@ services:
     volumes:
       - /opt/docker/wud/wud_store:/store
       - /etc/localtime:/etc/localtime:ro
-      - /etc/komodo/stacks:/docker
     networks:
       - wud
       - signal-rest-api
