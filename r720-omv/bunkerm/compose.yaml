@@ -62,7 +62,9 @@ services:
       - no-new-privileges:true
     mem_limit: 768M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:2000 || exit 1"]
+      # 127.0.0.1, not localhost: busybox wget tries ::1 first and the UI only
+      # listens on IPv4, so "localhost" is always connection refused.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:2000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -77,6 +79,10 @@ services:
       - "/opt/docker/bunkerm/bunkerm_data:/var/lib/mosquitto"
       - "/opt/docker/bunkerm/bunkerm_config:/etc/mosquitto"
       - "/opt/docker/bunkerm/bunkerm_auth:/data"
+      # The image ships no tzdata, so TZ=Europe/London can't be resolved and
+      # agent-api (tzlocal/APScheduler) crash-loops into FATAL. Lend it the host's.
+      - "/usr/share/zoneinfo:/usr/share/zoneinfo:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     networks:
       - bunkerm
     logging: *default-logging
