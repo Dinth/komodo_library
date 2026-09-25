@@ -77,7 +77,16 @@ services:
       - 5800:5800/tcp
     volumes:
       - /opt/docker/backblaze-personal-wine/backblaze_data:/config
-      - /Data:/storage
+      # Must be /drive_<letter>: startapp.sh only registers those with Wine as
+      # fixed disks ("d:"="hd" under HKLM\Software\Wine\Drives). The old
+      # /storage mount relied on a hand-made 2023 dosdevices symlink that
+      # Wine 11 never registers, so Backblaze stopped seeing D: after
+      # 2026-05-21 and expired the whole /Data backup ("drive has not been
+      # seen in 30 days"). startapp.sh replaces that symlink on each start.
+      # /Data/.bzvol (Backblaze's volume id, v0019145e...) must be owned by
+      # USER_ID (1003); it was still 1000-owned from the 2023 install and
+      # unreadable after USER_ID moved to DOCKER_PUID on 2026-06-04.
+      - /Data:/drive_d
     networks:
       - backblaze-personal-wine
     logging: *default-logging
