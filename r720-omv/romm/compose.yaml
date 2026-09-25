@@ -255,10 +255,15 @@ services:
       # proxied by RomM), and secHeaders' `default-src 'self'` — which frame-src
       # inherits — would block a cross-subdomain frame. Identical to secHeaders'
       # policy otherwise, with frame-src added.
+      # script-src also allows cdn.emulatorjs.org: with emulatorjs.netplay
+      # enabled in config.yml, RomM loads the EmulatorJS nightly from that CDN
+      # instead of its bundled 4.2.3, whose multi-disk bug fails every Amiga
+      # .m3u game with "Failed to start game". If the CDN script is blocked,
+      # RomM silently falls back to the bundled 4.2.3.
       traefik.http.routers.romm.middlewares: "romm-csp,secHeaders@file"
       traefik.http.middlewares.romm-csp.headers.customresponseheaders.Content-Security-Policy: >-
         default-src 'self' blob: data:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: unpkg.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: unpkg.com cdn.emulatorjs.org;
         style-src 'self' 'unsafe-inline' blob: data: fonts.bunny.net unpkg.com;
         img-src 'self' blob: data: https: i.ytimg.com cdn.jsdelivr.net ui-avatars.com m.media-amazon.com www.igdb.com;
         font-src 'self' blob: data: fonts.bunny.net unpkg.com;
