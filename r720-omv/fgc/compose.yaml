@@ -57,8 +57,8 @@ services:
       # here later if wanted.
       STORES: "epic,gog,prime"
       # --- Common credentials (fallback for per-store overrides) ---
+      # No common PASSWORD: every store below sets its own.
       EMAIL: "${ADMIN_EMAIL}"
-      PASSWORD: "${FGC_PASSWORD}"
       # --- Epic ---
       EG_EMAIL: "${ADMIN_EMAIL}"
       EG_PASSWORD: "${FGC_EG_PASS}"
@@ -73,7 +73,9 @@ services:
       PG_REDEEM: "1"
       PG_CLAIMDLC: "1"
       # --- Notifications (apprise) ---
-      NOTIFY: "${FGC_NOTIFY}"
+      # Apprise's Signal plugin, straight to signal-cli-rest-api (same bot and
+      # tech recipient as WUD's update notifications).
+      NOTIFY: "signal://signal-rest-api:8080/${SIGNAL_BOT_NUMBER}/${SIGNAL_TECH_ID}"
       NOTIFY_SUMMARY: "1"
       NOTIFY_ERRORS: "1"
       NOTIFY_CLAIM_FAILS: "1"
@@ -89,6 +91,8 @@ services:
       wud.link.template: 'https://github.com/P-Adamiec/Free-Games-Claimer-Remaster/releases/tag/v$${major}.$${minor}'
     networks:
       - fgc
+      # For NOTIFY above; the signal-rest-api stack owns this network.
+      - signal-rest-api
     logging: *default-logging
 
 networks:
@@ -96,3 +100,5 @@ networks:
     name: fgc
     driver: bridge
     external: false
+  signal-rest-api:
+    external: true

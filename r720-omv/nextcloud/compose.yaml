@@ -20,7 +20,7 @@ services:
     hostname: nextcloud-valkey
     ipc: private
     restart: unless-stopped
-    command: ['valkey-server','--save','30','1','--loglevel','warning','--maxmemory','200mb','--maxmemory-policy','noeviction']
+    command: ['valkey-server','--save','30','1','--loglevel','warning','--maxmemory','200mb','--maxmemory-policy','noeviction','--requirepass','${NEXTCLOUD_VALKEY_PASS}']
     cap_add:
       - SETGID
       - SETUID
@@ -33,8 +33,11 @@ services:
     mem_limit: 512M
     environment:
       TZ: "${TZ}"
-      ALLOW_EMPTY_PASSWORD: "no"
-      VALKEY_PASSWORD: "${NEXTCLOUD_VALKEY_PASS}"
+      # The official image ignores VALKEY_PASSWORD (a Bitnami-ism); the password
+      # is set by --requirepass above. valkey-cli reads REDISCLI_AUTH, which
+      # keeps the healthcheck's ping authenticated. Nextcloud's side lives in
+      # config.php ('redis' => ['password' => ...]), set via occ.
+      REDISCLI_AUTH: "${NEXTCLOUD_VALKEY_PASS}"
     healthcheck:
       # Fast probing only while starting (gates depends_on), 30s once healthy.
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
