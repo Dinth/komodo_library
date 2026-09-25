@@ -52,7 +52,11 @@ services:
       USER_ID: "${DOCKER_PUID}"
       GROUP_ID: "${DOCKER_PGID}"
       UMASK: "0022"
-      LANG: "en_GB.UTF-8"
+      # Must be a locale the image ships (only C.utf8 / en_US.utf8). en_GB.UTF-8
+      # isn't installed, so it fell back to ASCII and Wine mangled every
+      # non-ASCII filename (e.g. "Kōbō Abe", Polish/Chinese titles): Backblaze
+      # skipped them as invalid names or names with embedded CR/LF.
+      LANG: "en_US.UTF-8"
       KEEP_APP_RUNNING: "1"
       APP_NICENESS: "1"
       CONTAINER_DEBUG: "0"
