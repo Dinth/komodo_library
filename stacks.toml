@@ -951,6 +951,7 @@ repo = "Dinth/komodo_library"
 run_directory = "r720-omv/piped"
 environment = """
 TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
 PIPED_DB_PASS=[[PIPED_DB_PASS]]

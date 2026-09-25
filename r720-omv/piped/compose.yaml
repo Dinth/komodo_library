@@ -25,12 +25,36 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     mem_limit: 2G
+    environment:
+      <<: *piped-env
+      # Configured here rather than in config.properties: Constants.java reads
+      # every key from the environment first. The old on-server file used key
+      # names Piped never reads (proxy.url, frontendUrl, apiUrl), so the backend
+      # silently fell back to kavin.rocks' public proxy and piped.video.
+      PORT: "8080"
+      HTTP_WORKERS: "2"
+      # All three must be the browser-facing HTTPS origins. The backend rewrites
+      # every stream and thumbnail URL onto PROXY_PART, and the frontend is
+      # built to call https://<BACKEND_HOSTNAME>.
+      API_URL: "https://pipedapi.${DOMAIN_NAME}"
+      PROXY_PART: "https://pipedproxy.${DOMAIN_NAME}"
+      FRONTEND_URL: "https://piped.${DOMAIN_NAME}"
+      # PubSub needs YouTube's hub to call back into API_URL from the internet,
+      # which the allow-list below refuses. Poll subscribed channels instead so
+      # the Feed page still updates.
+      DISABLE_PUBSUB: "true"
+      FEED_REFRESH: "true"
+      FEED_REFRESH_MINUTES: "30"
+      # HIBERNATE__* env keys are lower-cased and "__" -> "." by the backend.
+      HIBERNATE__CONNECTION__URL: "jdbc:postgresql://piped-postgres:5432/piped"
+      HIBERNATE__CONNECTION__DRIVER_CLASS: "org.postgresql.Driver"
+      HIBERNATE__CONNECTION__USERNAME: "piped"
+      HIBERNATE__CONNECTION__PASSWORD: "${PIPED_DB_PASS}"
     volumes:
-      - /opt/docker/piped/piped_backend-config/config.properties:/app/config.properties:ro
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       piped-postgres: { condition: service_healthy }
-    networks: [piped]
+    networks: [piped, traefik]
     ports:
       - "4553:8080"
     healthcheck:
@@ -48,6 +72,20 @@ services:
       wud.tag.include: '^latest$$'
       wud.link.template: "https://github.com/TeamPiped/Piped/commits/master"
       wud.display.name: "Piped Backend"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.pipedapi.rule: "Host(`pipedapi.${DOMAIN_NAME}`)"
+      traefik.http.routers.pipedapi.entrypoints: "websecure"
+      traefik.http.routers.pipedapi.tls: "true"
+      traefik.http.routers.pipedapi.tls.certresolver: "letsencrypt"
+      traefik.http.routers.pipedapi.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.pipedapi.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # No Authelia: the frontend calls this cross-origin with fetch(), which
+      # sends no cookies, so forward-auth would redirect every API call. Piped
+      # has its own accounts; the allow-list keeps it off the internet and the
+      # IoT/guest VLANs.
+      traefik.http.routers.pipedapi.middlewares: "secHeaders@file,trusted-allowlist@docker"
+      traefik.http.services.pipedapi.loadbalancer.server.port: "8080"
 
   piped-proxy:
     image: *piped-proxy-version
@@ -64,7 +102,7 @@ services:
       <<: *piped-env
       UDS: 0
       BIND: "0.0.0.0:8081"
-    networks: [piped]
+    networks: [piped, traefik]
     healthcheck:
       # debian-slim with no wget/curl: just check the listener with bash.
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/8081"]
@@ -79,6 +117,18 @@ services:
       wud.tag.include: '^latest$$'
       wud.link.template: "https://github.com/TeamPiped/Piped-Proxy/releases"
       wud.display.name: "Piped Proxy"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.pipedproxy.rule: "Host(`pipedproxy.${DOMAIN_NAME}`)"
+      traefik.http.routers.pipedproxy.entrypoints: "websecure"
+      traefik.http.routers.pipedproxy.tls: "true"
+      traefik.http.routers.pipedproxy.tls.certresolver: "letsencrypt"
+      traefik.http.routers.pipedproxy.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.pipedproxy.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # Loaded by <img>/<video>/MSE from the frontend origin: no cookies, so no
+      # Authelia. It is an open googlevideo relay, so it must stay allow-listed.
+      traefik.http.routers.pipedproxy.middlewares: "secHeaders@file,trusted-allowlist@docker"
+      traefik.http.services.pipedproxy.loadbalancer.server.port: "8081"
 
   piped-frontend:
     image: *piped-frontend-version
@@ -93,11 +143,12 @@ services:
       - "4551:80"
     environment:
       <<: *piped-env
-      BACKEND_HOSTNAME: 10.10.1.13:4553
+      # The entrypoint seds https://<this> into the bundle -- the scheme is
+      # always https, so this must be a TLS hostname, never host:port.
+      BACKEND_HOSTNAME: "pipedapi.${DOMAIN_NAME}"
     volumes:
-#      - /opt/docker/piped/piped_frontend-data:/usr/share/nginx/html/assets
       - /etc/localtime:/etc/localtime:ro
-    networks: [piped]
+    networks: [piped, traefik]
     logging: *default-logging
     labels:
       wud.watch: "true"
@@ -106,6 +157,39 @@ services:
       wud.link.template: "https://github.com/TeamPiped/Piped/commits/master"
       wud.display.name: "Piped Frontend"
       wud.display.icon: "sh:piped"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.piped.rule: "Host(`piped.${DOMAIN_NAME}`)"
+      traefik.http.routers.piped.entrypoints: "websecure"
+      traefik.http.routers.piped.tls: "true"
+      traefik.http.routers.piped.tls.certresolver: "letsencrypt"
+      traefik.http.routers.piped.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.piped.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # Not secHeaders@file: its CSP is default-src 'self', which blocks every
+      # call to pipedapi. and every image/video from pipedproxy. piped-headers
+      # is secHeaders with the CSP widened to exactly those two origins.
+      traefik.http.routers.piped.middlewares: "piped-headers@docker,authelia-auth@docker"
+      traefik.http.services.piped.loadbalancer.server.port: "80"
+      traefik.http.middlewares.piped-headers.headers.browserXssFilter: "true"
+      traefik.http.middlewares.piped-headers.headers.contentTypeNosniff: "true"
+      traefik.http.middlewares.piped-headers.headers.forceSTSHeader: "true"
+      traefik.http.middlewares.piped-headers.headers.stsIncludeSubdomains: "true"
+      traefik.http.middlewares.piped-headers.headers.stsPreload: "true"
+      traefik.http.middlewares.piped-headers.headers.stsSeconds: "31536000"
+      traefik.http.middlewares.piped-headers.headers.customFrameOptionsValue: "SAMEORIGIN"
+      traefik.http.middlewares.piped-headers.headers.customRequestHeaders.Remote-User: ""
+      traefik.http.middlewares.piped-headers.headers.customRequestHeaders.Remote-Groups: ""
+      traefik.http.middlewares.piped-headers.headers.customRequestHeaders.Remote-Name: ""
+      traefik.http.middlewares.piped-headers.headers.customRequestHeaders.Remote-Email: ""
+      traefik.http.middlewares.piped-headers.headers.contentSecurityPolicy: >-
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
+        style-src 'self' 'unsafe-inline';
+        connect-src 'self' blob: data: https://pipedapi.${DOMAIN_NAME} https://pipedproxy.${DOMAIN_NAME};
+        img-src 'self' blob: data: https://pipedproxy.${DOMAIN_NAME};
+        media-src 'self' blob: data: https://pipedproxy.${DOMAIN_NAME};
+        worker-src 'self' blob:;
+        frame-ancestors 'self'
 
   piped-postgres:
     image: *piped-postgres-version
