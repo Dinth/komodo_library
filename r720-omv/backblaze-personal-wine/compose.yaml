@@ -61,13 +61,18 @@ services:
       VNC_LISTENING_PORT: "5900"
       VNC_PASSWORD: ""
     healthcheck:
-      # Unhealthy when the bzserv backup service isn't running (e.g. after the
-      # client's own auto-update stops it, as on 2026-09-23); autoheal then
-      # restarts the whole container, which brings wine + bzserv back.
-      # The old check killed `sleep infinity`, but its own command line
-      # contained that string, so it killed itself (exit 143) and bounced the
-      # UI every minute without ever restarting bzserv.
-      test: ["CMD", "pgrep", "-f", "[b]zserv.exe"]
+      # Unhealthy -> autoheal restarts the container. Fails when bzserv (the
+      # backup service) isn't running, e.g. after the client's own auto-update
+      # stops it; when its heartbeat is >30 min old (hung; it normally updates
+      # every <=10 min); or when /Data isn't mounted (no .bzvol marker).
+      # Don't write the service's exe name literally here, or pgrep -f matches
+      # this check's own shell and always passes.
+      test:
+        - CMD-SHELL
+        - >-
+          pgrep -f '[b]zserv[.]exe' >/dev/null || { echo 'bzserv not running'; exit 1; };
+          [ -n "$$(find /config/wine/drive_c/ProgramData/Backblaze/bzdata/bzreports/bzserv_heartbeat.txt -mmin -30)" ] || { echo 'bzserv heartbeat stale'; exit 1; };
+          [ -f /drive_d/.bzvol/bzvol_id.xml ] || { echo '/Data not mounted'; exit 1; }
       interval: 60s
       timeout: 10s
       retries: 3
