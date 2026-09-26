@@ -63,6 +63,13 @@ services:
       # skipped them as invalid names or names with embedded CR/LF.
       LANG: "en_US.UTF-8"
       KEEP_APP_RUNNING: "1"
+      # Let the container install client updates on start (its installer works
+      # under Wine). With the default "true", the client updates itself every
+      # 4h via a silent msiexec that fails under Wine (1603) after stopping
+      # bzserv, which then stays down until autoheal restarts the container
+      # (seen every 4h, 2026-09-25/26, trying 9.0.1.777 -> 9.2.2.897). A failed
+      # install falls back to starting the installed version.
+      DISABLE_AUTOUPDATE: "false"
       APP_NICENESS: "1"
       CONTAINER_DEBUG: "0"
       DISPLAY_WIDTH: "900"
