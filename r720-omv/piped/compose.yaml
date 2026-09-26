@@ -173,7 +173,9 @@ services:
     # drops the query ("No host provided"); unrewritten googlevideo BaseURLs go
     # through the player's own request filter, which adds host= itself.
     # The sed rewrites `if(X.video.livestream)Y=X.video.hls,Z="application/
-    # x-mpegURL"` into "DASH if the backend returned one, else the old HLS",
+    # x-mpegURL"` into "DASH if the backend returned one and the browser has
+    # MSE (ManagedMediaSource covers iOS 17.1+), else the old HLS" -- so a
+    # browser without MSE keeps native HLS,
     # in the modern and legacy chunks (no backreferences in the pattern: the
     # image's busybox/musl sed ignores them in -E). Like the DeArrow count, the logged
     # number dropping to 0 after an update means live is back on HLS.
@@ -184,7 +186,7 @@ services:
         sed -i -E 's/([`"]dearrow[`"]),!1\)/\1,!0)/g' /usr/share/nginx/html/assets/*.js
         n=$$(grep -lE '[`"]dearrow[`"],!0\)' /usr/share/nginx/html/assets/*.js | wc -l)
         echo "dearrow default-on: $$n files"
-        sed -i -E 's/if\(([A-Za-z_$$]+)\.video\.livestream\)([A-Za-z_$$]+)=[A-Za-z_$$]+\.video\.hls,([A-Za-z_$$]+)=([`"])application\/x-mpegURL[`"]/if(\1.video.livestream\&\&\1.video.dash){var pipedLiveDash=new URL(\1.video.dash);pipedLiveDash.searchParams.set(\4rewrite\4,!1),\2=pipedLiveDash.toString(),\3=\4application\/dash+xml\4}else if(\1.video.livestream)\2=\1.video.hls,\3=\4application\/x-mpegURL\4/' /usr/share/nginx/html/assets/*.js
+        sed -i -E 's/if\(([A-Za-z_$$]+)\.video\.livestream\)([A-Za-z_$$]+)=[A-Za-z_$$]+\.video\.hls,([A-Za-z_$$]+)=([`"])application\/x-mpegURL[`"]/if(\1.video.livestream\&\&\1.video.dash\&\&(window.MediaSource||window.ManagedMediaSource)){var pipedLiveDash=new URL(\1.video.dash);pipedLiveDash.searchParams.set(\4rewrite\4,!1),\2=pipedLiveDash.toString(),\3=\4application\/dash+xml\4}else if(\1.video.livestream)\2=\1.video.hls,\3=\4application\/x-mpegURL\4/' /usr/share/nginx/html/assets/*.js
         n=$$(grep -l 'pipedLiveDash' /usr/share/nginx/html/assets/*.js | wc -l)
         echo "live-over-dash: $$n files"
         exec /entrypoint.sh
