@@ -62,7 +62,7 @@ services:
       # --- Epic ---
       EG_EMAIL: "${ADMIN_EMAIL}"
       EG_PASSWORD: "${FGC_EG_PASS}"
-#      EG_OTPKEY: "${FGC_EG_OTPKEY}" # uncomment if the Epic account uses TOTP 2FA
+      EG_OTPKEY: "${FGC_EG_OTP_KEY}"
 #      EG_PARENTALPIN: "${FGC_EG_PARENTALPIN}" # only if parental controls are on
       # --- GOG ---
       GOG_EMAIL: "${ADMIN_EMAIL}"
