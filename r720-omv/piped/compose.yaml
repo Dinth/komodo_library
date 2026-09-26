@@ -151,6 +151,23 @@ services:
       # The entrypoint seds https://<this> into the bundle -- the scheme is
       # always https, so this must be a TLS hostname, never host:port.
       BACKEND_HOSTNAME: "pipedapi.${DOMAIN_NAME}"
+    # DeArrow (crowdsourced de-clickbaited titles/thumbnails) on by default.
+    # It is a per-browser preference that ships as getPreference("dearrow",
+    # false); the minified bundle carries that as `dearrow`,!1 / "dearrow",!1
+    # in the modern and legacy chunks. Flip the default to !0 before the stock
+    # entrypoint (which does its own sed on the same assets) starts nginx. A
+    # choice saved in Preferences still wins. Data flows frontend -> pipedapi
+    # /dearrow -> sponsor.ajay.app, thumbnails via pipedproxy, so the CSP below
+    # needs nothing new. If an update renames the literal, the count logged at
+    # start drops to 0 and DeArrow silently reverts to opt-in.
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sed -i -E 's/([`"]dearrow[`"]),!1\)/\1,!0)/g' /usr/share/nginx/html/assets/*.js
+        n=$$(grep -lE '[`"]dearrow[`"],!0\)' /usr/share/nginx/html/assets/*.js | wc -l)
+        echo "dearrow default-on: $$n files"
+        exec /entrypoint.sh
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks: [piped, traefik]
