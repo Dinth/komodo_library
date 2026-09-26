@@ -19,9 +19,11 @@ services:
   # Docker API for the daemon's container discovery, in place of the raw
   # socket. Scanopy lists and inspects containers and runs its port probe
   # inside them via exec, so exec is allowed; creating containers and
-  # anything image-related is not. The daemon uses host networking, so this
-  # listens on the host's loopback only; point Scanopy's DockerProxy
-  # credential (server UI) at 127.0.0.1:2379 for the local daemon.
+  # anything image-related is not. The daemon uses host networking and its
+  # DockerProxy credential (port 2379, set in Scanopy's UI) resolves to either
+  # 127.0.0.1 or r720's own address depending on how it is assigned, so both
+  # are published. Only the host itself may connect: its connections reach the
+  # proxy from this network's gateway, while LAN clients keep their own IP.
   scanopy-docker-proxy:
     image: *socket-proxy-version
     container_name: scanopy-docker-proxy
@@ -36,8 +38,7 @@ services:
     user: "65534:${DOCKER_SOCKET_GID}"
     command:
       - '-loglevel=info'
-      # Only reachable via the loopback-bound port below.
-      - '-allowfrom=0.0.0.0/0'
+      - '-allowfrom=169.254.4.112/28'
       - '-listenip=0.0.0.0'
       - '-allowGET=/(v[0-9.]+/)?(containers/json|containers/[^/]+/json|exec/[^/]+/json|networks(/.*)?|info|version|_ping|swarm|nodes|services|tasks)'
       - '-allowHEAD=/(v[0-9.]+/)?_ping'
@@ -54,6 +55,7 @@ services:
       start_period: 10s
     ports:
       - "127.0.0.1:2379:2375"
+      - "10.10.1.13:2379:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -179,6 +181,10 @@ networks:
   scanopy-docker:
     name: scanopy-docker
     driver: bridge
+    # Fixed so scanopy-docker-proxy's -allowfrom can name it.
+    ipam:
+      config:
+        - subnet: 169.254.4.112/28
   scanopy:
     name: scanopy
     driver: bridge
