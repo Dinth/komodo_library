@@ -20,7 +20,9 @@ auto_increment_version = false
 include_latest_tag = true
 include_version_tags = false
 include_commit_tag = false
-webhook_enabled = true
+# No GitHub webhook can reach LAN-only Komodo; rebuilds come from the
+# rebuild-local-images Procedure below.
+webhook_enabled = false
 
 ##
 
@@ -45,7 +47,9 @@ auto_increment_version = false
 include_latest_tag = true
 include_version_tags = false
 include_commit_tag = false
-webhook_enabled = true
+# No GitHub webhook can reach LAN-only Komodo; rebuilds come from the
+# rebuild-local-images Procedure below.
+webhook_enabled = false
 
 ##
 
@@ -71,7 +75,9 @@ auto_increment_version = false
 include_latest_tag = true
 include_version_tags = false
 include_commit_tag = false
-webhook_enabled = true
+# No GitHub webhook can reach LAN-only Komodo; rebuilds come from the
+# rebuild-local-images Procedure below.
+webhook_enabled = false
 
 ##
 
@@ -152,8 +158,8 @@ webhook_enabled = false
 # likely to break (upstream API drift) -- goes last. A failed build leaves the
 # previous image running; failure_alert reports it.
 #
-# The mcp-gateway images need no redeploy: the gateway spawns a fresh
-# container from the current :latest for every MCP session.
+# The gateway spawns a fresh MCP container from the current :latest for every
+# session; mcp-gateway is redeployed only to move its prune guards along.
 [[procedure]]
 name = "rebuild-local-images"
 tags = ["builds"]
@@ -176,9 +182,12 @@ executions = [
 ]
 
 [[procedure.config.stage]]
-name = "Redeploy kittygram"
+name = "Redeploy kittygram and MCP prune guards"
 executions = [
   { execution.type = "DeployStack", execution.params.stack = "kittygram" },
+  # Re-points the *-guard containers at the new MCP images; the gateway
+  # itself is digest-pinned, so compose leaves it running untouched.
+  { execution.type = "DeployStack", execution.params.stack = "mcp-gateway" },
 ]
 
 [[procedure.config.stage]]

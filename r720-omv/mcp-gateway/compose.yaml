@@ -108,11 +108,45 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+
+  # --- Prune guards ---------------------------------------------------------
   # Gateway-spawned stdio MCP servers are listed in
-  # /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml.
-  # Their images are produced by Komodo Builds (see ../../builds.toml) that run on the
-  # r720-omv server-builder, tagged as mitmproxy-mcp:latest and mcpmqtt:latest.
+  # /opt/docker/mcp-gateway/mcp-gateway_config/registry.yaml. Their images
+  # (mcpmqtt, mitmproxy-mcp, homebox-mcp :latest) are local-only Komodo Builds
+  # (../../builds.toml), and between sessions no container uses them, so an
+  # image prune would delete them and the gateway could no longer spawn them.
+  # Each guard is an idle container holding its image. They replace hand-made
+  # *-keep containers that kept pinning the July images after rebuilds; being
+  # in the stack, every deploy re-points them at the current :latest, and the
+  # rebuild-local-images Procedure redeploys this stack after the MCP builds.
   # mcpmqtt config (broker + topic ACL) lives at /opt/docker/mcp-gateway/mcpmqtt-config/config.json.
+  mcpmqtt-guard: &prune-guard
+    image: mcpmqtt:latest
+    pull_policy: never
+    container_name: mcpmqtt-guard
+    entrypoint: ["sleep", "infinity"]
+    restart: unless-stopped
+    network_mode: none
+    read_only: true
+    user: "65534:65534"
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 16M
+    logging: *default-logging
+    labels:
+      purpose: "mcp-image-prune-guard"
+      wud.watch: "false"
+
+  mitmproxy-mcp-guard:
+    <<: *prune-guard
+    image: mitmproxy-mcp:latest
+    container_name: mitmproxy-mcp-guard
+
+  homebox-mcp-guard:
+    <<: *prune-guard
+    image: homebox-mcp:latest
+    container_name: homebox-mcp-guard
 
 networks:
   mcp-gateway:
