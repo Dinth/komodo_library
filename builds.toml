@@ -91,3 +91,30 @@ include_latest_tag = true
 include_version_tags = false
 include_commit_tag = false
 webhook_enabled = false
+
+##
+
+# Piped-Backend rebuilt against NewPipe stable's extractor (v0.26.5), because
+# the published 1337kavin/piped image is stuck on a May fork that YouTube only
+# serves 360p to. The Dockerfile fetches upstream PR #895 at a pinned SHA and
+# carries the reasoning; the r720-omv/piped stack consumes piped-backend:latest.
+# Retire this Build once upstream merges an extractor update.
+[[build]]
+name = "piped-backend"
+tags = ["builds", "piped"]
+description = "Local image for TeamPiped/Piped-Backend with NewPipeExtractor v0.26.5 — restores full-quality YouTube streams."
+[build.config]
+builder = "r720-omv"
+git_provider = "github.com"
+git_account = "michal@gawronskikot.com"
+git_https = true
+repo = "Dinth/komodo_library"
+branch = "main"
+build_path = "r720-omv/piped/backend"
+dockerfile_path = "Dockerfile"
+image_name = "piped-backend"
+auto_increment_version = false
+include_latest_tag = true
+include_version_tags = false
+include_commit_tag = false
+webhook_enabled = false

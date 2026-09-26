@@ -1,7 +1,10 @@
 x-versions:
-  # Piped publishes no version tags (only latest and JVM variants), so all
-  # three are pinned by digest; WUD watches the latest digest for drift.
-  piped-backend-version: &piped-backend-version 1337kavin/piped:latest@sha256:7747e19ee501c0a3afa94dd3d6e982dd4247f1babe03fb515b4a0f0b87f82b2e
+  # Built locally by the "piped-backend" Komodo Build (../../builds.toml) from
+  # ./backend/Dockerfile: upstream's image is stuck on an extractor YouTube
+  # only serves 360p to. Updating means re-running that Build.
+  piped-backend-version: &piped-backend-version "piped-backend:latest"
+  # Piped publishes no version tags (only latest and JVM variants), so these
+  # are pinned by digest; WUD watches the latest digest for drift.
   piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest@sha256:e10c9474fdea1ddf09267a57c24d25a8c20ffbd96ac356db4b71d821f898e702
   piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest@sha256:762a8d18f458a4e74fb581dc01c711e83624142f392132db7f4620fdfddad4f1
   piped-postgres-version: &piped-postgres-version postgres:18.6-alpine
@@ -18,6 +21,9 @@ x-piped-env: &piped-env
 services:
   piped-backend:
     image: *piped-backend-version
+    # Exists only in r720's local image store (the Komodo Build puts it there),
+    # so the stack-wide `compose pull` must not try Docker Hub for it.
+    pull_policy: never
     container_name: piped-backend
     ipc: private
     restart: unless-stopped
@@ -67,10 +73,9 @@ services:
     logging: *default-logging
     labels:
       autoheal: "true"
-      wud.watch: "true"
-      wud.watch.digest: "true"
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/TeamPiped/Piped/commits/master"
+      # Local build, no registry tag to compare. Watch Piped-Backend PR #895 /
+      # upstream extractor updates instead, then re-run the Build.
+      wud.watch: "false"
       wud.display.name: "Piped Backend"
       traefik.enable: "true"
       traefik.docker.network: "traefik"
