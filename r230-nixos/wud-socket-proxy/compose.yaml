@@ -16,7 +16,9 @@ services:
       - '-loglevel=info'
       - '-allowfrom=10.10.1.13/32,10.10.1.11/32,10.40.0.10/32'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/(v[0-9.]+/)?(containers/.*|images/.*|events|info|version)'
+      # Also read by r720's Scanopy daemon (DockerProxy credential, port 2377)
+      # for container discovery, which needs _ping and networks; still read-only.
+      - '-allowGET=/(v[0-9.]+/)?(containers/.*|images/.*|networks(/.*)?|events|info|version|_ping)'
       # Read-only: WUD only watches (its sole trigger is Signal) and never
       # updates containers itself; Komodo does the deploys.
       - '-allowHEAD=/_ping'
