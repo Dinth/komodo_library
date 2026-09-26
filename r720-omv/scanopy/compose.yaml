@@ -99,7 +99,8 @@ services:
       SCANOPY_NETWORK_ID: "81dfd914-2d19-49de-978c-87388da0b2bc"
     volumes:
       - /opt/docker/scanopy/scanopy_daemon-config:/root/.config/daemon
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # No Docker socket: container discovery goes through scanopy-docker-proxy
+      # (r720) and wud-socket-proxy-r230 (r230) via DockerProxy credentials.
       - /etc/localtime:/etc/localtime:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:${SCANOPY_DAEMON_PORT:-60073}/api/health || exit 1"]
