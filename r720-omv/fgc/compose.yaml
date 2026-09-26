@@ -46,6 +46,10 @@ services:
       SHOW: "1" # keep browser visible so captchas can be hand-solved via noVNC
       NOVNC_PORT: "7080"
       VNC_PASSWORD: "${FGC_VNC_PASSWORD}"
+      # Seconds the bot waits at any manual step (sign-in, 2FA/e-mail code,
+      # captcha). Upstream's 180 is too short once the Signal ping has to reach
+      # a phone first; an unanswered wait only skips that store for the run.
+      VNC_LOGIN_TIMEOUT: "900"
       # --- Scheduler ---
       # Remaster builds an APScheduler cron trigger `hour=*/N`, so N must be <= 23
       # (a cron step can't exceed the 0-23 hour range). 12 = runs at 00:00 & 12:00.
