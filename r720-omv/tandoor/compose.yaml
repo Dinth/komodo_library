@@ -15,6 +15,9 @@ services:
     hostname: tandoor
     ipc: private
     restart: unless-stopped
+    # Runs unprivileged: the image logs nginx to stdout/stderr and keeps its
+    # temp paths, gunicorn socket and pid in /tmp. tandoor_static (rebuilt by
+    # collectstatic on every start) and tandoor_media must be DOCKER_PUID-owned.
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     entrypoint: ['/opt/recipes/boot.sh']
     working_dir: /opt/recipes

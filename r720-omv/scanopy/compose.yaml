@@ -2,6 +2,7 @@ x-versions:
   scanopy-daemon-version: &scanopy-daemon-version ghcr.io/scanopy/scanopy/daemon:v0.17.16
   scanopy-server-version: &scanopy-server-version ghcr.io/scanopy/scanopy/server:v0.17.16
   scanopy-postgres-version: &scanopy-postgres-version postgres:18.6-alpine
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -15,6 +16,56 @@ x-scanopy-env: &scanopy-env
   SCANOPY_DAEMON_PORT: ${SCANOPY_DAEMON_PORT:-60073}
 
 services:
+  # Docker API for the daemon's container discovery, in place of the raw
+  # socket. Scanopy lists and inspects containers and runs its port probe
+  # inside them via exec, so exec is allowed; creating containers and
+  # anything image-related is not. The daemon uses host networking, so this
+  # listens on the host's loopback only; point Scanopy's DockerProxy
+  # credential (server UI) at 127.0.0.1:2379 for the local daemon.
+  scanopy-docker-proxy:
+    image: *socket-proxy-version
+    container_name: scanopy-docker-proxy
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:${DOCKER_SOCKET_GID}"
+    command:
+      - '-loglevel=info'
+      # Only reachable via the loopback-bound port below.
+      - '-allowfrom=0.0.0.0/0'
+      - '-listenip=0.0.0.0'
+      - '-allowGET=/(v[0-9.]+/)?(containers/json|containers/[^/]+/json|exec/[^/]+/json|networks(/.*)?|info|version|_ping|swarm|nodes|services|tasks)'
+      - '-allowHEAD=/(v[0-9.]+/)?_ping'
+      - '-allowPOST=/(v[0-9.]+/)?(containers/[^/]+/exec|exec/[^/]+/start)'
+      - '-allowhealthcheck'
+      - '-watchdoginterval=1200'
+      - '-stoponwatchdog'
+      - '-shutdowngracetime=10'
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+    ports:
+      - "127.0.0.1:2379:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - scanopy-docker
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.display.name: "Docker Socket Proxy - Scanopy"
+      wud.display.icon: "mdi:connection"
+
   scanopy-daemon:
     image: *scanopy-daemon-version
     container_name: scanopy-daemon
@@ -125,6 +176,9 @@ services:
       wud.display.icon: "sh:scanopy"
 
 networks:
+  scanopy-docker:
+    name: scanopy-docker
+    driver: bridge
   scanopy:
     name: scanopy
     driver: bridge
