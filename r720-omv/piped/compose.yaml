@@ -4,7 +4,6 @@ x-versions:
   piped-backend-version: &piped-backend-version 1337kavin/piped:latest@sha256:7747e19ee501c0a3afa94dd3d6e982dd4247f1babe03fb515b4a0f0b87f82b2e
   piped-proxy-version: &piped-proxy-version 1337kavin/piped-proxy:latest@sha256:e10c9474fdea1ddf09267a57c24d25a8c20ffbd96ac356db4b71d821f898e702
   piped-frontend-version: &piped-frontend-version 1337kavin/piped-frontend:latest@sha256:762a8d18f458a4e74fb581dc01c711e83624142f392132db7f4620fdfddad4f1
-  piped-bg-helper-version: &piped-bg-helper-version 1337kavin/bg-helper-server:latest@sha256:be55faab8780599cd951206f73ad1ab5b33a2c1c148eaad7f7c2403e00561729
   piped-postgres-version: &piped-postgres-version postgres:18.6-alpine
 
 x-logging: &default-logging
@@ -46,11 +45,6 @@ services:
       DISABLE_PUBSUB: "true"
       FEED_REFRESH: "true"
       FEED_REFRESH_MINUTES: "30"
-      # Without a PoToken YouTube hands this server only the muxed 360p itag 18,
-      # and videos with no itag 18 (long VODs, ex-livestreams) fail outright
-      # with "Could not get any stream". The helper mints web-client PoTokens,
-      # which unlock the adaptive (DASH) formats.
-      BG_HELPER_URL: "http://piped-bg-helper:3000"
       # HIBERNATE__* env keys are lower-cased and "__" -> "." by the backend.
       HIBERNATE__CONNECTION__URL: "jdbc:postgresql://piped-postgres:5432/piped"
       HIBERNATE__CONNECTION__DRIVER_CLASS: "org.postgresql.Driver"
@@ -60,7 +54,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       piped-postgres: { condition: service_healthy }
-      piped-bg-helper: { condition: service_healthy }
     networks: [piped, traefik]
     ports:
       - "4553:8080"
@@ -197,54 +190,6 @@ services:
         media-src 'self' blob: data: https://pipedproxy.${DOMAIN_NAME};
         worker-src 'self' blob:;
         frame-ancestors 'self'
-
-  piped-bg-helper:
-    image: *piped-bg-helper-version
-    container_name: piped-bg-helper
-    ipc: private
-    restart: unless-stopped
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: [ALL]
-    read_only: true
-    tmpfs: [/tmp]
-    mem_limit: 512M
-    environment:
-      <<: *piped-env
-      # Bun wants a writable home/cache; the root filesystem is read-only.
-      HOME: /tmp
-      BUN_RUNTIME_TRANSPILER_CACHE_PATH: "0"
-    # Upstream bug, patched at start-up: after minting the real PoToken,
-    # src/index.ts also calls BG.PoToken.generatePlaceholder(visitorData),
-    # whose result it never uses. YouTube's visitorData is now ~520 chars and
-    # bgutils-js throws "Content binding is too long" on it (LuanRT/BgUtils#31),
-    # so every /generate failed and the good token was thrown away. The sed
-    # drops that one call from the bundle into /tmp and runs the copy; the
-    # bundle imports node_modules by absolute /app path, so that still
-    # resolves. Once upstream removes the call this is a harmless no-op.
-    entrypoint:
-      - sh
-      - -c
-      - |
-        sed -E 's/[A-Za-z0-9_$$.]+\.generatePlaceholder\(visitorData\);?//' \
-          /app/dist/index.js > /tmp/index.js
-        exec bun /tmp/index.js
-    networks: [piped]
-    healthcheck:
-      # No curl/wget in the image. Any HTTP reply (even 404 on /) resolves the
-      # fetch; a closed port rejects it and bun exits non-zero.
-      test: ["CMD", "bun", "-e", "await fetch('http://127.0.0.1:3000/')"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    logging: *default-logging
-    labels:
-      wud.watch: "true"
-      wud.watch.digest: "true"
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/TeamPiped/bg-helper-server/commits/main"
-      wud.display.name: "Piped BG Helper"
 
   piped-postgres:
     image: *piped-postgres-version
