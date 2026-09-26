@@ -55,7 +55,10 @@ services:
       # Steam omitted: the remaster claims Steam via account login, and no Steam
       # credentials were configured before — add STEAM_USERNAME/PASSWORD + "steam"
       # here later if wanted.
-      STORES: "epic,gog,prime"
+      # aliexpress = daily coin check-in (not a game store). It has no TOTP
+      # option: AliExpress' e-mailed 6-digit code or captcha is handed to VNC,
+      # normally once per browser profile.
+      STORES: "epic,gog,prime,aliexpress"
       # --- Common credentials (fallback for per-store overrides) ---
       # No common PASSWORD: every store below sets its own.
       EMAIL: "${ADMIN_EMAIL}"
@@ -72,6 +75,10 @@ services:
       PG_PASSWORD: "${FGC_PG_PASS}"
       PG_REDEEM: "1"
       PG_CLAIMDLC: "1"
+      # --- AliExpress ---
+      # AE_MIN_COINS / AE_FLAG_* / AE_PAGE_RETRIES left at upstream defaults.
+      AE_EMAIL: "${ADMIN_EMAIL}"
+      AE_PASSWORD: "${FGC_AE_PASS}"
       # --- Notifications (apprise) ---
       # Apprise's Signal plugin, straight to signal-cli-rest-api (same bot and
       # tech recipient as WUD's update notifications).
