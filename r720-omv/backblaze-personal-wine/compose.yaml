@@ -88,6 +88,15 @@ services:
       retries: 3
       # Wine + the service take a few minutes to come up after a restart.
       start_period: 600s
+    # Block only the client's self-update download. Every 4h it fetches
+    # bzinstall-win32-*.exe from f000.backblazeb2.com, stops bzserv, then fails
+    # to install under Wine (msiexec 1603) and leaves bzserv down until autoheal
+    # restarts the container; that also kills any upload running longer than
+    # 4h (44 GB video at ~10 GB/h). bzserv is only stopped after a successful
+    # download, so a failed download leaves it running. Uploads use
+    # pod-*.backblaze.com and are unaffected. Remove when moving to v10.
+    extra_hosts:
+      - "f000.backblazeb2.com:127.0.0.1"
     ports:
       - 5800:5800/tcp
     volumes:
