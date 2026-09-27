@@ -27,7 +27,15 @@ x-homepage-common: &homepage-common
     - no-new-privileges:true
   cap_drop:
     - ALL
+  # CHOWN: the image's entrypoint starts as root and chowns /app/.next before
+  # dropping to ${DOCKER_PUID}. Without CAP_CHOWN that chown only warns, so
+  # /app/.next/server/pages/en.html stays owned by `node` mode 644, every
+  # Next.js ISR revalidation fails with EACCES, and the board first paints the
+  # image's build-time prerender (Homepage's demo "My First Group") before
+  # client-side hydration swaps in the real one. A capability change lands only
+  # at container CREATION - recreate, do not restart.
   cap_add:
+    - CHOWN
     - SETGID
     - SETUID
   mem_limit: 256M
