@@ -1,0 +1,243 @@
+x-versions:
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.39.3"
+  # Upstream bundles and tests against postgres:16; 18 is used here to match
+  # the rest of the repo. HealthLog needs no extensions, so nothing in its
+  # schema depends on the 16 major.
+  postgres: &postgres-version "postgres:18.6-alpine"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  healthlog:
+    image: *healthlog-version
+    container_name: healthlog
+    hostname: healthlog
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # The image's own `nextjs` user (1001:1001), not DOCKER_PUID: /app/.next
+    # (Next.js runtime cache) and /opt/geolite2 (runtime GeoLite2 fetch) are
+    # chowned to 1001 at build time and are the only paths it writes. The app is
+    # stateless - everything lives in Postgres - so there is no bind mount whose
+    # ownership would need to match DOCKER_PUID. Binds :3000, so no caps needed.
+    # read_only is deliberately NOT set: upstream has not tested it against the
+    # Next.js cache, and an Apple Health import stages up to ~1.5G in /tmp,
+    # which as a tmpfs would count against mem_limit.
+    user: "1001:1001"
+    # Single-process web + worker (HEALTHLOG_PROCESS_TYPE=all), which upstream
+    # recommends for a single host. Upstream's 1g is "a starting point, not a
+    # measured ceiling"; the weekly per-account backup alone peaked at ~570M,
+    # and Apple Health imports + PDF rasterisation run in this same process.
+    mem_limit: 2G
+    depends_on:
+      healthlog-postgres:
+        condition: service_healthy
+    environment:
+      # The image hardcodes TZ=Europe/Berlin; pg-boss cron schedules follow it.
+      TZ: "${TZ}"
+      NODE_ENV: "production"
+      HEALTHLOG_PROCESS_TYPE: "all"
+      # connection_limit/pool_timeout are upstream's defaults, made explicit.
+      # HEALTHLOG_DB_PASS must be URL-safe (openssl rand -hex 32) - it is
+      # embedded in this URL unescaped.
+      DATABASE_URL: "postgresql://healthlog:${HEALTHLOG_DB_PASS}@healthlog-postgres:5432/healthlog?schema=public&connection_limit=20&pool_timeout=20"
+      # AES-256-GCM at-rest key for the encrypted columns AND the in-database
+      # weekly backups. Lose it and the data is unrecoverable, even from a
+      # pg_dump - keep a copy outside Komodo.
+      ENCRYPTION_KEY: "${HEALTHLOG_ENCRYPTION_KEY}"
+      # Rotating it invalidates every issued API/ingest token.
+      API_TOKEN_HMAC_KEY: "${HEALTHLOG_API_TOKEN_HMAC_KEY}"
+      # Both read at runtime on the prebuilt image (OAuth/OIDC redirect URIs,
+      # links in notifications are derived from them). Other NEXT_PUBLIC_*
+      # flags are inlined at build time and do nothing here.
+      NEXT_PUBLIC_APP_URL: "https://health.${DOMAIN_NAME}"
+      APP_URL: "https://health.${DOMAIN_NAME}"
+      # TLS terminates at Traefik, so the session cookie must keep `Secure`.
+      SESSION_COOKIE_SECURE: "true"
+      # One reverse-proxy hop (Traefik) - the client IP is the rightmost
+      # X-Forwarded-For entry. Wrong value = every anonymous caller shares one
+      # rate-limit bucket. Becomes 2 if Cloudflare is ever put in front.
+      TRUST_PROXY_HOPS: "1"
+
+      # --- SSO via Authelia (client 'healthlog' in its configuration.yml).
+      # Redirect URI: https://health.${DOMAIN_NAME}/api/auth/oidc/callback.
+      # Discovery is lazy (per login, cached 10 min) and not SSRF-guarded, so
+      # there is no boot race with Authelia and resolving id.${DOMAIN_NAME} to
+      # Traefik's private address via the traefik-network alias is fine.
+      OIDC_ISSUER_URL: "https://id.${DOMAIN_NAME}"
+      OIDC_CLIENT_ID: "healthlog"
+      OIDC_CLIENT_SECRET: "${HEALTHLOG_OIDC_CLIENT_SECRET}"
+      OIDC_SCOPES: "openid email profile"
+      OIDC_BUTTON_LABEL: "Sign in with Authelia"
+      # Password + passkey login stay available: they are the break-glass path
+      # if Authelia is down, and an iOS build without the native SSO handoff is
+      # locked out entirely by OIDC_ONLY.
+      OIDC_ONLY: "false"
+
+      # --- Web Push (PWA + desktop browsers; no Apple account needed).
+      # The admin panel can also mint a pair into the DB, which takes precedence
+      # over these; pinning them here keeps subscriptions valid across a DB
+      # restore. Changing the pair invalidates every existing subscription.
+      VAPID_PUBLIC_KEY: "${HEALTHLOG_VAPID_PUBLIC_KEY}"
+      VAPID_PRIVATE_KEY: "${HEALTHLOG_VAPID_PRIVATE_KEY}"
+      VAPID_SUBJECT: "mailto:${ADMIN_EMAIL}"
+
+      # --- Local AI: Ollama on omv. :11434 is the ollama-metrics proxy in the
+      # openwebui stack (Ollama itself is on :11435), so HealthLog's calls land
+      # in the Ollama metrics too. In Settings -> AI pick the "Local" provider
+      # with base URL http://10.10.1.13:11434/v1. Exact origin only - no path.
+      # Covers per-user and admin endpoints. The deprecated
+      # ALLOW_LOCAL_AI_PRIVATE_HOSTS is superseded by this and left unset.
+      AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
+      # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
+      ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
+
+      # --- Private webhook targets. The Webhook channel posts generic JSON
+      # (title/message/eventType/priority) - fine for a Home Assistant webhook
+      # trigger or an n8n webhook, NOT for signal-cli-rest-api's /v2/send body
+      # (route Signal through n8n instead). Exact origins; anything resolving
+      # to a private address and not listed here is refused at send time.
+      NOTIFICATION_PRIVATE_ORIGINS: "http://10.10.1.11:8123,https://home.${DOMAIN_NAME},https://auto.${DOMAIN_NAME}"
+      # --- Document picker: attach documents from Paperless-ngx (per-user API
+      # token entered in Settings). Unset = picker off. Only listed origins are
+      # ever contacted.
+      DOCUMENT_SOURCE_ORIGINS: "https://papers.${DOMAIN_NAME}"
+
+      # --- Outbound calls HealthLog makes on its own.
+      # WUD already tracks releases (same call as homebox/n8n): no daily GitHub
+      # releases API poll for the About-page badge.
+      UPDATE_CHECK_DISABLED: "1"
+      # Privacy: by default every login IP is sent to ipwho.is to enrich the
+      # admin login/audit overview. There is no offline GeoLite2 database
+      # without a MaxMind key, so this simply drops the "City, CC" column.
+      IP_GEO_LOOKUP_DISABLED: "1"
+      # PASSWORD_BREACH_CHECK stays on (default): HIBP k-anonymity, only five
+      # hex chars of the SHA-1 leave the host.
+    healthcheck:
+      # /api/health answers 503 until its dependencies are up; start_period
+      # covers the `prisma migrate deploy` the entrypoint runs on every boot.
+      test:
+        - "CMD-SHELL"
+        - "wget -q --spider http://127.0.0.1:3000/api/health || exit 1"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+      start_interval: 5s
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - healthlog
+      - traefik
+    logging: *default-logging
+    labels:
+      # Restart on a red healthcheck (e.g. worker wedged after a DB blip).
+      # Not on the database: a Postgres killed mid-write is worse than one
+      # left for a human to look at.
+      autoheal: "true"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.healthlog.rule: "Host(`health.${DOMAIN_NAME}`)"
+      traefik.http.routers.healthlog.entrypoints: "websecure"
+      traefik.http.routers.healthlog.tls: "true"
+      traefik.http.routers.healthlog.tls.certresolver: "letsencrypt"
+      traefik.http.routers.healthlog.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.healthlog.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # NOT secHeaders@file, deliberately. HealthLog sends its own strict
+      # headers (nonce-based CSP with no unsafe-inline/eval, frame-ancestors
+      # 'none', X-Frame-Options DENY, HSTS, Referrer-Policy), and secHeaders'
+      # customResponseHeaders would OVERWRITE that CSP with the much looser
+      # estate-wide one. This local middleware keeps only what the app does not
+      # do itself: secHeaders' Remote-* forward-auth spoofing strip, nosniff
+      # and the no-index header.
+      # No authelia-auth forward-auth either: it would break the native iOS
+      # app, API/ingest tokens (Home Assistant pushes, MCP) and the Withings/
+      # WHOOP webhooks. The app enforces its own auth; SSO is via OIDC.
+      traefik.http.middlewares.healthlog-headers.headers.customrequestheaders.Remote-User: ""
+      traefik.http.middlewares.healthlog-headers.headers.customrequestheaders.Remote-Groups: ""
+      traefik.http.middlewares.healthlog-headers.headers.customrequestheaders.Remote-Name: ""
+      traefik.http.middlewares.healthlog-headers.headers.customrequestheaders.Remote-Email: ""
+      traefik.http.middlewares.healthlog-headers.headers.contenttypenosniff: "true"
+      # yamllint disable-line rule:line-length
+      traefik.http.middlewares.healthlog-headers.headers.customresponseheaders.X-Robots-Tag: "noindex, nofollow, noarchive, nosnippet"
+      traefik.http.routers.healthlog.middlewares: "healthlog-headers@docker"
+      traefik.http.services.healthlog.loadbalancer.server.port: "3000"
+      wud.watch: "true"
+      # Upstream pushes both 1.39.3 and v1.39.3; track the bare form only so
+      # WUD doesn't see two "updates" per release.
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "HealthLog"
+      wud.display.icon: "mdi:heart-pulse"
+      wud.link.template: "https://github.com/MBombeck/HealthLog/releases/tag/v$${major}.$${minor}.$${patch}"
+
+  healthlog-postgres:
+    image: *postgres-version
+    container_name: healthlog-postgres
+    hostname: healthlog-postgres
+    ipc: private
+    restart: unless-stopped
+    # The official entrypoint starts as root, chowns PGDATA and drops to the
+    # image's postgres user (70 on alpine) - it needs exactly these caps.
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      POSTGRES_DB: "healthlog"
+      POSTGRES_USER: "healthlog"
+      POSTGRES_PASSWORD: "${HEALTHLOG_DB_PASS}"
+      # postgres:18 defaults PGDATA to /var/lib/postgresql/18/docker and puts
+      # its VOLUME on /var/lib/postgresql, so a bind mount to .../data lands
+      # beside the cluster and initdb quietly creates an empty one. Pin it.
+      PGDATA: "/var/lib/postgresql/data"
+      # Checksums catch silent on-disk corruption; only settable at initdb.
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "pg_isready -q -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER"
+      start_period: 20s
+      timeout: 30s
+      interval: 10s
+      retries: 5
+    volumes:
+      # Backrest's pre-backup hook pg_dumpall's this container automatically
+      # (name matches *postgres*, creds from its own env) into
+      # /opt/docker/db-dumps. The dump is useless without ENCRYPTION_KEY.
+      - /opt/docker/healthlog/healthlog-postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - healthlog
+      - adminer
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^18\.\d+-alpine$$'
+      wud.display.name: "HealthLog - Postgres"
+      wud.display.icon: "sh:postgresql"
+      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+
+networks:
+  healthlog:
+    name: healthlog
+    driver: bridge
+    external: false
+  traefik:
+    external: true
+  adminer:
+    external: true

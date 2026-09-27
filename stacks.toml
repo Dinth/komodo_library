@@ -489,6 +489,29 @@ HARBORGUARD_DB_PASS=[[HARBORGUARD_DB_PASS]]
 ##
 
 [[stack]]
+name = "healthlog"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/healthlog"
+environment = """
+TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+ADMIN_EMAIL=[[ADMIN_EMAIL]]
+HEALTHLOG_DB_PASS=[[HEALTHLOG_DB_PASS]]
+HEALTHLOG_ENCRYPTION_KEY=[[HEALTHLOG_ENCRYPTION_KEY]]
+HEALTHLOG_API_TOKEN_HMAC_KEY=[[HEALTHLOG_API_TOKEN_HMAC_KEY]]
+HEALTHLOG_OIDC_CLIENT_SECRET=[[HEALTHLOG_OIDC_CLIENT_SECRET]]
+HEALTHLOG_VAPID_PUBLIC_KEY=[[HEALTHLOG_VAPID_PUBLIC_KEY]]
+HEALTHLOG_VAPID_PRIVATE_KEY=[[HEALTHLOG_VAPID_PRIVATE_KEY]]
+"""
+
+##
+
+[[stack]]
 name = "homebox"
 tags = ["stacks"]
 [stack.config]
