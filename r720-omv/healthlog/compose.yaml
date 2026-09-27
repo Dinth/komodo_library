@@ -76,10 +76,13 @@ services:
       OIDC_CLIENT_SECRET: "${HEALTHLOG_OIDC_CLIENT_SECRET}"
       OIDC_SCOPES: "openid email profile"
       OIDC_BUTTON_LABEL: "Sign in with Authelia"
-      # Password + passkey login stay available: they are the break-glass path
-      # if Authelia is down, and an iOS build without the native SSO handoff is
-      # locked out entirely by OIDC_ONLY.
-      OIDC_ONLY: "false"
+      # Every login goes through Authelia and its 2FA; password and passkey
+      # login are refused server-side, so no HealthLog-side 2FA is needed. The
+      # one-time link of an existing account may still use its password.
+      # Break-glass if Authelia is down: set "false", redeploy, then
+      # `docker exec healthlog node scripts/reset-password.mjs <user>` for
+      # SSO-provisioned accounts (they have no password).
+      OIDC_ONLY: "true"
 
       # --- Web Push (PWA + desktop browsers; no Apple account needed).
       # The admin panel can also mint a pair into the DB, which takes precedence
