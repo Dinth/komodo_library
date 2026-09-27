@@ -45,15 +45,23 @@ services:
       # --- Display / VNC ---
       SHOW: "1" # keep browser visible so captchas can be hand-solved via noVNC
       NOVNC_PORT: "7080"
+      # VNC only uses the first 8 characters of this (TurboVNC truncates it).
       VNC_PASSWORD: "${FGC_VNC_PASSWORD}"
+      # Base for the links in sign-in alerts; without it they point at
+      # localhost, which is useless from a phone.
+      VNC_URL: "http://10.10.1.13:7080"
       # Seconds the bot waits at any manual step (sign-in, 2FA/e-mail code,
       # captcha). Upstream's 180 is too short once the Signal ping has to reach
       # a phone first; an unanswered wait only skips that store for the run.
       VNC_LOGIN_TIMEOUT: "900"
       # --- Scheduler ---
-      # Remaster builds an APScheduler cron trigger `hour=*/N`, so N must be <= 23
-      # (a cron step can't exceed the 0-23 hour range). 12 = runs at 00:00 & 12:00.
-      SCHEDULER_HOURS: "12"
+      # Fixed daily runs instead of an interval counted from container start
+      # (which drifted with every restart). 17:00 is just after Epic's weekly
+      # drop; 09:00 is the second pass. Both are waking hours, so a sign-in
+      # prompt can actually be answered. The container still runs once on start.
+      SCHEDULER_HOURS: "0"
+      SCHEDULER_TIMEZONE: "Europe/London"
+      SCHEDULER_FIXED_TIMES: "09:00,17:00"
       # --- Store selection ---
       # Microsoft Rewards is NOT supported by the remaster (dropped from feldorn).
       # aliexpress = daily coin check-in (not a game store). It has no TOTP
@@ -66,7 +74,7 @@ services:
       # --- Epic ---
       EG_EMAIL: "${ADMIN_EMAIL}"
       EG_PASSWORD: "${FGC_EG_PASS}"
-      EG_OTPKEY: "${FGC_EG_OTP_KEY}"
+      EG_OTP_KEY: "${FGC_EG_OTP_KEY}"
 #      EG_PARENTALPIN: "${FGC_EG_PARENTALPIN}" # only if parental controls are on
       # --- GOG ---
       GOG_EMAIL: "${ADMIN_EMAIL}"
@@ -75,7 +83,6 @@ services:
       PG_EMAIL: "${ADMIN_EMAIL}"
       PG_PASSWORD: "${FGC_PG_PASS}"
       PG_REDEEM: "1"
-      PG_CLAIMDLC: "1"
       # --- AliExpress ---
       # AE_MIN_COINS / AE_FLAG_* / AE_PAGE_RETRIES left at upstream defaults.
       AE_EMAIL: "${ADMIN_EMAIL}"
