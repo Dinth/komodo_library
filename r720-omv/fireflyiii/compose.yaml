@@ -222,8 +222,8 @@ services:
       # successive nights and then hit nginx's 300s ceiling, returning 504.
       # Cronicle recorded the failure and froze this event's scheduler cursor,
       # so the import silently stopped running altogether. Split, each bank
-      # takes ~50s and one failing bank no longer stops the other five.
-      IMPORT_DIR_ALLOWLIST: "/import/santander,/import/amex,/import/barclaycard,/import/capitalone,/import/tesco,/import/mbank"
+      # takes ~50s and one failing bank no longer stops the others.
+      IMPORT_DIR_ALLOWLIST: "/import/santander,/import/amex,/import/barclaycard,/import/capitalone,/import/tesco,/import/mbank,/import/virginmoney"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
     ports:
       - 4748:8080/tcp
