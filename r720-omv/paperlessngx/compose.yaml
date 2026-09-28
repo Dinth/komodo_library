@@ -2,6 +2,10 @@ x-versions:
   paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:3.2.1"
   postgres: &postgres-version "docker.io/postgres:18.6-alpine"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
+  # Pinned to Tika 3.x -- paperless-ngx targets the Tika 3 server API; a 4.0
+  # exists but don't follow it.
+  tika: &tika-version "docker.io/apache/tika:3.3.1.0"
+  gotenberg: &gotenberg-version "docker.io/gotenberg/gotenberg:8.37.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -111,6 +115,61 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
       wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
+  paperlessngx-tika:
+    image: *tika-version
+    container_name: paperlessngx-tika
+    hostname: paperlessngx-tika
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 1g
+    networks:
+      - paperlessngx
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^3\.\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/apache/tika/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.display.name: "Paperless-ngx - Tika"
+      wud.display.icon: "sh-paperless-ngx"
+
+  paperlessngx-gotenberg:
+    image: *gotenberg-version
+    container_name: paperlessngx-gotenberg
+    hostname: paperlessngx-gotenberg
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # No `user:` override here -- the image must run as its built-in gotenberg
+    # user (uid 1001), whose home holds the Chromium/LibreOffice profiles.
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+    mem_limit: 1g
+    healthcheck:
+      test: curl -fsS http://localhost:3000/health
+      interval: 30s
+      start_period: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - paperlessngx
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^8\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/gotenberg/gotenberg/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Paperless-ngx - Gotenberg"
+      wud.display.icon: "sh-paperless-ngx"
+
   paperlessngx:
     image: *paperlessngx-version
     container_name: paperlessngx
@@ -144,6 +203,14 @@ services:
         condition: service_healthy
       paperlessngx-postgres:
         condition: service_healthy
+      paperlessngx-tika:
+        condition: service_started
+      paperlessngx-gotenberg:
+        condition: service_healthy
+    # OIDC back-channel (token/userinfo/discovery) must hit Traefik on the LAN
+    # deterministically -- same pin as wud/homebox.
+    extra_hosts:
+      - "id.${DOMAIN_NAME}:10.10.1.13"
     environment:
       PAPERLESS_REDIS: "redis://paperlessngx-valkey:6379"
       PAPERLESS_DBHOST: "paperlessngx-postgres"
@@ -177,6 +244,51 @@ services:
       # supported form is this comma-separated dot-notation string, NOT the JSON
       # shown in the deprecation hint.
       PAPERLESS_DB_OPTIONS: "pool.min_size=4,pool.max_size=20"
+      # --- Public URL / proxy
+      PAPERLESS_URL: "https://papers.${DOMAIN_NAME}"
+      PAPERLESS_PROXY_SSL_HEADER: '["HTTP_X_FORWARDED_PROTO", "https"]'
+      # --- SSO via Authelia (client 'paperless' in Authelia configuration.yml).
+      # Callback: https://papers.${DOMAIN_NAME}/accounts/oidc/authelia/login/callback/
+      # Existing users are linked by pre-created SocialAccount rows keyed on Authelia's sub.
+      PAPERLESS_SOCIALACCOUNT_PROVIDERS: '{"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"paperless","secret":"${PAPERLESSNGX_OIDC_CLIENT_SECRET}","settings":{"server_url":"https://id.${DOMAIN_NAME}","token_auth_method":"client_secret_basic"}}]}}'
+      # Break-glass if Authelia is down: set both of the below to "false" and
+      # redeploy. API token auth (mobile apps, Homepage widget, HealthLog
+      # picker) is unaffected.
+      PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: "false"
+      PAPERLESS_DISABLE_REGULAR_LOGIN: "true"
+      PAPERLESS_REDIRECT_LOGIN_TO_SSO: "true"
+      PAPERLESS_LOGOUT_REDIRECT_URL: "https://id.${DOMAIN_NAME}/logout"
+      # --- Office docs & .eml ingestion
+      PAPERLESS_TIKA_ENABLED: "true"
+      PAPERLESS_TIKA_ENDPOINT: "http://paperlessngx-tika:9998"
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: "http://paperlessngx-gotenberg:3000"
+      # --- Consume: per-person subfolders consume/michal, consume/paulina;
+      # ownership assigned by workflows (path filter), so no subdirs-as-tags.
+      PAPERLESS_CONSUMER_RECURSIVE: "true"
+      # --- ASN barcodes on paper (sticker on page 1); only scan the first 2
+      # pages so big PDFs aren't rasterised twice.
+      PAPERLESS_CONSUMER_ENABLE_BARCODES: "true"
+      PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE: "true"
+      PAPERLESS_CONSUMER_BARCODE_MAX_PAGES: "2"
+      # --- Storage layout: per-owner tree.
+      PAPERLESS_FILENAME_FORMAT: "{{ owner_username }}/{{ correspondent }}/{{ created_year }}/{{ created }} {{ title }}"
+      PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: "true"
+      # --- Local AI (suggestions + document chat) on Ollama :11434
+      # (ollama-metrics proxy in openwebui stack). gemma4:e4b is already
+      # resident for Frigate/HA; context 8192 matches OLLAMA_CONTEXT_LENGTH so
+      # it doesn't force a model reload. OLLAMA_NUM_PARALLEL=1, so requests
+      # queue behind Frigate/HA -- hence the long timeout.
+      PAPERLESS_AI_ENABLED: "true"
+      PAPERLESS_AI_LLM_BACKEND: "ollama"
+      PAPERLESS_AI_LLM_ENDPOINT: "http://10.10.1.13:11434"
+      PAPERLESS_AI_LLM_MODEL: "gemma4:e4b"
+      PAPERLESS_AI_LLM_CONTEXT_SIZE: "8192"
+      PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
+      PAPERLESS_AI_LLM_EMBEDDING_BACKEND: "ollama"
+      PAPERLESS_AI_LLM_EMBEDDING_ENDPOINT: "http://10.10.1.13:11434"
+      PAPERLESS_AI_LLM_EMBEDDING_MODEL: "nomic-embed-text"
+    # Homepage widgets on both boards use http://10.10.1.13:8583 -- keep this
+    # published, don't switch it to Traefik-only.
     ports:
       - "8583:8000"
     volumes:
