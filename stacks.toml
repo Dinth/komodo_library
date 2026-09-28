@@ -358,7 +358,7 @@ SIGNAL_BOT_NUMBER=[[SIGNAL_BOT_NUMBER]]
 
 [[stack]]
 name = "free-games-claimer"
-tags = ["stacks", "needs-improvement"]
+tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
