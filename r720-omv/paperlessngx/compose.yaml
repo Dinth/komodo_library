@@ -240,6 +240,9 @@ services:
       # --- SSO via Authelia (client 'paperless' in Authelia configuration.yml).
       # Callback: https://papers.${DOMAIN_NAME}/accounts/oidc/authelia/login/callback/
       # Existing users are linked by pre-created SocialAccount rows keyed on Authelia's sub.
+      # The provider app isn't installed by default -- without this the login
+      # page lists no SSO button and REDIRECT_LOGIN_TO_SSO has nothing to submit.
+      PAPERLESS_APPS: "allauth.socialaccount.providers.openid_connect"
       PAPERLESS_SOCIALACCOUNT_PROVIDERS: '{"openid_connect":{"SCOPE":["openid","profile","email"],"OAUTH_PKCE_ENABLED":true,"APPS":[{"provider_id":"authelia","name":"Authelia","client_id":"paperless","secret":"${PAPERLESSNGX_OIDC_CLIENT_SECRET}","settings":{"server_url":"https://id.${DOMAIN_NAME}","token_auth_method":"client_secret_basic"}}]}}'
       # Break-glass if Authelia is down: set both of the below to "false" and
       # redeploy. API token auth (mobile apps, Homepage widget, HealthLog
@@ -301,7 +304,12 @@ services:
       traefik.http.routers.paperlessngx.tls.certresolver: "letsencrypt"
       traefik.http.routers.paperlessngx.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.paperlessngx.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.paperlessngx.middlewares: "secHeaders@file"
+      # secHeaders' CSP with form-action widened to Authelia: the SSO login is a
+      # self-POST that 302s to id.*, and browsers apply form-action to that
+      # redirect. Listed first because the first middleware wins on response
+      # headers. Keep in sync with secHeaders in traefik_dynamic.yml.
+      traefik.http.middlewares.paperlessngx-csp.headers.customresponseheaders.Content-Security-Policy: "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: unpkg.com; style-src 'self' 'unsafe-inline' blob: data: fonts.bunny.net unpkg.com *.vorwerk-digital.com; img-src 'self' blob: data: https: i.ytimg.com cdn.jsdelivr.net ui-avatars.com m.media-amazon.com s.lubimyczytac.pl tile.openstreetmap.org www.igdb.com assets.tmecosys.com *.vorwerk-digital.com; font-src 'self' blob: data: fonts.bunny.net unpkg.com patternlib-all.prod.external.eu-tm-prod.vorwerk-digital.com; object-src 'none'; frame-ancestors 'self'; connect-src 'self' https: wss: blob: api.github.com; form-action 'self' https://id.${DOMAIN_NAME}; media-src 'self' blob: data:; worker-src 'self' blob: data:; child-src 'self' blob: data:; frame-src 'self' www.youtube.com s.tradingview.com www.tradingview-widget.com blob: data:"
+      traefik.http.routers.paperlessngx.middlewares: "paperlessngx-csp,secHeaders@file"
       traefik.http.services.paperlessngx.loadbalancer.server.port: "8000"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
