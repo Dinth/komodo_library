@@ -18,13 +18,14 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    # Hardening deliberately relaxed to match upstream: the TurboVNC + Chrome
-    # (nodriver) init runs as root and switches users, so no-new-privileges,
-    # cap_drop: ALL, and a non-root `user:` break startup. Revisit once it boots.
-#    security_opt:
-#      - no-new-privileges:true
-#    cap_drop:
-#      - ALL
+    # Still root (the image has no USER and the data dir is root-owned), but
+    # with no capabilities: the entrypoint never switches users, Chrome runs
+    # with sandbox=False (no namespaces/setuid) and VNC listens above 1024.
+    # A non-root `user:` would also need remaster_data re-owned.
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     mem_limit: 4G
     healthcheck:
       test: pgrep python3 && curl --fail http://localhost:7080 || exit 1
@@ -37,7 +38,6 @@ services:
                     # reliable drag/slider captchas; browser noVNC drops drag moves
     volumes:
       # Fresh data dir — different app/DB/browser-profile schema than feldorn.
-      # Old data kept at /opt/docker/fgc/fgc_data as a rollback point.
       - /opt/docker/fgc/remaster_data:/fgc/data
       - /etc/localtime:/etc/localtime:ro
     environment:
