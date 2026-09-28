@@ -221,6 +221,10 @@ services:
     volumes:
       - /opt/docker/nextcloud/nextcloud_config:/config
       - /Data/IT/nextcloud:/data
+      # Paperless consume inboxes, surfaced per user as "Paperless inbox"
+      # External Storage mounts. Paperless (1003:100) deletes files once
+      # consumed, so the dirs are setgid 2775 group 100 (shared with abc).
+      - /opt/docker/paperlessngx/paperlessngx_consume:/paperless-consume
     networks:
       - nextcloud
       - traefik
