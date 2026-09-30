@@ -1,5 +1,8 @@
 x-versions:
-  authelia: &authelia-version "authelia/authelia:4.39.28"
+  # Base image the local patched image is built FROM (see Dockerfile).
+  # Releases: https://github.com/authelia/authelia/releases
+  # Bump this + redeploy (rebuild) to update; the WebAuthn patch re-applies.
+  authelia-base: &authelia-base "authelia/authelia:4.39.28"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
 
 x-logging: &default-logging
@@ -10,7 +13,20 @@ x-logging: &default-logging
 
 services:
   authelia:
-    image: *authelia-version
+    # Locally patched build: go-webauthn v0.18 rejects the `appid: false`
+    # extension output every iOS browser returns, breaking iPhone YubiKey
+    # logins. Revert this build:/image:/pull_policy block to a plain
+    # `image: *authelia-base` once v4.40.0 ships the fix:
+    # https://github.com/authelia/authelia/issues/13146
+    build:
+      context: .
+      args:
+        BASE_IMAGE: *authelia-base
+    # Bump the -pN suffix whenever the Dockerfile patches change: a
+    # Dockerfile-only edit doesn't change the compose, so Komodo reuses the
+    # cached image and never rebuilds. A new tag forces a fresh build.
+    image: authelia-patched:4.39.28-p1
+    pull_policy: never
     container_name: authelia
     ipc: private
     restart: unless-stopped
@@ -59,11 +75,16 @@ services:
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeadersRegex: "^(Location|Set-Cookie)$"
       # --- Whats up Docker? config ---
-      wud.watch: "true"
-      wud.display.name: "Authelia"
-      wud.display.icon: sh-authelia
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/authelia/authelia/releases/tag/v$${major}.$${minor}.$${patch}'
+      # WUD disabled: the running image is a locally-built patched tag, not a
+      # registry tag, so WUD can't watch it. Restore these (set watch back to
+      # "true") once the patch is dropped. The watchers use WATCHALL, so
+      # opting out needs an explicit label; otherwise WUD looks the local
+      # image up on Docker Hub and gets a 401.
+      wud.watch: "false"
+      # wud.display.name: "Authelia"
+      # wud.display.icon: sh-authelia
+      # wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      # wud.link.template: 'https://github.com/authelia/authelia/releases/tag/v$${major}.$${minor}.$${patch}'
 
   authelia-valkey:
     image: *valkey-version
