@@ -426,6 +426,24 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 ##
 
 [[stack]]
+name = "gogl-watcher"
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/gogl-watcher"
+environment = """
+TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+MEDIA_PUID=[[MEDIA_PUID]]
+MEDIA_PGID=[[MEDIA_PGID]]
+"""
+
+##
+
+[[stack]]
 name = "grafana-prometheus"
 tags = ["stacks"]
 [stack.config]

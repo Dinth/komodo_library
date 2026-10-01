@@ -1,0 +1,84 @@
+x-versions:
+  gogl-watcher: &gogl-watcher-version "ghcr.io/alehel/gogl-watcher:0.1.0"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  gogl-watcher:
+    image: *gogl-watcher-version
+    container_name: gogl-watcher
+    hostname: gogl-watcher
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Same as the other stacks that write into /Data (romm, mediarr's whisper,
+    # audiobookshelf, immich): the media user, so installers land in
+    # /Data/Games/GOG as media:users like the rest of the library. The image's
+    # own user is gogl (1000:1000); it only needs /data and /library writable
+    # and binds :8080, so no capabilities are needed.
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    # Go binary + SQLite. Parallel downloads stream to .part files on disk and
+    # are not buffered in memory.
+    mem_limit: 512m
+    environment:
+      TZ: "${TZ}"
+      PORT: "8080"
+      LOG_LEVEL: "info"
+      # Upstream default, made explicit: delay before the first scheduled GOG
+      # check after a (re)start.
+      STARTUP_SYNC_DELAY_SECONDS: "15"
+    # The image ships the same healthcheck (GET /api/status); restated here so
+    # it is visible in the stack.
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "wget -qO- http://127.0.0.1:8080/api/status >/dev/null || exit 1"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    volumes:
+      # SQLite DB, settings, logs AND the GOG refresh token. Anyone holding the
+      # token can act as the GOG account, so keep this directory 0700.
+      - /opt/docker/gogl-watcher/gogl-watcher/data:/data
+      # Installers, one folder per game. Written as <name>.part and renamed
+      # only after size + MD5 verification.
+      - /Data/Games/GOG:/library
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    logging: *default-logging
+    labels:
+      # The app has NO built-in authentication: Authelia forward-auth is the
+      # only thing standing between the network and the GOG account, and the
+      # router is additionally restricted to the LAN (same chain as boinc).
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.gogl-watcher.rule: "Host(`gog.${DOMAIN_NAME}`)"
+      traefik.http.routers.gogl-watcher.entrypoints: "websecure"
+      traefik.http.routers.gogl-watcher.tls: "true"
+      traefik.http.routers.gogl-watcher.tls.certresolver: "letsencrypt"
+      traefik.http.routers.gogl-watcher.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.gogl-watcher.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # yamllint disable-line rule:line-length
+      traefik.http.routers.gogl-watcher.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.services.gogl-watcher.loadbalancer.server.port: "8080"
+      wud.watch: "true"
+      # Upstream also pushes floating 0.1 / 0 / latest tags; track the full
+      # semver only.
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "gogl-watcher"
+      wud.display.icon: "mdi:download-box"
+      # yamllint disable-line rule:line-length
+      wud.link.template: "https://github.com/alehel/gogl-watcher/releases/tag/v$${major}.$${minor}.$${patch}"
+
+networks:
+  traefik:
+    external: true
