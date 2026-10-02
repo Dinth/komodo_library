@@ -59,7 +59,8 @@ services:
   # it is a general fan-out, so other stacks can use it by joining the
   # `signal-rest-api` network below and having a `<key>.cfg` of their own
   # dropped into apprise_config on disk (the API cannot register one, see
-  # APPRISE_CONFIG_LOCK).
+  # APPRISE_CONFIG_LOCK). A consumer must then either name a specific tag or
+  # log in as the apprise administrator (see APPRISE_AUTH_REQUIRED).
   apprise:
     image: *apprise-version
     container_name: apprise
@@ -82,9 +83,19 @@ services:
       APPRISE_STATEFUL_MODE: "simple"
       # The stored configs hold signal:// URLs with phone numbers, and without
       # the lock every container on the signal-rest-api network could read
-      # them back via /get/<key>. Locked, /notify/<key> still delivers, but a
-      # config can only be changed by editing its .cfg file on disk.
+      # them back via /get/<key>. Locked, a config can only be changed by
+      # editing its .cfg file on disk, and /notify/<key> still delivers — but
+      # only for the administrator below or a caller naming a specific tag.
       APPRISE_CONFIG_LOCK: "yes"
+      # The lock alone makes apprise refuse (HTTP 400) any notification that is
+      # untagged or tagged `all` unless it comes from an administrator — which
+      # is exactly how autoheal (no tag) and pricebuddy (hardcoded `all`) call
+      # it. So they authenticate as this admin, with the credentials in the
+      # userinfo of their apprise URL. The password therefore ends up inside
+      # URLs and must be URL-safe: letters and digits only.
+      APPRISE_AUTH_REQUIRED: "yes"
+      APPRISE_USER: "admin"
+      APPRISE_PASSWORD: "${APPRISE_ADMIN_PASSWORD}"
       # A handful of notifications a day; one worker is ample.
       APPRISE_WORKER_COUNT: "1"
     cap_drop:
@@ -95,7 +106,10 @@ services:
     healthcheck:
       # /status returns 200 when healthy and 417 when not, so -f is meaningful
       # here (unlike pricebuddy's probe, where any response proves apache is up).
-      test: ["CMD-SHELL", "curl -fsS -o /dev/null --max-time 5 http://127.0.0.1:8000/status || exit 1"]
+      # With APPRISE_AUTH_REQUIRED an anonymous /status is a 401, so the probe
+      # logs in as the admin. `$$` leaves the expansion to the container's own
+      # shell and env, keeping the password out of the healthcheck definition.
+      test: ["CMD-SHELL", 'curl -fsS -o /dev/null --max-time 5 -u "$$APPRISE_USER:$$APPRISE_PASSWORD" http://127.0.0.1:8000/status || exit 1']
       interval: 60s
       timeout: 10s
       retries: 3
@@ -111,9 +125,10 @@ services:
       autoheal: "true"
       # No Traefik router on purpose. The web UI would only be for creating or
       # testing a config; under APPRISE_CONFIG_LOCK configs are created on disk
-      # instead, /notify tests them just as well from inside the network, and
-      # the stored configs hold phone numbers. Add a router behind
-      # authelia-auth@docker if managing several consumers by hand gets old.
+      # instead, /notify (with the admin login) tests them just as well from
+      # inside the network, and the stored configs hold phone numbers. Add a
+      # router behind authelia-auth@docker if managing several consumers by
+      # hand gets old.
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Apprise"
