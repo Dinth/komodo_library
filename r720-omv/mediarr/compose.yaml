@@ -1,17 +1,17 @@
 x-versions:
   gluetun: &gluetun-version "qmcgaw/gluetun:v3.41.3"
-  qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.2.1"
+  qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.2.4"
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.6.5"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
-  bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.1"
+  bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.2"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
   # against the new image (patched copy is bind-mounted over upstream's).
   whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.0"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
-  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.7"
+  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.8"
   radarr: &radarr-version "lscr.io/linuxserver/radarr:6.4.4"
   sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.20"
 services:
