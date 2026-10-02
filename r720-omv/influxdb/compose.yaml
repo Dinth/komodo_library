@@ -2,7 +2,7 @@ x-versions:
   influxdb: &influxdb-version "influxdb:2.9.1-alpine"
   telegraf-version: &telegraf-version "telegraf:1.40-alpine"
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
-  unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v2.21.0"
+  unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v5.5.0"
 
 services:
   # Read-only Docker API for telegraf's docker input (per-container health
@@ -191,6 +191,10 @@ services:
       UP_UNIFI_CONTROLLER_0_SAVE_EVENTS: "false"
       UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES: "false"
       UP_UNIFI_CONTROLLER_0_SAVE_ALARMS: "false"
+      # Neighbouring access points (SSID, channel, signal) as seen by our APs,
+      # for channel planning around the 2.4 GHz Zigbee network. Off upstream
+      # because it adds a series set per neighbour network.
+      UP_UNIFI_CONTROLLER_0_SAVE_ROGUE: "true"
       # InfluxDB configuration
       UP_INFLUXDB_URL: "http://influxdb:8086"
       UP_INFLUXDB_ORG: "wickhay"
