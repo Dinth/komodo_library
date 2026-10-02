@@ -25,4 +25,15 @@ FROM ${BASE_IMAGE}
 # vdirsyncer), which is the signal to re-check the patch.
 USER root
 RUN python3 -c "import glob; p=glob.glob('/opt/pipx/venvs/vdirsyncer/lib/python3.*/site-packages/vdirsyncer/storage/dav.py')[0]; s=open(p).read(); o1='        href = self._normalize_href(str(response.url))'; n1='        location = response.headers.get(\"Location\")\n        href = self._normalize_href(location or str(response.url))'; assert s.count(o1)==1, 'anchor1 count %d' % s.count(o1); s=s.replace(o1,n1); o2='data=item.raw.encode(\"utf-8\")'; n2='data=item.raw.replace(\";VALUE=DATE,X-APPLE-OMIT-YEAR\", \";VALUE=DATE;X-APPLE-OMIT-YEAR\").encode(\"utf-8\")'; assert s.count(o2)==1, 'anchor2 count %d' % s.count(o2); s=s.replace(o2,n2); open(p,'w').write(s); print('patched dav.py: Location header + BDAY separator workaround')"
+
+# Scheduled job wrapper: syncs pair by pair, retries failures once, lets
+# contacts run less often than calendars, and writes the status document the
+# Homepage tile reads. See the docstring in vdirsyncer_job.py.
+COPY --chmod=0755 vdirsyncer_job.py /usr/local/bin/vdirsyncer-job
 USER vdirsyncer
+
+# The image's start.sh can only schedule its own fixed `metasync && sync` line,
+# so write the crontab here instead. Same supercronic, same CRON_TIME/CRON_FILE
+# variables, and the image's healthcheck (pgrep supercronic + CRON_FILE) still
+# holds. AUTOSYNC/AUTODISCOVER/AUTOUPDATE no longer do anything.
+ENTRYPOINT ["/bin/sh", "-c", "printf '%s %s\\n' \"$CRON_TIME\" /usr/local/bin/vdirsyncer-job > \"$CRON_FILE\" && exec \"$SUPERCRONIC_EXECUTABLE_PATH\" \"$CRON_FILE\""]

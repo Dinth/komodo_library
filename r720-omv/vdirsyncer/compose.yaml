@@ -22,7 +22,8 @@ services:
     # Bump the -pN suffix whenever the Dockerfile patches change: a
     # Dockerfile-only edit doesn't change the compose, so Komodo reuses the
     # cached image and never rebuilds. A new tag forces a fresh build.
-    image: vdirsyncer-patched:2.6.1-p2
+    # Same applies when vdirsyncer_job.py changes (it is COPYed into the image).
+    image: vdirsyncer-patched:2.6.1-p3
     pull_policy: never
     container_name: vdirsyncer
     ipc: private
@@ -33,13 +34,25 @@ services:
     mem_limit: 256M
     environment:
       <<: *vdirsyncer-env
-      AUTODISCOVER: "false"
-      AUTOSYNC: "true"
       CRON_TIME: "${VDIRSYNCER_CRON_TIME:-*/15 * * * *}"
+      # CRON_TIME is the tick for every pair. VDIRSYNCER_PAIR_INTERVALS is
+      # `pair=minutes` for pairs that should run less often than the tick:
+      # contacts hourly, since they change rarely and Google's CardDAV endpoint
+      # is the one that rate-limits. Pair names must match the `[pair ...]`
+      # sections of the server-side config. Failed pairs are retried once after
+      # VDIRSYNCER_RETRY_DELAY seconds.
+      VDIRSYNCER_PAIR_INTERVALS: "monica_contacts_to_google=60,nextcloud_contacts_to_google=60"
+      VDIRSYNCER_RETRY_DELAY: "45"
+      VDIRSYNCER_JOB_STATUS_FILE: "/job/vdirsyncer.json"
     volumes:
       - /opt/docker/vdirsyncer/vdirsyncer_config/config:/vdirsyncer/config:ro
       - /opt/docker/vdirsyncer/vdirsyncer_status:/status
       - /opt/docker/vdirsyncer/vdirsyncer_tokens:/vdirsyncer/tokens
+      # The job wrapper writes vdirsyncer.json here; the homepage stack's
+      # homepage-selector nginx serves this directory at /status/ for the
+      # boards' tiles (the cronicle stack writes its tile documents into the
+      # same directory).
+      - /opt/docker/homepage/status:/job
       - /etc/localtime:/etc/localtime:ro
     networks: [vdirsyncer]
     logging: *default-logging
