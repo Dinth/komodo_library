@@ -2,7 +2,7 @@ x-versions:
   # Base image the local patched image is built FROM (see Dockerfile).
   # Releases: https://github.com/Bleala/Vdirsyncer-DOCKERIZED/releases
   # Bump this + redeploy (rebuild) to update; the Location-header patch re-applies.
-  vdirsyncer-base: &vdirsyncer-base "bleala/vdirsyncer:2.6.1"
+  vdirsyncer-base: &vdirsyncer-base "bleala/vdirsyncer:2.7.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -23,7 +23,7 @@ services:
     # Dockerfile-only edit doesn't change the compose, so Komodo reuses the
     # cached image and never rebuilds. A new tag forces a fresh build.
     # Same applies when vdirsyncer_job.py changes (it is COPYed into the image).
-    image: vdirsyncer-patched:2.6.1-p3
+    image: vdirsyncer-patched:2.7.0-p3
     pull_policy: never
     container_name: vdirsyncer
     ipc: private

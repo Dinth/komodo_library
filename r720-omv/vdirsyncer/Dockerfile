@@ -17,7 +17,7 @@
 # BASE_IMAGE is pinned in compose.yaml (x-versions) and passed as a build arg,
 # which is the source of truth; the default below only covers a bare `docker
 # build` and should be kept in sync. Bump + redeploy (rebuild) to update.
-ARG BASE_IMAGE="bleala/vdirsyncer:2.6.1"
+ARG BASE_IMAGE="bleala/vdirsyncer:2.7.0"
 FROM ${BASE_IMAGE}
 
 # Apply the patch as root (base image ends with USER vdirsyncer); the build
