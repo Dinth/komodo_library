@@ -1,4 +1,4 @@
-# Patched vdirsyncer image: three changes to vdirsyncer's DAVStorage._put,
+# Patched vdirsyncer image: three changes to vdirsyncer's DAV storage,
 # applied by patch_dav.py (the reasons are in its docstring):
 #
 # 1. Record the server's Location response header instead of the request URL,
@@ -6,12 +6,12 @@
 #    tombstones them. Upstream: https://github.com/pimutils/vdirsyncer/issues/1223
 # 2. Repair Google's malformed year-less BDAY on the way out; Nextcloud answers
 #    it with a 500.
-# 3. Strip ORGANIZER/ATTENDEE from uploads into the paths named in
-#    VDIRSYNCER_STRIP_SCHEDULING_PATHS (compose.yaml), so a one-way mirror into
-#    Nextcloud does not set off Nextcloud's invitation handling.
+# 3. Send `Schedule-Reply: F` / `X-NC-Scheduling: false` on writes to the URLs
+#    named in VDIRSYNCER_NO_SCHEDULING_URLS (compose.yaml), so Nextcloud does
+#    not run invitation handling on events vdirsyncer is merely copying.
 #
-# Drop 1 and 2 and go back to the plain pinned base once (1) ships upstream
-# and Google/Sabre stop mangling year-less BDAYs.
+# 1 and 2 can go once (1) ships upstream and Google/Sabre stop mangling
+# year-less BDAYs; 3 is needed for as long as anything syncs into Nextcloud.
 #
 # BASE_IMAGE is pinned in compose.yaml (x-versions) and passed as a build arg,
 # which is the source of truth; the default below only covers a bare `docker

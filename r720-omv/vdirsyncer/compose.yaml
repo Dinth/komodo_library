@@ -24,7 +24,7 @@ services:
     # cached image and never rebuilds. A new tag forces a fresh build.
     # Same applies when vdirsyncer_job.py or patch_dav.py changes (both are
     # COPYed into the image).
-    image: vdirsyncer-patched:2.7.0-p4
+    image: vdirsyncer-patched:2.7.0-p5
     pull_policy: never
     container_name: vdirsyncer
     ipc: private
@@ -45,13 +45,16 @@ services:
       VDIRSYNCER_PAIR_INTERVALS: "monica_contacts_to_google=60,nextcloud_contacts_to_google=60,paulina_google_contacts_to_nextcloud=60"
       VDIRSYNCER_RETRY_DELAY: "45"
       VDIRSYNCER_JOB_STATUS_FILE: "/job/vdirsyncer.json"
-      # Uploads into these Nextcloud calendar paths have ORGANIZER/ATTENDEE
-      # removed (see patch_dav.py). They are the one-way Google -> Nextcloud
-      # mirror calendars: Nextcloud otherwise runs invitation handling on every
-      # mirrored event (rewrites other users' copies, tries to email attendees).
-      # Never list a calendar that syncs two-way: the stripped copy would travel
-      # back and remove the attendees in Google.
-      VDIRSYNCER_STRIP_SCHEDULING_PATHS: "/calendars/michal/google/,/calendars/paulina/google/"
+      # On every PUT/DELETE to a URL containing one of these comma-separated
+      # fragments, vdirsyncer sends `Schedule-Reply: F` and
+      # `X-NC-Scheduling: false` (see patch_dav.py), which makes Nextcloud skip
+      # CalDAV scheduling for that request. A sync client copies events, it
+      # does not send invitations. Without it Nextcloud rewrites events that
+      # have attendees, delivers them into other local users' calendars (whose
+      # own Google sync then pushes the change and Google refuses it with 400),
+      # tries to email the attendees, and 500s on detached recurrence
+      # instances.
+      VDIRSYNCER_NO_SCHEDULING_URLS: "nc.wickhay.uk/remote.php/dav/calendars/"
     volumes:
       - /opt/docker/vdirsyncer/vdirsyncer_config/config:/vdirsyncer/config:ro
       - /opt/docker/vdirsyncer/vdirsyncer_status:/status
