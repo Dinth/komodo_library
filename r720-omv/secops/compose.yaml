@@ -1,8 +1,8 @@
 x-versions:
   spiderfoot-version: &spiderfoot-version saidsef/spiderfoot:v4.0
-  misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.47
+  misp-core-version: &misp-core-version ghcr.io/misp/misp-docker/misp-core:v2.5.48
   # Same tag as misp-core: the nginx image ships that release's webroot.
-  misp-nginx-version: &misp-nginx-version ghcr.io/misp/misp-docker/misp-nginx:v2.5.47
+  misp-nginx-version: &misp-nginx-version ghcr.io/misp/misp-docker/misp-nginx:v2.5.48
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.0.10
   misp-mariadb-version: &misp-mariadb-version mariadb:12.3
   misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.2-alpine
