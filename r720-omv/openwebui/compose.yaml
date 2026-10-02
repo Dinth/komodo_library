@@ -5,7 +5,7 @@ x-versions:
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest@sha256:3dd32882666cf0e77272086446b5639c636fb090ac9ea629c11874200c629164"
   # latest-cuda resolved to this tag and has not moved since 2024-09 (ai-dock
   # stopped publishing), so pin what actually runs.
-  comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-base-22.04-v0.2.2"
+  comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-base-22.04-v0.2.7"
   comfyui-idle: &comfyui-idle-version "curlimages/curl:8.22.0"
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.3"
   # Upstream publishes no releases/version tags — :main is the only stream.
