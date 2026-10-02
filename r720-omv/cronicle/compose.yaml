@@ -137,6 +137,14 @@ services:
       # "0 files" and the tile turns red.
       BACKBLAZE_DATA: "/bzdata"
       BACKBLAZE_VOLUME: "D:"
+      # How old Backblaze's last COMPLETED backup may be before the "Last
+      # backup" row goes STALE and the Cronicle event fails. The script's own
+      # default is 24 hours, but Backblaze only stamps a backup as completed
+      # when nothing is left to upload - so a long catch-up reads as stale
+      # while the uploads are perfectly healthy. Re-selecting D: on 2026-09-25
+      # took a week to push ~900,000 files and the row sat red throughout.
+      # A week is the threshold.
+      BACKBLAZE_MAX_BACKUP_AGE_HOURS: "168"
     ports:
       - 3012:3012/tcp
     volumes:
