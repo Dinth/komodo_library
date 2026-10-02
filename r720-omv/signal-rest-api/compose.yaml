@@ -1,6 +1,6 @@
 x-versions:
   signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.100"
-  apprise: &apprise-version "caronc/apprise:1.5.4"
+  apprise: &apprise-version "caronc/apprise:2.0.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -57,7 +57,9 @@ services:
   # methods are mail, database, pushover, gotify, apprise, telegram, discord
   # and ntfy (app/Enums/NotificationMethods.php), with no native Signal — but
   # it is a general fan-out, so other stacks can use it by joining the
-  # `apprise` network below and registering their own config key.
+  # `signal-rest-api` network below and having a `<key>.cfg` of their own
+  # dropped into apprise_config on disk (the API cannot register one, see
+  # APPRISE_CONFIG_LOCK).
   apprise:
     image: *apprise-version
     container_name: apprise
@@ -78,6 +80,11 @@ services:
       # obscures the filename, which would make the signal:// URL — and the
       # phone numbers in it — awkward to audit or repair.
       APPRISE_STATEFUL_MODE: "simple"
+      # The stored configs hold signal:// URLs with phone numbers, and without
+      # the lock every container on the signal-rest-api network could read
+      # them back via /get/<key>. Locked, /notify/<key> still delivers, but a
+      # config can only be changed by editing its .cfg file on disk.
+      APPRISE_CONFIG_LOCK: "yes"
       # A handful of notifications a day; one worker is ample.
       APPRISE_WORKER_COUNT: "1"
     cap_drop:
@@ -102,9 +109,10 @@ services:
     logging: *default-logging
     labels:
       autoheal: "true"
-      # No Traefik router on purpose. The web UI is only needed to create or
-      # test a config, which /add and /notify do just as well from inside the
-      # network, and the stored configs hold phone numbers. Add a router behind
+      # No Traefik router on purpose. The web UI would only be for creating or
+      # testing a config; under APPRISE_CONFIG_LOCK configs are created on disk
+      # instead, /notify tests them just as well from inside the network, and
+      # the stored configs hold phone numbers. Add a router behind
       # authelia-auth@docker if managing several consumers by hand gets old.
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
