@@ -35,8 +35,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-    ports:
-      - "3333:3333"
     volumes:
       # The four image/instruction folders are nested inside the data mount so
       # the container sees upstream's single-folder layout without moving
@@ -48,8 +46,22 @@ services:
       - /opt/docker/bricktracker/bricktracker_sets:/app/data/sets/
     networks:
       - bricktracker
+      - traefik
     logging: *default-logging
     labels:
+      # Authelia gates the whole UI (its *.domain rules cover this host); the
+      # BrickTracker password still guards Admin and edits. DOMAIN_NAME is for
+      # labels only: never put it (or BK_DOMAIN_NAME) in the env, BrickTracker
+      # makes it a strict Socket.IO CORS origin that breaks behind the proxy.
+      traefik.enable: "true"
+      traefik.http.routers.bricktracker.rule: "Host(`bricktracker.${DOMAIN_NAME}`)"
+      traefik.http.routers.bricktracker.entrypoints: "websecure"
+      traefik.http.routers.bricktracker.tls: "true"
+      traefik.http.routers.bricktracker.tls.certresolver: "letsencrypt"
+      traefik.http.routers.bricktracker.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.bricktracker.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.bricktracker.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.bricktracker.loadbalancer.server.port: "3333"
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
@@ -62,3 +74,5 @@ networks:
     name: bricktracker
     driver: bridge
     external: false
+  traefik:
+    external: true
