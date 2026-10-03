@@ -1,5 +1,9 @@
 [[stack]]
 name = "adguardhome"
+description = """
+DNS ad/tracker blocker for the LAN.
+Web UI: http://10.10.1.12:3000
+DNS: 10.10.1.12:53 (TCP/UDP)"""
 tags = ["stacks"]
 [stack.config]
 server = "r230-nixos"
@@ -14,6 +18,9 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "adminer"
+description = """
+Web database admin client (Postgres, MariaDB, ...).
+Web UI: http://10.10.1.13:9009"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -26,6 +33,10 @@ run_directory = "r720-omv/adminer"
 
 [[stack]]
 name = "audiobookshelf"
+description = """
+Audiobook & podcast server.
+https://audiobooks.wickhay.uk
+LAN: http://10.10.1.13:3378"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -44,6 +55,9 @@ HOMEPAGE_AUDIOBOOKSHELF_API=[[HOMEPAGE_AUDIOBOOKSHELF_API]]
 
 [[stack]]
 name = "authelia"
+description = """
+SSO / 2FA identity provider (OIDC + Traefik forward-auth for the other stacks).
+https://id.wickhay.uk"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -63,6 +77,9 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "autoheal"
+description = """
+Restarts unhealthy containers that carry the autoheal label (r720-omv).
+No UI."""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -80,6 +97,9 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 
 [[stack]]
 name = "autoheal-r230"
+description = """
+Restarts unhealthy containers that carry the autoheal label (r230-nixos).
+No UI."""
 tags = ["stacks"]
 [stack.config]
 server = "r230-nixos"
@@ -97,6 +117,10 @@ DOCKER_SOCKET_GID=131
 
 [[stack]]
 name = "babybuddy"
+description = """
+Baby care tracker (feeds, sleep, nappies).
+https://baby.wickhay.uk
+LAN: http://10.10.1.13:3938"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -115,6 +139,9 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "backblaze-personal-wine"
+description = """
+Backblaze Personal Backup client (Windows app under Wine) backing up /Data, plus a status exporter for Homepage.
+Web UI (noVNC): http://10.10.1.13:5800"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -133,6 +160,9 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "backrest"
+description = """
+Restic backup scheduler & web UI for r720-omv.
+Web UI: http://10.10.1.13:9898"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -151,6 +181,9 @@ SIGNAL_TECH_ID=[[SIGNAL_TECH_ID]]
 
 [[stack]]
 name = "backrest-r230"
+description = """
+Restic backup scheduler & web UI for r230-nixos.
+Web UI: http://10.10.1.12:9898"""
 tags = ["stacks"]
 [stack.config]
 server = "r230-nixos"
@@ -171,6 +204,9 @@ SMB_BACKUP_PASS=[[SMB_BACKUP_PASS]]
 
 [[stack]]
 name = "boinc"
+description = """
+BOINC volunteer distributed-computing client.
+https://boinc.wickhay.uk (Authelia, LAN only)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -188,6 +224,9 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "bricktracker"
+description = """
+LEGO set & parts collection tracker.
+https://bricktracker.wickhay.uk (Authelia)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -208,6 +247,11 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "bunkerm"
+description = """
+MQTT broker (BunkerM / Mosquitto) + MQTT Explorer web UI.
+MQTT: 10.10.1.13:1883
+BunkerM UI: http://10.10.1.13:2000
+MQTT Explorer: https://mqtt.wickhay.uk (Authelia, LAN only)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -223,6 +267,10 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "calibre-web"
+description = """
+E-book library web reader (Calibre).
+https://calibre.wickhay.uk
+LAN: http://10.10.1.13:8083"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -243,7 +291,10 @@ HOMEPAGE_CALIBREWEB_PASS=[[HOMEPAGE_CALIBREWEB_PASS]]
 
 [[stack]]
 name = "cronicle"
-description = "job scheduler; runs as DOCKER_PUID since 2026-09-21"
+description = """
+Job scheduler with web UI; runs the homelab's scheduled jobs.
+Web UI: http://10.10.1.13:3012
+Note: runs as DOCKER_PUID since 2026-09-21"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -272,6 +323,10 @@ PFSENSE_BACKUP_ENC=[[PFSENSE_BACKUP_ENC]]
 
 [[stack]]
 name = "dawarich"
+description = """
+Location history / GPS timeline (Google Timeline alternative).
+https://traces.wickhay.uk
+LAN: http://10.10.1.13:4745"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -295,6 +350,10 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "deceptifeed"
+description = """
+Honeypot + threat feed; Traefik sends unknown hostnames here.
+SSH honeypot: 10.10.1.13:12222
+Threat feed: http://10.10.1.13:19000"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -311,6 +370,9 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "ebusd"
+description = """
+eBUS daemon: reads the heating/boiler eBUS adapter and publishes to Home Assistant's MQTT (10.10.1.11).
+No UI."""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r230-nixos"
@@ -327,6 +389,13 @@ EBUSD_MQTTPASS="[[MQTT_PASSWORD]]"
 
 [[stack]]
 name = "fireflyiii"
+description = """
+Firefly III personal finance manager + per-user bank data importers + MCP.
+https://finance.wickhay.uk
+LAN: http://10.10.1.13:4747
+Data importer (Michal): http://10.10.1.13:4748
+Data importer (Paulina): http://10.10.1.13:4749
+MCP: http://10.10.1.13:5137"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -361,6 +430,10 @@ SIGNAL_BOT_NUMBER=[[SIGNAL_BOT_NUMBER]]
 
 [[stack]]
 name = "free-games-claimer"
+description = """
+Auto-claims free games (Epic, Prime Gaming, GOG).
+noVNC: http://10.10.1.13:7080
+VNC client: 10.10.1.13:5900"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -391,6 +464,11 @@ FGC_VNC_PASSWORD=[[FGC_VNC_PASSWORD]]
 
 [[stack]]
 name = "freshrss"
+description = """
+RSS reader + RSS-Bridge (feeds for sites without RSS).
+https://rss.wickhay.uk
+LAN: http://10.10.1.13:8020
+RSS-Bridge: http://10.10.1.13:4746"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -414,6 +492,12 @@ HOMEPAGE_FRESHRSS_MICHAL_PASSWORD=[[HOMEPAGE_FRESHRSS_MICHAL_PASSWORD]]
 
 [[stack]]
 name = "frigate"
+description = """
+CCTV NVR with object detection (TensorRT on the T4).
+https://cctv.wickhay.uk (Authelia)
+Authenticated UI: https://10.10.1.13:8971
+API (no auth, trusted VLANs): http://10.10.1.13:5000
+go2rtc: http://10.10.1.13:1984 / RTSP: rtsp://10.10.1.13:8554 / WebRTC: 10.10.1.13:8555"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -430,6 +514,9 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "gogl-watcher"
+description = """
+Watches the GOG library and downloads installers to /Data/Games/GOG.
+https://gog.wickhay.uk (Authelia, LAN only)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -448,6 +535,12 @@ MEDIA_PGID=[[MEDIA_PGID]]
 
 [[stack]]
 name = "grafana-prometheus"
+description = """
+Monitoring: Grafana + Prometheus + exporters (node, cAdvisor, DCGM GPU, blackbox, SNMP, HA Bluetooth) + Grafana MCP.
+Grafana: https://grafana.wickhay.uk (LAN only)
+Grafana LAN: http://10.10.1.13:3003
+Prometheus: http://10.10.1.13:9090
+Grafana MCP: http://10.10.1.13:5133/mcp"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -473,6 +566,11 @@ PROMETHEUS_HASS_TOKEN=[[PROMETHEUS_HASS_TOKEN]]
 
 [[stack]]
 name = "grocy"
+description = """
+Grocery & household stock management + MCP.
+https://grocery.wickhay.uk
+LAN: http://10.10.1.13:9283
+MCP: http://10.10.1.13:5135/mcp"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -493,6 +591,9 @@ GROCY_MCP_API_KEY=[[GROCY_MCP_API_KEY]]
 
 [[stack]]
 name = "harborguard"
+description = """
+Container image vulnerability scanner dashboard.
+Web UI: http://10.10.1.13:3005"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -511,6 +612,9 @@ HARBORGUARD_DB_PASS=[[HARBORGUARD_DB_PASS]]
 
 [[stack]]
 name = "healthlog"
+description = """
+Personal health metrics log.
+https://health.wickhay.uk"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -534,6 +638,9 @@ HEALTHLOG_VAPID_PRIVATE_KEY=[[HEALTHLOG_VAPID_PRIVATE_KEY]]
 
 [[stack]]
 name = "homebox"
+description = """
+Home inventory (belongings, warranties, locations).
+https://inventory.wickhay.uk (Authelia)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -553,6 +660,11 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "homepage"
+description = """
+Start-page dashboards; the selector routes each Authelia user to their own board.
+https://fp.wickhay.uk (Authelia)
+Michal: http://10.10.1.13:3008
+Paulina: http://10.10.1.13:3018"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -571,6 +683,9 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 
 [[stack]]
 name = "hortusfox"
+description = """
+Houseplant management & care tracker.
+Web UI: http://10.10.1.13:4142"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -592,6 +707,10 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "immich"
+description = """
+Photo & video library (Google Photos alternative) with ML search.
+https://photos.wickhay.uk
+LAN: http://10.10.1.13:2283"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -613,6 +732,9 @@ HOMEPAGE_IMMICH_KEY=[[HOMEPAGE_IMMICH_KEY]]
 
 [[stack]]
 name = "influxdb-telegraf"
+description = """
+Time-series metrics: InfluxDB 2 + Telegraf (host/Docker) + UnPoller (UniFi stats).
+InfluxDB UI/API: http://10.10.1.13:8086"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -633,6 +755,10 @@ UNPOLLER_UNIFI_PASS=[[UNPOLLER_UNIFI_PASS]]
 
 [[stack]]
 name = "jellyfin"
+description = """
+Media server (movies, TV, live TV).
+https://jf.wickhay.uk
+LAN: http://10.10.1.13:8096 (HTTPS :8920)"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -653,6 +779,10 @@ HOMEPAGE_JELLYFIN_API=[[HOMEPAGE_JELLYFIN_API]]
 
 [[stack]]
 name = "karakeep"
+description = """
+Bookmark / read-it-later manager with AI tagging.
+https://keep.wickhay.uk
+LAN: http://10.10.1.13:3000"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -672,6 +802,9 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "kittygram"
+description = """
+Privacy-friendly Instagram frontend (locally built image).
+https://kittygram.wickhay.uk (Authelia)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -688,6 +821,9 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "komodo"
+description = """
+Komodo Core (this deployment manager) + MongoDB.
+Web UI: http://10.10.1.13:9120"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -708,6 +844,10 @@ HOMEPAGE_KOMODO_PASSWORD=[[HOMEPAGE_KOMODO_PASSWORD]]
 
 [[stack]]
 name = "languagetool"
+description = """
+Grammar & spell-check server (LanguageTool API for browser plugins).
+https://spellcheck.wickhay.uk
+LAN: http://10.10.1.13:8010"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -723,6 +863,10 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "loki-promtail"
+description = """
+Log aggregation: Loki + Grafana Alloy (Docker logs, journal, syslog). Browse logs in Grafana.
+Loki API: http://10.10.1.13:3100
+Syslog in: 10.10.1.13:1514 (RFC3164) / :1515 (RFC5424), TCP+UDP"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -741,6 +885,9 @@ HOSTNAME="r720-omv"
 
 [[stack]]
 name = "mcp-gateway"
+description = """
+Docker MCP Gateway: exposes local stdio MCP servers (mqtt, mitmproxy, homebox, ...) over SSE.
+Endpoint: http://10.10.1.13:4888/sse"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -762,6 +909,11 @@ MCP_GATEWAY_AUTH_TOKEN=[[MCP_GATEWAY_AUTH_TOKEN]]
 
 [[stack]]
 name = "mediarr"
+description = """
+*arr media automation: Sonarr, Radarr, Lidarr, Prowlarr, Bazarr (+ Whisper subtitles), qBittorrent/Prowlarr/Flaresolverr behind Gluetun VPN, Iplayarr, Recommendarr, Cleanuparr.
+All at http://10.10.1.13:<port>
+Sonarr 8989 / Radarr 7878 / Lidarr 8686 / Prowlarr 9696 / Bazarr 6767
+qBittorrent 8008 / Iplayarr 4404 / Recommendarr 8282 / Cleanuparr 11011"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -795,6 +947,10 @@ WIREGUARD_ADDRESSES=[[WIREGUARD_ADDRESSES]]
 
 [[stack]]
 name = "monica"
+description = """
+Personal CRM (contacts, birthdays, relationships).
+https://monica.wickhay.uk
+LAN: http://10.10.1.13:5435"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -815,6 +971,11 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "n8n"
+description = """
+Workflow automation + n8n MCP.
+https://auto.wickhay.uk
+LAN: http://10.10.1.13:5678
+MCP: http://10.10.1.13:5138"""
 tags = [
   "stacks",
   "needs-improvement",
@@ -840,6 +1001,10 @@ N8N_MCP_AUTH_TOKEN=[[N8N_MCP_AUTH_TOKEN]]
 
 [[stack]]
 name = "navidrome"
+description = """
+Music streaming server (Subsonic API).
+https://music.wickhay.uk
+LAN: http://10.10.1.13:4533"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -858,6 +1023,10 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "netbootxyz"
+description = """
+PXE network boot server (netboot.xyz menus).
+Config UI: http://10.10.1.13:3010
+TFTP: 10.10.1.13:69/udp / assets HTTP: 10.10.1.13:85"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -874,6 +1043,12 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "nextcloud"
+description = """
+Nextcloud (files, calendar, contacts) + Collabora Office + MCP.
+https://nc.wickhay.uk
+LAN: http://10.10.1.13:1357
+Collabora: https://collabora.wickhay.uk
+MCP: http://10.10.1.13:5136"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -895,6 +1070,10 @@ NEXTCLOUD_DB_PASSWORD=[[NEXTCLOUD_DB_PASSWORD]]
 
 [[stack]]
 name = "omnitools"
+description = """
+Collection of browser-based utilities (image / PDF / text converters).
+https://omnitools.wickhay.uk (Authelia)
+LAN: http://10.10.1.13:8586"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -910,6 +1089,8 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "omnivore"
+description = """
+RETIRED: Komodo record only, r720-omv/omnivore no longer exists in the repo."""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -925,6 +1106,10 @@ OMNIVORE_JWT_SECRET=[[OMNIVORE_JWT_SECRET]]
 
 [[stack]]
 name = "openttd"
+description = """
+OpenTTD dedicated game server.
+Game: 10.10.1.13:3978 (TCP/UDP)
+Admin port: 10.10.1.13:3979"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -937,6 +1122,12 @@ run_directory = "r720-omv/openttd"
 
 [[stack]]
 name = "openwebui"
+description = """
+Local AI: Open WebUI chat + Ollama (T4 GPU) + ComfyUI image gen + Pipelines + Crawl4AI + ZeroClaw Signal assistants.
+Open WebUI: https://ai.wickhay.uk
+Open WebUI LAN: http://10.10.1.13:3311
+Ollama API: http://10.10.1.13:11434 (via metrics proxy; direct :11435)
+ZeroClaw: https://zeroclaw.wickhay.uk (Authelia)"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -959,6 +1150,10 @@ OPENWEBUI_CRAWL4AI_API_TOKEN=[[OPENWEBUI_CRAWL4AI_API_TOKEN]]
 
 [[stack]]
 name = "paperlessngx"
+description = """
+Document management with OCR (scans, bills, letters).
+https://papers.wickhay.uk
+LAN: http://10.10.1.13:8583"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -980,6 +1175,9 @@ PAPERLESSNGX_OIDC_CLIENT_SECRET=[[PAPERLESSNGX_OIDC_CLIENT_SECRET]]
 
 [[stack]]
 name = "pinchflat"
+description = """
+YouTube channel / playlist downloader (yt-dlp).
+Web UI: http://10.10.1.13:8945"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -996,6 +1194,11 @@ MEDIA_PGID=[[MEDIA_PGID]]
 
 [[stack]]
 name = "piped"
+description = """
+Privacy-friendly YouTube frontend.
+https://piped.wickhay.uk (Authelia)
+LAN: http://10.10.1.13:4551
+API: https://pipedapi.wickhay.uk / proxy: https://pipedproxy.wickhay.uk (trusted VLANs)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1014,6 +1217,9 @@ PIPED_DB_PASS=[[PIPED_DB_PASS]]
 
 [[stack]]
 name = "pricebuddy"
+description = """
+Online shop price tracker with drop alerts.
+https://prices.wickhay.uk"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1037,6 +1243,9 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "printstream"
+description = """
+Bambu Lab 3D-printer monitor / controller + slicer.
+https://print.wickhay.uk (Authelia)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1057,6 +1266,12 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "romm"
+description = """
+ROM library manager & in-browser emulation, plus streamed PCSX2 / Dolphin.
+https://emu.wickhay.uk
+LAN: http://10.10.1.13:4040
+PCSX2: https://emu-pcsx2.wickhay.uk (LAN only)
+Dolphin: https://emu-dolphin.wickhay.uk (LAN only)"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1086,6 +1301,9 @@ ROMM_STEAMGRIDDB_API_KEY=[[ROMM_STEAMGRIDDB_API_KEY]]
 
 [[stack]]
 name = "scanopy"
+description = """
+Network discovery & topology mapper (server + host-network scan daemon).
+Web UI: http://10.10.1.13:60072"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1105,6 +1323,9 @@ SCANOPY_TOKEN=[[SCANOPY_TOKEN]]
 
 [[stack]]
 name = "scrutiny"
+description = """
+Hard-drive S.M.A.R.T. health dashboard.
+Web UI: http://10.10.1.13:93"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -1124,6 +1345,9 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "searxng"
+description = """
+Private metasearch engine.
+https://search.wickhay.uk (Authelia)"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -1140,6 +1364,11 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "secops"
+description = """
+Security tooling: SpiderFoot OSINT, MISP threat intel, mitmproxy.
+SpiderFoot: http://10.10.1.13:5001
+MISP: http://10.10.1.13:8081
+mitmproxy: proxy 10.10.1.13:8084 / web UI http://10.10.1.13:8184"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1161,6 +1390,8 @@ SECOPS_MISP_ADMIN_PASSWORD=[[SECOPS_MISP_ADMIN_PASSWORD]]
 
 [[stack]]
 name = "semaphore"
+description = """
+RETIRED: Komodo record only, r720-omv/semaphore no longer exists in the repo."""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1175,6 +1406,10 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "signal-rest-api"
+description = """
+Signal messenger REST API (alerts / notifications) + Apprise notification gateway.
+Signal API: http://10.10.1.13:3162 (trusted VLANs)
+Apprise: internal only, http://apprise:8000 on the signal-rest-api network"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1194,6 +1429,10 @@ TZ=[[TZ]]
 
 [[stack]]
 name = "tandoor"
+description = """
+Recipe manager & meal planner.
+https://recipes.wickhay.uk
+LAN: http://10.10.1.13:1244"""
 tags = [
   "stacks",
   "needs-improvement",
@@ -1218,6 +1457,10 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "traefik"
+description = """
+Reverse proxy & TLS (Let's Encrypt via Cloudflare DNS) for *.wickhay.uk; also owns the LAN ports of auth-less services and the Wazuh agent ports (9514/9515).
+Dashboard: https://traefik.wickhay.uk (Authelia, LAN only)
+Also routes: https://home.wickhay.uk -> Home Assistant, https://edr.wickhay.uk -> Wazuh"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -1239,6 +1482,9 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 
 [[stack]]
 name = "trek"
+description = """
+Trip planner & travel journal.
+https://trek.wickhay.uk"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1258,6 +1504,10 @@ TREK_OIDC_CLIENT_SECRET=[[TREK_OIDC_CLIENT_SECRET]]
 
 [[stack]]
 name = "tvheadend"
+description = """
+TV streaming server (DVB-T2 / DVB-S2 tuners) + OSCam card server.
+TVHeadend: https://tvh.wickhay.uk (Authelia)
+OSCam: https://oscam.wickhay.uk (Authelia, LAN only)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1276,6 +1526,10 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "unifi"
+description = """
+UniFi Network Application (Wi-Fi AP controller) + UniFi MCP.
+Web UI: https://10.10.1.12:8443
+MCP: http://10.10.1.12:5134"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r230-nixos"
@@ -1296,8 +1550,8 @@ UNIFI_MCP_PASS=[[UNIFI_MCP_PASS]]
 [[stack]]
 name = "uptime-kuma"
 description = """
-Port 3001
-Rootless not available until 2.0.0"""
+Uptime / service availability monitor.
+Web UI: http://10.10.1.13:3001"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
@@ -1316,6 +1570,9 @@ DOCKER_SOCKET_GID=[[DOCKER_SOCKET_GID]]
 
 [[stack]]
 name = "vdirsyncer"
+description = """
+Two-way sync of calendars & contacts between Google and Nextcloud (CalDAV/CardDAV); jobs run from Cronicle.
+No UI."""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1333,6 +1590,10 @@ VDIRSYNCER_SYNC_INTERVAL=900
 
 [[stack]]
 name = "vouchervault"
+description = """
+Gift card / voucher / loyalty card wallet.
+https://cards.wickhay.uk
+LAN: http://10.10.1.13:8077"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1351,6 +1612,9 @@ DOCKER_PGID=[[DOCKER_PGID]]
 
 [[stack]]
 name = "wud"
+description = """
+What's Up Docker: watches container images for updates (r720-omv + r230-nixos).
+https://wud.wickhay.uk (LAN only)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1376,6 +1640,9 @@ WUD_OIDC_CLIENT_SECRET=[[WUD_AUTHELIA_SECRET]]
 
 [[stack]]
 name = "wud-socket-proxy-r230"
+description = """
+Read-only Docker socket proxy so WUD (and HA monitor_docker) can see r230-nixos containers.
+Endpoint: tcp://10.10.1.12:2377"""
 tags = ["stacks"]
 [stack.config]
 server = "r230-nixos"
@@ -1390,6 +1657,10 @@ DOCKER_SOCKET_GID=131
 
 [[stack]]
 name = "yamtrack"
+description = """
+Media tracker (shows, movies, games, books).
+https://mediatracker.wickhay.uk
+LAN: http://10.10.1.13:5743"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1412,6 +1683,9 @@ MYANIMELIST_SECRET=[[MYANIMELIST_SECRET]]
 
 [[stack]]
 name = "zigbee2mqtt"
+description = """
+Zigbee <-> MQTT bridge for Home Assistant (SLZB-MR3 coordinator).
+Web UI: http://10.10.1.12:4080"""
 tags = ["stacks"]
 [stack.config]
 server = "r230-nixos"
