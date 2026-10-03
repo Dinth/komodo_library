@@ -1,5 +1,5 @@
 x-versions:
-  bricktracker: &bricktracker-version "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.2.2"
+  bricktracker: &bricktracker-version "gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.4.2"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -20,11 +20,16 @@ services:
       - no-new-privileges:true
     mem_limit: 512M
     environment:
-      BK_DATABASE_PATH: "/data/app.db"
-      BK_MINIFIGURES_FOLDER: "minifigures"
-      BK_RETIRED_SETS_PATH: "/data/retired_sets.csv"
-      BK_THEMES_PATH: "/data/themes.csv"
+      # No path overrides: since 1.3 everything defaults to /app/data (database,
+      # CSVs, images, instructions and the .env that Admin > Live Settings
+      # writes), which the volumes below map onto the existing host folders.
       BK_REBRICKABLE_API_KEY: "${BK_REBRICKABLE_API_KEY}"
+      # Password-protects Admin and every write action (add/delete sets,
+      # missing parts, instructions, wishlist); browsing stays open. An empty
+      # password silently turns protection off, so both Komodo Variables must
+      # be filled in. The key signs the session cookie.
+      BK_AUTHENTICATION_PASSWORD: "${BK_AUTHENTICATION_PASSWORD}"
+      BK_AUTHENTICATION_KEY: "${BK_AUTHENTICATION_KEY}"
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; r = requests.get('http://localhost:3333'); print(r.status_code == 200)"]
       interval: 10s
@@ -33,11 +38,14 @@ services:
     ports:
       - "3333:3333"
     volumes:
-      - /opt/docker/bricktracker/bricktracker_data:/data/
-      - /opt/docker/bricktracker/bricktracker_instructions:/app/static/instructions/
-      - /opt/docker/bricktracker/bricktracker_minifigures:/app/static/minifigures/
-      - /opt/docker/bricktracker/bricktracker_parts:/app/static/parts/
-      - /opt/docker/bricktracker/bricktracker_sets:/app/static/sets/
+      # The four image/instruction folders are nested inside the data mount so
+      # the container sees upstream's single-folder layout without moving
+      # anything on the host.
+      - /opt/docker/bricktracker/bricktracker_data:/app/data/
+      - /opt/docker/bricktracker/bricktracker_instructions:/app/data/instructions/
+      - /opt/docker/bricktracker/bricktracker_minifigures:/app/data/minifigures/
+      - /opt/docker/bricktracker/bricktracker_parts:/app/data/parts/
+      - /opt/docker/bricktracker/bricktracker_sets:/app/data/sets/
     networks:
       - bricktracker
     logging: *default-logging
