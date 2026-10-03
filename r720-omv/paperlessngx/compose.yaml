@@ -307,8 +307,21 @@ services:
       # secHeaders' CSP with form-action widened to Authelia: the SSO login is a
       # self-POST that 302s to id.*, and browsers apply form-action to that
       # redirect. Listed first because the first middleware wins on response
-      # headers. Keep in sync with secHeaders in traefik_dynamic.yml.
-      traefik.http.middlewares.paperlessngx-csp.headers.customresponseheaders.Content-Security-Policy: "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: unpkg.com; style-src 'self' 'unsafe-inline' blob: data: fonts.bunny.net unpkg.com *.vorwerk-digital.com; img-src 'self' blob: data: https: i.ytimg.com cdn.jsdelivr.net ui-avatars.com m.media-amazon.com s.lubimyczytac.pl tile.openstreetmap.org www.igdb.com assets.tmecosys.com *.vorwerk-digital.com; font-src 'self' blob: data: fonts.bunny.net unpkg.com patternlib-all.prod.external.eu-tm-prod.vorwerk-digital.com; object-src 'none'; frame-ancestors 'self'; connect-src 'self' https: wss: blob: api.github.com; form-action 'self' https://id.${DOMAIN_NAME}; media-src 'self' blob: data:; worker-src 'self' blob: data:; child-src 'self' blob: data:; frame-src 'self' www.youtube.com s.tradingview.com www.tradingview-widget.com blob: data:"
+      # headers. Keep the baseline in sync with secHeaders in traefik_dynamic.yml.
+      traefik.http.middlewares.paperlessngx-csp.headers.customresponseheaders.Content-Security-Policy: >-
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:;
+        style-src 'self' 'unsafe-inline' blob: data:;
+        img-src 'self' blob: data: https:;
+        font-src 'self' blob: data:;
+        object-src 'none';
+        frame-ancestors 'self';
+        connect-src 'self' https: wss: blob:;
+        form-action 'self' https://id.${DOMAIN_NAME};
+        media-src 'self' blob: data:;
+        worker-src 'self' blob: data:;
+        child-src 'self' blob: data:;
+        frame-src 'self' blob: data:
       traefik.http.routers.paperlessngx.middlewares: "paperlessngx-csp,secHeaders@file"
       traefik.http.services.paperlessngx.loadbalancer.server.port: "8000"
       wud.watch: "true"

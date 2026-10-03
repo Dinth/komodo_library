@@ -255,7 +255,8 @@ services:
       # embeds the Selkies desktop in an <iframe> loaded by the BROWSER (not
       # proxied by RomM), and secHeaders' `default-src 'self'` — which frame-src
       # inherits — would block a cross-subdomain frame. Identical to secHeaders'
-      # policy otherwise, with frame-src added.
+      # policy otherwise, with frame-src added (plus www.youtube.com for the
+      # game-trailer embeds).
       # script-src also allows cdn.emulatorjs.org: with emulatorjs.netplay
       # enabled in config.yml, RomM loads the EmulatorJS nightly from that CDN
       # instead of its bundled 4.2.3, whose multi-disk bug fails every Amiga
@@ -272,7 +273,7 @@ services:
         font-src 'self' blob: data: fonts.bunny.net unpkg.com;
         object-src 'none';
         frame-ancestors 'self';
-        frame-src 'self' https://emu-pcsx2.${DOMAIN_NAME} https://emu-dolphin.${DOMAIN_NAME};
+        frame-src 'self' https://emu-pcsx2.${DOMAIN_NAME} https://emu-dolphin.${DOMAIN_NAME} https://www.youtube.com;
         connect-src 'self' https: wss: blob: api.github.com;
         form-action 'self';
         media-src 'self' blob: data:;

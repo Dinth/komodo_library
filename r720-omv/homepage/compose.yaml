@@ -158,7 +158,24 @@ services:
       traefik.http.routers.homepage.tls.certresolver: "letsencrypt"
       traefik.http.routers.homepage.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.homepage.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.homepage.middlewares: "secHeaders@file,authelia-auth@docker"
+      # secHeaders' baseline CSP plus what this app needs: the TradingView symbol-overview iframe on the crypto card.
+      # Listed before secHeaders@file because the first middleware wins on
+      # response headers. Keep the baseline in sync with traefik_dynamic.yml.
+      traefik.http.middlewares.homepage-csp.headers.customresponseheaders.Content-Security-Policy: >-
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:;
+        style-src 'self' 'unsafe-inline' blob: data:;
+        img-src 'self' blob: data: https:;
+        font-src 'self' blob: data:;
+        object-src 'none';
+        frame-ancestors 'self';
+        connect-src 'self' https: wss: blob:;
+        form-action 'self';
+        media-src 'self' blob: data:;
+        worker-src 'self' blob: data:;
+        child-src 'self' blob: data:;
+        frame-src 'self' blob: data: https://s.tradingview.com https://www.tradingview-widget.com
+      traefik.http.routers.homepage.middlewares: "homepage-csp,secHeaders@file,authelia-auth@docker"
       traefik.http.services.homepage.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
