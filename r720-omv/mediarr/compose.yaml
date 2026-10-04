@@ -337,14 +337,17 @@ services:
       # The non-root user otherwise has / as its home, which is not writable
       # (matplotlib logs "Permission denied: '/.config'" on every start).
       HOME: "/models"
-      # Hand the VRAM back after 5 minutes idle. This is the whole reason
-      # whisper can share fc3316a9 with ollama: subtitle work is bursty and
-      # rare, so outside an actual transcription the card is released.
+      # Drops the model after 5 minutes idle, but NOT the VRAM: CTranslate2
+      # keeps its CUDA context and allocator pool, measured 2026-10-04 at
+      # ~2.4G held by an idle process that had unloaded the model hours before.
       MODEL_IDLE_TIMEOUT: "300"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
-      # Same card as ollama (Quadro RTX 5000). Bursty work belongs on the 230W
-      # card per the reasoning in openwebui; the T4 keeps its 24/7 tenants.
-      NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
+      # T4 (GPU 0), moved off the Quadro 2026-10-04. Because of the ~2.4G that
+      # is never released (above), sharing the Quadro left too little for
+      # ollama's pinned gemma4:e4b + gemma4:12b-32k, and the 12b spilled
+      # layers to CPU. The T4's 14-day peak was 7.4G of 15G (Frigate, ComfyUI,
+      # Jellyfin, Immich); a large-v3 float16 transcription adds ~3.5-4G.
+      NVIDIA_VISIBLE_DEVICES: "GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"
     # Deliberately below ollama's 512: this is a background fallback job and
     # must never win CPU against work someone is actually waiting on.
     cpu_shares: 256
@@ -363,7 +366,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ["GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"]
+              device_ids: ["GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"]
               capabilities: [compute,utility]
     volumes:
       - /opt/docker/mediarr/whisper_models:/models
