@@ -24,7 +24,7 @@ services:
     # cached image and never rebuilds. A new tag forces a fresh build.
     # Same applies when vdirsyncer_job.py or patch_dav.py changes (both are
     # COPYed into the image).
-    image: vdirsyncer-patched:2.7.0-p5
+    image: vdirsyncer-patched:2.7.0-p6
     pull_policy: never
     container_name: vdirsyncer
     ipc: private
@@ -44,6 +44,16 @@ services:
       # VDIRSYNCER_RETRY_DELAY seconds.
       VDIRSYNCER_PAIR_INTERVALS: "monica_contacts_to_google=60,nextcloud_contacts_to_google=60,paulina_google_contacts_to_nextcloud=60"
       VDIRSYNCER_RETRY_DELAY: "45"
+      # When Google refuses (400) a change coming from Nextcloud in one of
+      # these pairs, the job resets that event's sync history so the retry
+      # treats it as a conflict and puts Google's copy back into Nextcloud.
+      # Only list pairs whose second storage is Google and whose
+      # conflict_resolution is "b wins". At most VDIRSYNCER_RESET_MAX events
+      # per pair per run, and never the same event twice in 24h; otherwise
+      # the pair fails visibly. Every reset is logged and counted on the
+      # Homepage tile.
+      VDIRSYNCER_GOOGLE_WINS_ON_REJECT: "nextcloud_google,paulina_nextcloud_google"
+      VDIRSYNCER_RESET_MAX: "5"
       VDIRSYNCER_JOB_STATUS_FILE: "/job/vdirsyncer.json"
       # On every PUT/DELETE to a URL containing one of these comma-separated
       # fragments, vdirsyncer sends `Schedule-Reply: F` and
