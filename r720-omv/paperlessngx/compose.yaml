@@ -306,14 +306,17 @@ services:
       PAPERLESS_FILENAME_FORMAT_REMOVE_NONE: "true"
       # --- Local AI (suggestions + document chat) on Ollama :11434
       # (ollama-metrics proxy in openwebui stack). gemma4:e4b is already
-      # resident for Frigate/HA; context 8192 matches OLLAMA_CONTEXT_LENGTH so
-      # it doesn't force a model reload. OLLAMA_NUM_PARALLEL=1, so requests
+      # resident for Frigate/HA, pinned at num_ctx 16384. llama-index sends
+      # this size as num_ctx on every request, and a different size makes
+      # Ollama reload the model, so it must stay 16384 to match HA, Frigate
+      # and Karakeep (was 8192, which reloaded e4b on every alternation with
+      # them). OLLAMA_NUM_PARALLEL=1, so requests
       # queue behind Frigate/HA -- hence the long timeout.
       PAPERLESS_AI_ENABLED: "true"
       PAPERLESS_AI_LLM_BACKEND: "ollama"
       PAPERLESS_AI_LLM_ENDPOINT: "http://10.10.1.13:11434"
       PAPERLESS_AI_LLM_MODEL: "gemma4:e4b"
-      PAPERLESS_AI_LLM_CONTEXT_SIZE: "8192"
+      PAPERLESS_AI_LLM_CONTEXT_SIZE: "16384"
       PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
       PAPERLESS_AI_LLM_EMBEDDING_BACKEND: "ollama"
       PAPERLESS_AI_LLM_EMBEDDING_ENDPOINT: "http://10.10.1.13:11434"
