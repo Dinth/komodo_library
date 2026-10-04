@@ -478,6 +478,13 @@ services:
       DATABASE_URL: "sqlite:///app/pipelines/pipelines.db"
       PIPELINES_API_KEY: "${OPENWEBUI_PIPELINES_PASS}"
       PIPELINES_URLS: "https://raw.githubusercontent.com/open-webui/pipelines/main/examples/pipelines/providers/google_manifold_pipeline.py"
+      # Pipelines pip-install their requirements at start. As DOCKER_PUID with
+      # HOME=/ pip falls back to a user install in /.local, gets "Permission
+      # denied" and the Gemini pipeline lands in failed/. A HOME inside the
+      # persistent bind mount (owned by DOCKER_PUID) makes the install work and
+      # survive recreation. The loader only reads top-level *.py, so the extra
+      # directory is ignored.
+      HOME: "/app/pipelines/.home"
       TZ: "${TZ}"
     hostname: openwebui-pipelines
     image: *openwebui-pipelines-version
