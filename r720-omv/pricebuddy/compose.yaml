@@ -17,6 +17,29 @@ x-logging: &default-logging
 services:
   pricebuddy:
     image: *pricebuddy-version
+    # TEMPORARY start-time patch: the laravel/ai Ollama gateway never sends
+    # `think`, and providerOptions are merged into `options` rather than the
+    # top level, so not even config can switch gemma4 reasoning off; every AI
+    # call reasons first. Adds 'think' => false to buildChatRequestBody(), the
+    # single place chat/stream request bodies are built, before the stock
+    # entrypoint. Ollama accepts think:false on non-reasoning models too.
+    # Idempotent; on an anchor miss it logs a WARNING and starts unpatched.
+    # Setting entrypoint clears the image CMD, hence the explicit
+    # /start-app.sh. Revert: delete this entrypoint block.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        f=/app/vendor/laravel/ai/src/Gateway/Ollama/Concerns/BuildsTextRequests.php
+        if grep -qF "'think' => false," "$$f"; then
+          echo "think patch: already patched"
+        elif [ "$$(grep -cF "'stream' => " "$$f")" = 1 ]; then
+          sed -i "s/'stream' => /'think' => false, 'stream' => /" "$$f"
+          echo "think patch: patched"
+        else
+          echo "WARNING: think patch anchor not found - running UNPATCHED"
+        fi
+        exec docker-php-entrypoint /start-app.sh
     container_name: pricebuddy
     hostname: pricebuddy
     ipc: private

@@ -12,6 +12,28 @@ x-logging: &default-logging
 services:
   karakeep:
     image: *karakeep-version
+    # TEMPORARY start-time patch: Karakeep's Ollama client never sends `think`,
+    # and has no setting for it, so gemma4 (text AND image models) reasons on
+    # every tagging/summary call - several times slower, and the reasoning
+    # counts against num_predict. Adds think:false to its single
+    # ollama.generate() call in the stock image before /init. Ollama accepts
+    # think:false on non-reasoning models too. Idempotent across restarts; on
+    # an anchor miss it logs a WARNING and starts unpatched.
+    # Revert: delete this entrypoint block.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        f=/app/apps/workers/dist/index.js
+        if grep -qF 'this.ollama.generate({think:false,' "$$f"; then
+          echo "think patch: already patched"
+        elif grep -qF 'this.ollama.generate({' "$$f"; then
+          sed -i 's/this\.ollama\.generate({/this.ollama.generate({think:false,/' "$$f"
+          echo "think patch: patched"
+        else
+          echo "WARNING: think patch anchor not found - running UNPATCHED"
+        fi
+        exec /init
     container_name: karakeep
     hostname: karakeep
     ipc: private
