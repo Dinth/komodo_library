@@ -1,5 +1,5 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.39.9"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.40.0"
   # Upstream bundles and tests against postgres:16; 18 is used here to match
   # the rest of the repo. HealthLog needs no extensions, so nothing in its
   # schema depends on the 16 major.
@@ -14,43 +14,6 @@ x-logging: &default-logging
 services:
   healthlog:
     image: *healthlog-version
-    # TEMPORARY start-time patch, until upstream adds a per-provider reasoning
-    # setting (feature request filed on github.com/MBombeck/HealthLog). Ollama
-    # reasoning models (gemma4) think by default and HealthLog's fixed per-
-    # feature max_tokens (250 status, 400 narrative, 600 coach) get eaten by the
-    # reasoning: "Local AI returned empty content" or 180s timeouts. This adds
-    # `reasoning_effort` from LOCAL_AI_REASONING_EFFORT to the Local provider's
-    # /chat/completions body (src/lib/ai/local-client.ts), rewriting the
-    # compiled chunks in place before the stock entrypoint runs. They are owned
-    # by 1001, the user below, so no root is needed. Idempotent across restarts.
-    # If an image bump changes the minified anchor, it logs a WARNING and starts
-    # unpatched rather than crash-looping - check the log line after upgrades.
-    # Setting entrypoint clears the image CMD, hence the explicit
-    # `node server.js`. Revert: delete this entrypoint block and the env var.
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        node -e '
-        const fs = require("fs");
-        const dir = "/app/.next/server/chunks";
-        const A = "max_tokens:e.maxTokens??1e3,...void 0!==e.seed";
-        const B = "max_tokens:e.maxTokens??1e3,...(process.env.LOCAL_AI_REASONING_EFFORT?{reasoning_effort:process.env.LOCAL_AI_REASONING_EFFORT}:{}),...void 0!==e.seed";
-        let patched = 0, already = 0;
-        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-          if (!e.isFile() || !e.name.endsWith(".js")) continue;
-          const p = dir + "/" + e.name;
-          const s = fs.readFileSync(p, "utf8");
-          if (s.includes(B)) { already++; continue; }
-          if (s.includes(A)) { fs.writeFileSync(p, s.replaceAll(A, B)); patched++; }
-        }
-        if (patched + already === 0) {
-          console.log("WARNING: reasoning_effort patch anchor not found - Local AI requests are UNPATCHED");
-        } else {
-          console.log("reasoning_effort patch: " + patched + " patched, " + already + " already patched");
-        }
-        '
-        exec ./docker-entrypoint.sh node server.js
     container_name: healthlog
     hostname: healthlog
     ipc: private
@@ -89,6 +52,9 @@ services:
       # weekly backups. Lose it and the data is unrecoverable, even from a
       # pg_dump - keep a copy outside Komodo.
       ENCRYPTION_KEY: "${HEALTHLOG_ENCRYPTION_KEY}"
+      # 1.40+: the admin key-backup reminder opens on the Docker Compose
+      # instructions. Purely cosmetic; the start-up key check runs regardless.
+      HEALTHLOG_PLATFORM: "compose"
       # Rotating it invalidates every issued API/ingest token.
       API_TOKEN_HMAC_KEY: "${HEALTHLOG_API_TOKEN_HMAC_KEY}"
       # Both read at runtime on the prebuilt image (OAuth/OIDC redirect URIs,
@@ -135,14 +101,13 @@ services:
       # with base URL http://10.10.1.13:11434/v1. Exact origin only - no path.
       # Covers per-user and admin endpoints. The deprecated
       # ALLOW_LOCAL_AI_PRIVATE_HOSTS is superseded by this and left unset.
+      # gemma4 reasons by default and eats HealthLog's small per-feature token
+      # budgets ("Local AI returned empty content" / timeouts): set Settings ->
+      # AI -> Reasoning to "Off" for EVERY user (per-user since 1.40, upstream
+      # #1126; replaced a local start-time patch).
       AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
       # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
       ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
-      # Read by the start-time patch in `entrypoint` above, not by upstream:
-      # sent as `reasoning_effort` on every user's Local provider request.
-      # none/low/medium/high; unset = stock request. Ollama ignores it on
-      # non-reasoning models (verified with qwen2.5).
-      LOCAL_AI_REASONING_EFFORT: "none"
 
       # --- Private webhook targets. The Webhook channel posts generic JSON
       # (title/message/eventType/priority) - fine for a Home Assistant webhook
