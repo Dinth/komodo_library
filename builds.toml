@@ -154,12 +154,18 @@ webhook_enabled = false
 # base images, OS packages, unpinned dependencies and upstream source.
 #
 # Stages run in order and a failed stage stops the rest, so each image's
-# redeploy sits right after its own build and piped-backend -- the one most
-# likely to break (upstream API drift) -- goes last. A failed build leaves the
-# previous image running; failure_alert reports it.
+# redeploy sits right after its own build and the builds most likely to break
+# on upstream drift (kittygram, piped-backend) go last. A failed build leaves
+# the previous image running; failure_alert reports it.
 #
 # The gateway spawns a fresh MCP container from the current :latest for every
-# session; mcp-gateway is redeployed only to move its prune guards along.
+# session; mcp-gateway is redeployed only to move its prune guards along. That
+# redeploy MUST follow the MCP builds even when something else fails: Komodo's
+# auto_prune (on for r720-omv) deletes every image no container uses, so a
+# freshly built :latest that no guard adopts is gone by the next prune, and the
+# gateway can then spawn none of these servers. That is what happened on
+# 2026-10-04, when kittygram's build (lapis migrate) failed in the shared
+# stage and skipped the guard redeploy.
 [[procedure]]
 name = "rebuild-local-images"
 tags = ["builds"]
@@ -173,21 +179,31 @@ schedule_alert = false
 failure_alert = true
 
 [[procedure.config.stage]]
-name = "Build MCP images and kittygram"
+name = "Build MCP images"
 executions = [
   { execution.type = "RunBuild", execution.params.build = "mcpmqtt" },
   { execution.type = "RunBuild", execution.params.build = "mitmproxy-mcp" },
   { execution.type = "RunBuild", execution.params.build = "homebox-mcp" },
+]
+
+[[procedure.config.stage]]
+name = "Redeploy MCP prune guards"
+executions = [
+  # Re-points the *-guard containers at the new MCP images; the gateway
+  # itself is digest-pinned, so compose leaves it running untouched.
+  { execution.type = "DeployStack", execution.params.stack = "mcp-gateway" },
+]
+
+[[procedure.config.stage]]
+name = "Build kittygram"
+executions = [
   { execution.type = "RunBuild", execution.params.build = "kittygram" },
 ]
 
 [[procedure.config.stage]]
-name = "Redeploy kittygram and MCP prune guards"
+name = "Redeploy kittygram"
 executions = [
   { execution.type = "DeployStack", execution.params.stack = "kittygram" },
-  # Re-points the *-guard containers at the new MCP images; the gateway
-  # itself is digest-pinned, so compose leaves it running untouched.
-  { execution.type = "DeployStack", execution.params.stack = "mcp-gateway" },
 ]
 
 [[procedure.config.stage]]
