@@ -26,6 +26,17 @@
 #         same access policy) and runs it, instead of returning "Unknown tool".
 #         Benchmarks on 2026-09-15 showed gemma4:12b and qwen3.5:9b both call
 #         deferred tools directly first; qwen then gave up or invented answers.
+#   0003  local: skip MCP notifications/* frames when reading an SSE tool
+#         response; Home Assistant's ha_search sends a progress frame first,
+#         which parsed as an empty response ("outcome unknown").
+#   0004  local: Signal attachments (photos, voice notes) are fetched with
+#         signal-cli getAttachment into the message so [media_pipeline] can
+#         describe/transcribe them (v0.8.5 dropped them); local_whisper sends
+#         the upload as `audio_file` for whisper-asr-webservice /asr URLs.
+#   0005  local, on top of 0001: the deferred index is sorted, so the system
+#         prompt is identical across restarts and the model server can reuse
+#         its KV cache; ZEROCLAW_DEFERRED_SUMMARY_CHARS overrides the summary
+#         cap (0 = names only).
 #
 # Bump procedure: change the tag in compose additional_contexts AND the image
 # tag together, re-diff upstream Dockerfile.debian for stage changes, and check
@@ -212,7 +223,7 @@ COPY --from=builder /app/zerocode /usr/local/bin/zerocode
 COPY --from=builder /zeroclaw-data /zeroclaw-data
 COPY --from=web-builder /app/web/dist /usr/share/zeroclawlabs/web/dist
 
-LABEL org.opencontainers.image.description="ZeroClaw v0.8.5 debian + channel-signal + PR #10845 (local patch)"
+LABEL org.opencontainers.image.description="ZeroClaw v0.8.5 debian + channel-signal + local patches 0001-0005"
 
 ENV LANG=C.UTF-8
 ENV ZEROCLAW_DATA_DIR=/zeroclaw-data/data

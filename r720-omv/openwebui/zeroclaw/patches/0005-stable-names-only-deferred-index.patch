@@ -1,0 +1,83 @@
+From: Michal Gawronski-Kot <michal@gawronskikot.com>
+Subject: [PATCH] perf(mcp): stable, optionally names-only deferred tool index
+
+Local komodo_library patch on top of 0001 (not upstream). Deferred stubs
+arrive in MCP connect-completion order, which differs on every process
+start, so the ~35k-char index (308 tools) never matched the model server's
+cached prefix and every new turn re-prefilled ~20k tokens (~20 s on the RTX
+5000). The index is now sorted by prefixed name. The per-tool summary cap
+(0001's 200 chars) can be overridden with ZEROCLAW_DEFERRED_SUMMARY_CHARS;
+0 lists names only (~9.8k chars). tool_search still matches and returns the
+full descriptions and schemas.
+---
+--- a/crates/zeroclaw-tools/src/mcp_deferred.rs
++++ b/crates/zeroclaw-tools/src/mcp_deferred.rs
+@@ -261,6 +261,20 @@
+ /// Longest one-line summary the deferred index carries per tool, in chars.
+ const DEFERRED_SUMMARY_MAX_CHARS: usize = 200;
+ 
++/// Local patch 0005: the summary cap can be overridden with the
++/// `ZEROCLAW_DEFERRED_SUMMARY_CHARS` env var, read once per process. `0`
++/// lists names only (the description still drives `tool_search`), which
++/// keeps the index small enough for a 32k-context local model.
++fn deferred_summary_max_chars() -> usize {
++    static MAX: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
++    *MAX.get_or_init(|| {
++        std::env::var("ZEROCLAW_DEFERRED_SUMMARY_CHARS")
++            .ok()
++            .and_then(|v| v.trim().parse().ok())
++            .unwrap_or(DEFERRED_SUMMARY_MAX_CHARS)
++    })
++}
++
+ /// The one-line summary the index shows for a deferred tool: the first
+ /// non-empty line of its description, capped at
+ /// [`DEFERRED_SUMMARY_MAX_CHARS`] on a char boundary.
+@@ -272,15 +286,16 @@
+ /// of hundred deferred tools the bodies alone cost more context per turn than
+ /// every activated schema combined.
+ fn deferred_summary_line(description: &str) -> String {
++    let max_chars = deferred_summary_max_chars();
+     let line = description
+         .lines()
+         .map(str::trim)
+         .find(|l| !l.is_empty())
+         .unwrap_or("");
+-    if line.chars().count() <= DEFERRED_SUMMARY_MAX_CHARS {
++    if line.chars().count() <= max_chars {
+         return line.to_string();
+     }
+-    let mut cut: String = line.chars().take(DEFERRED_SUMMARY_MAX_CHARS).collect();
++    let mut cut: String = line.chars().take(max_chars).collect();
+     cut.push_str("...");
+     cut
+ }
+@@ -321,7 +336,13 @@
+     );
+     out.push_str("<available-deferred-tools>\n");
+     let mut count = 0;
+-    for stub in &deferred.stubs {
++    // Local patch 0005: stubs arrive in MCP connect-completion order, which
++    // differs on every process start; sorting keeps the system prompt
++    // byte-identical across restarts so the model server can reuse its KV
++    // cache for this (large) prefix.
++    let mut stubs: Vec<_> = deferred.stubs.iter().collect();
++    stubs.sort_by(|a, b| a.prefixed_name.cmp(&b.prefixed_name));
++    for stub in stubs {
+         if exclude.contains(&stub.prefixed_name) {
+             continue;
+         }
+@@ -331,8 +352,11 @@
+             continue;
+         }
+         out.push_str(&stub.prefixed_name);
+-        out.push_str(" - ");
+-        out.push_str(&deferred_summary_line(&stub.description));
++        let summary = deferred_summary_line(&stub.description);
++        if !summary.is_empty() && deferred_summary_max_chars() > 0 {
++            out.push_str(" - ");
++            out.push_str(&summary);
++        }
+         out.push('\n');
+         count += 1;
+     }

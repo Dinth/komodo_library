@@ -16,12 +16,23 @@ x-versions:
   # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream v0.8.5
   # tag via the in-repo wrapper at ./zeroclaw (Dockerfile + patches/), with the
   # dist feature set plus channel-signal (~40 min on omv). It carries the local
-  # patches in ./zeroclaw/patches: 0001 upstream PR #10845 (one summary line
-  # per deferred MCP tool); 0002 local (auto-activate a deferred MCP tool the
-  # model calls directly by name via tool_search). The image tag no longer
-  # encodes individual patches. Bump: change the tag in additional_contexts
-  # AND this image tag together, and check the patches still apply.
-  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-patched-debian"
+  # patches in ./zeroclaw/patches:
+  #   0001 upstream PR #10845: one <=200-char summary line per deferred MCP tool
+  #   0002 local: auto-activate a deferred MCP tool the model calls directly by
+  #        name (via tool_search)
+  #   0003 local: skip MCP notification frames when reading an SSE tool
+  #        response (HA ha_search failures)
+  #   0004 local: Signal photos/voice notes reach the media pipeline
+  #        (getAttachment); local_whisper sends `audio_file` for /asr URLs
+  #   0005 local: deferred tool index sorted (stable prompt -> Ollama KV-cache
+  #        reuse across turns) and ZEROCLAW_DEFERRED_SUMMARY_CHARS env
+  #        (0 = names only)
+  # The image tag MUST be bumped whenever patches/ or the Dockerfile change:
+  # with `pull_policy: never` compose reuses an existing local tag, so a
+  # Komodo Deploy would not rebuild. Upstream bump: change the tag in
+  # additional_contexts AND this image tag together, and check the patches
+  # still apply.
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p5-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
   zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27.5-alpine"
 
@@ -39,6 +50,11 @@ x-zeroclaw-common: &zeroclaw-common
     # openwebui's SEARXNG_QUERY_URL: the public router is behind Authelia
     # forward-auth. Requires the traefik network below to resolve `searxng`.
     SEARXNG_INSTANCE_URL: "http://searxng:8080"
+    # Read by local patch 0005. 0 = deferred MCP tools listed by name only
+    # (tool_search still returns full descriptions/schemas); with the sorted
+    # index: system prompt ~44k -> ~17k chars, Ollama reuses its prompt cache
+    # (2026-10-05: follow-up turns 17 s -> 2 s, HA question 57 s -> 11 s).
+    ZEROCLAW_DEFERRED_SUMMARY_CHARS: "0"
     # The gateway binds 127.0.0.1 by default and refuses a non-local bind
     # unless allow_public_bind is set. Both are still needed: the selector
     # reaches each instance over the docker network, not loopback. Nothing is

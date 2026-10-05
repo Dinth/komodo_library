@@ -1,0 +1,188 @@
+From: Michal Gawronski-Kot <michal@gawronskikot.com>
+Subject: [PATCH] feat(signal): deliver photos and voice notes to the media pipeline
+
+Local komodo_library patch on top of v0.8.5 (not upstream). The Signal
+channel always built ChannelMessage with `attachments: vec![]` and produced
+no message at all for a caption-less photo or voice note, so both were
+silently dropped. Attachments are now fetched from signal-cli
+(`getAttachment`, base64, <=20 MB each) into the first message, and an
+attachment-only envelope yields one empty-text message. The orchestrator's
+existing [media_pipeline] then inlines images for a vision model and
+transcribes audio. Voice notes (audio/aac) are named .m4a because the
+transcription path only accepts container extensions.
+
+Also: the local_whisper transcription provider sends the upload as
+`audio_file` when its URL path ends in /asr (whisper-asr-webservice) instead
+of `file` (whisper.cpp / OpenAI-style).
+---
+--- a/crates/zeroclaw-channels/src/signal.rs
++++ b/crates/zeroclaw-channels/src/signal.rs
+@@ -469,12 +469,21 @@
+                 Vec::new()
+             }
+         } else {
+-            data_msg
++            let text = data_msg
+                 .message
+                 .as_deref()
+                 .filter(|t| !t.is_empty())
+                 .map(|t| vec![t.to_string()])
+-                .unwrap_or_default()
++                .unwrap_or_default();
++            // Local patch 0004: an attachment-only message (photo or voice
++            // note without a caption) still yields one message so the media
++            // pipeline can annotate it; `hydrate_attachments` fills the bytes.
++            let has_attachments = data_msg.attachments.as_ref().is_some_and(|a| !a.is_empty());
++            if text.is_empty() && has_attachments && !self.ignore_attachments {
++                vec![String::new()]
++            } else {
++                text
++            }
+         };
+         contents
+             .into_iter()
+@@ -511,6 +520,93 @@
+             })
+             .collect()
+     }
++    /// Local patch 0004: download the envelope's attachments from signal-cli
++    /// (`getAttachment`, base64) into the first message so the orchestrator's
++    /// media pipeline can transcribe audio and pass images to a vision model.
++    /// Upstream v0.8.5 always sent `attachments: vec![]`, silently dropping
++    /// photos and voice notes. Failures are logged and skipped; the text part
++    /// of the message is still delivered.
++    async fn hydrate_attachments(&self, envelope: &Envelope, messages: &mut [ChannelMessage]) {
++        const MAX_ATTACHMENT_BYTES: u64 = 20 * 1024 * 1024;
++        if self.ignore_attachments {
++            return;
++        }
++        let Some(first) = messages.first_mut() else {
++            return;
++        };
++        let Some(items) = envelope
++            .data_message
++            .as_ref()
++            .and_then(|d| d.attachments.as_ref())
++        else {
++            return;
++        };
++        for item in items {
++            let Some(id) = item.get("id").and_then(|v| v.as_str()) else {
++                continue;
++            };
++            let size = item.get("size").and_then(serde_json::Value::as_u64).unwrap_or(0);
++            if size > MAX_ATTACHMENT_BYTES {
++                ::zeroclaw_log::record!(
++                    WARN,
++                    ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Reject)
++                        .with_attrs(::serde_json::json!({"id": id, "size": size})),
++                    "Signal attachment too large, skipped"
++                );
++                continue;
++            }
++            let mime = item
++                .get("contentType")
++                .and_then(|v| v.as_str())
++                .map(str::to_string);
++            let data = match self
++                .rpc_request("getAttachment", serde_json::json!({ "id": id }))
++                .await
++            {
++                Ok(Some(result)) => {
++                    let b64 = result
++                        .get("data")
++                        .and_then(|v| v.as_str())
++                        .or_else(|| result.as_str())
++                        .unwrap_or_default();
++                    match base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64) {
++                        Ok(bytes) if !bytes.is_empty() => bytes,
++                        _ => continue,
++                    }
++                }
++                Ok(None) => continue,
++                Err(e) => {
++                    ::zeroclaw_log::record!(
++                        WARN,
++                        ::zeroclaw_log::Event::new(module_path!(), ::zeroclaw_log::Action::Note)
++                            .with_outcome(::zeroclaw_log::EventOutcome::Failure)
++                            .with_attrs(::serde_json::json!({"id": id, "error": format!("{e}")})),
++                        "Signal getAttachment failed"
++                    );
++                    continue;
++                }
++            };
++            // Signal voice notes are AAC; the transcription path only accepts
++            // container extensions, and ffmpeg on the whisper side probes the
++            // content anyway, so present them as .m4a.
++            let file_name = match mime.as_deref() {
++                Some("audio/aac" | "audio/mp4" | "audio/x-m4a") => format!("{id}.m4a"),
++                _ => item
++                    .get("filename")
++                    .and_then(|v| v.as_str())
++                    .filter(|f| !f.is_empty())
++                    .unwrap_or(id)
++                    .to_string(),
++            };
++            first.attachments.push(zeroclaw_api::media::MediaAttachment {
++                file_name,
++                data,
++                mime_type: mime,
++                marker: None,
++            });
++        }
++    }
++
+     fn random_id_suffix() -> String {
+         use rand::RngExt;
+         const CHARSET: &[u8] = b"0123456789abcdef";
+@@ -744,7 +840,8 @@
+                                 Ok(sse) => {
+                                     if let Some(ref envelope) = sse.envelope {
+                                         let mut consumed_as_approval = false;
+-                                        let messages = self.process_envelope(envelope);
++                                        let mut messages = self.process_envelope(envelope);
++                                        self.hydrate_attachments(envelope, &mut messages).await;
+                                         for msg in messages {
+                                             if let Some((token, response)) =
+                                                 crate::util::parse_approval_reply(&msg.content)
+@@ -796,7 +893,9 @@
+                 match serde_json::from_str::<SseEnvelope>(&current_data) {
+                     Ok(sse) => {
+                         if let Some(ref envelope) = sse.envelope {
+-                            for msg in self.process_envelope(envelope) {
++                            let mut messages = self.process_envelope(envelope);
++                            self.hydrate_attachments(envelope, &mut messages).await;
++                            for msg in messages {
+                                 if let Some((token, response)) =
+                                     crate::util::parse_approval_reply(&msg.content)
+                                 {
+--- a/crates/zeroclaw-channels/src/transcription.rs
++++ b/crates/zeroclaw-channels/src/transcription.rs
+@@ -897,8 +897,12 @@
+             req = req.bearer_auth(token);
+         }
+ 
++        // Local patch 0004: whisper-asr-webservice (`POST /asr?output=json`)
++        // takes the upload as `audio_file`; whisper.cpp and OpenAI-style
++        // servers take `file`.
++        let field = if url_path_is_asr(&self.url) { "audio_file" } else { "file" };
+         let resp = req
+-            .multipart(Form::new().part("file", file_part))
++            .multipart(Form::new().part(field, file_part))
+             .timeout(std::time::Duration::from_secs(self.timeout_secs))
+             .send()
+             .await
+@@ -908,6 +912,13 @@
+     }
+ }
+ 
++/// Local patch 0004: true when the endpoint path ends in `/asr`
++/// (whisper-asr-webservice), ignoring any query string.
++fn url_path_is_asr(url: &str) -> bool {
++    let path = url.split(['?', '#']).next().unwrap_or(url);
++    path.trim_end_matches('/').ends_with("/asr")
++}
++
+ // ── Shared response parsing ─────────────────────────────────────
+ 
+ async fn parse_whisper_response(resp: reqwest::Response) -> Result<String> {
