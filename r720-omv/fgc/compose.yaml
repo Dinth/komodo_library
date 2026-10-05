@@ -2,7 +2,7 @@ x-versions:
   # Python remaster (nodriver + stealth CDP) — replaces feldorn/free-games-claimer
   # (Playwright), which was getting captcha-walled at Epic checkout. Public ghcr
   # image, so this stays pull-based (WUD-watchable); `build:` fallback not needed.
-  fgc: &fgc-version "ghcr.io/p-adamiec/free-games-claimer-remaster:v1.9"
+  fgc: &fgc-version "ghcr.io/p-adamiec/free-games-claimer-remaster:v1.11"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -18,14 +18,19 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    # Still root (the image has no USER and the data dir is root-owned), but
-    # with no capabilities: the entrypoint never switches users, Chrome runs
-    # with sandbox=False (no namespaces/setuid) and VNC listens above 1024.
-    # A non-root `user:` would also need remaster_data re-owned.
+    # The entrypoint starts as root only to hand /fgc/data to PUID:PGID and
+    # switch user (setpriv); these three caps are what that switch needs, and
+    # without them it silently stays root. After setpriv the bot, Chrome and
+    # VNC run as DOCKER_PUID with no capabilities. No `user:` key: upstream
+    # needs root at entry (a container-level user breaks VNC/session saving).
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
     mem_limit: 4G
     healthcheck:
       test: pgrep python3 && curl --fail http://localhost:7080 || exit 1
@@ -42,6 +47,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       TZ: "${TZ}"
+      # --- User (entrypoint drops to these via setpriv) ---
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
       # --- Display / VNC ---
       SHOW: "1" # keep browser visible so captchas can be hand-solved via noVNC
       NOVNC_PORT: "7080"
@@ -63,11 +71,17 @@ services:
       SCHEDULER_TIMEZONE: "Europe/London"
       SCHEDULER_FIXED_TIMES: "09:00,17:00"
       # --- Store selection ---
-      # Microsoft Rewards is NOT supported by the remaster (dropped from feldorn).
+      # microsoft (v1.10) redeems Prime's Microsoft codes and claims paid
+      # MS Store/Xbox games while they are free to keep.
       # aliexpress = daily coin check-in (not a game store). It has no TOTP
       # option: AliExpress' e-mailed 6-digit code or captcha is handed to VNC,
       # normally once per browser profile.
-      STORES: "epic,gog,prime,aliexpress,itchio,steam,ubisoft"
+      # fanatical's Steam keys are activated on the Steam account at the end
+      # of the run because steam is in STORES (v1.11; upstream: not yet tested
+      # end to end).
+      # indiegala has no 2FA support; its login captcha is ticked over VNC,
+      # ~every 14 days and only when a giveaway exists.
+      STORES: "epic,gog,prime,microsoft,aliexpress,itchio,fanatical,indiegala,steam,ubisoft"
       # --- Common credentials (fallback for per-store overrides) ---
       # No common PASSWORD: every store below sets its own.
       EMAIL: "${ADMIN_EMAIL}"
@@ -82,7 +96,7 @@ services:
       # --- Prime Gaming (Amazon) ---
       PG_EMAIL: "${ADMIN_EMAIL}"
       PG_PASSWORD: "${FGC_PG_PASS}"
-      PG_REDEEM: "1"
+      # No PG_REDEEM (gone in v1.10): codes redeem if gog/microsoft in STORES.
       # --- AliExpress ---
       # AE_MIN_COINS / AE_FLAG_* / AE_PAGE_RETRIES left at upstream defaults.
       AE_EMAIL: "${ADMIN_EMAIL}"
@@ -101,6 +115,19 @@ services:
       UBI_PASSWORD: "${FGC_UBI_PASS}"
       # TOTP secret; empty until the Ubisoft account has an authenticator.
       UBI_OTP_KEY: "${FGC_UBI_OTP_KEY:-}"
+      # --- Microsoft Store / Xbox ---
+      MS_EMAIL: "${FGC_MS_EMAIL}"
+      MS_PASSWORD: "${FGC_MS_PASS}"
+      # TOTP secret; empty unless the account uses an authenticator app
+      # (e-mail codes and passkeys are handed to VNC).
+      MS_OTP_KEY: "${FGC_MS_OTP_KEY:-}"
+      # --- Fanatical (GamerPower finds; keys activated on Steam) ---
+      FANATICAL_EMAIL: "${ADMIN_EMAIL}"
+      FANATICAL_PASSWORD: "${FGC_FANATICAL_PASS}"
+      # No FANATICAL_OTP_KEY upstream (v1.11): its 2FA code is typed over VNC.
+      # --- IndieGala (GamerPower finds, claimed into the IndieGala library) ---
+      INDIEGALA_EMAIL: "${ADMIN_EMAIL}"
+      INDIEGALA_PASSWORD: "${FGC_INDIEGALA_PASS}"
       # --- Notifications (apprise) ---
       # Apprise's Signal plugin, straight to signal-cli-rest-api (same bot and
       # tech recipient as WUD's update notifications).
