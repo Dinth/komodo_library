@@ -85,7 +85,7 @@ services:
       # Break-glass if Authelia is down: set "false", redeploy, then
       # `docker exec healthlog node scripts/reset-password.mjs <user>` for
       # SSO-provisioned accounts (they have no password).
-      OIDC_ONLY: "false"
+      OIDC_ONLY: "true"
 
       # --- Web Push (PWA + desktop browsers; no Apple account needed).
       # The admin panel can also mint a pair into the DB, which takes precedence
