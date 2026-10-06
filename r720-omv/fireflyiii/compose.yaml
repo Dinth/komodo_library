@@ -333,9 +333,15 @@ services:
       FIREFLY_URL: "http://fireflyiii:8080"
       # Same compose network, so the token never leaves the host and Traefik
       # is not in the path.
-      MCP_PRESET: "default"
+      MCP_GROUPS: "accounts,transactions,budgets,categories,bills,reports"
       # Not cosmetic: the image ships ~140 tools in 14 groups and loading all
       # of them floods a client's context before any work starts.
+      # = the `default` preset plus `reports` (MCP_PRESET would override
+      # MCP_GROUPS, so it must stay unset). Added 2026-10-05: ZeroClaw's local
+      # model could not answer "groceries spend in September" - each
+      # transaction is ~3.5k chars of JSON, a month overran the client's
+      # tool-result cap and it summed a truncated list. get_insight_expenses
+      # returns the per-category totals directly.
       HOME: "/tmp"
       NODE_ENV: "production"
     tmpfs:

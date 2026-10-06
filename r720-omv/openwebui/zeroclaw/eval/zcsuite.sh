@@ -70,8 +70,8 @@ start_proxy() {
 make_test_config() {
   docker exec "$INSTANCE" sh -c '
     rm -rf /tmp/zct && mkdir -p /tmp/zct &&
-    cp -a /zeroclaw-data/.zeroclaw/config.toml /zeroclaw-data/.zeroclaw/.secret_key \
-          /zeroclaw-data/.zeroclaw/agents /tmp/zct/ &&
+    cp -a /zeroclaw-data/.zeroclaw/config.toml /zeroclaw-data/.zeroclaw/agents /tmp/zct/ &&
+    { [ ! -e /zeroclaw-data/.zeroclaw/.secret_key ] || cp -a /zeroclaw-data/.zeroclaw/.secret_key /tmp/zct/; } &&
     sed -i "s#^uri = \"http://ollama:11434\"#uri = \"http://zc-proxy:8080\"#" /tmp/zct/config.toml &&
     grep -q "zc-proxy" /tmp/zct/config.toml'
 }
