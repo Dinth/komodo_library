@@ -1,5 +1,5 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.40.5"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.41.1"
   # Upstream bundles and tests against postgres:16; 18 is used here to match
   # the rest of the repo. HealthLog needs no extensions, so nothing in its
   # schema depends on the 16 major.
@@ -102,9 +102,13 @@ services:
       # Covers per-user and admin endpoints. The deprecated
       # ALLOW_LOCAL_AI_PRIVATE_HOSTS is superseded by this and left unset.
       # gemma4 reasons by default and eats HealthLog's small per-feature token
-      # budgets ("Local AI returned empty content" / timeouts): set Settings ->
-      # AI -> Reasoning to "Off" for EVERY user (per-user since 1.40, upstream
-      # #1126; replaced a local start-time patch).
+      # budgets ("Local AI returned empty content" / timeouts), so Settings ->
+      # AI -> Reasoning stays "Off" for EVERY user (upstream #1126). Since 1.41
+      # that only governs calls without their own level (status cards, document
+      # reads, lab scans). The Coach (per-user Coach settings, default Medium),
+      # briefings, summaries and memory jobs send their own level and get the
+      # thinking budget ON TOP of the answer budget, so they can reason safely.
+      # Admin -> Assistant can switch reasoning off or cap it for everyone.
       AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
       # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
       ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
