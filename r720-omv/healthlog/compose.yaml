@@ -108,6 +108,11 @@ services:
       AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
       # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
       ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
+      # Lab-report scans per account per rolling hour (upstream default 6,
+      # clamped 1-1000). The cap exists to bound paid-provider spend; scans here
+      # run on the local Ollama, so 6 only got in the way of entering a batch of
+      # results ("Too many scans, try again later"). Excess load just queues.
+      LABS_OCR_LIMIT_PER_HOUR: "30"
 
       # --- Private webhook targets. The Webhook channel posts generic JSON
       # (title/message/eventType/priority) - fine for a Home Assistant webhook
