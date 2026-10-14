@@ -104,6 +104,10 @@ services:
       # --- Prime Gaming (Amazon) ---
       PG_EMAIL: "${ADMIN_EMAIL}"
       PG_PASSWORD: "${FGC_PG_PASS}"
+      # Amazon 2-Step Verification authenticator secret; empty = Amazon's
+      # security-code prompts are answered over VNC. The bot ticks "don't ask
+      # again on this browser" after a code. Amazon issues no recovery codes.
+      PG_OTP_KEY: "${FGC_PG_OTP_KEY:-}"
       # No PG_REDEEM (gone in v1.10): codes redeem if gog/microsoft in STORES.
       # --- Legacy Games (Prime's Legacy Games codes; newsletter left unticked) ---
       LG_EMAIL: "${ADMIN_EMAIL}"
