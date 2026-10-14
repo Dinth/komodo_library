@@ -2,7 +2,7 @@ x-versions:
   influxdb: &influxdb-version "influxdb:2.9.1-alpine"
   telegraf-version: &telegraf-version "telegraf:1.40-alpine"
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
-  unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v5.5.0"
+  unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v5.5.1"
 
 services:
   # Read-only Docker API for telegraf's docker input (per-container health
