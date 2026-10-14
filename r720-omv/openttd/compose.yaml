@@ -45,7 +45,7 @@ services:
       TZ: ${TZ}
       XDG_CONFIG_HOME: /config
       XDG_DATA_HOME: /data
-      OPENTTD_SERVER_NAME: "Server Loading NEXT"
+      OPENTTD_SERVER_NAME: "Loading NEXT unofficial OpenTTD server"
       OPENTTD_SERVER_PASSWORD: ${OPENTTD_SERVER_PASSWORD}
       OPENTTD_RCON_PASSWORD: ${OPENTTD_RCON_PASSWORD}
     ports:
