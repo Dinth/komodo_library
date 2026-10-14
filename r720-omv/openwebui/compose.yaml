@@ -1,6 +1,6 @@
 x-versions:
   ollama: &ollama-version "ollama/ollama:0.34.3"
-  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.11.4"
+  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.12.0"
   # No version tags upstream (latest/main/nightly only): pinned by digest.
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest@sha256:3dd32882666cf0e77272086446b5639c636fb090ac9ea629c11874200c629164"
   # latest-cuda resolved to this tag and has not moved since 2024-09 (ai-dock
