@@ -15,6 +15,11 @@ services:
     hostname: openttd
     ipc: private
     restart: unless-stopped
+    # The image's /openttd.sh runs as root and chowns /home/openttd (1001:1001
+    # 0750) to PUID: impossible under cap_drop ALL, so it silently generated a
+    # new map and every save failed. Run the binary directly as the data owner
+    # and point OpenTTD's XDG dirs at the bind mounts instead.
+    user: "1002:100"
     entrypoint:
       - /usr/bin/dumb-init
       - --rewrite
@@ -22,37 +27,46 @@ services:
       - --rewrite
       - "9:3"
       - --
+    # defaults/start.sh: applies defaults/openttd.cfg + env secrets, then loads
+    # the newest autosave/exit.sav or generates a new game. The cfg is copied
+    # at START: after changing it, Restart the stack (a no-op Redeploy won't).
     command:
-      - /openttd.sh
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
+      - /bin/sh
+      - /defaults/start.sh
+    stdin_open: true  # `docker attach openttd` = server console; detach Ctrl-P Ctrl-Q
+    tty: true
+    stop_grace_period: 30s  # time to write exit.sav
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     mem_limit: 512M
     environment:
-      DEBUG: "1"
-      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      PGID: "100"
-      PUID: "1002"
-      loadgame: last-autosave
+      TZ: ${TZ}
+      XDG_CONFIG_HOME: /config
+      XDG_DATA_HOME: /data
+      OPENTTD_SERVER_NAME: "Server Loading NEXT"
+      OPENTTD_SERVER_PASSWORD: ${OPENTTD_SERVER_PASSWORD}
+      OPENTTD_RCON_PASSWORD: ${OPENTTD_RCON_PASSWORD}
     ports:
-      - 3978:3978/tcp
-      - 3978:3978/udp
+      # OpenTTD 15 game port (3978 is the retired master-server port)
       - 3979:3979/tcp
       - 3979:3979/udp
     volumes:
-      - /opt/docker/openttd/openttd_config:/home/openttd/.config/openttd
-      - /opt/docker/openttd/openttd_save:/home/openttd/.openttd/save
-      - /opt/docker/openttd/openttd_data:/home/openttd/.local/share/openttd
+      - /etc/localtime:/etc/localtime:ro
+      - ./defaults:/defaults:ro
+      - /opt/docker/openttd/openttd_config:/config/openttd
+      - /opt/docker/openttd/openttd_data:/data/openttd
     networks:
       - openttd
     logging: *default-logging
     labels:
-      wud.watch: "false"
+      # Notify only: every client must run the exact server version, so bump
+      # deliberately and tell players to update.
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+$$'
+      wud.display.name: "OpenTTD"
+      wud.link.template: 'https://github.com/OpenTTD/OpenTTD/releases/tag/$${major}.$${minor}'
 
 networks:
   openttd:

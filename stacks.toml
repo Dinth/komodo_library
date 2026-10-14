@@ -1113,9 +1113,9 @@ OMNIVORE_JWT_SECRET=[[OMNIVORE_JWT_SECRET]]
 [[stack]]
 name = "openttd"
 description = """
-OpenTTD dedicated game server.
-Game: 10.10.1.13:3978 (TCP/UDP)
-Admin port: 10.10.1.13:3979"""
+OpenTTD dedicated game server (public list).
+Game: 10.10.1.13:3979 (TCP/UDP)
+Console: docker attach openttd"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1123,6 +1123,11 @@ poll_for_updates = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/openttd"
+environment = """
+TZ=[[TZ]]
+OPENTTD_SERVER_PASSWORD=[[OPENTTD_SERVER_PASSWORD]]
+OPENTTD_RCON_PASSWORD=[[OPENTTD_RCON_PASSWORD]]
+"""
 
 ##
 
