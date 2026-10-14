@@ -87,7 +87,9 @@ services:
       # end to end).
       # indiegala has no 2FA support; its login captcha is ticked over VNC,
       # ~every 14 days and only when a giveaway exists.
-      STORES: "epic,gog,prime,microsoft,aliexpress,itchio,fanatical,indiegala,steam,ubisoft"
+      # legacy (v1.13) redeems Prime's Legacy Games codes, which expire within
+      # days; it only runs with LG_EMAIL/LG_PASSWORD set.
+      STORES: "epic,gog,prime,microsoft,aliexpress,itchio,fanatical,indiegala,steam,ubisoft,legacy"
       # --- Common credentials (fallback for per-store overrides) ---
       # No common PASSWORD: every store below sets its own.
       EMAIL: "${ADMIN_EMAIL}"
@@ -103,6 +105,9 @@ services:
       PG_EMAIL: "${ADMIN_EMAIL}"
       PG_PASSWORD: "${FGC_PG_PASS}"
       # No PG_REDEEM (gone in v1.10): codes redeem if gog/microsoft in STORES.
+      # --- Legacy Games (Prime's Legacy Games codes; newsletter left unticked) ---
+      LG_EMAIL: "${ADMIN_EMAIL}"
+      LG_PASSWORD: "${FGC_LG_PASS}"
       # --- AliExpress ---
       # AE_MIN_COINS / AE_FLAG_* / AE_PAGE_RETRIES left at upstream defaults.
       AE_EMAIL: "${ADMIN_EMAIL}"
