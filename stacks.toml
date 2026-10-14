@@ -464,6 +464,9 @@ FGC_MS_EMAIL=[[FGC_MS_EMAIL]]
 FGC_MS_PASS=[[FGC_MS_PASS]]
 FGC_FANATICAL_PASS=[[FGC_FANATICAL_PASS]]
 FGC_INDIEGALA_PASS=[[FGC_INDIEGALA_PASS]]
+FGC_LG_PASS=[[FGC_LG_PASS]]
+FGC_FANATICAL_OTP_KEY=[[FGC_FANATICAL_OTP_KEY]]
+FGC_PG_OTP_KEY=[[FGC_PG_OTP_KEY]]
 """
 
 ##
@@ -1095,8 +1098,7 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 
 [[stack]]
 name = "omnivore"
-description = """
-RETIRED: Komodo record only, r720-omv/omnivore no longer exists in the repo."""
+description = "RETIRED: Komodo record only, r720-omv/omnivore no longer exists in the repo."
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1401,8 +1403,7 @@ SECOPS_MISP_ADMIN_PASSWORD=[[SECOPS_MISP_ADMIN_PASSWORD]]
 
 [[stack]]
 name = "semaphore"
-description = """
-RETIRED: Komodo record only, r720-omv/semaphore no longer exists in the repo."""
+description = "RETIRED: Komodo record only, r720-omv/semaphore no longer exists in the repo."
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
