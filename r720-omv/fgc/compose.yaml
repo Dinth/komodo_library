@@ -135,7 +135,9 @@ services:
       # --- Fanatical (GamerPower finds; keys activated on Steam) ---
       FANATICAL_EMAIL: "${ADMIN_EMAIL}"
       FANATICAL_PASSWORD: "${FGC_FANATICAL_PASS}"
-      # No FANATICAL_OTP_KEY upstream (v1.11): its 2FA code is typed over VNC.
+      # TOTP secret (v1.12+, upstream #75); empty = the 2FA code is typed over
+      # VNC. Fanatical issues no recovery codes, so this is the only bypass.
+      FANATICAL_OTP_KEY: "${FGC_FANATICAL_OTP_KEY:-}"
       # --- IndieGala (GamerPower finds, claimed into the IndieGala library) ---
       INDIEGALA_EMAIL: "${ADMIN_EMAIL}"
       INDIEGALA_PASSWORD: "${FGC_INDIEGALA_PASS}"
