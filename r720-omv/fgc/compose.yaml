@@ -2,7 +2,7 @@ x-versions:
   # Python remaster (nodriver + stealth CDP) — replaces feldorn/free-games-claimer
   # (Playwright), which was getting captcha-walled at Epic checkout. Public ghcr
   # image, so this stays pull-based (WUD-watchable); `build:` fallback not needed.
-  fgc: &fgc-version "ghcr.io/p-adamiec/free-games-claimer-remaster:v1.11"
+  fgc: &fgc-version "ghcr.io/p-adamiec/free-games-claimer-remaster:v1.14"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -32,6 +32,12 @@ services:
       - SETUID
       - SETGID
     mem_limit: 4G
+    # v1.12+: upstream supports a read-only root. The entrypoint no longer
+    # writes a user into /etc and keeps the home folder in /tmp, so only the
+    # data bind and this tmpfs are written (the tmpfs counts against mem_limit).
+    read_only: true
+    tmpfs:
+      - /tmp
     healthcheck:
       test: pgrep python3 && curl --fail http://localhost:7080 || exit 1
       interval: 30s
