@@ -1,6 +1,6 @@
 x-versions:
-  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v3.2.4"
-  immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v3.2.4-cuda"
+  immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v3.3.1"
+  immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v3.3.1-cuda"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   postgres: &postgres-version "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.3.0"
 
@@ -94,6 +94,10 @@ services:
               device_ids: ["GPU-993cb9a5-03ef-b0c5-0a88-db2d62ecd361"]
               capabilities:
                 - gpu
+    environment:
+      # Optimised re-exports of the same models (v3.3.0+): faster, less VRAM,
+      # numerically equivalent outputs, so no jobs need re-running.
+      MACHINE_LEARNING_MODEL_REVISION: "v2"
     healthcheck:
       disable: false
     volumes:
