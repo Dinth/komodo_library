@@ -1,8 +1,8 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.41.1"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.42.2"
   # Upstream bundles and tests against postgres:16; 18 is used here to match
-  # the rest of the repo. HealthLog needs no extensions, so nothing in its
-  # schema depends on the 16 major.
+  # the rest of the repo. HealthLog's schema needs no extensions, so nothing in
+  # it depends on the 16 major (pg_stat_statements below is diagnostics only).
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
@@ -215,6 +215,20 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 1G
+    # 1.42.1+: Docker's default 64M /dev/shm makes parallel queries and the
+    # Admin -> System status maintenance run (which hands back the space freed
+    # by 1.42's condensed-sample cleanup) fail with "could not resize shared
+    # memory segment". Upstream's value; it counts against mem_limit.
+    shm_size: 256mb
+    # Upstream's 1.42 compose: collect per-query stats so slow queries can be
+    # measured. The view appears only after a one-time
+    # `CREATE EXTENSION pg_stat_statements;` in the healthlog DB.
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=top
     environment:
       TZ: "${TZ}"
       POSTGRES_DB: "healthlog"
