@@ -27,12 +27,15 @@ x-versions:
   #   0005 local: deferred tool index sorted (stable prompt -> Ollama KV-cache
   #        reuse across turns) and ZEROCLAW_DEFERRED_SUMMARY_CHARS env
   #        (0 = names only)
+  #   0006 backport of upstream #10914 + #11479: decode an array/object
+  #        argument the model sent as a JSON string, where the tool schema
+  #        declares it (HealthLog get_metrics -32602); drop at v0.8.6+
   # The image tag MUST be bumped whenever patches/ or the Dockerfile change:
   # with `pull_policy: never` compose reuses an existing local tag, so a
   # Komodo Deploy would not rebuild. Upstream bump: change the tag in
   # additional_contexts AND this image tag together, and check the patches
   # still apply.
-  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p5-debian"
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p6-debian"
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
   zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27.5-alpine"
 

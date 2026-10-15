@@ -37,6 +37,11 @@
 #         prompt is identical across restarts and the model server can reuse
 #         its KV cache; ZEROCLAW_DEFERRED_SUMMARY_CHARS overrides the summary
 #         cap (0 = names only).
+#   0006  backport of upstream #10914 + #11479 (merged after v0.8.5): an
+#         array/object argument sent as a JSON-encoded string is decoded
+#         where the tool's schema declares that type (gemma4 sent
+#         {"metrics":"[\"weight\"]"} and HealthLog answered -32602), for
+#         native and text-parsed calls. Drop it at v0.8.6+.
 #
 # Bump procedure: change the tag in compose additional_contexts AND the image
 # tag together, re-diff upstream Dockerfile.debian for stage changes, and check
@@ -223,7 +228,7 @@ COPY --from=builder /app/zerocode /usr/local/bin/zerocode
 COPY --from=builder /zeroclaw-data /zeroclaw-data
 COPY --from=web-builder /app/web/dist /usr/share/zeroclawlabs/web/dist
 
-LABEL org.opencontainers.image.description="ZeroClaw v0.8.5 debian + channel-signal + local patches 0001-0005"
+LABEL org.opencontainers.image.description="ZeroClaw v0.8.5 debian + channel-signal + local patches 0001-0006"
 
 ENV LANG=C.UTF-8
 ENV ZEROCLAW_DATA_DIR=/zeroclaw-data/data
