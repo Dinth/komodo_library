@@ -1,9 +1,11 @@
 x-versions:
-  # Pinned by digest, not a version tag: upstream builds :latest from master
-  # ahead of its CalVer tags (v2025.6.6 is the newest tag but :latest is a
-  # newer build), so a version pin would be a downgrade. WUD digest-watches
-  # :latest; bump by replacing the digest.
-  pinchflat: &pinchflat-version "ghcr.io/kieraneglin/pinchflat:latest@sha256:01b4f98aabaf3f5fe394213f7a32578c9e84e42080f52e2f8334021a4473b202"
+  # Pinchflat-ngx fork (TheBadFella), a strict superset of upstream
+  # kieraneglin/pinchflat (upstream dormant since Dec 2025). The fork publishes
+  # real CalVer tags on GHCR (YYYY.M.D, no `v` prefix), so we pin a version
+  # tag. SQLite image, NOT the `-postgres` variant.
+  # First start runs one-way schema migrations on /config: rollback = restore
+  # the pre-migration config backup + the old upstream image.
+  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.10.15"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -41,6 +43,8 @@ services:
     mem_limit: 2G
     environment:
       TZ: "${TZ}"
+      # Fork defaults to debug, which floods Loki.
+      LOG_LEVEL: "info"
     ports:
       - '8945:8945'
     volumes:
@@ -51,11 +55,10 @@ services:
     logging: *default-logging
     labels:
       wud.watch: 'true'
-      wud.watch.digest: 'true'
       wud.display.icon: 'sh-pinchflat'
-      wud.display.name: 'Pinchflat'
-      wud.tag.include: '^latest$$'
-      wud.link.template: "https://github.com/kieraneglin/pinchflat/commits/master"
+      wud.display.name: 'Pinchflat-ngx'
+      wud.tag.include: '^\d{4}\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/TheBadFella/pinchflat-ngx/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   pinchflat:
