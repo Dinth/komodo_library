@@ -127,11 +127,84 @@ services:
       wud.display.name: "Frigate"
       wud.display.icon: "mdi:cctv"
 
+  frigate-signal-feedback:
+    # HA decides when to alert and POSTs here; this sends the event snapshot to
+    # Signal and turns emoji reactions into Frigate+ submissions. It has to do
+    # the sending itself (not HA's notify.signal_messenger): a reaction only
+    # carries the target message's sent-timestamp, so the timestamp -> event id
+    # map must be recorded at send time.
+    #
+    # Built locally (same pattern as fireflyiii-signal-shim): image: pins the
+    # local tag, pull_policy:never keeps the stack-wide `compose pull` from
+    # failing on a non-registry image.
+    build:
+      context: ./signal-feedback
+      dockerfile: Dockerfile
+    image: frigate-signal-feedback:latest
+    pull_policy: never
+    container_name: frigate-signal-feedback
+    hostname: frigate-signal-feedback
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64M
+    environment:
+      TZ: "${TZ}"
+      SIGNAL_API: "http://signal-rest-api:8080"
+      # The dedicated bot account, NOT SIGNAL_PHONE_NUMBER (michal's personal
+      # account). It must be a member of the group below to receive reactions.
+      SIGNAL_NUMBER: "${SIGNAL_BOT_NUMBER}"
+      # "Wickhay HA Bot" group, in signal-cli-rest-api's group.<base64> form.
+      SIGNAL_RECIPIENT: "${SIGNAL_HA_ID}"
+      # Straight over the frigate network rather than via Traefik's :5000.
+      FRIGATE_API: "http://frigate:5000/api"
+      # Shared secret with HA (Authorization: Bearer ...).
+      NOTIFY_TOKEN: "${FRIGATE_FEEDBACK_TOKEN}"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # SQLite map of Signal sent-timestamp -> Frigate event id.
+      - /opt/docker/frigate/signal-feedback/data:/data
+    networks:
+      - frigate
+      - signal-rest-api
+      - traefik
+    healthcheck:
+      # python:slim has no curl.
+      test:
+        - "CMD-SHELL"
+        - "python -c \"import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/feedback/health')\""
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    labels:
+      # Piggybacks on frigate's :5000 entrypoint so HA reaches it at
+      # http://10.10.1.13:5000/feedback/... without a new Traefik entrypoint.
+      # Frigate's API has no /feedback path; the explicit priority beats the
+      # frigate-api PathPrefix(`/`) catch-all (default priority = rule length).
+      traefik.enable: "true"
+      traefik.http.routers.frigate-feedback.entrypoints: "frigateapi"
+      traefik.http.routers.frigate-feedback.rule: "PathPrefix(`/feedback`)"
+      traefik.http.routers.frigate-feedback.priority: "100"
+      traefik.http.routers.frigate-feedback.middlewares: "trusted-allowlist@docker"
+      traefik.http.routers.frigate-feedback.service: "frigate-feedback"
+      traefik.http.services.frigate-feedback.loadbalancer.server.port: "8080"
+      traefik.docker.network: "traefik"
+      autoheal: "true"
+      wud.watch: "false"
+
 
 networks:
   frigate:
     name: frigate
     driver: bridge
     external: false
+  signal-rest-api:
+    external: true
   traefik:
     external: true
