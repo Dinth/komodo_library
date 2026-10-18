@@ -65,7 +65,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    mem_limit: 2G
     command: ["-config.file=/etc/loki/local-config.yml"]
     environment:
       TZ: "${TZ}"
