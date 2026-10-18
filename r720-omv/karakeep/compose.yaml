@@ -1,7 +1,7 @@
 x-versions:
-  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.33.2"
+  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.34.0"
   meilisearch: &meilisearch-version "getmeili/meilisearch:v1.53.1"
-  chrome: &chrome-version "zenika/alpine-chrome:124"
+  chrome: &chrome-version "ghcr.io/karakeep-app/karakeep-chrome:154.0.8037.57-r1"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -19,17 +19,19 @@ services:
     # ollama.generate() call in the stock image before /init. Ollama accepts
     # think:false on non-reasoning models too. Idempotent across restarts; on
     # an anchor miss it logs a WARNING and starts unpatched.
+    # Since 0.34.0 the workers lazy-load each worker, so the call lives in a
+    # code-split chunk under dist/ rather than index.js - search all of dist.
     # Revert: delete this entrypoint block.
     entrypoint:
       - /bin/sh
       - -c
       - |
-        f=/app/apps/workers/dist/index.js
-        if grep -qF 'this.ollama.generate({think:false,' "$$f"; then
+        d=/app/apps/workers/dist
+        if grep -rqF --include='*.js' 'this.ollama.generate({think:false,' "$$d"; then
           echo "think patch: already patched"
-        elif grep -qF 'this.ollama.generate({' "$$f"; then
-          sed -i 's/this\.ollama\.generate({/this.ollama.generate({think:false,/' "$$f"
-          echo "think patch: patched"
+        elif f=$$(grep -rlF --include='*.js' 'this.ollama.generate({' "$$d"); then
+          sed -i 's/this\.ollama\.generate({/this.ollama.generate({think:false,/' $$f
+          echo "think patch: patched" $$f
         else
           echo "WARNING: think patch anchor not found - running UNPATCHED"
         fi
@@ -77,6 +79,9 @@ services:
       # Sent as keep_alive. Ollama needs a unit and treats any negative duration
       # as "forever", so a Karakeep request never shortens HA's forever-pin.
       OLLAMA_KEEP_ALIVE: "-1m"
+      # Report the real local timezone to sites; a UTC browser on a UK IP is a
+      # bot-protection signal (0.34.0+).
+      CRAWLER_BROWSER_TIMEZONE: "${TZ}"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
       interval: 30s
@@ -185,6 +190,9 @@ services:
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     shm_size: '2gb'
+    # karakeep-chrome's entrypoint runs socat (9222 -> Chrome on 9223) next to
+    # Chrome; init reaps it.
+    init: true
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -201,15 +209,17 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 2G
+    # The entrypoint already supplies --no-sandbox and the remote-debugging
+    # flags (overriding them breaks its 9222 forwarding).
     command:
-      - --no-sandbox
       - --disable-gpu
       - --disable-dev-shm-usage
-      - --remote-debugging-address=0.0.0.0
-      - --remote-debugging-port=9222
       - --hide-scrollbars
+      - --disable-blink-features=AutomationControlled
+      - --window-size=1440,900
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:9222/json/version || exit 1"]
+      # Image ships no wget/curl; socat is there. Probe Chrome's own port.
+      test: ["CMD-SHELL", "socat -u OPEN:/dev/null TCP4:127.0.0.1:9223,connect-timeout=3 || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -222,8 +232,8 @@ services:
       wud.watch: "true"
       wud.display.name: "KaraKeep - Chrome headless"
       wud.display.icon: "sh:karakeep"
-      wud.tag.include: '^\d+$$'
-      wud.link.template: "https://github.com/jlandure/alpine-chrome/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.tag.include: '^\d+\.\d+\.\d+\.\d+-r\d+$$'
+      wud.link.template: "https://github.com/karakeep-app/karakeep/pkgs/container/karakeep-chrome"
 
 networks:
   karakeep:
