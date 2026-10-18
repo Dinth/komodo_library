@@ -82,6 +82,13 @@ services:
       # Report the real local timezone to sites; a UTC browser on a UK IP is a
       # bot-protection signal (0.34.0+).
       CRAWLER_BROWSER_TIMEZONE: "${TZ}"
+      # On-demand "Preserve Video" (yt-dlp) per bookmark; automatic video
+      # downloads stay off (CRAWLER_VIDEO_DOWNLOAD unset).
+      CRAWLER_VIDEO_DOWNLOAD_ON_DEMAND: "true"
+      # data dir is on local ext4, so WAL is safe (docs: not on network drives).
+      DB_WAL_MODE: "true"
+      # Default is debug; info still logs worker/crawler startup and failures.
+      LOG_LEVEL: "info"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
       interval: 30s
