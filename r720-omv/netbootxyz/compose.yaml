@@ -1,5 +1,5 @@
 x-versions:
-  netbootxyz: &netbootxyz-version "ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz25"
+  netbootxyz: &netbootxyz-version "ghcr.io/netbootxyz/netbootxyz:0.7.6-nbxyz26"
 
 x-logging: &default-logging
   driver: "json-file"
