@@ -5,7 +5,7 @@ x-versions:
   # tag. SQLite image, NOT the `-postgres` variant.
   # First start runs one-way schema migrations on /config: rollback = restore
   # the pre-migration config backup + the old upstream image.
-  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.10.19"
+  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.10.20"
 
 x-logging: &default-logging
   driver: "json-file"
