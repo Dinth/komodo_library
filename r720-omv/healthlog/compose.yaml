@@ -1,5 +1,5 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.43.8"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.43.11"
   # Upstream bundles and tests against postgres:16; 18 is used here to match
   # the rest of the repo. HealthLog's schema needs no extensions, so nothing in
   # it depends on the 16 major (pg_stat_statements below is diagnostics only).
