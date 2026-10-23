@@ -89,6 +89,9 @@ services:
       DB_WAL_MODE: "true"
       # Default is debug; info still logs worker/crawler startup and failures.
       LOG_LEVEL: "info"
+      # Plain "error:"/"info:" instead of ANSI-coloured levels, so Loki's
+      # detected_level works (was "unknown"). Any non-empty value (0.34.0+).
+      NO_COLOR: "1"
       # The router has no lan-only/trusted-allowlist and :3000 is published, so
       # any VLAN (GUEST, IoT) could self-register. Admin Settings > Users can
       # still add accounts (admin-created users bypass this).
