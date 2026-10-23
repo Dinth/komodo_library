@@ -85,17 +85,17 @@ services:
       # Video games - the IGDB/Twitch app RomM uses.
       TWITCH_CLIENT_ID: "${IGDB_CLIENT_ID}"
       TWITCH_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
-      # Retro games - the image ships DVinyl's ScreenScraper developer pair;
-      # the member login (shared with RomM) only raises the daily quota.
-      SCREENSCRAPER_USER: "dinth"
-      SCREENSCRAPER_PASSWORD: "${ROMM_SCREENSCRAPER_PASS}"
+      # Retro games - ScreenScraper runs on the developer pair baked into the
+      # image. A member login (SCREENSCRAPER_USER/PASSWORD) would only raise
+      # the daily quota, and a wrong password breaks lookups: RomM's
+      # ROMM_SCREENSCRAPER_PASS is not a Komodo variable, so none is set.
       # LEGO - the key BrickTracker uses.
       REBRICKABLE_API_KEY: "${BRICKTRACKER_REBRICKABLE_API_KEY}"
     healthcheck:
       # No health endpoint. /manifest.json runs the full middleware chain
-      # (Mongo lookups included) without needing a session. Mainly catches the
-      # boot wedge: if Mongo is unreachable at boot DVinyl logs "[BOOT] DB
-      # Error" and stays up without ever listening.
+      # (Mongo lookups included) without needing a session. A failed Mongo
+      # connect at boot is logged as "[BOOT] DB Error" and the process exits
+      # (the restart policy retries); it is never routed by Traefik meanwhile.
       test:
         - "CMD-SHELL"
         - "wget -q --spider http://127.0.0.1:3099/manifest.json || exit 1"
@@ -114,8 +114,8 @@ services:
       - traefik
     logging: *default-logging
     labels:
-      # Restart on a red healthcheck (the boot wedge above). Not on the
-      # database: a Mongo killed mid-write is worse than one left for a human.
+      # Restart on a red healthcheck. Not on the database: a Mongo killed
+      # mid-write is worse than one left for a human.
       autoheal: "true"
       traefik.enable: "true"
       traefik.docker.network: "traefik"
@@ -158,7 +158,9 @@ services:
     mem_limit: 1G
     environment:
       TZ: "${TZ}"
-      # Only read when /data/db is empty (first start).
+      # Only read when /data/db is empty (first start). To change the password
+      # later, db.changeUserPassword() first, then the variable - the app and
+      # Backrest's dump both read it from here.
       MONGO_INITDB_ROOT_USERNAME: "dvinyl"
       MONGO_INITDB_ROOT_PASSWORD: "${DVINYL_DB_PASS}"
     healthcheck:
