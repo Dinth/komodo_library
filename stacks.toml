@@ -369,6 +369,34 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 ##
 
 [[stack]]
+name = "dvinyl"
+description = """
+Physical media collection manager (vinyl, CDs, films, books, games, LEGO).
+https://vinyl.wickhay.uk"""
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/dvinyl"
+environment = """
+TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+DVINYL_DB_PASS=[[DVINYL_DB_PASS]]
+DVINYL_PASSJWT=[[DVINYL_PASSJWT]]
+DVINYL_SESSION_SECRET=[[DVINYL_SESSION_SECRET]]
+DVINYL_OIDC_CLIENT_SECRET=[[DVINYL_OIDC_CLIENT_SECRET]]
+DVINYL_DISCOGS_TOKEN=[[DVINYL_DISCOGS_TOKEN]]
+IGDB_CLIENT_ID=[[IGDB_CLIENT_ID]]
+IGDB_CLIENT_SECRET=[[IGDB_CLIENT_SECRET]]
+ROMM_SCREENSCRAPER_PASS=[[ROMM_SCREENSCRAPER_PASS]]
+BRICKTRACKER_REBRICKABLE_API_KEY=[[BRICKTRACKER_REBRICKABLE_API_KEY]]
+"""
+
+##
+
+[[stack]]
 name = "ebusd"
 description = """
 eBUS daemon: reads the heating/boiler eBUS adapter and publishes to Home Assistant's MQTT (10.10.1.11).
@@ -941,6 +969,7 @@ registry_provider = "docker.io"
 registry_account = "dinth"
 environment = """
 TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 MEDIA_PUID=[[MEDIA_PUID]]
 MEDIA_PGID=[[MEDIA_PGID]]
 IPLAYARR_API_KEY=[[IPLAYARR_API_KEY]]

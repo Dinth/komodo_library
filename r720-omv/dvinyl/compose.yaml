@@ -1,0 +1,193 @@
+x-versions:
+  dvinyl: &dvinyl-version "ghcr.io/kyonew/dvinyl:3.3.0"
+  # Upstream's compose uses mongo:latest; DVinyl needs MongoDB 6+.
+  mongo: &mongo-version "mongo:8.3.13"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  dvinyl:
+    image: *dvinyl-version
+    container_name: dvinyl
+    hostname: dvinyl
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Runs as the image's root user, NOT DOCKER_PUID, but with no capabilities:
+    # root without DAC_OVERRIDE/CHOWN can only write what root owns. The image
+    # is root-owned throughout (no USER, no --chown), and DVinyl writes into it
+    # at runtime: no-code item types built in /create-plugin are materialised
+    # as /app/plugins/<id>/ at boot and on save, next to the built-in plugins,
+    # so that directory can't be swapped for a bind mount. Under DOCKER_PUID
+    # that write fails with EACCES. The uploads bind mount is created root-owned
+    # by Docker on first deploy, so it is writable for the same reason - don't
+    # pre-create it as another user. Listens on 3099, so no NET_BIND_SERVICE.
+    mem_limit: 1G
+    depends_on:
+      dvinyl-mongo:
+        condition: service_healthy
+    environment:
+      TZ: "${TZ}"
+      # The DB user is Mongo's root user (as in the komodo stack): Backrest's
+      # pre-backup hook mongodumps every *mongo* container with the
+      # MONGO_INITDB_ROOT_* credentials from that container's own env.
+      # DVINYL_DB_PASS must be URL-safe (openssl rand -hex 32) - it is
+      # embedded in this URL unescaped.
+      MONGODB_URL: "mongodb://dvinyl:${DVINYL_DB_PASS}@dvinyl-mongo:27017/dvinyl?authSource=admin"
+      # Two different random secrets (openssl rand -hex 32). The app refuses to
+      # start without them. Rotating either logs everyone out once.
+      PASSJWT: "${DVINYL_PASSJWT}"
+      SESSION_SECRET: "${DVINYL_SESSION_SECRET}"
+      # Served over HTTPS by Traefik: Secure cookies and `trust proxy` 1 (one
+      # hop). Must stay "true" behind HTTPS or logins break.
+      PROD: "true"
+      VINYL_PORT: "3099"
+      # npx is PID 1 (upstream CMD `npx tsx app.ts`); stop npm's weekly
+      # registry poll for a newer npm.
+      NPM_CONFIG_UPDATE_NOTIFIER: "false"
+
+      # --- SSO via Authelia (client 'dvinyl' in its configuration.yml, with
+      # claims_policy 'dvinyl' putting email/email_verified into the ID token,
+      # which is the only place DVinyl reads them from). Discovery is lazy (on
+      # the first SSO login, retried on failure), so there is no boot race with
+      # Authelia; id.${DOMAIN_NAME} resolves to Traefik via its traefik-network
+      # alias. openid-client defaults to client_secret_post + PKCE S256.
+      OIDC_ISSUER_URL: "https://id.${DOMAIN_NAME}"
+      OIDC_CLIENT_ID: "dvinyl"
+      OIDC_CLIENT_SECRET: "${DVINYL_OIDC_CLIENT_SECRET}"
+      OIDC_REDIRECT_URI: "https://vinyl.${DOMAIN_NAME}/login/oidc/callback"
+      OIDC_BUTTON_LABEL: "Sign in with Authelia"
+      # An unknown Authelia identity gets an SSO-only account. If an account
+      # with the same (verified) email already exists - the admin made on the
+      # first-run /setup page - it is linked to that instead. New accounts
+      # start with no collection until an admin adds them to one.
+      OIDC_ALLOW_SIGNUP: "true"
+      # Applied only when an account is created through SSO.
+      OIDC_ADMIN_GROUP: "admins"
+      # Every login goes through Authelia and its 2FA; the password form is
+      # gone and a local sign-in is refused. /setup is unaffected, so the
+      # first-run admin is still created there. Break-glass if Authelia is
+      # down: set "false" and redeploy (the setup admin keeps its password).
+      OIDC_DISABLE_LOCAL_LOGIN: "true"
+
+      # --- Metadata sources. Each item type needs its own key; a type whose
+      # key is unset just reports it as missing. TMDB_API_KEY (films),
+      # HARDCOVER_API_KEY (books) and BGG_API_KEY (board games) are not set.
+      # Music (vinyl, CD, cassette) - Discogs personal access token.
+      DISCOGS_TOKEN: "${DVINYL_DISCOGS_TOKEN}"
+      # Video games - the IGDB/Twitch app RomM uses.
+      TWITCH_CLIENT_ID: "${IGDB_CLIENT_ID}"
+      TWITCH_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
+      # Retro games - the image ships DVinyl's ScreenScraper developer pair;
+      # the member login (shared with RomM) only raises the daily quota.
+      SCREENSCRAPER_USER: "dinth"
+      SCREENSCRAPER_PASSWORD: "${ROMM_SCREENSCRAPER_PASS}"
+      # LEGO - the key BrickTracker uses.
+      REBRICKABLE_API_KEY: "${BRICKTRACKER_REBRICKABLE_API_KEY}"
+    healthcheck:
+      # No health endpoint. /manifest.json runs the full middleware chain
+      # (Mongo lookups included) without needing a session. Mainly catches the
+      # boot wedge: if Mongo is unreachable at boot DVinyl logs "[BOOT] DB
+      # Error" and stays up without ever listening.
+      test:
+        - "CMD-SHELL"
+        - "wget -q --spider http://127.0.0.1:3099/manifest.json || exit 1"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+      start_interval: 5s
+    volumes:
+      # Item images and avatars. No-code item types live in Mongo; their
+      # plugins/<id>/ folders are rebuilt from it at boot.
+      - /opt/docker/dvinyl/uploads:/app/public/uploads
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - dvinyl
+      - traefik
+    logging: *default-logging
+    labels:
+      # Restart on a red healthcheck (the boot wedge above). Not on the
+      # database: a Mongo killed mid-write is worse than one left for a human.
+      autoheal: "true"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.dvinyl.rule: "Host(`vinyl.${DOMAIN_NAME}`)"
+      traefik.http.routers.dvinyl.entrypoints: "websecure"
+      traefik.http.routers.dvinyl.tls: "true"
+      traefik.http.routers.dvinyl.tls.certresolver: "letsencrypt"
+      traefik.http.routers.dvinyl.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.dvinyl.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # The baseline CSP covers DVinyl as-is (self-hosted assets; cover art
+      # from https: hosts) and its camera=(self) lets the barcode scanner run.
+      # No authelia-auth forward-auth: it would block public share links and
+      # the app enforces its own auth; SSO is via OIDC.
+      traefik.http.routers.dvinyl.middlewares: "secHeaders@file"
+      traefik.http.services.dvinyl.loadbalancer.server.port: "3099"
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "DVinyl"
+      wud.display.icon: "mdi:album"
+      wud.link.template: "https://github.com/Kyonew/DVinyl/releases/tag/v$${major}.$${minor}.$${patch}"
+
+  dvinyl-mongo:
+    image: *mongo-version
+    container_name: dvinyl-mongo
+    hostname: dvinyl-mongo
+    ipc: private
+    restart: unless-stopped
+    command: --quiet --wiredTigerCacheSizeGB 0.25
+    # The official entrypoint starts as root, chowns /data/db and
+    # /data/configdb and drops to the image's mongodb user.
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      # Only read when /data/db is empty (first start).
+      MONGO_INITDB_ROOT_USERNAME: "dvinyl"
+      MONGO_INITDB_ROOT_PASSWORD: "${DVINYL_DB_PASS}"
+    healthcheck:
+      # ping needs no authentication.
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    volumes:
+      # Backrest's pre-backup hook also writes a consistent mongodump of this
+      # container (name matches *mongo*) to /opt/docker/db-dumps.
+      - /opt/docker/dvinyl/mongo_data:/data/db
+      - /opt/docker/dvinyl/mongo_config:/data/configdb
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - dvinyl
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.display.name: "DVinyl - Mongo"
+      wud.display.icon: "sh:mongodb"
+      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
+
+networks:
+  dvinyl:
+    name: dvinyl
+    driver: bridge
+    external: false
+  traefik:
+    external: true
