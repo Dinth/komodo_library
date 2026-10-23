@@ -1,7 +1,7 @@
 x-versions:
-  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.34.0"
-  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.53.1"
-  chrome: &chrome-version "ghcr.io/karakeep-app/karakeep-chrome:154.0.8037.57-r1"
+  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.34.1"
+  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.55.0"
+  chrome: &chrome-version "ghcr.io/karakeep-app/karakeep-chrome:156.0.8078.47-r1"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -89,6 +89,20 @@ services:
       DB_WAL_MODE: "true"
       # Default is debug; info still logs worker/crawler startup and failures.
       LOG_LEVEL: "info"
+      # The router has no lan-only/trusted-allowlist and :3000 is published, so
+      # any VLAN (GUEST, IoT) could self-register. Admin Settings > Users can
+      # still add accounts (admin-created users bypass this).
+      DISABLE_SIGNUPS: "true"
+      # Embeddings power the Semantic/Hybrid search modes and feed similar
+      # bookmarks' tags into the tagging prompt (less tag sprawl). Not on by
+      # default with Ollama. nomic-embed-text is already resident for ZeroClaw
+      # memory (OLLAMA_MAX_LOADED_MODELS=3 counts it), so no extra runner; the
+      # embed call sends no num_ctx/keep_alive, so Ollama's defaults apply.
+      # Changing model or dimensions means regenerating ALL embeddings
+      # (Admin Settings > Background Jobs > Embeddings).
+      EMBEDDING_ENABLE_AUTO_INDEXING: "true"
+      EMBEDDING_TEXT_MODEL: "nomic-embed-text"
+      EMBEDDING_DIMENSIONS: "768"
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
       interval: 30s
@@ -149,7 +163,6 @@ services:
     ipc: private
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    #command: "meilisearch --upgrade-db"
     cap_add:
       - AUDIT_WRITE
       - CHOWN
@@ -171,6 +184,12 @@ services:
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
       MEILI_NO_ANALYTICS: "true"
       TZ: "${TZ}"
+      # ONE-SHOT: Meilisearch refuses data written by an older version. This
+      # migrates it in place on start (one-way). Remove once it has started,
+      # so a later image bump can't migrate unasked. Fallback: delete data.ms,
+      # then Admin Settings > Background Jobs > Reindex All Bookmarks (and
+      # Regenerate Embeddings - they live in the same index).
+      MEILI_UPGRADE_DB: "true"
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://127.0.0.1:7700/health || exit 1"]
       interval: 30s
