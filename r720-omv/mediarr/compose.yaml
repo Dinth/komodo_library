@@ -4,6 +4,8 @@ x-versions:
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.6.5"
   recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
+  seerr: &seerr-version "ghcr.io/seerr-team/seerr:v3.5.1"
+  suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.1.0"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.2"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
   # against the new image (patched copy is bind-mounted over upstream's).
@@ -224,6 +226,141 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/mediarr/recommendarr_data:/app/server/data
+  #############################################################################
+  # Seerr
+  # Media request front end. SuggestArr files its requests here and Seerr
+  # hands them to Sonarr/Radarr, so this is also where they get approved.
+  # Reaches Sonarr/Radarr over the mediarr bridge and Jellyfin over traefik.
+  #############################################################################
+  seerr:
+    image: *seerr-version
+    container_name: seerr
+    hostname: seerr
+    restart: unless-stopped
+    ipc: private
+    # The image's own node user: everything under /app is chowned to it at
+    # build, so the config bind mount is 1000:1000 to match.
+    user: "1000:1000"
+    init: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1G
+    environment:
+      TZ: "${TZ}"
+      LOG_LEVEL: "info"
+      PORT: "5055"
+    volumes:
+      - /opt/docker/mediarr/seerr_config:/app/config
+    networks:
+      - mediarr
+      - traefik
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:5055/api/v1/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      autoheal: "true"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.seerr.rule: "Host(`requests.${DOMAIN_NAME}`)"
+      traefik.http.routers.seerr.entrypoints: "websecure"
+      traefik.http.routers.seerr.tls: "true"
+      traefik.http.routers.seerr.tls.certresolver: "letsencrypt"
+      traefik.http.routers.seerr.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.seerr.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # No Authelia: Seerr logs people in with their Jellyfin accounts, the
+      # same model as Jellyfin itself at jf.${DOMAIN_NAME}.
+      traefik.http.routers.seerr.middlewares: "secHeaders@file"
+      traefik.http.services.seerr.loadbalancer.server.port: "5055"
+      wud.watch: "true"
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/seerr-team/seerr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "Seerr"
+      wud.display.icon: "sh-seerr"
+  #############################################################################
+  # SuggestArr
+  # Requests titles similar to what each person watches on Jellyfin (TMDb
+  # similarity, optionally an LLM) through Seerr. Replaces Recommendarr,
+  # whose upstream is gone and whose config here has been empty since 2025-04.
+  #############################################################################
+  suggestarr:
+    image: *suggestarr-version
+    container_name: suggestarr
+    hostname: suggestarr
+    restart: unless-stopped
+    ipc: private
+    # The image runs as root by default. All it writes is under the bind mount
+    # (config.yaml, requests.db, secret.key, app.log) plus a lock dir in /tmp.
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512M
+    environment:
+      TZ: "${TZ}"
+      SUGGESTARR_PORT: "5000"
+      LOG_LEVEL: "info"
+      SUGGESTARR_ALLOWED_ORIGINS: "https://suggestarr.${DOMAIN_NAME}"
+      # Authelia is the only login. SuggestArr takes the user from the
+      # Remote-User header that authelia-auth injects (secHeaders strips any
+      # client-supplied Remote-*), and believes it only from the traefik
+      # network's dynamic range, where Traefik gets its address. That range is
+      # every container on the traefik network, the same trust model as the
+      # homepage and zeroclaw selectors.
+      AUTH_MODE: "trusted_header"
+      AUTH_TRUSTED_HEADER: "Remote-User"
+      AUTH_TRUSTED_CIDRS: "10.55.0.0/24"
+      AUTH_TRUSTED_PROXY_CIDRS: "10.55.0.0/24"
+      # Off, so only accounts created under Users can sign in. With it on, an
+      # unknown username is provisioned as role=user on first sight, and one
+      # arriving before the first admin existed would finish setup with no
+      # admin at all.
+      AUTH_TRUSTED_HEADER_AUTO_CREATE: "false"
+    volumes:
+      - /opt/docker/mediarr/suggestarr_config:/app/config/config_files
+    # mediarr for Seerr; traefik for Jellyfin, Ollama and SearXNG.
+    networks:
+      - mediarr
+      - traefik
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health/live')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      autoheal: "true"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.suggestarr.rule: "Host(`suggestarr.${DOMAIN_NAME}`)"
+      traefik.http.routers.suggestarr.entrypoints: "websecure"
+      traefik.http.routers.suggestarr.tls: "true"
+      traefik.http.routers.suggestarr.tls.certresolver: "letsencrypt"
+      traefik.http.routers.suggestarr.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.suggestarr.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.suggestarr.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.suggestarr.loadbalancer.server.port: "5000"
+      wud.watch: "true"
+      # Releases also ship -linux-amd64/-arm64 tags; match only the plain one.
+      wud.tag.include: '^v\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/giuseppe99barchetta/SuggestArr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.display.name: "SuggestArr"
+      wud.display.icon: "sh-suggestarr"
   #############################################################################
   # Bazarr
   # Subtitle manager and downloader
@@ -806,3 +943,5 @@ services:
 networks:
   mediarr:
     external: false
+  traefik:
+    external: true
