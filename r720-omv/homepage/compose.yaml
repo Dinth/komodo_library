@@ -59,6 +59,12 @@ x-homepage-common: &homepage-common
   networks:
     - homepage
     - monitoring
+  # r720's own resolver never sees AdGuard's internal *.${DOMAIN_NAME}
+  # rewrite: it gets the public Cloudflare records, and nothing at all for
+  # names that only exist internally. Widgets for Traefik-only services
+  # therefore pin those hostnames to Traefik on this host.
+  extra_hosts:
+    - "seerr.${DOMAIN_NAME}:10.10.1.13"
 
 services:
   homepage-socket-proxy:
