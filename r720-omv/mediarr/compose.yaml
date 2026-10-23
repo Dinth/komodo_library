@@ -271,7 +271,7 @@ services:
       autoheal: "true"
       traefik.enable: "true"
       traefik.docker.network: "traefik"
-      traefik.http.routers.seerr.rule: "Host(`requests.${DOMAIN_NAME}`)"
+      traefik.http.routers.seerr.rule: "Host(`seerr.${DOMAIN_NAME}`)"
       traefik.http.routers.seerr.entrypoints: "websecure"
       traefik.http.routers.seerr.tls: "true"
       traefik.http.routers.seerr.tls.certresolver: "letsencrypt"

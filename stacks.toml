@@ -929,7 +929,7 @@ description = """
 All at http://10.10.1.13:<port>
 Sonarr 8989 / Radarr 7878 / Lidarr 8686 / Prowlarr 9696 / Bazarr 6767
 qBittorrent 8008 / Iplayarr 4404 / Recommendarr 8282 / Cleanuparr 11011
-Except, via Traefik only: Seerr https://requests.wickhay.uk / SuggestArr https://suggestarr.wickhay.uk (Authelia)"""
+Except, via Traefik only: Seerr https://seerr.wickhay.uk / SuggestArr https://suggestarr.wickhay.uk (Authelia)"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
