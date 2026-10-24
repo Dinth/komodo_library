@@ -86,9 +86,12 @@ services:
       TWITCH_CLIENT_ID: "${IGDB_CLIENT_ID}"
       TWITCH_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
       # Retro games - ScreenScraper runs on the developer pair baked into the
-      # image. A member login (SCREENSCRAPER_USER/PASSWORD) would only raise
-      # the daily quota, and a wrong password breaks lookups: RomM's
-      # ROMM_SCREENSCRAPER_PASS is not a Komodo variable, so none is set.
+      # image. The member login (the screenscraper.fr account, shared with
+      # RomM) only raises the daily quota. DVinyl sends it only when both are
+      # non-empty, so an empty ROMM_SCREENSCRAPER_PASS leaves it off - but a
+      # WRONG password makes every lookup fail.
+      SCREENSCRAPER_USER: "dinth"
+      SCREENSCRAPER_PASSWORD: "${ROMM_SCREENSCRAPER_PASS}"
       # LEGO - the key BrickTracker uses.
       REBRICKABLE_API_KEY: "${BRICKTRACKER_REBRICKABLE_API_KEY}"
     healthcheck:
