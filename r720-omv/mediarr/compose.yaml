@@ -3,7 +3,6 @@ x-versions:
   qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.3.0"
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.6.5"
-  recommendarr: &recommendarr-version "tannermiddleton/recommendarr:v1.4.4"
   seerr: &seerr-version "ghcr.io/seerr-team/seerr:v3.5.1"
   suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.1.0"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.2"
@@ -176,57 +175,6 @@ services:
       wud.tag.include: "^v?\\d+\\.\\d+\\.\\d+$$"
       wud.watch: "true"
   #############################################################################
-  # Recommendarr
-  # AI powered media recommendation engine
-  #############################################################################
-  recommendarr:
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - SETGID
-      - SETUID
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
-    mem_limit: 512M
-    command: ['sh','/start-unified.sh']
-    container_name: recommendarr
-    healthcheck:
-      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:8282/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 5
-    entrypoint:
-      - docker-entrypoint.sh
-    environment:
-      PORT: "8282"
-      TZ: "${TZ}"
-    hostname: recommendarr
-    image: *recommendarr-version
-    ipc: private
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    labels:
-      autoheal: "true"
-      wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/fingerthief/recommendarr/releases/tag/$${major}.$${minor}.$${patch}'
-      wud.display.name: "Recommendarr"
-      wud.display.icon: "sh-recommendarr"
-    networks:
-      - mediarr
-    ports:
-      - 8282:8282/tcp
-    restart: unless-stopped
-    volumes:
-      - /opt/docker/mediarr/recommendarr_data:/app/server/data
-  #############################################################################
   # Seerr
   # Media request front end. SuggestArr files its requests here and Seerr
   # hands them to Sonarr/Radarr, so this is also where they get approved.
@@ -289,8 +237,8 @@ services:
   #############################################################################
   # SuggestArr
   # Requests titles similar to what each person watches on Jellyfin (TMDb
-  # similarity, optionally an LLM) through Seerr. Replaces Recommendarr,
-  # whose upstream is gone and whose config here has been empty since 2025-04.
+  # similarity, optionally an LLM) through Seerr. Replaced Recommendarr
+  # (upstream gone, unused here since 2025-04) on 2026-10-24.
   #############################################################################
   suggestarr:
     image: *suggestarr-version
