@@ -1,5 +1,5 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.43.11"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.45.0"
   # Upstream bundles and tests against postgres:16; 18 is used here to match
   # the rest of the repo. HealthLog's schema needs no extensions, so nothing in
   # it depends on the 16 major (pg_stat_statements below is diagnostics only).
@@ -32,10 +32,17 @@ services:
     # which as a tmpfs would count against mem_limit.
     user: "1001:1001"
     # Single-process web + worker (HEALTHLOG_PROCESS_TYPE=all), which upstream
-    # recommends for a single host. Upstream's 1g is "a starting point, not a
-    # measured ceiling"; the weekly per-account backup alone peaked at ~570M,
-    # and Apple Health imports + PDF rasterisation run in this same process.
+    # recommends for a single host. Since 1.44 upstream's supported floor is
+    # 1536M (below it the boot log and Admin -> System status complain); the
+    # weekly per-account backup alone peaked at ~570M, and Apple Health imports
+    # + PDF rasterisation run in this same process. 2G gives a ~1 GB heap, and
+    # 1.45's memory guard reads this cgroup limit to pause heavy jobs at 85%.
     mem_limit: 2G
+    # 1.45+: on SIGTERM the app drains in-flight requests and gives running
+    # jobs up to 30 s to end. Docker's default 10 s cut that short and left
+    # jobs marked active, holding their exclusive queues, until they expired.
+    # Upstream's value; autoheal gets the same via its label below.
+    stop_grace_period: 45s
     depends_on:
       healthlog-postgres:
         condition: service_healthy
@@ -104,11 +111,17 @@ services:
       # gemma4 reasons by default and eats HealthLog's small per-feature token
       # budgets ("Local AI returned empty content" / timeouts), so Settings ->
       # AI -> Reasoning stays "Off" for EVERY user (upstream #1126). Since 1.41
-      # that only governs calls without their own level (status cards, document
-      # reads, lab scans). The Coach (per-user Coach settings, default Medium),
-      # briefings, summaries and memory jobs send their own level and get the
-      # thinking budget ON TOP of the answer budget, so they can reason safely.
-      # Admin -> Assistant can switch reasoning off or cap it for everyone.
+      # that only governs calls without their own level (document reads, lab
+      # scans). The Coach (per-user Coach settings, default Medium), briefings,
+      # summaries and memory jobs send their own level and get the thinking
+      # budget ON TOP of the answer budget. The nightly insight pre-generation
+      # - status cards included - runs at the briefing's fixed "medium", not at
+      # this setting. Up to 1.44.1 every one of those runs failed on gemma4
+      # (logged as ai.chain.link_failed cause=network, upstream #1267); 1.44.2
+      # retries a thinking-only reply with reasoning off and asks that model
+      # that way for the next hour. Admin -> Assistant can switch reasoning off
+      # or cap it for everyone - the lever if link_failed now reports
+      # failure=timeout (one call took 205 s of its 210 s budget).
       AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
       # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
       ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
@@ -140,15 +153,24 @@ services:
       # PASSWORD_BREACH_CHECK stays on (default): HIBP k-anonymity, only five
       # hex chars of the SHA-1 leave the host.
     healthcheck:
-      # /api/health answers 503 until its dependencies are up; start_period
-      # covers the `prisma migrate deploy` the entrypoint runs on every boot.
+      # Upstream's values (1.45). /api/health answers 503 until the
+      # `prisma migrate deploy` the entrypoint runs on every boot is done and,
+      # since 1.44, with reason "starting" until the pg-boss worker is up
+      # (10-60 s under load, up to five minutes). Docker ends start_period at
+      # the first passing probe, so a normal boot (~45 s here) is healthy within
+      # a minute; the 10m only matters on a slow one, where the old 90s let
+      # autoheal restart the container mid-migration. Five misses (2.5 min)
+      # before "unhealthy", so a DB pool saturated for a minute costs a probe,
+      # not a restart. wget's own 4 s timeout ends inside Docker's 5 s, so a
+      # stalled connection reads as one clean miss rather than a killed probe.
       test:
         - "CMD-SHELL"
-        - "wget -q --spider http://127.0.0.1:3000/api/health || exit 1"
+        # yamllint disable-line rule:line-length
+        - "wget -q --tries=1 --timeout=4 --spider http://127.0.0.1:3000/api/health || exit 1"
       interval: 30s
       timeout: 5s
-      retries: 3
-      start_period: 90s
+      retries: 5
+      start_period: 10m
       start_interval: 5s
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -161,6 +183,8 @@ services:
       # Not on the database: a Postgres killed mid-write is worse than one
       # left for a human to look at.
       autoheal: "true"
+      # Match stop_grace_period; autoheal's own default is 30 s.
+      autoheal.stop.timeout: "45"
       traefik.enable: "true"
       traefik.docker.network: "traefik"
       traefik.http.routers.healthlog.rule: "Host(`health.${DOMAIN_NAME}`)"
