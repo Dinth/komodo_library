@@ -77,11 +77,20 @@ services:
       # down: set "false" and redeploy (the setup admin keeps its password).
       OIDC_DISABLE_LOCAL_LOGIN: "true"
 
-      # --- Metadata sources. Each item type needs its own key; a type whose
-      # key is unset just reports it as missing. TMDB_API_KEY (films),
-      # HARDCOVER_API_KEY (books) and BGG_API_KEY (board games) are not set.
+      # --- Metadata sources. Each item type needs its own key. An EMPTY
+      # variable counts as unset (the type reports its key as missing), so
+      # these can sit empty in Komodo until filled in; a placeholder value
+      # would count as a key and make every lookup fail. Keyless picture-only
+      # fallbacks: iTunes (music, games), Open Library (books).
       # Music (vinyl, CD, cassette) - Discogs personal access token.
       DISCOGS_TOKEN: "${DVINYL_DISCOGS_TOKEN}"
+      # Films, plus extra game artwork - TMDB API key or Read Access Token.
+      TMDB_API_KEY: "${DVINYL_TMDB_API_KEY}"
+      # Books - Hardcover API key (they expire; renew it here).
+      HARDCOVER_API_KEY: "${DVINYL_HARDCOVER_API_KEY}"
+      # Board games - BGG application token (approved by hand). The admin
+      # panel won't enable the board games type until this is set.
+      BGG_API_KEY: "${DVINYL_BGG_API_KEY}"
       # Video games - the IGDB/Twitch app RomM uses.
       TWITCH_CLIENT_ID: "${IGDB_CLIENT_ID}"
       TWITCH_CLIENT_SECRET: "${IGDB_CLIENT_SECRET}"
