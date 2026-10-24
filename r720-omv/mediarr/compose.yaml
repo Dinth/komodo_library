@@ -285,7 +285,11 @@ services:
       interval: 30s
       timeout: 10s
       start_period: 30s
-      retries: 5
+      # 20, not 5: the app serves requests on one thread, so an interactive
+      # run that waits on the local LLM (a dry run or AI Search, 3-4 min on
+      # gemma4:12b) starves /api/health/live too. With 5 retries autoheal
+      # restarted it mid-run on 2026-10-24; a real hang still trips at ~10 min.
+      retries: 20
     logging:
       driver: json-file
       options:
