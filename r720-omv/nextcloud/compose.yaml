@@ -194,21 +194,9 @@ services:
       TZ: "${TZ}"
       PUID: "1001"
       PGID: "100"
-      PHP_MEMORY_LIMIT: "4096M"
-      PHP_MAX_CHILDREN: "120"
-      PHP_START_SERVERS: "12"
-      PHP_MIN_SPARE_SERVERS: "6"
-      PHP_MAX_SPARE_SERVERS: "18"
-      PHP_UPLOAD_LIMIT: "16G"
-      APACHE_BODY_LIMIT: "0"
-      REDIS_HOST: "nextcloud-valkey"
-      REDIS_HOST_PASSWORD: "${NEXTCLOUD_VALKEY_PASS}"
-      REDIS_HOST_PORT: "6379"
-      OVERWRITEHOST: "nc.${DOMAIN_NAME}"
-      OVERWRITEPROTOCOL: "https"
-      OVERWRITECLIURL: "https://nc.${DOMAIN_NAME}"
-      OVERWRITEWEBROOT: "/"
-      TRUSTED_PROXIES: "10.10.1.13 10.55.0.0/24"
+      # The LSIO image ignores the official image's PHP_*/REDIS_*/OVERWRITE*/
+      # TRUSTED_PROXIES env vars. Redis, overwrite* and trusted_proxies live in
+      # config.php; PHP/FPM tuning comes from the configs mounted below.
       DOCKER_MODS: "linuxserver/mods:nextcloud-notify-push"
     healthcheck:
       test: ["CMD-SHELL", "curl -Ss http://localhost/status.php | grep '\"installed\":true' || exit 1"]
@@ -225,11 +213,20 @@ services:
       # External Storage mounts. Paperless (1003:100) deletes files once
       # consumed, so the dirs are setgid 2775 group 100 (shared with abc).
       - /opt/docker/paperlessngx/paperlessngx_consume:/paperless-consume
+    configs:
+      # PHP_INI_SCAN_DIR includes /config/php; LSIO's php-fpm includes www2.conf.
+      - source: nextcloud-php-ini
+        target: /config/php/php-local.ini
+      - source: nextcloud-fpm-pool
+        target: /config/php/www2.conf
     networks:
       - nextcloud
       - traefik
     logging: *default-logging
     labels:
+      # compose doesn't hash configs: content; bump this whenever either
+      # nextcloud-php-ini or nextcloud-fpm-pool changes to force a recreate.
+      config.revision: "1"
       traefik.enable: "true"
       traefik.http.routers.nextcloud.rule: "Host(`nc.${DOMAIN_NAME}`)"
       traefik.http.routers.nextcloud.entrypoints: "websecure"
@@ -353,6 +350,21 @@ services:
       wud.display.name: "Nextcloud PostgreSQL"
       wud.display.icon: "sh:postgresql"
       wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+
+configs:
+  nextcloud-php-ini:
+    content: |
+      memory_limit = 4096M
+      upload_max_filesize = 16G
+      post_max_size = 16G
+  nextcloud-fpm-pool:
+    content: |
+      [www]
+      pm = dynamic
+      pm.max_children = 120
+      pm.start_servers = 12
+      pm.min_spare_servers = 6
+      pm.max_spare_servers = 18
 
 networks:
   nextcloud:
