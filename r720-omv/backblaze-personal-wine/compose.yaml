@@ -97,8 +97,9 @@ services:
     # pod-*.backblaze.com and are unaffected. Remove when moving to v10.
     extra_hosts:
       - "f000.backblazeb2.com:127.0.0.1"
-    ports:
-      - 5800:5800/tcp
+    # No host port publish: the noVNC GUI on WEB_LISTENING_PORT 5800 is plain
+    # HTTP with an empty VNC_PASSWORD. It is reached via the Traefik TLS route
+    # below instead.
     volumes:
       - /opt/docker/backblaze-personal-wine/backblaze_data:/config
       # Must be /drive_<letter>: startapp.sh only registers those with Wine as
@@ -113,9 +114,22 @@ services:
       - /Data:/drive_d
     networks:
       - backblaze-personal-wine
+      - traefik
     logging: *default-logging
     labels:
       autoheal: "true"
+      # noVNC web GUI behind Traefik TLS + Authelia forward-auth + lan-only - it
+      # is a full remote desktop with read access to all of /Data.
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.backblaze.rule: "Host(`backblaze.${DOMAIN_NAME}`)"
+      traefik.http.routers.backblaze.entrypoints: "websecure"
+      traefik.http.routers.backblaze.tls: "true"
+      traefik.http.routers.backblaze.tls.certresolver: "letsencrypt"
+      traefik.http.routers.backblaze.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.backblaze.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.backblaze.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.services.backblaze.loadbalancer.server.port: "5800"
       wud.watch: "true"
       wud.watch.digest: "true"
       # The image runs the mutable `ubuntu22` tag, so only its digest is
@@ -191,3 +205,5 @@ networks:
     name: backblaze-personal-wine
     driver: bridge
     external: false
+  traefik:
+    external: true
