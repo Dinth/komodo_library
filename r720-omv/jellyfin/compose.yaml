@@ -38,7 +38,9 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 8G
+    # The 20G /transcode RAM disk below plus about 4G for Jellyfin and ffmpeg
+    # (their combined peak was 1.5 GB over 30 days).
+    mem_limit: 24G
     deploy:
       resources:
         reservations:
@@ -69,8 +71,16 @@ services:
       - 7359:7359/udp
       - 8096:8096/tcp
       - 8920:8920/tcp
+    # /transcode is RAM-backed and its pages count against mem_limit (the host
+    # has no swap). With throttling and segment deletion off in Jellyfin, a
+    # session keeps its whole encoded output (bitrate x duration) here until
+    # playback stops. Sized about 4G below mem_limit so a full disk fails only
+    # that ffmpeg job ("No space left on device") instead of OOM-killing
+    # Jellyfin; the old 64G inside an 8G limit did the opposite. 20G covers a
+    # 2.5 h 1080p transcode at 15 Mbps. r720 has 304 GB RAM; the lowest
+    # MemAvailable in the last 30 days was 31 GB.
     tmpfs:
-      - /transcode:size=64G,mode=1777
+      - /transcode:size=20G,mode=1777
     volumes:
       - /opt/docker/jellyfin/jellyfin_config:/config
       - /Data/TVShows:/tv
