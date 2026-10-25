@@ -12,6 +12,54 @@ x-logging: &default-logging
 services:
   dvinyl:
     image: *dvinyl-version
+    # Start-time patch: console tabs for the Games collection. DVinyl only
+    # offers the navbar shortcuts its plugins declare (for games: format tabs
+    # like Collector/Limited), so this adds four to the games plugin, after
+    # "Video Games". Each opens the collection with its platform filter set to
+    # a group of platforms: comma-separated, exact names as DVinyl stores them
+    # (IGDB's wording - copy them from the collection's platform menu). Pick
+    # the tabs in Personalisation for the collection. Also counts a tab as the
+    # current page only when the platform filter matches too, so "Video Games"
+    # and a console tab aren't highlighted together. Idempotent across
+    # restarts; on an anchor miss it logs a WARNING and starts unpatched (the
+    # console tabs drop out of the navbar, nothing else changes).
+    # Revert: delete this entrypoint block.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        node - <<'EOF'
+        const fs = require("fs");
+        const tabs = [
+          ["game_console_switch", "Switch", ["Nintendo Switch", "Nintendo Switch 2"]],
+          ["game_console_playstation", "PlayStation", ["PlayStation", "PlayStation 2",
+            "PlayStation 3", "PlayStation 4", "PlayStation 5", "PlayStation Portable",
+            "PlayStation Vita"]],
+          ["game_console_nintendo", "Other Nintendo", ["Nintendo Entertainment System",
+            "Family Computer Disk System", "Super Nintendo Entertainment System",
+            "Nintendo 64", "Nintendo GameCube", "Wii", "Wii U", "Game Boy",
+            "Game Boy Color", "Game Boy Advance", "Nintendo DS", "Nintendo 3DS"]],
+          ["game_console_computers", "Computers", ["PC (Microsoft Windows)", "DOS",
+            "Amiga", "Amiga CD32", "Commodore C64/128/MAX", "ZX Spectrum", "Atari 8-bit"]],
+        ];
+        const patch = (file, anchor, replacement, marker) => {
+          const s = fs.readFileSync(file, "utf8");
+          if (s.includes(marker)) return console.log("console tabs patch: already patched", file);
+          if (s.split(anchor).length !== 2) {
+            return console.log("WARNING: console tabs patch anchor not found in", file, "- running UNPATCHED");
+          }
+          fs.writeFileSync(file, s.replace(anchor, () => replacement));
+          console.log("console tabs patch: patched", file);
+        };
+        const entries = tabs.map(([id, label, platforms]) => JSON.stringify({ id, label,
+          url: "/collection?type=games&platform=" + platforms.map(encodeURIComponent).join(",") }));
+        const games = "url: '/collection?type=games' },";
+        patch("/app/plugins/games/index.ts", games, games + " " + entries.join(", ") + ",",
+          "game_console_");
+        patch("/app/views/partials/shell/nav-shortcuts.ejs", "['type', 'format'].every",
+          "['type', 'format', 'platform'].every", "'format', 'platform'");
+        EOF
+        exec npx tsx app.ts
     container_name: dvinyl
     hostname: dvinyl
     ipc: private
@@ -49,7 +97,8 @@ services:
       # hop). Must stay "true" behind HTTPS or logins break.
       PROD: "true"
       VINYL_PORT: "3099"
-      # npx is PID 1 (upstream CMD `npx tsx app.ts`); stop npm's weekly
+      # npx is PID 1 (upstream CMD `npx tsx app.ts`, exec'd by the entrypoint
+      # above - keep the two in step on upgrades); stop npm's weekly
       # registry poll for a newer npm.
       NPM_CONFIG_UPDATE_NOTIFIER: "false"
 
