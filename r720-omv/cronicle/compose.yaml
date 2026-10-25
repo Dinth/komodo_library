@@ -178,6 +178,12 @@ services:
       # on this. Owned by the pricebuddy stack, so on a cold start that one
       # has to have been deployed first for this to resolve.
       - pricebuddy
+      # Egress only, for the firefly import jobs: they call
+      # http://fireflyiii_michal_dataimporter:8080 and
+      # http://fireflyiii_paulina_dataimporter:8080, which publish no host
+      # port. Owned by the fireflyiii stack, so on a cold start that one has
+      # to have been deployed first for this to resolve.
+      - fireflyiii
     logging: *default-logging
     labels:
       wud.watch: "true"
@@ -191,4 +197,6 @@ networks:
     name: cronicle
     driver: bridge
   pricebuddy:
+    external: true
+  fireflyiii:
     external: true

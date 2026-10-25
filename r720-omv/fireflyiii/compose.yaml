@@ -164,15 +164,32 @@ services:
       CAN_POST_AUTOIMPORT: "true"
       IMPORT_DIR_ALLOWLIST: "/import"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_PAULINA_AUTOIMPORT_KEY}"
-    ports:
-      - 4749:8080/tcp
+      # Same as the core app: behind Traefik TLS, Laravel needs to trust the
+      # proxy headers to generate https URLs.
+      TRUSTED_PROXIES: "*"
     volumes:
       - /opt/docker/fireflyiii/fireflyiii_dataimporter_paulina_upload:/var/www/html/storage/upload
       - /Data/IT/filebrowser-data/users/paulina/Paulina-Documents/firefly_configurations:/import:ro
+    # No host port publish. Cronicle calls /autoimport over the internal
+    # fireflyiii network (http://fireflyiii_paulina_dataimporter:8080); the UI has
+    # no login of its own and holds bank-sync configs, so it is Authelia +
+    # lan-only behind Traefik.
     networks:
       - fireflyiii
+      - traefik
     logging: *default-logging
     labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.fireflyiii-import-paulina.entrypoints: websecure
+      traefik.http.routers.fireflyiii-import-paulina.rule: Host(`finance-import-paulina.${DOMAIN_NAME}`)
+      traefik.http.routers.fireflyiii-import-paulina.tls: "true"
+      traefik.http.routers.fireflyiii-import-paulina.tls.certresolver: letsencrypt
+      traefik.http.routers.fireflyiii-import-paulina.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.fireflyiii-import-paulina.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.fireflyiii-import-paulina.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.routers.fireflyiii-import-paulina.service: fireflyiii-import-paulina
+      traefik.http.services.fireflyiii-import-paulina.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III Data importer"
@@ -225,15 +242,32 @@ services:
       # takes ~50s and one failing bank no longer stops the others.
       IMPORT_DIR_ALLOWLIST: "/import/santander,/import/amex,/import/barclaycard,/import/capitalone,/import/tesco,/import/mbank,/import/virginmoney"
       AUTO_IMPORT_SECRET: "${FIREFLYIII_MICHAL_AUTOIMPORT_KEY}"
-    ports:
-      - 4748:8080/tcp
+      # Same as the core app: behind Traefik TLS, Laravel needs to trust the
+      # proxy headers to generate https URLs.
+      TRUSTED_PROXIES: "*"
     volumes:
       - /Data/IT/filebrowser-data/users/michal/Michal-Documents/firefly_configurations:/import:ro
       - /opt/docker/fireflyiii/fireflyiii_dataimporter_michal_upload:/var/www/html/storage/upload
+    # No host port publish. Cronicle calls /autoimport over the internal
+    # fireflyiii network (http://fireflyiii_michal_dataimporter:8080); the UI has
+    # no login of its own and holds bank-sync configs, so it is Authelia +
+    # lan-only behind Traefik.
     networks:
       - fireflyiii
+      - traefik
     logging: *default-logging
     labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.fireflyiii-import-michal.entrypoints: websecure
+      traefik.http.routers.fireflyiii-import-michal.rule: Host(`finance-import.${DOMAIN_NAME}`)
+      traefik.http.routers.fireflyiii-import-michal.tls: "true"
+      traefik.http.routers.fireflyiii-import-michal.tls.certresolver: letsencrypt
+      traefik.http.routers.fireflyiii-import-michal.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.fireflyiii-import-michal.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.fireflyiii-import-michal.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
+      traefik.http.routers.fireflyiii-import-michal.service: fireflyiii-import-michal
+      traefik.http.services.fireflyiii-import-michal.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III Data importer"
