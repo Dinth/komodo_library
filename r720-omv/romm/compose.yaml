@@ -44,6 +44,27 @@ x-emulator-gpu: &emulator-gpu
   NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
   NVIDIA_DRIVER_CAPABILITIES: "all"
 
+# The emu-stream Traefik middleware, attached to BOTH emulator containers so
+# neither router depends on the other container existing (defined on
+# romm-pcsx2 alone, every recreate of it left romm-dolphin's router pointing at
+# a missing `emu-stream@docker`). Traefik's docker provider accepts the same
+# middleware from several containers when the definitions are identical, so
+# keep it defined only here.
+x-emu-stream-labels: &emu-stream-labels
+  traefik.http.middlewares.emu-stream.headers.contentTypeNosniff: "true"
+  traefik.http.middlewares.emu-stream.headers.browserXssFilter: "true"
+  traefik.http.middlewares.emu-stream.headers.forceSTSHeader: "true"
+  traefik.http.middlewares.emu-stream.headers.stsIncludeSubdomains: "true"
+  traefik.http.middlewares.emu-stream.headers.stsPreload: "true"
+  traefik.http.middlewares.emu-stream.headers.stsSeconds: "31536000"
+  # Defence-in-depth, mirroring secHeaders: a client must never be able to
+  # spoof the forward-auth identity headers.
+  traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-User: ""
+  traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Groups: ""
+  traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Name: ""
+  traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Email: ""
+  traefik.http.middlewares.emu-stream.headers.customresponseheaders.Content-Security-Policy: "frame-ancestors 'self' https://emu.${DOMAIN_NAME}"
+
 services:
   romm-mariadb:
     image: *mariadb-version
@@ -339,19 +360,7 @@ services:
       # Selkies is an unauthenticated full desktop — do not drop that.
       traefik.http.routers.romm-pcsx2.middlewares: "emu-stream@docker,lan-only@file"
       traefik.http.services.romm-pcsx2.loadbalancer.server.port: "3000"
-      traefik.http.middlewares.emu-stream.headers.contentTypeNosniff: "true"
-      traefik.http.middlewares.emu-stream.headers.browserXssFilter: "true"
-      traefik.http.middlewares.emu-stream.headers.forceSTSHeader: "true"
-      traefik.http.middlewares.emu-stream.headers.stsIncludeSubdomains: "true"
-      traefik.http.middlewares.emu-stream.headers.stsPreload: "true"
-      traefik.http.middlewares.emu-stream.headers.stsSeconds: "31536000"
-      # Defence-in-depth, mirroring secHeaders: a client must never be able to
-      # spoof the forward-auth identity headers.
-      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-User: ""
-      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Groups: ""
-      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Name: ""
-      traefik.http.middlewares.emu-stream.headers.customrequestheaders.Remote-Email: ""
-      traefik.http.middlewares.emu-stream.headers.customresponseheaders.Content-Security-Policy: "frame-ancestors 'self' https://emu.${DOMAIN_NAME}"
+      <<: *emu-stream-labels
       wud.watch: "true"
       wud.display.name: "Romm - PCSX2"
       wud.display.icon: "sh-romm"
@@ -401,9 +410,10 @@ services:
       traefik.http.routers.romm-dolphin.tls.certresolver: "letsencrypt"
       traefik.http.routers.romm-dolphin.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.romm-dolphin.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      # emu-stream is defined once on romm-pcsx2 above; both routers share it.
+      # emu-stream is defined by x-emu-stream-labels, merged in below.
       traefik.http.routers.romm-dolphin.middlewares: "emu-stream@docker,lan-only@file"
       traefik.http.services.romm-dolphin.loadbalancer.server.port: "3000"
+      <<: *emu-stream-labels
       wud.watch: "true"
       wud.display.name: "Romm - Dolphin"
       wud.display.icon: "sh-romm"
