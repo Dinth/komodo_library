@@ -42,6 +42,12 @@ services:
       FIREWALL_VPN_INPUT_PORTS: "55062"
       SERVER_COUNTRIES: "Netherlands"
       FIREWALL_OUTBOUND_SUBNETS: "10.10.0.0/16"
+      # Health server on all interfaces (default is loopback only) so
+      # Cleanuparr's connectivity check can probe http://gluetun:9999 and skip
+      # queue cleaning while the tunnel is down — otherwise every active
+      # download gets struck as stalled and deleted. Not published on the
+      # host; gluetun's own `healthcheck` still dials 127.0.0.1.
+      HEALTH_SERVER_ADDRESS: ":9999"
     volumes:
       - /opt/docker/mediarr/gluetun_data:/gluetun
     devices:
@@ -106,10 +112,14 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 2G
+    # Unhealthy while DHT has no nodes: after a gluetun tunnel restart storm
+    # qBittorrent can keep sockets bound to a deleted tun0 and silently stop
+    # transferring until restarted; autoheal does that. Needs DHT enabled.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8008"]
-      interval: 30s
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8008/api/v2/transfer/info | grep -q 'dht_nodes.:[1-9]'"]
+      interval: 60s
       timeout: 10s
+      start_period: 180s
       retries: 5
     logging:
       driver: json-file
@@ -117,6 +127,7 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
+      autoheal: "true"
       wud.display.icon: "sh-qbittorrent"
       wud.display.name: "QBittorrent"
       wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
