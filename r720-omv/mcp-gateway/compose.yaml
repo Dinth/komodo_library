@@ -28,11 +28,12 @@ services:
     user: "65534:${DOCKER_SOCKET_GID}"
     command:
       - '-loglevel=info'
-      # Any container on this network, not just the gateway: the gateway-spawned
+      # The whole mcp-docker subnet, not just the gateway: the gateway-spawned
       # docker MCP server calls the API through this proxy from a dynamic IP
-      # (limiting it to mcp-gateway broke it on 2026-09-25). That server is a
+      # (limiting it to mcp-gateway broke it on 2026-09-25). Only the gateway
+      # and the servers it spawns are on mcp-docker. That server is a
       # container-management tool by design, so the POST rules are its point.
-      - '-allowfrom=0.0.0.0/0'
+      - '-allowfrom=169.254.4.128/28'
       - '-listenip=0.0.0.0'
       - '-allowGET=/v1\..{1,2}/(containers/.*|images/.*|events|info|version)|/version'
       - '-allowHEAD=/_ping'
@@ -43,7 +44,7 @@ services:
       - '-shutdowngracetime=10'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks: [mcp-gateway]
+    networks: [mcp-docker]
     healthcheck:
       test: ["CMD", "./healthcheck"]
       interval: 10s
@@ -65,9 +66,6 @@ services:
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    # Grants the socket group so the gateway can read/write the docker.sock
-    # mounted below (needed for the stdio-attach step — see that volume's note).
-    group_add: ["${DOCKER_SOCKET_GID}"]
     mem_limit: 512M
     ports: ["4888:8080"]
     # --catalog paths MUST resolve under ~/.docker/mcp/catalogs/ (HOME=/ in this
@@ -104,7 +102,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       mcp-gateway-socket-proxy: { condition: service_healthy }
-    networks: [mcp-gateway]
+    networks: [mcp-gateway, mcp-docker]
     logging: *default-logging
     labels:
       wud.watch: "true"
@@ -152,3 +150,16 @@ networks:
   mcp-gateway:
     name: mcp-gateway
     driver: bridge
+  # Holds only the socket proxy and the gateway. The gateway attaches every
+  # server it spawns to all of its own networks, so spawned servers
+  # (docker-mcp) still reach the proxy, while containers that join
+  # mcp-gateway for other reasons (Homebox, for homebox-mcp) cannot.
+  # Subnet fixed so the proxy's -allowfrom can name it (as scanopy-docker,
+  # 169.254.4.112/28, the neighbouring /28).
+  mcp-docker:
+    name: mcp-docker
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 169.254.4.128/28
