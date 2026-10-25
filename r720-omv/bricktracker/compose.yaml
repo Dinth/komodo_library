@@ -31,7 +31,9 @@ services:
       BK_AUTHENTICATION_PASSWORD: "${BK_AUTHENTICATION_PASSWORD}"
       BK_AUTHENTICATION_KEY: "${BK_AUTHENTICATION_KEY}"
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; r = requests.get('http://localhost:3333'); print(r.status_code == 200)"]
+      # sys.exit, not print: print() exits 0 whatever the status, so an HTTP 500
+      # still passed.
+      test: ["CMD", "python", "-c", "import sys, requests; r = requests.get('http://localhost:3333', timeout=4); sys.exit(r.status_code != 200)"]
       interval: 10s
       timeout: 5s
       retries: 3
