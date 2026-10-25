@@ -1,0 +1,17 @@
+# Trivy findings accepted on purpose. Each entry is scoped to the files it
+# applies to; a new Dockerfile with the same problem still gets reported.
+misconfigurations:
+  - id: DS-0002
+    paths:
+      - "r720-omv/authelia/Dockerfile"
+      - "r720-omv/piped/backend/Dockerfile"
+    statement: >-
+      No USER in the Dockerfile, but both run non-root: their compose services
+      set user: "${DOCKER_PUID}:${DOCKER_PGID}".
+  - id: DS-0029
+    paths:
+      - "r720-omv/openwebui/zeroclaw/Dockerfile"
+    statement: >-
+      Build stages only (the runtime stage drops to USER 65534). The file
+      mirrors upstream Dockerfile.debian stage for stage, so it keeps upstream's
+      apt-get lines rather than diverging from them.

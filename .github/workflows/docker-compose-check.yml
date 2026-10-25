@@ -10,16 +10,25 @@ on:
     paths: # Only run if compose files change (check both naming conventions)
       - '**/docker-compose*.y*ml'
       - '**/compose.y*ml'
+      - '**/Dockerfile'
       - '.yamllint' # Also run if yamllint config changes
+      - '.trivyignore.yaml'
+      - '.github/workflows/docker-compose-check.yml'
   pull_request:
     # Optionally filter branches for pull_request events
     # branches: [ main ]
     paths: # Only run if compose files change (check both naming conventions)
       - '**/docker-compose*.y*ml'
       - '**/compose.y*ml'
+      - '**/Dockerfile'
       - '.yamllint' # Also run if yamllint config changes
+      - '.trivyignore.yaml'
+      - '.github/workflows/docker-compose-check.yml'
 
 permissions: read-all # Default permissions
+
+# Every step still has continue-on-error: the checks report, but don't block,
+# until they have stayed green for a while.
 
 jobs:
   check-lint-docker-compose:
@@ -33,47 +42,57 @@ jobs:
       - name: Install yamllint
         run: pip install yamllint
 
+      # Compose files only. .github/ is excluded because this workflow's own
+      # name (docker-compose-check.yml) matches the docker-compose*.y*ml glob.
       - name: Lint YAML files
         shell: bash
         continue-on-error: true
         run: |
           echo "Linting Docker Compose files..."
-          
-          files=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f)
-          
+
+          files=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f -not -path "./.github/*")
+
           if [ -z "$files" ]; then
             echo "No Docker Compose files found"
             exit 0
           fi
-          
+
           echo "$files" | xargs yamllint -d relaxed
           echo "✓ All files passed linting"
 
+      # Checks every file and reports all failures, rather than stopping at
+      # the first one.
       - name: Validate Docker Compose syntax
         shell: bash
         continue-on-error: true
         run: |
           echo "Validating Docker Compose files..."
-          
-          files=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f)
-          
+
+          files=$(find . \( -name "docker-compose*.y*ml" -o -name "compose.y*ml" \) -type f -not -path "./.github/*")
+
           if [ -z "$files" ]; then
             echo "No Docker Compose files found"
             exit 0
           fi
-          
-          echo "$files" | while read -r file; do
+
+          failed=0
+          while read -r file; do
             echo "Validating $file..."
             if ! docker compose -f "$file" config -q; then
               echo "::error file=$file::Syntax validation failed"
-              exit 1
+              failed=$((failed + 1))
             fi
-          done
-          
+          done <<< "$files"
+
+          if [ "$failed" -ne 0 ]; then
+            echo "$failed file(s) failed validation"
+            exit 1
+          fi
           echo "✓ All files validated successfully"
 
+      # Accepted findings, each with its reason, are in .trivyignore.yaml.
       - name: Run Trivy security scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: true
         with:
           scan-type: 'config'
@@ -81,3 +100,4 @@ jobs:
           exit-code: '1'
           severity: 'HIGH,CRITICAL'
           format: 'table'
+          trivyignores: '.trivyignore.yaml'

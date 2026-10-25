@@ -30,7 +30,7 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "3000:3000/tcp" 
+      - "3000:3000/tcp"
     healthcheck:
       test: ["CMD-SHELL", "nslookup -timeout=2 cloudflare.com 127.0.0.1 >/dev/null 2>&1 || exit 1"]
       interval: 30s
