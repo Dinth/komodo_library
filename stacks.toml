@@ -142,7 +142,7 @@ DOCKER_PGID=[[DOCKER_PGID]]
 name = "backblaze-personal-wine"
 description = """
 Backblaze Personal Backup client (Windows app under Wine) backing up /Data, plus a status exporter for Homepage.
-Web UI (noVNC): http://10.10.1.13:5800"""
+Web UI (noVNC): https://backblaze.wickhay.uk (Authelia, LAN only)"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -155,6 +155,7 @@ environment = """
 TZ=[[TZ]]
 DOCKER_PUID=[[DOCKER_PUID]]
 DOCKER_PGID=[[DOCKER_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 """
 
 ##
@@ -425,8 +426,8 @@ description = """
 Firefly III personal finance manager + per-user bank data importers + MCP.
 https://finance.wickhay.uk
 LAN: http://10.10.1.13:4747
-Data importer (Michal): http://10.10.1.13:4748
-Data importer (Paulina): http://10.10.1.13:4749
+Data importer (Michal): https://finance-import.wickhay.uk (Authelia, LAN only)
+Data importer (Paulina): https://finance-import-paulina.wickhay.uk (Authelia, LAN only)
 MCP: http://10.10.1.13:5137"""
 tags = ["stacks", "needs-improvement"]
 [stack.config]
