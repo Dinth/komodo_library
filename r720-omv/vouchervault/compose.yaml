@@ -40,6 +40,16 @@ services:
       SECURE_COOKIES: "True"
       EXPIRY_THRESHOLD_DAYS: "90"
       TZ: "${TZ}"
+      # VoucherVault's Celery broker. Unset, it falls back to
+      # redis://redis:6379/0, a host that doesn't exist here, so the Celery
+      # worker and beat exit about an hour after start and the daily expiry
+      # check (last run 2026-09-05) never fires.
+      REDIS_URL: "redis://vouchervault-valkey:6379/0"
+      # Unset, a new random key is generated at every start, which logs
+      # everyone out on each restart. Must be non-empty: upstream uses an
+      # empty value as-is and Django then refuses to start, so the Komodo
+      # variable has to exist before deploying.
+      SECRET_KEY: "${VOUCHERVAULT_SECRET_KEY}"
     depends_on:
       vouchervault-valkey:
         condition: service_healthy
