@@ -39,7 +39,6 @@ services:
     environment:
       TZ: "${TZ}"
       CSRF_TRUSTED_ORIGINS: "https://baby.${DOMAIN_NAME},http://10.10.1.13:3938"
-      DEBUG: "true"
       PUID: "${DOCKER_PUID}"
       PGID: "${DOCKER_PGID}"
     healthcheck:
