@@ -83,12 +83,11 @@ services:
     networks:
       - trek
       - traefik
-      # Signal notifications: each user's webhook in Settings -> Notifications
-      # is http://apprise:8000/notify/trek?tag=<user>. TREK's generic webhook
-      # JSON carries `title` and `body`, which apprise reads as-is; the
-      # per-user signal:// targets live in apprise_config/trek.cfg on disk
-      # (APPRISE_CONFIG_LOCK). Naming one tag needs no apprise admin login.
-      - signal-rest-api
+      # No Signal via apprise: TREK's webhook payload (title/body) would suit
+      # apprise, but apprise requires its admin login for every send
+      # (APPRISE_AUTH_REQUIRED), and TREK's webhook can neither send headers
+      # nor a user:pass URL (Node fetch rejects URLs with credentials). Making
+      # a `trek` apprise key public was ruled out. TREK notifies by Web Push.
     logging: *default-logging
     labels:
       autoheal: "true"
@@ -114,6 +113,4 @@ networks:
     driver: bridge
     external: false
   traefik:
-    external: true
-  signal-rest-api:
     external: true

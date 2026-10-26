@@ -151,8 +151,8 @@ services:
       wud.link.template: "https://github.com/caronc/apprise-api/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
-  # Joined by wud, uptime-kuma, backrest, pricebuddy and trek (both via
-  # apprise); fireflyiii uses the published port instead.
+  # Joined by wud, uptime-kuma, backrest and pricebuddy (via apprise);
+  # fireflyiii uses the published port instead.
   signal-rest-api:
     name: signal-rest-api
     driver: bridge
