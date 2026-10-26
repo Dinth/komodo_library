@@ -1,5 +1,5 @@
 x-versions:
-  omnitools: &omnitools-version "iib0011/omni-tools:0.6.0"
+  omnitools: &omnitools-version "iib0011/omni-tools:0.7.0"
 
 x-logging: &default-logging
   driver: "json-file"
