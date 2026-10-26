@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.2"
   # Upstream publishes semver tags to Docker Hub ONLY when a git tag is pushed,
   # and the last one was 1.2.0 in 2021; `latest` is rebuilt nightly from main
   # (last commit 2025-09-09) and carries fixes 1.2.0 lacks — the

@@ -1,6 +1,6 @@
 x-versions:
   # Only latest/main/v0.2b are published: pinned by digest.
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.1"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.2"
   harborguard: &harborguard-version "ghcr.io/harborguard/harborguard:latest@sha256:706d6f34eee522fc6824fda772be68a0777c7f1e7cfbfa4954f97afde064187c"
   postgres: &postgres-version "postgres:18.6-alpine"
 
