@@ -747,7 +747,11 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    command: ["--config", "/signal-data", "daemon", "--http", "0.0.0.0:8686"]
+    # --no-receive-stdout: by default the daemon also prints every received
+    # message in plain text (sender, body) to stdout, which Alloy shipped to
+    # Loki - ~200 message bodies a day. ZeroClaw reads messages from the
+    # /api/v1/events SSE stream, not stdout, so nothing needs that output.
+    command: ["--config", "/signal-data", "daemon", "--http", "0.0.0.0:8686", "--no-receive-stdout"]
     container_name: zeroclaw-signal-cli
     entrypoint: ["signal-cli"]
     environment:
