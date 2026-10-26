@@ -3,7 +3,7 @@ x-versions:
   #   tvheadend -> version-<8-char git hash>
   #   oscam     -> version-<OSCam SVN revision>
   tvheadend: &tvheadend-version "linuxserver/tvheadend:version-71159218"
-  oscam: &oscam-version "linuxserver/oscam:version-11966"
+  oscam: &oscam-version "linuxserver/oscam:version-11968"
 
 x-logging: &default-logging
   driver: "json-file"
