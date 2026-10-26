@@ -4,7 +4,7 @@ x-versions:
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   # Pinned to Tika 3.x -- paperless-ngx targets the Tika 3 server API; a 4.0
   # exists but don't follow it.
-  tika: &tika-version "docker.io/apache/tika:3.3.1.0"
+  tika: &tika-version "docker.io/apache/tika:3.3.3.0"
   gotenberg: &gotenberg-version "docker.io/gotenberg/gotenberg:8.37.0"
 
 x-logging: &default-logging

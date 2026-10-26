@@ -1,6 +1,6 @@
 x-versions:
   signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.100"
-  apprise: &apprise-version "caronc/apprise:2.0.0"
+  apprise: &apprise-version "caronc/apprise:2.0.2"
 
 x-logging: &default-logging
   driver: "json-file"

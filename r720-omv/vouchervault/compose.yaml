@@ -1,5 +1,5 @@
 x-versions:
-  vouchervault: &vouchervault-version "l4rm4nd/vouchervault:1.30.2"
+  vouchervault: &vouchervault-version "l4rm4nd/vouchervault:1.30.3"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
 
 x-logging: &default-logging

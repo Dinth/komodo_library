@@ -1,6 +1,6 @@
 x-versions:
   komodo-core: &komodo-core-version "ghcr.io/moghtech/komodo-core:2.3.4"
-  mongo: &mongo-version "mongo:8.3.11"
+  mongo: &mongo-version "mongo:8.3.13"
 
 x-logging: &default-logging
   driver: "json-file"

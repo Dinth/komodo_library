@@ -1,5 +1,5 @@
 x-versions:
-  freshrss: &freshrss-version "freshrss/freshrss:1.30.0"
+  freshrss: &freshrss-version "freshrss/freshrss:1.30.4"
   # The newest date tag (2025-08-05) is a year behind :latest, so pin the
   # digest of the build that runs instead of downgrading.
   rss-bridge: &rss-bridge-version "rssbridge/rss-bridge:latest@sha256:606896116558c57e3d381dec6874457f7a69216103d77c78b5bd38b92b251902"

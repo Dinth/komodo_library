@@ -1,5 +1,5 @@
 x-versions:
-  mariadb: &mariadb-version "linuxserver/mariadb:11.4.8"
+  mariadb: &mariadb-version "linuxserver/mariadb:11.4.12"
   monica: &monica-version "monica:4.1.2-apache"
 
 x-logging: &default-logging
