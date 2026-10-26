@@ -36,7 +36,9 @@ x-versions:
   # additional_contexts AND this image tag together, and check the patches
   # still apply.
   zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p6-debian"
-  zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:0.100"
+  # Same image as the signal-rest-api stack (an upstream -ci build, see the
+  # note there); keep the two in step.
+  zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:1791633879-ci"
   zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27.5-alpine"
 
 # Shared definition for the per-user ZeroClaw instances (zeroclaw-michal,
@@ -782,8 +784,8 @@ services:
       # signal-rest-api stack — avoid duplicate update notifications.
       wud.watch: "false"
     restart: unless-stopped
-    # Running directly as the target user bypasses the image's root setpriv
-    # entrypoint, so NO cap_add is needed (unlike the signal-rest-api stack).
+    # The entrypoint override runs signal-cli directly as the target user and
+    # skips the image's s6 /init (and its /run needs), so NO cap_add or tmpfs.
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
       - /opt/docker/openwebui/zeroclaw-signal-cli_data:/signal-data

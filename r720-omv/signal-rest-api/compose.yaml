@@ -1,5 +1,14 @@
 x-versions:
-  signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:0.100"
+  # NOT a release: upstream's CI build of master at caa19af6d (2026-10-10),
+  # i.e. 0.101 plus the json-rpc fixes it lacks - #892 (every received message
+  # printed to the container log, so to Loki) and #893 (startup race leaving
+  # the API unable to send until restarted) - and signal-cli 0.14.9. Without
+  # the later json-rpc receive-mode rework (#897). Move to the first release
+  # tag after 0.101 (0.102+) once it ships: WUD cannot compare a -ci tag, so
+  # it will not announce it (wud.watch is off below for that reason).
+  # 0.101 changed the image: s6-overlay as user 1000 instead of a root
+  # entrypoint, so SIGNAL_CLI_UID/GID are gone - see user/tmpfs below.
+  signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:1791633879-ci"
   apprise: &apprise-version "caronc/apprise:2.0.2"
 
 x-logging: &default-logging
@@ -16,19 +25,23 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    cap_add:
-      - AUDIT_WRITE
-      - DAC_OVERRIDE
-      - CHOWN
-      - SETGID
-      - SETUID
+    # Since 0.101 the image never runs as root (s6-overlay as `signal-api`,
+    # uid 1000), so no capabilities are needed and the old root entrypoint's
+    # SIGNAL_CLI_UID/GID chown is gone. The data dir is 1003:100
+    # (DOCKER_PUID:DOCKER_PGID); without this `user` it fails "permission
+    # denied" (upstream #891). Tested on r720 with the image below, cap_drop
+    # ALL and no-new-privileges.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_drop:
       - ALL
+    # s6 needs a writable, executable /run owned by the running user
+    # (upstream's compose does the same); with no-new-privileges its setuid
+    # preinit cannot fix the ownership itself.
+    tmpfs:
+      - /run:exec,size=64m,uid=${DOCKER_PUID},gid=${DOCKER_PGID},mode=0755
     mem_limit: 768M
     environment:
       MODE: "json-rpc" #supported modes: json-rpc, native, normal
-      SIGNAL_CLI_UID: "${DOCKER_PUID}"
-      SIGNAL_CLI_GID: "${DOCKER_PGID}"
       #AUTO_RECEIVE_SCHEDULE: "0 22 * * *" #enable this parameter on demand
     volumes:
       - "/opt/docker/signal-cli-api/signal-cli-api_data:/home/.local/share/signal-cli"
@@ -45,7 +58,9 @@ services:
       traefik.http.routers.signal-rest-api.middlewares: "trusted-allowlist@docker"
       traefik.http.routers.signal-rest-api.service: "signal-rest-api"
       traefik.http.services.signal-rest-api.loadbalancer.server.port: "8080"
-      wud.watch: "true"
+      # Off while pinned to a -ci build (see x-versions); back to "true" with
+      # the next release tag.
+      wud.watch: "false"
       wud.tag.include: '^\d+\.\d+$$'
       wud.display.name: "Signal Rest API"
       wud.display.icon: "sh:signal"
