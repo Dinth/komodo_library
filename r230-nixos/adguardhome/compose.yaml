@@ -46,4 +46,6 @@ services:
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+-b\.\d+$$'
       wud.display.name: "AdGuard Home"
-      wud.link.template: 'https://github.com/AdguardTeam/AdGuardHome/releases/tag/v$${major}.$${minor}.$${patch}-$${prerelease}'
+      # ${original} is the full tag (v0.108.0-b.90). ${prerelease} is only the
+      # first prerelease field ("b"), which made the link .../v0.108.0-b.
+      wud.link.template: 'https://github.com/AdguardTeam/AdGuardHome/releases/tag/$${original}'
