@@ -1,5 +1,7 @@
 x-versions:
-  trek: &trek-version "mauriceboe/trek:4.3.2"
+  # 4.3.4 = 4.3.3 rebuilt on Node's October 2026 security release. 5.0.0
+  # (a one-way DB migration) is a separate, deliberate step.
+  trek: &trek-version "mauriceboe/trek:4.3.4"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -26,6 +28,12 @@ services:
       - CHOWN
       - SETUID
       - SETGID
+      # PID 1 is dumb-init as root; it forwards SIGTERM to node, which runs as
+      # uid 1000 after gosu, and signalling another uid needs CAP_KILL. Without
+      # it every stop/redeploy timed out into SIGKILL (exit 137) and TREK's
+      # graceful shutdown (close HTTP server + SQLite) never ran. Only reaches
+      # processes in this container's PID namespace. Upstream #2790 / #2791.
+      - KILL
     mem_limit: 1G
     tmpfs:
       - /tmp:noexec,nosuid,size=128m
