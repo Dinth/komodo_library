@@ -1,8 +1,9 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.45.0"
-  # Upstream bundles and tests against postgres:16; 18 is used here to match
-  # the rest of the repo. HealthLog's schema needs no extensions, so nothing in
-  # it depends on the 16 major (pg_stat_statements below is diagnostics only).
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.46.1"
+  # Same major as upstream's compose since 1.46. Its one-shot `db-upgrade`
+  # service (moves a Postgres 16 `pgdata` volume into 18) is left out: this
+  # stack has run 18 from the start. The image's pg_dump is 18 too, which the
+  # nightly dump needs (a client dumps its own major and older only).
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
@@ -24,9 +25,9 @@ services:
       - ALL
     # The image's own `nextjs` user (1001:1001), not DOCKER_PUID: /app/.next
     # (Next.js runtime cache) and /opt/geolite2 (runtime GeoLite2 fetch) are
-    # chowned to 1001 at build time and are the only paths it writes. The app is
-    # stateless - everything lives in Postgres - so there is no bind mount whose
-    # ownership would need to match DOCKER_PUID. Binds :3000, so no caps needed.
+    # chowned to 1001 at build time and are, with the backups dir below, the
+    # only paths it writes. Everything else lives in Postgres. Binds :3000, so
+    # no caps needed.
     # read_only is deliberately NOT set: upstream has not tested it against the
     # Next.js cache, and an Apple Health import stages up to ~1.5G in /tmp,
     # which as a tmpfs would count against mem_limit.
@@ -119,9 +120,15 @@ services:
       # this setting. Up to 1.44.1 every one of those runs failed on gemma4
       # (logged as ai.chain.link_failed cause=network, upstream #1267); 1.44.2
       # retries a thinking-only reply with reasoning off and asks that model
-      # that way for the next hour. Admin -> Assistant can switch reasoning off
-      # or cap it for everyone - the lever if link_failed now reports
-      # failure=timeout (one call took 205 s of its 210 s budget).
+      # that way for the next hour. Through 1.45 the briefing's up to five calls
+      # shared ONE bound of the user timeout + 30 s (210 s here), so the nightly
+      # insight pre-generation failed "all-providers-failed" with
+      # failure=timeout every night; 1.46 gives each call the full user timeout
+      # (#1274). Also since 1.46, background work pauses a provider that keeps
+      # failing (5 min, then 30 min doubling up to a day; the Coach still
+      # reaches it) and saving the AI settings ends the pause. If link_failed
+      # still reports failure=timeout, Admin -> Assistant can switch reasoning
+      # off or cap it for everyone, or raise the per-user timeout (max 600 s).
       AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
       # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
       ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
@@ -174,6 +181,19 @@ services:
       start_interval: 5s
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      # 1.46+: whole-database dumps (pg_dump -Fc + manifest with key
+      # fingerprints): nightly at 01:30 Europe/Berlin (fixed zone, not TZ),
+      # newest 7 kept, plus one before any boot that applies migrations - the
+      # way back from an upgrade (docs/ops/disaster-recovery.md). The app reads
+      # its mount table: without a mount here it keeps no dump, and with no
+      # off-host S3 bucket either, Recovery readiness pushes "failing" to the
+      # admins daily. The host dir must exist as 1001:1001 mode 700 BEFORE the
+      # deploy (Docker would create it root-owned; unwritable = same alert):
+      #   install -d -o 1001 -g 1001 -m 700 /opt/docker/healthlog/backups
+      # ~20 MB per dump. Backrest's 03:00 run picks them up. A failed
+      # pre-migration dump here stops the boot before migrating;
+      # DB_BACKUP_BEFORE_MIGRATE=false skips it once.
+      - /opt/docker/healthlog/backups:/var/lib/healthlog/backups
     networks:
       - healthlog
       - traefik
