@@ -10,7 +10,7 @@ x-versions:
   # against the new image (patched copy is bind-mounted over upstream's).
   whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.6"
-  iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
+  iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
   iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
   cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.12"
   radarr: &radarr-version "lscr.io/linuxserver/radarr:6.4.4"

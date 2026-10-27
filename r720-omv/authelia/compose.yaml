@@ -3,7 +3,7 @@ x-versions:
   # Releases: https://github.com/authelia/authelia/releases
   # Bump this + redeploy (rebuild) to update; the WebAuthn patch re-applies.
   authelia-base: &authelia-base "authelia/authelia:4.39.28"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
 
 x-logging: &default-logging
   driver: "json-file"

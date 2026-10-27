@@ -6,7 +6,7 @@ x-versions:
   # the r720-omv server-builder. "Updating" this service therefore means
   # re-running that Build, not pulling a newer tag.
   kittygram: &kittygram-version "kittygram:latest"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
