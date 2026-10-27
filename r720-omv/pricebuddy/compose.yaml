@@ -17,15 +17,23 @@ x-logging: &default-logging
 services:
   pricebuddy:
     image: *pricebuddy-version
-    # TEMPORARY start-time patch: the laravel/ai Ollama gateway never sends
-    # `think`, and providerOptions are merged into `options` rather than the
-    # top level, so not even config can switch gemma4 reasoning off; every AI
-    # call reasons first. Adds 'think' => false to buildChatRequestBody(), the
-    # single place chat/stream request bodies are built, before the stock
-    # entrypoint. Ollama accepts think:false on non-reasoning models too.
-    # Idempotent; on an anchor miss it logs a WARNING and starts unpatched.
-    # Setting entrypoint clears the image CMD, hence the explicit
-    # /start-app.sh. Revert: delete this entrypoint block.
+    # TEMPORARY start-time patches to the laravel/ai Ollama gateway, applied
+    # before the stock entrypoint. Both are idempotent; on an anchor miss each
+    # logs a WARNING and that patch is skipped. Setting entrypoint clears the
+    # image CMD, hence the explicit /start-app.sh. Revert: delete this block
+    # (and the ollama-tools-format.php mount).
+    # - think: the gateway never sends `think`, and providerOptions are merged
+    #   into `options` rather than the top level, so not even config can switch
+    #   gemma4 reasoning off; every AI call reasons first. Adds
+    #   'think' => false to buildChatRequestBody(), the single place
+    #   chat/stream request bodies are built. Ollama accepts think:false on
+    #   non-reasoning models too.
+    # - tools+format: the gateway sends the output schema together with the
+    #   tools, so Ollama never lets the model call a tool and the AI healer
+    #   guesses selectors blind. Attaches ollama-tools-format.php (see its
+    #   header) as middleware on the gateway's HTTP client. Benchmarked
+    #   2026-10-27 with gemma4:12b-32k: 3/5 real pages healed correctly,
+    #   0/5 unpatched (unpatched it never fetches the page).
     entrypoint:
       - /bin/sh
       - -c
@@ -38,6 +46,15 @@ services:
           echo "think patch: patched"
         else
           echo "WARNING: think patch anchor not found - running UNPATCHED"
+        fi
+        f=/app/vendor/laravel/ai/src/Gateway/Ollama/Concerns/CreatesOllamaClient.php
+        if grep -qF "ollama-tools-format.php" "$$f"; then
+          echo "tools+format patch: already patched"
+        elif [ "$$(grep -cF -e "->throw();" "$$f")" = 1 ]; then
+          sed -i "s|->throw();|->throw()->withMiddleware(require '/opt/pricebuddy-patches/ollama-tools-format.php');|" "$$f"
+          echo "tools+format patch: patched"
+        else
+          echo "WARNING: tools+format patch anchor not found - running UNPATCHED"
         fi
         exec docker-php-entrypoint /start-app.sh
     container_name: pricebuddy
@@ -112,6 +129,7 @@ services:
     # below. Nothing was found using it.
     volumes:
       - /opt/docker/pricebuddy/pricebuddy_data:/app/storage
+      - ./ollama-tools-format.php:/opt/pricebuddy-patches/ollama-tools-format.php:ro
     networks:
       - pricebuddy
       - traefik
