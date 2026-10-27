@@ -3,7 +3,7 @@ x-versions:
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
   # Upstream tags are build datestamps (no semver).
   imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20261021_180331"
-  collabora: &collabora-version "collabora/code:25.04.7.2.1"
+  collabora: &collabora-version "collabora/code:26.04.5.2.1"
   nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.202.1"
   postgres: &postgres-version "postgres:18.6-alpine"
 
@@ -123,6 +123,10 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 1G
+    # 26.04 images are distroless: no start script, coolwsd reads these env
+    # vars itself (extra_params included - checked on a test container).
+    # security.capabilities=false no longer means "no isolation": 26.04
+    # sandboxes each document process with Landlock instead of chroot jails.
     environment:
       TZ: "${TZ}"
       aliasgroup1: "https://nc.${DOMAIN_NAME}:443"
