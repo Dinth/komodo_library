@@ -198,6 +198,11 @@ services:
     container_name: node-exporter
     image: *node-exporter-version
     restart: unless-stopped
+    # RAPL energy counters (/sys/class/powercap/*/energy_uj) are root-only;
+    # a host udev rule (/etc/udev/rules.d/90-rapl-read.rules) hands them to
+    # group rapl (gid 989) so the rapl collector can read them as nobody.
+    group_add:
+      - "989"
     cap_add:
       - CHOWN
       - DAC_OVERRIDE
