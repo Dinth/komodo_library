@@ -256,6 +256,10 @@ services:
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     environment:
       - HOME=/mitmproxy
+      # 12.3.1 (Python 3.15) wrote nothing to `docker logs` - not even the
+      # web UI URL whose ?token= the UI asks for - because stdout is a pipe
+      # and Python buffers it. Unbuffered output brings the token back.
+      - PYTHONUNBUFFERED=1
     ipc: private
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
