@@ -57,6 +57,10 @@ services:
       # 400 page, which reads exactly like a bad API token but is not one.
       ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},10.10.1.13,127.0.0.1"
       GUNICORN_MEDIA: "1"
+      # Running as DOCKER_PUID leaves HOME at /, where the gunicorn shipped in
+      # 2.7 fails to create its control socket dir (`/.gunicorn`, EACCES -
+      # logged as an error, otherwise harmless). /tmp is writable here.
+      HOME: "/tmp"
       # AI features (recipe import from photo/PDF/text, step sort, food and
       # recipe properties) go through litellm. A provider with a `url` is only
       # called if that url is listed here, compared as an exact string. The
@@ -68,12 +72,20 @@ services:
     depends_on:
       tandoor-postgres:
         condition: service_healthy
+    # 2.7 serves its login as part of the new SPA (/ -> 302 /account/login/,
+    # <title>Tandoor</title>), so the old `grep 'Login'` never matched and
+    # autoheal restart-looped a working container. Any 2xx from the login page
+    # means nginx + gunicorn are up; while gunicorn boots nginx answers 502.
+    # A start runs migrate + collectstatic and imports litellm into every
+    # worker: ~2.5 min here, so start_period covers that (start_interval keeps
+    # probing early, the first success ends it).
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 | grep -q 'Login' || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/account/login/ || exit 1"]
       interval: 40s
       timeout: 30s
       retries: 3
-      start_period: 60s
+      start_period: 240s
+      start_interval: 10s
     ports:
       - 1244:80/tcp
     volumes:
