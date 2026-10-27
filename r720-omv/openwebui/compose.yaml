@@ -1,5 +1,15 @@
 x-versions:
-  ollama: &ollama-version "ollama/ollama:0.34.4"
+  # 0.40.2+ runs every model on llama-server and converts models pulled by
+  # older versions (Ollama-format GGUF: vision/audio encoders inside the
+  # model file, Ollama-only metadata) into llama.cpp layout in the background
+  # on first use; until then a compatibility patch loads the old layout. The
+  # original stays as a backup so a downgrade to 0.34.x still works: the
+  # rollback is this tag. Delete the backups once 0.40 is settled (upstream's
+  # jq one-liner in the v0.40.2 release notes) - a later release will remove
+  # them automatically. Pre-upgrade baseline (2026-10-27, 0.34.4): gemma4
+  # already on llama-server with q8_0 KV cache + flash-attn; e4b + 12b-32k
+  # loaded = 13.5 GB of 16 GB; 12b-32k 31-token answer 8.8 s cold, 0.9 s warm.
+  ollama: &ollama-version "ollama/ollama:0.40.11"
   openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.12.4"
   # No version tags upstream (latest/main/nightly only): pinned by digest.
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest@sha256:3dd32882666cf0e77272086446b5639c636fb090ac9ea629c11874200c629164"
