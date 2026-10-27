@@ -123,7 +123,11 @@ services:
         condition: service_healthy
       promtail-socket-proxy:
         condition: service_started
-    command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting" ]
+    # --storage.path puts read positions (docker, journal, file sources) on the
+    # alloy-storage volume. Without it they lived in /data-alloy inside the
+    # container, so every recreate re-read docker logs and 12h of journal and
+    # Loki rejected the resent entries as "too far behind".
+    command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting", "--storage.path=/var/lib/alloy/data" ]
     environment:
       TZ: "${TZ}"
       HOSTNAME: "r720-omv"
