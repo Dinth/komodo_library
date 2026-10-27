@@ -49,7 +49,7 @@ x-versions:
   # Same image as the signal-rest-api stack (an upstream -ci build, see the
   # note there); keep the two in step.
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:1791633879-ci"
-  zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.27.5-alpine"
+  zeroclaw-selector: &zeroclaw-selector-version "nginxinc/nginx-unprivileged:1.31.7-alpine"
 
 # Shared definition for the per-user ZeroClaw instances (zeroclaw-michal,
 # zeroclaw-paulina) — see the design comment above zeroclaw-selector.
