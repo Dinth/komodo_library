@@ -2,7 +2,7 @@ x-versions:
   # Full image, not `-slim`: slim ships no local js-dos runtime (it falls back
   # to jsDelivr, which this stack's CSP does not allow as a script source) and
   # no FAKE-08 at all, so PICO-8 simply would not play.
-  romm: &romm-version "rommapp/romm:5.3.1"
+  romm: &romm-version "rommapp/romm:5.4.1"
   mariadb: &mariadb-version "linuxserver/mariadb:11.8.9"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.2-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls88"
@@ -239,12 +239,19 @@ services:
       WEB_SERVER_CONCURRENCY: "4"
       TZ: "${TZ}"
       STEAMGRIDDB_API_KEY: "${ROMM_STEAMGRIDDB_API_KEY}"
+    # start_period covers long first starts: 5.4.0's migrations rewrite and
+    # backfill the roms table in batches ("give it 15-20 minutes, don't
+    # restart it") and the web server is down meanwhile. With the old 30s
+    # grace, autoheal (label below) would have restarted RomM mid-migration.
+    # Failures inside start_period don't count and the first pass ends it,
+    # so a normal start still turns healthy within seconds.
     healthcheck:
       test: curl -ILfSs http://localhost:8080/ || exit 1
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 30m
+      start_interval: 15s
     depends_on:
       romm-valkey:
         condition: service_healthy
