@@ -1,11 +1,11 @@
 x-versions:
-  grafana: &grafana-version "grafana/grafana:13.2.4"
-  prometheus: &prometheus-version "prom/prometheus:v3.14.0"
+  grafana: &grafana-version "grafana/grafana:13.2.5"
+  prometheus: &prometheus-version "prom/prometheus:v3.15.1"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.12.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.6.1-4.8.4-distroless"
-  blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.28.0"
-  snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.30.1"
+  blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.29.1"
+  snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.31.0"
   mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:1.5.1"
 
 services:

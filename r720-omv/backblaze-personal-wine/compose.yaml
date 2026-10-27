@@ -1,6 +1,6 @@
 x-versions:
   backblaze: &backblaze-version "tessypowder/backblaze-personal-wine:ubuntu22"
-  busybox: &busybox-version "busybox:1.37.0"
+  busybox: &busybox-version "busybox:1.38.0"
 
 x-logging: &default-logging
   driver: "json-file"
