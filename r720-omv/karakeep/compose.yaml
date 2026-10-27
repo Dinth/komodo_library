@@ -188,11 +188,13 @@ services:
       MEILI_NO_ANALYTICS: "true"
       TZ: "${TZ}"
       # ONE-SHOT: Meilisearch refuses data written by an older version. This
-      # migrates it in place on start (one-way). Remove once it has started,
-      # so a later image bump can't migrate unasked. Fallback: delete data.ms,
-      # then Admin Settings > Background Jobs > Reindex All Bookmarks (and
-      # Regenerate Embeddings - they live in the same index).
-      MEILI_UPGRADE_DB: "true"
+      # migrates it in place on start (one-way). Uncomment it together with
+      # an image bump, and comment it out again once the upgradeDatabase task
+      # has succeeded, so a later bump can't migrate unasked (last used:
+      # 1.55.0 -> 1.56.0, 2026-10-27). Fallback: delete data.ms, then Admin
+      # Settings > Background Jobs > Reindex All Bookmarks (and Regenerate
+      # Embeddings - they live in the same index).
+      # MEILI_UPGRADE_DB: "true"
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://127.0.0.1:7700/health || exit 1"]
       interval: 30s
