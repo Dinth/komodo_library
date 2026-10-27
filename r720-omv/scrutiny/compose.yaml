@@ -69,9 +69,20 @@ services:
         permissions: r
     environment:
       COLLECTOR_API_ENDPOINT: "http://scrutiny-web:8080"
+      # Pinned to a daytime run so the spinning HDDs in the ZFS Data pool can
+      # idle overnight. The image default is "0 0 * * *" (midnight), which wakes
+      # every disk for smartctl. entrypoint-collector.sh seds this into
+      # /etc/cron.d/scrutiny. cron uses the container's clock, which is UTC
+      # unless TZ / /etc/localtime below are set, so they keep 11:00 = UK local.
+      COLLECTOR_CRON_SCHEDULE: "0 11 * * *"
+      TZ: "${TZ}"
     ipc: private
     restart: unless-stopped
     volumes:
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
       - type: bind
         source: /run/udev
         target: /run/udev

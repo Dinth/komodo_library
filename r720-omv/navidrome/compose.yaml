@@ -58,6 +58,12 @@ services:
       ND_BACKUP_PATH: "/backup"
       ND_BACKUP_SCHEDULE: "0 4 * * *"
       ND_BACKUP_COUNT: "7"
+      # Periodic library scan pinned to daytime so the spinning HDDs in the ZFS
+      # Data pool (/Data/Music) can idle overnight. Scanner.Schedule is the
+      # 0.55+ name; the old ND_SCANSCHEDULE is not read by 0.64. The filesystem
+      # watcher (Scanner.WatcherWait, default 5s) stays on, so new music is
+      # still picked up between scheduled scans. Same TZ as the backup cron.
+      ND_SCANNER_SCHEDULE: "30 11 * * *"
       # Sorts "Track 2" before "Track 10" instead of lexically. No rescan
       # needed — it is a NATSORT collation applied at query time, not a stored
       # sort key. That is also the catch: the collation cannot use the existing
