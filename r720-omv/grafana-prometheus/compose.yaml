@@ -1,5 +1,5 @@
 x-versions:
-  grafana: &grafana-version "grafana/grafana:13.2.5"
+  grafana: &grafana-version "grafana/grafana:13.3.0"
   prometheus: &prometheus-version "prom/prometheus:v3.15.1"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.12.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
