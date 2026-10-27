@@ -57,6 +57,14 @@ services:
       # 400 page, which reads exactly like a bad API token but is not one.
       ALLOWED_HOSTS: "recipes.${DOMAIN_NAME},10.10.1.13,127.0.0.1"
       GUNICORN_MEDIA: "1"
+      # AI features (recipe import from photo/PDF/text, step sort, food and
+      # recipe properties) go through litellm. A provider with a `url` is only
+      # called if that url is listed here, compared as an exact string. The
+      # space's default provider is the local Ollama on r720 via its
+      # OpenAI-compatible API: model `openai/gemma4:12b-32k` (vision + 32k
+      # context), url below, api_key "ollama" (litellm insists on one, Ollama
+      # ignores it). It lives in cookbook_aiprovider, set up in the DB.
+      AI_ALLOWED_URLS: "http://10.10.1.13:11434/v1"
     depends_on:
       tandoor-postgres:
         condition: service_healthy
