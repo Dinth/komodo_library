@@ -4,7 +4,7 @@ x-versions:
   # no FAKE-08 at all, so PICO-8 simply would not play.
   romm: &romm-version "rommapp/romm:5.4.1"
   mariadb: &mariadb-version "linuxserver/mariadb:11.8.9"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.4-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:v9.1.4-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls88"
   dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2609-ls85"
 
