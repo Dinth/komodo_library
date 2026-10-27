@@ -240,7 +240,12 @@ services:
       traefik.http.routers.nextcloud.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.nextcloud.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.services.nextcloud.loadbalancer.passhostheader: "true"
-      traefik.http.routers.nextcloud.middlewares: "secHeaders@file,nextcloud-redirectregex1,nextcloud-redirectregex2,compresstraefik,nextcloud-securityheaders"
+      # baseHeaders, not secHeaders: secHeaders' estate-wide CSP replaced
+      # Nextcloud's own (a strict per-request nonce policy that apps extend),
+      # so frame-src/form-action no longer allowed collabora.${DOMAIN_NAME}
+      # and Office never loaded its editor. baseHeaders keeps the rest,
+      # including the Remote-* request-header stripping.
+      traefik.http.routers.nextcloud.middlewares: "baseHeaders@file,nextcloud-redirectregex1,nextcloud-redirectregex2,compresstraefik,nextcloud-securityheaders"
       traefik.http.middlewares.compresstraefik.compress: "true"
       traefik.http.middlewares.nextcloud-redirectregex1.redirectregex.permanent: "true"
       traefik.http.middlewares.nextcloud-redirectregex1.redirectregex.regex: "https?://([^/]*)/.well-known/(card|cal)dav"
