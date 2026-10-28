@@ -1,5 +1,5 @@
 x-versions:
-  mariadb: &mariadb-version "linuxserver/mariadb:11.4.12"
+  mariadb: &mariadb-version "mariadb:12.3.3"
   monica: &monica-version "monica:4.1.2-apache"
 
 x-logging: &default-logging
@@ -15,35 +15,42 @@ services:
     hostname: monica-mariadb
     ipc: private
     restart: unless-stopped
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - FOWNER
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     mem_limit: 1g
+    # Server settings the old linuxserver custom.cnf had that differ from the
+    # official image defaults. READ-COMMITTED also keeps 11.8+'s
+    # innodb_snapshot_isolation (REPEATABLE READ only) out of play. Monica
+    # sets utf8mb4_unicode_ci itself; the collation pins keep the old server
+    # default for anything that doesn't.
+    command:
+      - --transaction-isolation=READ-COMMITTED
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --character-set-collations=utf8mb4=utf8mb4_general_ci
     environment:
-      MYSQL_DIR: "/config"
-      DATADIR: "/config/databases"
       MYSQL_ROOT_PASSWORD: "${MONICA_DB_PASS}"
       MYSQL_DATABASE: "monica"
       MYSQL_USER: "monica"
       MYSQL_PASSWORD: "${MONICA_DB_PASS}"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+      # Runs mariadb-upgrade when the image's major version moves ahead of the
+      # datadir (the server refuses to start otherwise) and keeps a dump of
+      # the system tables first.
+      MARIADB_AUTO_UPGRADE: "1"
       TZ: "${TZ}"
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
     volumes:
-      - /opt/docker/monica/mariadb_data:/config
+      # The datadir of the former linuxserver/mariadb container (its
+      # /config/databases); custom.cnf and the binlogs beside it are unused.
+      - /opt/docker/monica/mariadb_data/databases:/var/lib/mysql
     networks:
       - monica
       - adminer
@@ -52,8 +59,9 @@ services:
       wud.display.name: "Monica - MariaDB"
       wud.display.icon: "sh-monica"
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+      # Stay on the 12.3 LTS series (EOL June 2029); 13.x is short-lived rolling.
+      wud.tag.include: '^12\.3\.\d+$$'
+      wud.link.template: 'https://mariadb.com/docs/release-notes/community-server/12.3/$${major}.$${minor}.$${patch}'
 
   monica:
     image: *monica-version
