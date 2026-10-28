@@ -55,7 +55,10 @@ services:
       N8N_USER_FOLDER: "/home/node/.n8n"
       N8N_RUNNERS_ENABLED: "true"
       N8N_LICENSE_ACTIVATION_KEY: ""
-      N8N_LICENSE_AUTO_RENEWAL: "false"
+      # Was N8N_LICENSE_AUTO_RENEWAL, which n8n never read: renewal stayed on
+      # and, from 2.45, its system task failed every 15 min against a licence
+      # cert that expired in May 2025 ("A system task run failed").
+      N8N_LICENSE_AUTO_RENEW_ENABLED: "false"
       N8N_METRICS: 'true'
       N8N_METRICS_INCLUDE_DEFAULT_METRICS: 'true'
       N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL: 'true'
