@@ -122,7 +122,9 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    # 1G logged "Low memory condition detected: only 819 MB of RAM available"
+    # on every start.
+    mem_limit: 2G
     # 26.04 images are distroless: no start script, coolwsd reads these env
     # vars itself (extra_params included - checked on a test container).
     # security.capabilities=false no longer means "no isolation": 26.04
@@ -134,6 +136,12 @@ services:
       password: "${COLLABORA_ADMIN_PASSWORD}"
       extra_params: "--o:ssl.enable=false --o:ssl.termination=true --o:logging.level=warning --o:security.capabilities=false"
       dictionaries: "en_GB en_US pl_PL"
+    volumes:
+      # WOPI proof key: Collabora signs its requests to Nextcloud and publishes
+      # the public half in /hosting/discovery, so Office can verify they really
+      # come from Collabora. Generated 2026-10-28 with
+      # `ssh-keygen -t rsa -b 2048 -m PEM -N ""`, owned 1001 (cool), mode 0400.
+      - /opt/docker/nextcloud/collabora/proof_key:/etc/coolwsd/proof_key:ro
     networks:
       - nextcloud
       - traefik
