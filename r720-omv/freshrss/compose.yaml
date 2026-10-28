@@ -19,6 +19,10 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 1G
+    # Same reason as the freshrss service's dns: bridges fetch arbitrary sites.
+    dns:
+      - 10.10.1.12
+      - 10.10.0.1
     entrypoint: ["sh", "-c", "/app/bin/cache-clear && exec /app/docker-entrypoint.sh"]
     healthcheck:
       # The old check echoed "HTTP FAIL" and still exited 0, so it never failed.
@@ -87,6 +91,16 @@ services:
     security_opt:
       - no-new-privileges:true
     mem_limit: 1G
+    # Look up feed hosts at AdGuard directly (pfSense only if AdGuard fails to
+    # answer), not via r720's systemd-resolved. resolved treats a SERVFAIL as a
+    # dead server and switches all of r720 to pfSense, which answers
+    # *.wickhay.uk with public Cloudflare IPs: one dead feed domain refreshed
+    # every 10 min did that 61 times in a night (2026-10-28). Docker's
+    # embedded DNS still answers container names and tries these per query,
+    # without sticking to the second.
+    dns:
+      - 10.10.1.12
+      - 10.10.0.1
     environment:
       TRUSTED_PROXIES: "traefik"
       # 1.30.0 blocks fetching from private/loopback addresses by default (SSRF
