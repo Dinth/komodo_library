@@ -6,7 +6,7 @@ x-versions:
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.6.1-4.8.4-distroless"
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.29.1"
   snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.31.0"
-  mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:1.5.1"
+  mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:2.1.1"
 
 services:
   grafana:
@@ -466,6 +466,9 @@ services:
       - ":5133"
       - "--enabled-tools"
       - "search,dashboard,datasources,prometheus,loki,alerting,annotations,navigation"
+      # 2.0 turned anonymous usage statistics on by default.
+      - "--usage-stats"
+      - "disabled"
       # DNS-rebinding Host allowlist (added in 0.17.x). Without it the default is
       # loopback-only, so LAN access via 10.10.1.13:5133 (Claude .mcp.json) and
       # in-cluster mcp-grafana:5133 (OpenWebUI's MCP client) are both rejected
