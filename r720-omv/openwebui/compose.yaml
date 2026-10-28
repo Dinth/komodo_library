@@ -167,13 +167,14 @@ services:
       # belong on the 70W card, and putting them on a 230W one costs far more
       # in continuous draw than the bursty LLM work gains.
       NVIDIA_VISIBLE_DEVICES: "GPU-fc3316a9-5356-110a-282a-7c1cb6dfae03"
-      # Two slots per model, so a second request to the same model (HA voice
-      # next to PriceBuddy/HealthLog at 7am) runs alongside instead of queueing
-      # behind a multi-minute prompt. Costs one more context per model: gemma4
-      # keeps full-window KV on only 8 layers, so 12b-32k grows ~0.6 GB
-      # (272 MB + 340 MB SWA at q8_0) and e4b ~0.3 GB; 2.8 GB was free on the
-      # RTX 5000 with both loaded (2026-10-28). Was "1".
-      OLLAMA_NUM_PARALLEL: "2"
+      # Keep at 1. Tried 2 on 2026-10-28 so same-model requests would stop
+      # queueing: the real KV cost is small (gemma4 keeps full-window KV on few
+      # layers; e4b stayed 3.1 GiB), but Ollama's scheduler sizes a load from
+      # its own estimate, which put e4b at 12.2 GiB with 2 slots. It no longer
+      # "fit" next to 12b-32k, so it evicted 12b-32k (waiting 71 s for its
+      # in-flight request) - HA's model and 12b-32k would keep evicting each
+      # other. There is no setting to correct the estimate.
+      OLLAMA_NUM_PARALLEL: "1"
       # HA's pinned gemma4:e4b + gemma4:12b-32k (ZeroClaw/Open WebUI/Karakeep)
       # + nomic-embed-text (ZeroClaw memory) must coexist without evicting HA's
       # model (~3.4 + 8.1 + 0.3 GB on the 16 GB RTX 5000).
