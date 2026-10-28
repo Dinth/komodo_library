@@ -42,7 +42,9 @@ services:
     labels:
       komodo.skip:
       wud.watch: "true"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
+      # Held on MongoDB 8.3 (michal's call, 2026-10-28). 9.0 needs FCV 8.3 set
+      # first and a deliberate upgrade; widen this only when doing that.
+      wud.tag.include: '^8\.3\.\d+$$'
       wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo Mongo DB'
       wud.display.icon: 'sh:komodo'

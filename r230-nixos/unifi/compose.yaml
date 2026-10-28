@@ -40,11 +40,12 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      # Held on the 8.x line. UniFi Network 10.x officially supports MongoDB
-      # only up to 8.0 (8.3 here already runs past that). Its bundled Java
-      # driver 5.1.4 is untested against 9.0, and 9.0 also needs FCV 8.3 set
-      # first. Widen the regex only once Ubiquiti or linuxserver list 9.0.
-      wud.tag.include: '^8\.\d+\.\d+$$'
+      # Held on MongoDB 8.3, like the other Mongo instances (michal's call,
+      # 2026-10-28). UniFi Network 10.x officially supports MongoDB only up to
+      # 8.0 (8.3 here already runs past that). Its bundled Java driver 5.1.4 is
+      # untested against 9.0, and 9.0 also needs FCV 8.3 set first. Widen the
+      # regex only once Ubiquiti or linuxserver list 9.0.
+      wud.tag.include: '^8\.3\.\d+$$'
       wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
       wud.display.name: 'Unifi Network Application - Mongo DB'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'

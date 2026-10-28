@@ -4,7 +4,7 @@ x-versions:
   # Same tag as misp-core: the nginx image ships that release's webroot.
   misp-nginx-version: &misp-nginx-version ghcr.io/misp/misp-docker/misp-nginx:v2.5.50
   misp-modules-version: &misp-modules-version ghcr.io/misp/misp-docker/misp-modules:v3.1.1
-  misp-mariadb-version: &misp-mariadb-version mariadb:12.3
+  misp-mariadb-version: &misp-mariadb-version mariadb:12.3.3
   misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.3-alpine
   mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:12.3.1
 
@@ -238,11 +238,12 @@ services:
     labels:
       # The r720-omv watcher runs WATCHALL=true, so this container is watched
       # whether or not it is labelled. Without an include regex WUD considers
-      # every mariadb tag — which is why it kept offering the 13.x release
-      # candidates (13.0-rc, 13.0.1-ubi10-rc, ...) alongside the -noble/-ubi/
-      # -resolute variants. Only bare GA series tags match the pin above.
+      # every mariadb tag, which is why it kept offering the 13.x release
+      # candidates and the -noble/-ubi/-resolute variants. Held on the 12.3 LTS
+      # series (EOL June 2029) like the other MariaDB instances; 13.x is
+      # short-lived rolling.
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+$$'
+      wud.tag.include: '^12\.3\.\d+$$'
       wud.display.name: "MISP - MariaDB"
       wud.display.icon: "sh:mariadb"
 
