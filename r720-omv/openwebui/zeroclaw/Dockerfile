@@ -13,13 +13,9 @@
 # registry and target caches.
 #
 # Patches:
-#   0001  upstream PR #10845 (merged to master 2026-09-14, not in v0.8.5): the
-#         deferred MCP index lists one <=200-char summary line per tool instead
-#         of its full description. Without it the "## Deferred Tools" section
-#         was ~229k chars (~58k tokens) for our 312 MCP tools, so local models
-#         only ever saw a truncated fragment of the prompt. tool_search still
-#         searches and returns the full descriptions. Drop this patch once a
-#         release contains it (v0.8.6+).
+#   (0001, upstream #10845, and 0006, upstream #10914 + #11479, were dropped
+#   at v0.8.7: both ship in v0.8.6. Numbering is kept so history stays
+#   readable.)
 #   0002  local, not upstream: when a model calls a deferred MCP tool
 #         (`<server>__<tool>`) by name without calling tool_search first, the
 #         agent activates it through the registered tool_search (`select:<name>`,
@@ -33,23 +29,18 @@
 #         signal-cli getAttachment into the message so [media_pipeline] can
 #         describe/transcribe them (v0.8.5 dropped them); local_whisper sends
 #         the upload as `audio_file` for whisper-asr-webservice /asr URLs.
-#   0005  local, on top of 0001: the deferred index is sorted, so the system
+#   0005  local, on top of upstream #10845: the deferred index is sorted, so the system
 #         prompt is identical across restarts and the model server can reuse
 #         its KV cache; ZEROCLAW_DEFERRED_SUMMARY_CHARS overrides the summary
 #         cap (0 = names only).
-#   0006  backport of upstream #10914 + #11479 (merged after v0.8.5): an
-#         array/object argument sent as a JSON-encoded string is decoded
-#         where the tool's schema declares that type (gemma4 sent
-#         {"metrics":"[\"weight\"]"} and HealthLog answered -32602), for
-#         native and text-parsed calls. Drop it at v0.8.6+.
 #
 # Bump procedure: change the tag in compose additional_contexts AND the image
 # tag together, re-diff upstream Dockerfile.debian for stage changes, and check
 # every patch still applies (git apply --check).
 
-# >>> copied from upstream Dockerfile.debian (v0.8.5) <<<
-ARG ZEROCLAW_BASE_NODE=node:24-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e
-ARG ZEROCLAW_BASE_RUST_BOOKWORM=rust:1.98-bookworm@sha256:82150a52ec202c1b14d7817e14516c392bb7f5cfebd88f1ed531cb37ebd39922
+# >>> copied from upstream Dockerfile.debian (v0.8.7) <<<
+ARG ZEROCLAW_BASE_NODE=node:24-bookworm-slim@sha256:91acba91b842bec0bf7ea6f5e09c644c7ccad72c4996ed9616d861d1c7cd60d4
+ARG ZEROCLAW_BASE_RUST_BOOKWORM=rust:1.98-bookworm@sha256:93ce27a88655056a51dbdd8f5f2d7ddc071c7b0070fb288a37b5a285fc83971e
 
 # ── Stage S: patched upstream source ────────────────────────────
 FROM ${ZEROCLAW_BASE_RUST_BOOKWORM} AS src
@@ -78,7 +69,8 @@ RUN set -eux; \
     for f in crates/*/tests/fixtures/*/Cargo.toml; do \
       if [ -f "$f" ]; then cp --parents "$f" /manifests/; fi; \
     done; \
-    cp -r wit /manifests/wit
+    cp -r wit /manifests/wit; \
+    cp -r vendor /manifests/vendor
 
 # ── Stage 0: Frontend build ─────────────────────────────────────
 FROM ${ZEROCLAW_BASE_NODE} AS web-node
@@ -110,8 +102,19 @@ RUN --mount=type=cache,id=zeroclaw-cargo-registry,target=/usr/local/cargo/regist
 FROM ${ZEROCLAW_BASE_RUST_BOOKWORM} AS builder
 
 WORKDIR /app
-# Upstream dist feature set plus channel-signal (compose passes the same string).
-ARG ZEROCLAW_CARGO_FLAGS="--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-git,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,whatsapp-web,channel-signal"
+# The v0.8.5 dist feature set plus tools-external and channel-signal (compose
+# passes the same string). Since v0.8.6 (#11221) web_search_tool, weather,
+# browser_open, pushover etc. compile only with tools-external; both instances
+# auto-approve web_search_tool and weather. Upstream's v0.8.7 dist set also
+# adds plugins-wasm-cranelift and the tool-* integrations (Jira, Notion,
+# Composio, Google Workspace, M365, LinkedIn, coding CLIs, project-intel):
+# none is configured in either config.toml, so they are left out.
+ARG ZEROCLAW_CARGO_FLAGS="--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-git,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,tools-external,whatsapp-web,channel-signal"
+
+# No `.git` in the build context; upstream passes the commit in here. Free-form:
+# shows up as `0.8.7 (<id>)` in `zeroclaw status`.
+ARG ZEROCLAW_BUILD_ID="v0.8.7+local-p4"
+ENV ZEROCLAW_BUILD_ID=${ZEROCLAW_BUILD_ID}
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -140,6 +143,8 @@ RUN mkdir -p src src/bin benches apps/tauri/src apps/zerocode/src apps/zerorelay
     && echo "fn main() {}" > xtask/src/bin/web.rs \
     && mkdir -p crates/zeroclaw-hardware/examples \
     && echo "fn main() {}" > crates/zeroclaw-hardware/examples/esp32_sim.rs \
+    && mkdir -p crates/zeroclaw-plugins/examples \
+    && echo "fn main() {}" > crates/zeroclaw-plugins/examples/sign_manifest.rs \
     && for d in crates/*/; do mkdir -p "${d}src" && printf '' > "${d}src/lib.rs"; done \
     && for d in crates/*/tests/fixtures/*/; do [ -f "${d}Cargo.toml" ] || continue; mkdir -p "${d}src" && printf '' > "${d}src/lib.rs"; done \
     && printf 'fn main() {}' > crates/zeroclaw-log/tests/fixtures/attribution-macro-consumer/src/main.rs
@@ -162,6 +167,9 @@ COPY --from=src /src/tools/fill-translations/ tools/fill-translations/
 COPY --from=src /src/apps/zerocode/ apps/zerocode/
 COPY --from=src /src/web/src/ web/src/
 COPY --from=src /src/locales.toml .
+# Root build.rs emits ZEROCLAW_VERSION (read with env!()); without it the
+# compile fails (upstream `COPY *.rs .`, v0.8.6+).
+COPY --from=src /src/build.rs .
 COPY --from=web-builder /app/web/dist web/dist
 RUN touch src/main.rs src/lib.rs apps/zerocode/src/main.rs
 RUN --mount=type=cache,id=zeroclaw-cargo-registry,target=/usr/local/cargo/registry,sharing=locked \
@@ -221,6 +229,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         git \
         vim-tiny \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' ca-certificates)" ge '20250419~deb12u2' \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/zeroclaw /usr/local/bin/zeroclaw
@@ -228,7 +237,7 @@ COPY --from=builder /app/zerocode /usr/local/bin/zerocode
 COPY --from=builder /zeroclaw-data /zeroclaw-data
 COPY --from=web-builder /app/web/dist /usr/share/zeroclawlabs/web/dist
 
-LABEL org.opencontainers.image.description="ZeroClaw v0.8.5 debian + channel-signal + local patches 0001-0006"
+LABEL org.opencontainers.image.description="ZeroClaw v0.8.7 debian + channel-signal + local patches 0002-0005"
 
 ENV LANG=C.UTF-8
 ENV ZEROCLAW_DATA_DIR=/zeroclaw-data/data

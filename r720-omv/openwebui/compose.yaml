@@ -23,11 +23,12 @@ x-versions:
   # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
   # default distroless image has NO shell and breaks the agent's shell tool;
   # the prebuilt ghcr images also lack the channel-signal Cargo feature. So this
-  # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream v0.8.5
+  # is built LOCALLY (see build: in x-zeroclaw-common) from the upstream v0.8.7
   # tag via the in-repo wrapper at ./zeroclaw (Dockerfile + patches/), with the
-  # dist feature set plus channel-signal (~40 min on omv). It carries the local
-  # patches in ./zeroclaw/patches:
-  #   0001 upstream PR #10845: one <=200-char summary line per deferred MCP tool
+  # v0.8.5 dist feature set plus tools-external and channel-signal (~40 min on
+  # omv; see the Dockerfile for why the newer tool-* features are left out). It
+  # carries the local patches in ./zeroclaw/patches (0001 = upstream #10845 and
+  # 0006 = upstream #10914 + #11479 ship in v0.8.6, so they were dropped):
   #   0002 local: auto-activate a deferred MCP tool the model calls directly by
   #        name (via tool_search)
   #   0003 local: skip MCP notification frames when reading an SSE tool
@@ -37,15 +38,12 @@ x-versions:
   #   0005 local: deferred tool index sorted (stable prompt -> Ollama KV-cache
   #        reuse across turns) and ZEROCLAW_DEFERRED_SUMMARY_CHARS env
   #        (0 = names only)
-  #   0006 backport of upstream #10914 + #11479: decode an array/object
-  #        argument the model sent as a JSON string, where the tool schema
-  #        declares it (HealthLog get_metrics -32602); drop at v0.8.6+
   # The image tag MUST be bumped whenever patches/ or the Dockerfile change:
   # with `pull_policy: never` compose reuses an existing local tag, so a
   # Komodo Deploy would not rebuild. Upstream bump: change the tag in
   # additional_contexts AND this image tag together, and check the patches
   # still apply.
-  zeroclaw: &zeroclaw-version "zeroclaw:0.8.5-signal-p6-debian"
+  zeroclaw: &zeroclaw-version "zeroclaw:0.8.7-signal-p4-debian"
   # Same image as the signal-rest-api stack (an upstream -ci build, see the
   # note there); keep the two in step.
   zeroclaw-signal-cli: &zeroclaw-signal-cli-version "bbernhard/signal-cli-rest-api:1791633879-ci"
@@ -61,10 +59,15 @@ x-zeroclaw-common: &zeroclaw-common
   environment:
     # Image sets HOME itself, but keep it explicit because user: is overridden.
     HOME: "/zeroclaw-data"
-    # Read by ZeroClaw's web_search tool. In-network for the same reason as
-    # openwebui's SEARXNG_QUERY_URL: the public router is behind Authelia
-    # forward-auth. Requires the traefik network below to resolve `searxng`.
-    SEARXNG_INSTANCE_URL: "http://searxng:8080"
+    # web_search_tool through SearXNG instead of its DuckDuckGo default. The
+    # plain SEARXNG_INSTANCE_URL that used to be here was never read by any
+    # version: config comes from config.toml plus ZEROCLAW_<section>__<field>
+    # overrides, and an override that names no schema field stops the daemon
+    # from starting. In-network for the same reason as openwebui's
+    # SEARXNG_QUERY_URL: the public router is behind Authelia forward-auth.
+    # Requires the traefik network below to resolve `searxng`.
+    ZEROCLAW_web_search__search_provider: "searxng"
+    ZEROCLAW_web_search__searxng_instance_url: "http://searxng:8080"
     # Read by local patch 0005. 0 = deferred MCP tools listed by name only
     # (tool_search still returns full descriptions/schemas); with the sorted
     # index: system prompt ~44k -> ~17k chars, Ollama reuses its prompt cache
@@ -96,9 +99,9 @@ x-zeroclaw-common: &zeroclaw-common
     context: ./zeroclaw
     dockerfile: Dockerfile
     additional_contexts:
-      upstream: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.5"
+      upstream: "https://github.com/zeroclaw-labs/zeroclaw.git#v0.8.7"
     args:
-      ZEROCLAW_CARGO_FLAGS: "--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-git,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,whatsapp-web,channel-signal"
+      ZEROCLAW_CARGO_FLAGS: "--no-default-features --features acp-bridge,agent-runtime,channel-acp-server,channel-discord,channel-email,channel-filesystem,channel-git,channel-lark,channel-matrix,channel-telegram,channel-webhook,gateway,observability-prometheus,schema-export,tools-external,whatsapp-web,channel-signal"
   image: *zeroclaw-version
   pull_policy: never
   ipc: private
@@ -978,7 +981,7 @@ configs:
               proxy_cache off;
               proxy_read_timeout 1h;
               proxy_send_timeout 1h;
-              # v0.8.5 dashboard image uploads.
+              # Dashboard image uploads.
               client_max_body_size 25m;
           }
       }

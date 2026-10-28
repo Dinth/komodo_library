@@ -1,14 +1,16 @@
 From: Michal Gawronski-Kot <michal@gawronskikot.com>
 Subject: [PATCH] fix(agent): auto-activate deferred MCP tools called directly by name
 
-Local komodo_library patch on top of v0.8.5 (not upstream). When a model calls
+Local komodo_library patch, refreshed onto v0.8.7 (not upstream). When a model calls
 a deferred `<server>__<tool>` without calling tool_search first, activate it via
 the registered tool_search (`select:<name>`, same access policy) and execute it,
 instead of returning "Unknown tool".
 ---
+diff --git a/crates/zeroclaw-runtime/src/agent/tool_execution.rs b/crates/zeroclaw-runtime/src/agent/tool_execution.rs
+index aa587c460..23f78fc77 100644
 --- a/crates/zeroclaw-runtime/src/agent/tool_execution.rs
 +++ b/crates/zeroclaw-runtime/src/agent/tool_execution.rs
-@@ -171,7 +171,7 @@
+@@ -177,7 +177,7 @@ pub(crate) async fn execute_one_tool(
      }
  
      let static_tool = find_tool(dispatch.tools_registry, call_name);
@@ -17,7 +19,7 @@ instead of returning "Unknown tool".
          match dispatch.activated_tools {
              Some(at) => {
                  let activated_tools = match at.lock() {
-@@ -201,6 +201,35 @@
+@@ -207,6 +207,35 @@ pub(crate) async fn execute_one_tool(
      } else {
          None
      };

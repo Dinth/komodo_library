@@ -1,7 +1,7 @@
 From: Michal Gawronski-Kot <michal@gawronskikot.com>
 Subject: [PATCH] perf(mcp): stable, optionally names-only deferred tool index
 
-Local komodo_library patch on top of 0001 (not upstream). Deferred stubs
+Local komodo_library patch on top of upstream #10845 (in v0.8.6+; not upstream itself). Deferred stubs
 arrive in MCP connect-completion order, which differs on every process
 start, so the ~35k-char index (308 tools) never matched the model server's
 cached prefix and every new turn re-prefilled ~20k tokens (~20 s on the RTX
@@ -10,9 +10,11 @@ cached prefix and every new turn re-prefilled ~20k tokens (~20 s on the RTX
 0 lists names only (~9.8k chars). tool_search still matches and returns the
 full descriptions and schemas.
 ---
+diff --git a/crates/zeroclaw-tools/src/mcp_deferred.rs b/crates/zeroclaw-tools/src/mcp_deferred.rs
+index 90c798e25..7bd67555b 100644
 --- a/crates/zeroclaw-tools/src/mcp_deferred.rs
 +++ b/crates/zeroclaw-tools/src/mcp_deferred.rs
-@@ -261,6 +261,20 @@
+@@ -342,6 +342,20 @@ impl Default for ActivatedToolSet {
  /// Longest one-line summary the deferred index carries per tool, in chars.
  const DEFERRED_SUMMARY_MAX_CHARS: usize = 200;
  
@@ -33,26 +35,16 @@ full descriptions and schemas.
  /// The one-line summary the index shows for a deferred tool: the first
  /// non-empty line of its description, capped at
  /// [`DEFERRED_SUMMARY_MAX_CHARS`] on a char boundary.
-@@ -272,15 +286,16 @@
+@@ -353,7 +367,7 @@ const DEFERRED_SUMMARY_MAX_CHARS: usize = 200;
  /// of hundred deferred tools the bodies alone cost more context per turn than
  /// every activated schema combined.
  fn deferred_summary_line(description: &str) -> String {
-+    let max_chars = deferred_summary_max_chars();
-     let line = description
-         .lines()
-         .map(str::trim)
-         .find(|l| !l.is_empty())
-         .unwrap_or("");
--    if line.chars().count() <= DEFERRED_SUMMARY_MAX_CHARS {
-+    if line.chars().count() <= max_chars {
-         return line.to_string();
-     }
--    let mut cut: String = line.chars().take(DEFERRED_SUMMARY_MAX_CHARS).collect();
-+    let mut cut: String = line.chars().take(max_chars).collect();
-     cut.push_str("...");
-     cut
+-    summary_line(description, DEFERRED_SUMMARY_MAX_CHARS)
++    summary_line(description, deferred_summary_max_chars())
  }
-@@ -321,7 +336,13 @@
+ 
+ fn summary_line(description: &str, max_chars: usize) -> String {
+@@ -447,7 +461,13 @@ pub fn build_deferred_tools_section_excluding(
      );
      out.push_str("<available-deferred-tools>\n");
      let mut count = 0;
@@ -67,7 +59,7 @@ full descriptions and schemas.
          if exclude.contains(&stub.prefixed_name) {
              continue;
          }
-@@ -331,8 +352,11 @@
+@@ -457,8 +477,11 @@ pub fn build_deferred_tools_section_excluding(
              continue;
          }
          out.push_str(&stub.prefixed_name);

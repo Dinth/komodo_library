@@ -1,7 +1,7 @@
 From: Michal Gawronski-Kot <michal@gawronskikot.com>
 Subject: [PATCH] feat(signal): deliver photos and voice notes to the media pipeline
 
-Local komodo_library patch on top of v0.8.5 (not upstream). The Signal
+Local komodo_library patch, rebased onto v0.8.7 (not upstream; upstream PR #11556 is the open equivalent). The Signal
 channel always built ChannelMessage with `attachments: vec![]` and produced
 no message at all for a caption-less photo or voice note, so both were
 silently dropped. Attachments are now fetched from signal-cli
@@ -15,9 +15,11 @@ Also: the local_whisper transcription provider sends the upload as
 `audio_file` when its URL path ends in /asr (whisper-asr-webservice) instead
 of `file` (whisper.cpp / OpenAI-style).
 ---
+diff --git a/crates/zeroclaw-channels/src/signal.rs b/crates/zeroclaw-channels/src/signal.rs
+index ea3c4fa77..e40076912 100644
 --- a/crates/zeroclaw-channels/src/signal.rs
 +++ b/crates/zeroclaw-channels/src/signal.rs
-@@ -469,12 +469,21 @@
+@@ -509,12 +509,21 @@ impl SignalChannel {
                  Vec::new()
              }
          } else {
@@ -41,7 +43,7 @@ of `file` (whisper.cpp / OpenAI-style).
          };
          contents
              .into_iter()
-@@ -511,6 +520,93 @@
+@@ -551,6 +560,93 @@ impl SignalChannel {
              })
              .collect()
      }
@@ -135,7 +137,7 @@ of `file` (whisper.cpp / OpenAI-style).
      fn random_id_suffix() -> String {
          use rand::RngExt;
          const CHARSET: &[u8] = b"0123456789abcdef";
-@@ -744,7 +840,8 @@
+@@ -802,7 +898,8 @@ impl Channel for SignalChannel {
                                  Ok(sse) => {
                                      if let Some(ref envelope) = sse.envelope {
                                          let mut consumed_as_approval = false;
@@ -143,9 +145,9 @@ of `file` (whisper.cpp / OpenAI-style).
 +                                        let mut messages = self.process_envelope(envelope);
 +                                        self.hydrate_attachments(envelope, &mut messages).await;
                                          for msg in messages {
-                                             if let Some((token, response)) =
-                                                 crate::util::parse_approval_reply(&msg.content)
-@@ -796,7 +893,9 @@
+                                             if let Some(resolution) =
+                                                 self.resolve_approval_reply(&msg).await
+@@ -854,7 +951,9 @@ impl Channel for SignalChannel {
                  match serde_json::from_str::<SseEnvelope>(&current_data) {
                      Ok(sse) => {
                          if let Some(ref envelope) = sse.envelope {
@@ -153,12 +155,14 @@ of `file` (whisper.cpp / OpenAI-style).
 +                            let mut messages = self.process_envelope(envelope);
 +                            self.hydrate_attachments(envelope, &mut messages).await;
 +                            for msg in messages {
-                                 if let Some((token, response)) =
-                                     crate::util::parse_approval_reply(&msg.content)
-                                 {
+                                 if let Some(resolution) = self.resolve_approval_reply(&msg).await
+                                     && !matches!(
+                                         resolution,
+diff --git a/crates/zeroclaw-channels/src/transcription.rs b/crates/zeroclaw-channels/src/transcription.rs
+index 851220c19..1a4359aa9 100644
 --- a/crates/zeroclaw-channels/src/transcription.rs
 +++ b/crates/zeroclaw-channels/src/transcription.rs
-@@ -897,8 +897,12 @@
+@@ -918,8 +918,12 @@ impl TranscriptionProvider for LocalWhisperProvider {
              req = req.bearer_auth(token);
          }
  
@@ -172,7 +176,7 @@ of `file` (whisper.cpp / OpenAI-style).
              .timeout(std::time::Duration::from_secs(self.timeout_secs))
              .send()
              .await
-@@ -908,6 +912,13 @@
+@@ -929,6 +933,13 @@ impl TranscriptionProvider for LocalWhisperProvider {
      }
  }
  
