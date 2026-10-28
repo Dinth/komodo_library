@@ -1,8 +1,7 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.7.9"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.13.2"
-  alloy: &alloy-version "grafana/alloy:v1.21.2"
-
+  alloy: &alloy-version "grafana/alloy:v1.21.3
 x-logging: &default-logging
   driver: "json-file"
   options:
