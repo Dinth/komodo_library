@@ -1258,6 +1258,11 @@ API: https://pipedapi.wickhay.uk / proxy: https://pipedproxy.wickhay.uk (trusted
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
+poll_for_updates = true
+auto_update = true
+# Built locally by the piped-backend Komodo Build (rebuild-local-images);
+# there is no registry image to poll.
+auto_update_skip_services = ["piped-backend"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/piped"
@@ -1408,6 +1413,7 @@ tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/searxng"

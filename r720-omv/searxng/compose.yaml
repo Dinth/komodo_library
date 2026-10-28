@@ -1,5 +1,9 @@
 x-versions:
-  searxng: &searxng-version "docker.io/searxng/searxng:2026.10.27-ef7bae9dd"
+  # Rolling release with a new dated tag almost every day, so this follows
+  # :latest and the Komodo stack has auto_update on (stacks.toml): Global Auto
+  # Update redeploys it when a new image lands (checked every 8 h). WUD
+  # ignores it.
+  searxng: &searxng-version "docker.io/searxng/searxng:latest"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
 
 x-logging: &default-logging
@@ -157,15 +161,8 @@ services:
       # added it recorded pricebuddy as a non-consumer on exactly that basis.
       traefik.http.routers.searxng.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.searxng.loadbalancer.server.port: "8080"
-      wud.watch: "true"
-      # SearXNG is a rolling release: it publishes no GitHub releases and no git
-      # tags at all, so the usual '^v\d+\.\d+\.\d+$' + /releases/tag/ pattern
-      # matched nothing and linked to a 404. Its Docker tags are
-      # YYYY.M.D-<short-commit>, which parses as semver with the commit as the
-      # prerelease part, so the date drives ordering and ${prerelease} gives the
-      # exact commit the image was built from.
-      wud.tag.include: '^\d{4}\.\d{1,2}\.\d{1,2}-[0-9a-f]{7,}$$'
-      wud.link.template: 'https://github.com/searxng/searxng/commit/$${prerelease}'
+      # Komodo auto_update keeps :latest current (see x-versions).
+      wud.watch: "false"
       wud.display.name: "Searxng"
       wud.display.icon: "sh-searxng"
 
