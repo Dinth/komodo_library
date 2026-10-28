@@ -3,7 +3,9 @@ x-versions:
   # to jsDelivr, which this stack's CSP does not allow as a script source) and
   # no FAKE-08 at all, so PICO-8 simply would not play.
   romm: &romm-version "rommapp/romm:5.4.1"
-  mariadb: &mariadb-version "linuxserver/mariadb:11.8.9"
+  # Official image: linuxserver/mariadb stops at 11.8. 12.3 is the current LTS
+  # (EOL June 2029); MARIADB_AUTO_UPGRADE below runs mariadb-upgrade itself.
+  mariadb: &mariadb-version "mariadb:12.3.3"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls88"
   dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2609-ls85"
@@ -72,12 +74,7 @@ services:
     hostname: romm-mariadb
     ipc: private
     restart: unless-stopped
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - FOWNER
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_drop:
       - ALL
     security_opt:
@@ -92,24 +89,44 @@ services:
           memory: 3g
         reservations:
           memory: 512m
+    # The tuning the old linuxserver custom.cnf carried (set 2026-06-22), minus
+    # values that are now the defaults: READ-COMMITTED (12.x defaults to
+    # REPEATABLE READ), the utf8mb4_general_ci server collation, a 2G buffer
+    # pool and a larger redo log, flush-per-second commits and raised I/O
+    # capacity. Binary logging is off now: nothing replicates from it, it had
+    # grown to 8.5 GB (11.x keeps binlogs until a replica has read them), and
+    # without it the trigger-creating migrations no longer need
+    # log_bin_trust_function_creators.
+    command:
+      - --transaction-isolation=READ-COMMITTED
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --innodb-buffer-pool-size=2G
+      - --innodb-log-file-size=256M
+      - --innodb-flush-log-at-trx-commit=2
+      - --innodb-io-capacity=2000
+      - --innodb-io-capacity-max=4000
+      - --innodb-open-files=1000
     environment:
-      MYSQL_DIR: "/config"
-      DATADIR: "/config/databases"
       MYSQL_ROOT_PASSWORD: "${ROMM_DB_PASS}"
       MYSQL_DATABASE: "romm"
       MYSQL_USER: "romm"
       MYSQL_PASSWORD: "${ROMM_DB_PASS}"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+      # Runs mariadb-upgrade when the image's major version moves ahead of the
+      # datadir (the server refuses to start otherwise) and keeps a dump of
+      # the system tables first.
+      MARIADB_AUTO_UPGRADE: "1"
       TZ: "${TZ}"
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
     volumes:
-      - /opt/docker/romm/mariadb_data:/config
+      # The datadir of the former linuxserver/mariadb container (its
+      # /config/databases); custom.cnf and the binlogs beside it are unused.
+      - /opt/docker/romm/mariadb_data/databases:/var/lib/mysql
     networks:
       - romm
       - adminer
@@ -118,11 +135,9 @@ services:
       wud.display.name: "Romm - MariaDB"
       wud.display.icon: "sh-romm"
       wud.watch: "true"
-      # No `v` prefix: LSIO publishes bare `11.4.8` alongside its `-r0-lsNNN`
-      # builds. `^v\d+\.\d+\.\d+$$` matched none of the 1310 published tags, so
-      # WUD silently tracked nothing here rather than reporting a bad candidate.
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+      # Stay on the 12.3 LTS series (EOL June 2029); 13.x is short-lived rolling.
+      wud.tag.include: '^12\.3\.\d+$$'
+      wud.link.template: 'https://mariadb.com/docs/release-notes/community-server/12.3/$${major}.$${minor}.$${patch}'
 
   romm-valkey:
     image: *valkey-version

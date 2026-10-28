@@ -1,11 +1,8 @@
 x-versions:
   pricebuddy: &pricebuddy-version "jez500/pricebuddy:v1.0.57"
-  # 11.4 and 11.8 are both LTS; 11.5-11.7 were short-term releases, so this is
-  # the intended LTS-to-LTS hop rather than a skipped-version upgrade. MariaDB
-  # guarantees mariadb-upgrade handles data files from any older release. Note
-  # the linuxserver image does NOT run it: init-mariadb-poststart only prints a
-  # banner, so `mariadb-upgrade -u root` has to be run by hand after deploying.
-  mariadb: &mariadb-version "linuxserver/mariadb:11.8.9"
+  # Official image: linuxserver/mariadb stops at 11.8. 12.3 is the current LTS
+  # (EOL June 2029); MARIADB_AUTO_UPGRADE below runs mariadb-upgrade itself.
+  mariadb: &mariadb-version "mariadb:12.3.3"
   scraper: &scraper-version "jez500/seleniumbase-scrapper:v1.0"
 
 x-logging: &default-logging
@@ -185,44 +182,47 @@ services:
     hostname: pricebuddy-mariadb
     ipc: private
     restart: unless-stopped
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - FOWNER
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     mem_limit: 2g
+    # Server settings the old linuxserver custom.cnf had that differ from the
+    # official image defaults: READ-COMMITTED (12.x defaults to REPEATABLE
+    # READ), the utf8mb4_general_ci server collation and a 256M buffer pool
+    # (the data is ~190 MB; the default is 128M). Binary logging is off now:
+    # nothing replicates from it, and the old binlogs had grown to 1.5 GB.
+    command:
+      - --transaction-isolation=READ-COMMITTED
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --innodb-buffer-pool-size=256M
     environment:
-      MYSQL_DIR: "/config"
-      DATADIR: "/config/databases"
       # Its own secret rather than the app user's. Inert on the existing
-      # datadir — linuxserver's init-mariadb-initdb only runs when
-      # ${DATADIR}/mysql is absent, and root here authenticates via unix_socket
-      # anyway — but it means a rebuild or disaster-recovery re-init gives root
-      # a distinct password instead of handing out the application's.
-      # PRICEBUDDY_DB_ADMIN_PASS was already passed by Komodo and unreferenced.
+      # datadir — the entrypoint only initialises an empty one, and root here
+      # authenticates via unix_socket anyway — but it means a rebuild or
+      # disaster-recovery re-init gives root a distinct password instead of
+      # handing out the application's.
       MYSQL_ROOT_PASSWORD: "${PRICEBUDDY_DB_ADMIN_PASS}"
       MYSQL_DATABASE: "pricebuddy"
       MYSQL_USER: "pricebuddy"
       MYSQL_PASSWORD: "${PRICEBUDDY_DB_PASS}"
-      PUID: "${DOCKER_PUID}"
-      PGID: "${DOCKER_PGID}"
+      # Runs mariadb-upgrade when the image's major version moves ahead of the
+      # datadir (the server refuses to start otherwise) and keeps a dump of
+      # the system tables first.
+      MARIADB_AUTO_UPGRADE: "1"
       TZ: "${TZ}"
     healthcheck:
-      # mariadb-admin, not the deprecated mysqladmin symlink — it still exists
-      # in 11.8.8 but this healthcheck gates the app via depends_on, so it
-      # shouldn't rest on a compatibility shim MariaDB is retiring.
-      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --protocol=tcp || exit 1"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 60s
       interval: 30s
       timeout: 5s
       retries: 5
     volumes:
-      - /opt/docker/pricebuddy/mariadb_data:/config
+      # The datadir of the former linuxserver/mariadb container (its
+      # /config/databases); custom.cnf and the binlogs beside it are unused.
+      - /opt/docker/pricebuddy/mariadb_data/databases:/var/lib/mysql
     networks:
       - pricebuddy
       - adminer
@@ -235,11 +235,9 @@ services:
       wud.display.name: "Pricebuddy - MariaDB"
       wud.display.icon: "sh:pricebuddy"
       wud.watch: "true"
-      # linuxserver/mariadb publishes bare versions (11.8.8), never v-prefixed,
-      # so the old '^v\d+\.\d+\.\d+$' matched zero tags and WUD silently had no
-      # candidate to compare against — the 11.4.8 -> 11.8.8 update went unseen.
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/MariaDB/server/releases/tag/mariadb-$${major}.$${minor}.$${patch}'
+      # Stay on the 12.3 LTS series (EOL June 2029); 13.x is short-lived rolling.
+      wud.tag.include: '^12\.3\.\d+$$'
+      wud.link.template: 'https://mariadb.com/docs/release-notes/community-server/12.3/$${major}.$${minor}.$${patch}'
 
   pricebuddy-scraper:
     image: *scraper-version
