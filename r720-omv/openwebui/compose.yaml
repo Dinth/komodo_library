@@ -16,7 +16,7 @@ x-versions:
   # latest-cuda resolved to this tag and has not moved since 2024-09 (ai-dock
   # stopped publishing), so pin what actually runs.
   comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-base-22.04-v0.2.7"
-  comfyui-idle: &comfyui-idle-version "curlimages/curl:8.22.0"
+  comfyui-idle: &comfyui-idle-version "curlimages/curl:8.23.0"
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.5"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main@sha256:b48e9bc338ce2be0acfbeff01810db72408a12f07739f9e3879c1f2b00952d6e"
