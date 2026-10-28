@@ -3,7 +3,7 @@ x-versions:
   # data/pre-migrate-legacy-<schema>-<time>.db (newest 3 kept); going back to
   # 4.3.x = stop, copy that file over data/travel.db, delete travel.db-wal and
   # -shm, start the old image. The copy holds the DB only, not uploads.
-  trek: &trek-version "mauriceboe/trek:5.0.0"
+  trek: &trek-version "mauriceboe/trek:5.0.1"
 
 x-logging: &default-logging
   driver: "json-file"
