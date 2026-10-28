@@ -126,9 +126,17 @@ services:
       # failure=timeout every night; 1.46 gives each call the full user timeout
       # (#1274). Also since 1.46, background work pauses a provider that keeps
       # failing (5 min, then 30 min doubling up to a day; the Coach still
-      # reaches it) and saving the AI settings ends the pause. If link_failed
-      # still reports failure=timeout, Admin -> Assistant can switch reasoning
-      # off or cap it for everyone, or raise the per-user timeout (max 600 s).
+      # reaches it) and saving the AI settings ends the pause.
+      # On 1.46.1 the briefing still failed on every run. Its main call (~10k
+      # prompt tokens) let gemma4 think through its whole budget: ~6.6k tokens
+      # at ~35 t/s, so 3m10s. The 180 s user timeout ended it before the
+      # thinking-only reply could arrive and switch reasoning off for the
+      # hour. Since 2026-10-28, Admin -> Assistant reasoning is therefore OFF
+      # for everyone. It was set in the DB (app_settings.ai_reasoning_enabled
+      # = false), so the admin audit log has no entry for it. Off overrides
+      # every Coach preference and every background job's level. On this
+      # Ollama, reasoning only ever produced answerless replies. Turn it back
+      # on only for a model that answers after it thinks.
       AI_PRIVATE_ORIGINS: "http://10.10.1.13:11434"
       # Bare hostnames the ADMIN-configured instance-wide AI base URL may use.
       ADMIN_AI_BASE_URL_ALLOWLIST: "10.10.1.13"
