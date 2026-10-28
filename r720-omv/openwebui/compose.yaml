@@ -611,8 +611,9 @@ services:
       ENABLE_IMAGE_GENERATION: "true"
       IMAGE_GENERATION_ENGINE: "comfyui"
       COMFYUI_BASE_URL: "http://comfyui:8188"
-      MCP_SERVERS: "Grafana@http://mcp-grafana:5133"
-      OPENWEBUI_MCP_SYNC_MODE: "true"
+      # MCP tool servers (Grafana, Grocy) are configured in Admin > External
+      # Tools and stored in the DB (tool_server.connections). The MCP_SERVERS /
+      # OPENWEBUI_MCP_SYNC_MODE vars that were here are read by nothing.
       TZ: "${TZ}"
     hostname: openwebui
     image: *openwebui-version

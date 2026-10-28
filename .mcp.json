@@ -2,7 +2,10 @@
   "mcpServers": {
     "grafana": {
       "type": "http",
-      "url": "http://10.10.1.13:5133/mcp"
+      "url": "http://10.10.1.13:5133/mcp",
+      "headers": {
+        "Authorization": "Bearer ${MCP_GRAFANA_SERVER_TOKEN}"
+      }
     },
     "n8n": {
       "type": "http",
