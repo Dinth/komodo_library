@@ -17,7 +17,6 @@ x-versions:
   # stopped publishing), so pin what actually runs.
   comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-base-22.04-v0.2.7"
   comfyui-idle: &comfyui-idle-version "curlimages/curl:8.22.0"
-  ollama-preload: &ollama-preload-version "curlimages/curl:8.22.0"
   crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.5"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main@sha256:b48e9bc338ce2be0acfbeff01810db72408a12f07739f9e3879c1f2b00952d6e"
@@ -151,9 +150,34 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    command: ['serve']
     container_name: ollama
-    entrypoint: ['/bin/ollama']
+    # `ollama serve`, plus a load order workaround for ollama/ollama#19357: the
+    # scheduler estimates gemma4:e4b at 8-12 GiB (3.1 real), so when
+    # gemma4:12b-32k is resident first, as after any restart, loading HA's e4b
+    # evicts it; with e4b loaded first, both fit. So once the server answers,
+    # e4b is loaded with the options HA's conversation agent sends (16k ctx,
+    # pinned), and HA's next request reuses that runner instead of reloading
+    # it. Plain bash /dev/tcp because the image has no curl. bash stays PID 1
+    # and passes SIGTERM on, so ollama still stops cleanly (tested: 0.2 s).
+    # Back to entrypoint /bin/ollama + command serve once #19357 is fixed.
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /bin/ollama serve & pid=$$!
+        trap 'kill -TERM $$pid 2>/dev/null' TERM INT
+        (
+          until ollama ps >/dev/null 2>&1; do kill -0 $$pid 2>/dev/null || exit; sleep 1; done
+          body='{"model":"gemma4:e4b","keep_alive":-1,"options":{"num_ctx":16384}}'
+          exec 3<>/dev/tcp/127.0.0.1/11434 || exit
+          printf 'POST /api/generate HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s' "$${#body}" "$$body" >&3
+          r=$$(cat <&3)
+          case "$$r" in
+            *'"done":true'*) echo "[preload] loaded gemma4:e4b first (16k ctx, pinned)" ;;
+            *) echo "[preload] gemma4:e4b preload failed: $$(printf '%s' "$$r" | tail -n 1)" ;;
+          esac
+        ) &
+        while kill -0 $$pid 2>/dev/null; do wait $$pid; s=$$?; done
+        exit $$s
     environment:
       OLLAMA_HOST: "0.0.0.0"
       NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
@@ -490,64 +514,6 @@ services:
     labels:
       wud.watch: "true"
       wud.display.name: "ComfyUI Idle Unloader"
-      wud.display.icon: "sh:curl"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-  ollama-preload:
-    image: *ollama-preload-version
-    container_name: ollama-preload
-    depends_on:
-      ollama:
-        condition: service_started
-    environment:
-      TZ: "${TZ}"
-    entrypoint: ["/bin/sh", "-c"]
-    # Load order workaround for ollama/ollama#19357: the scheduler estimates
-    # gemma4:e4b at 8-12 GiB (3.1 real), so when gemma4:12b-32k is resident
-    # first - after any Ollama restart - loading HA's e4b evicts it. With e4b
-    # loaded first, 12b-32k fits beside it. So whenever Ollama has NOTHING
-    # loaded (a fresh start, or everything stopped by hand), load e4b with the
-    # options HA's conversation agent sends (16k ctx, pinned), so HA's next
-    # request reuses this runner instead of reloading it. It never loads e4b
-    # while another model is resident: that would evict models in use between
-    # requests. Drop this once #19357 is fixed.
-    command:
-      - |
-        A=http://ollama:11434; STEP=10
-        BODY='{"model":"gemma4:e4b","keep_alive":-1,"options":{"num_ctx":16384}}'
-        while :; do
-          ps=$$(curl -sf -m 10 "$$A/api/ps" | tr -d ' \n')
-          case "$$ps" in
-            *'"models":[]'*|*'"models":null'*)
-              if curl -sf -m 900 "$$A/api/generate" -d "$$BODY" >/dev/null; then
-                echo "[preload] nothing was loaded; loaded gemma4:e4b first"
-              else
-                echo "[preload] gemma4:e4b load failed; retrying in $${STEP}s"
-              fi ;;
-          esac
-          sleep $$STEP
-        done
-    ipc: private
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    restart: unless-stopped
-    networks:
-      - openwebui
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: '32M'
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    labels:
-      wud.watch: "true"
-      wud.display.name: "Ollama Preload"
       wud.display.icon: "sh:curl"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
   openwebui-pipelines:
