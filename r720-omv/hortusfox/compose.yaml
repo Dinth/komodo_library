@@ -111,7 +111,8 @@ services:
       hortusfox-mariadb:
         condition: service_healthy
     ports:
-      - 4142:8080/tcp
+      # Apache in the image listens on 80 (EXPOSE 80); 8080 had nothing behind it.
+      - 4142:80/tcp
     volumes:
       - /opt/docker/hortusfox/hortusfox_logs:/var/www/html/app/logs
       - /opt/docker/hortusfox/hortusfox_backup:/var/www/html/public/backup
