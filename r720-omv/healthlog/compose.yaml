@@ -1,5 +1,5 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.46.1"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.46.5"
   # Same major as upstream's compose since 1.46. Its one-shot `db-upgrade`
   # service (moves a Postgres 16 `pgdata` volume into 18) is left out: this
   # stack has run 18 from the start. The image's pg_dump is 18 too, which the
