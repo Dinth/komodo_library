@@ -1,0 +1,107 @@
+x-versions:
+  # Unofficial build of the official Rust anki-sync-server (ankitects/anki).
+  # Ankitects publish no image. This one is rebuilt automatically for every
+  # stable Anki release (betas are not published), compiled in-tree so Anki's
+  # own rust-toolchain.toml and Cargo.lock apply, and shipped as a single
+  # static binary on Alpine. GHCR, not Docker Hub, so WUD can watch it.
+  # Tag == Anki version. The server must be >= every client's version
+  # (desktop / AnkiDroid / AnkiMobile): bump this BEFORE updating clients.
+  # yamllint disable-line rule:line-length
+  anki-sync-server: &anki-sync-server-version "ghcr.io/f7zorn/anki-sync-server:26.09.3"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  anki-sync-server:
+    image: *anki-sync-server-version
+    container_name: anki-sync-server
+    hostname: anki-sync-server
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # The image sets no USER (would run as root) and has no entrypoint script,
+    # so it runs unprivileged as-is: it only needs SYNC_BASE writable and binds
+    # an unprivileged port. No capabilities required.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    # The server only stops gracefully on SIGINT (tokio ctrl_c handler); on
+    # SIGTERM as PID 1 it would just be SIGKILLed after the grace period.
+    stop_signal: SIGINT
+    # Idles at a few MB. A full collection upload holds the request body
+    # (<= MAX_SYNC_PAYLOAD_MEGS) plus its decompressed form (up to 3x) in
+    # memory, so this must grow with MAX_SYNC_PAYLOAD_MEGS.
+    mem_limit: 768m
+    environment:
+      TZ: "${TZ}"
+      # The image defaults SYNC_BASE=/config and SYNC_PORT=27701; set both.
+      SYNC_BASE: "/data"
+      SYNC_HOST: "0.0.0.0"
+      SYNC_PORT: "8080"
+      # Log the real client IP instead of Traefik's: Traefik appends the
+      # connecting address to X-Forwarded-For, so the rightmost entry is it.
+      SYNC_IP_HEADER: "RightmostXForwardedFor"
+      # Upstream default 100 (the AnkiWeb limit). Only full collection
+      # uploads hit this; media syncs in small batches.
+      MAX_SYNC_PAYLOAD_MEGS: "150"
+      # "user:password". Indexes must be contiguous: the server stops at the
+      # first missing SYNC_USERn. A DEFINED-BUT-EMPTY one (Komodo var empty)
+      # is a startup crash ("should be in 'username:password' format"), so
+      # delete the SYNC_USER2 line rather than blanking its variable.
+      SYNC_USER1: "${ANKI_SYNC_USER1}"
+      SYNC_USER2: "${ANKI_SYNC_USER2}"
+      # Presence-only switch: ANY value, even "" or "0", turns it on, so it
+      # cannot be toggled through an empty Komodo var. Uncomment only once
+      # every SYNC_USERn holds "user:$pbkdf2-sha256$..." PHC hashes.
+      # PASSWORDS_HASHED: "1"
+    healthcheck:
+      # Built-in check: a TCP connect to SYNC_HOST:SYNC_PORT, no HTTP request,
+      # so it adds nothing to the log. No shell needed.
+      test: ["CMD", "/usr/local/bin/anki-sync-server", "--healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    volumes:
+      # One folder per user: collection.anki2 + media. Back up via Backrest.
+      - /opt/docker/anki-sync/anki-sync-server/data:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    logging: *default-logging
+    labels:
+      autoheal: "true"
+      # NO Authelia: Anki clients cannot do SSO; the server has its own auth.
+      # Public (like navidrome) so phones sync off-LAN. No buffering middleware
+      # anywhere in the chain, so Traefik streams bodies with no size cap, and
+      # websecure's 1200s read/write timeouts cover a slow full upload.
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.anki-sync.rule: "Host(`anki.${DOMAIN_NAME}`)"
+      traefik.http.routers.anki-sync.entrypoints: "websecure"
+      traefik.http.routers.anki-sync.tls: "true"
+      traefik.http.routers.anki-sync.tls.certresolver: "letsencrypt"
+      traefik.http.routers.anki-sync.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.anki-sync.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.anki-sync.middlewares: "secHeaders@file"
+      traefik.http.services.anki-sync.loadbalancer.server.port: "8080"
+      wud.watch: "true"
+      # Anki versions are YY.MM or YY.MM.P (26.09, 26.09.3). The image also
+      # pushes latest and per-arch build-<run>-<arch> tags; exclude them.
+      wud.tag.include: '^\d+\.\d+(\.\d+)?$$'
+      wud.display.name: "Anki Sync Server"
+      wud.display.icon: "sh:anki"
+      # $${raw}, not major.minor.patch: semver parsing drops the leading zero
+      # (26.09.3 -> 26.9.3) and invents .0 for 26.09, both of which 404.
+      # Links to Anki's own release notes (the image repo has none).
+      # yamllint disable-line rule:line-length
+      wud.link.template: "https://github.com/ankitects/anki/releases/tag/$${raw}"
+
+networks:
+  traefik:
+    external: true

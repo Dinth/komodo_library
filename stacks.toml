@@ -32,6 +32,29 @@ run_directory = "r720-omv/adminer"
 ##
 
 [[stack]]
+name = "anki-sync"
+description = """
+Anki sync server (official Rust anki-sync-server, own auth, no Authelia).
+https://anki.wickhay.uk"""
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/anki-sync"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+ANKI_SYNC_USER1=[[ANKI_SYNC_USER1]]
+ANKI_SYNC_USER2=[[ANKI_SYNC_USER2]]
+"""
+
+##
+
+[[stack]]
 name = "audiobookshelf"
 description = """
 Audiobook & podcast server.
