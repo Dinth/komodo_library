@@ -1,8 +1,8 @@
 name: scrutiny
 
 x-versions:
-  scrutiny-collector-version: &scrutiny-collector-version ghcr.io/analogj/scrutiny:v0.9.5-collector
-  scrutiny-web-version: &scrutiny-web-version ghcr.io/analogj/scrutiny:v0.9.5-web
+  scrutiny-collector-version: &scrutiny-collector-version ghcr.io/analogj/scrutiny:v0.10.0-collector
+  scrutiny-web-version: &scrutiny-web-version ghcr.io/analogj/scrutiny:v0.10.0-web
 
 x-logging: &default-logging
   driver: "json-file"
@@ -116,7 +116,12 @@ services:
       SCRUTINY_WEB_INFLUXDB_HOST: "10.10.1.13"
       SCRUTINY_WEB_INFLUXDB_ORG: "wickhay"
       SCRUTINY_WEB_INFLUXDB_PORT: "8086"
-      SCRUTINY_WEB_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
+      # Scrutiny reads notify.urls through viper (SCRUTINY_ prefix, dots become
+      # underscores), so this must be SCRUTINY_NOTIFY_URLS. The old key
+      # SCRUTINY_WEB_NOTIFY_URLS mapped to web.notify.urls, which nothing reads,
+      # so every notification was skipped with "No notification endpoints
+      # configured". The Komodo variable keeps its SCRUTINY_WEB_ name.
+      SCRUTINY_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
       SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
       SCRUTINY_WEB_INFLUXDB_BUCKET_BASENAME: "scrutiny"
     ipc: private
