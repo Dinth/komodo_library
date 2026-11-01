@@ -116,12 +116,15 @@ services:
       SCRUTINY_WEB_INFLUXDB_HOST: "10.10.1.13"
       SCRUTINY_WEB_INFLUXDB_ORG: "wickhay"
       SCRUTINY_WEB_INFLUXDB_PORT: "8086"
-      # Scrutiny reads notify.urls through viper (SCRUTINY_ prefix, dots become
-      # underscores), so this must be SCRUTINY_NOTIFY_URLS. The old key
-      # SCRUTINY_WEB_NOTIFY_URLS mapped to web.notify.urls, which nothing reads,
-      # so every notification was skipped with "No notification endpoints
-      # configured". The Komodo variable keeps its SCRUTINY_WEB_ name.
-      SCRUTINY_NOTIFY_URLS: "${SCRUTINY_WEB_NOTIFY_URLS}"
+      # Must be SCRUTINY_NOTIFY_URLS: viper reads notify.urls (SCRUTINY_ prefix,
+      # dots become underscores). SCRUTINY_WEB_NOTIFY_URLS was a dead key.
+      # notify-signal.pl formats the alert with the failing attributes and
+      # posts it to Signal.
+      SCRUTINY_NOTIFY_URLS: "script:///opt/scrutiny/notify-signal.pl"
+      SIGNAL_NUMBER: "${SIGNAL_BOT_NUMBER}"
+      # Tech group, in group.<base64> form.
+      SIGNAL_RECIPIENT: "${SIGNAL_TECH_ID}"
+      SCRUTINY_HOST_LABEL: "r720-omv"
       SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}"
       SCRUTINY_WEB_INFLUXDB_BUCKET_BASENAME: "scrutiny"
     ipc: private
@@ -137,8 +140,13 @@ services:
         target: /opt/scrutiny/config
         bind:
           create_host_path: true
+      - type: bind
+        source: ./notify-signal.pl
+        target: /opt/scrutiny/notify-signal.pl
+        read_only: true
     networks:
       - monitoring
+      - signal-rest-api
     working_dir: /opt/scrutiny
     healthcheck:
       test: curl -ILfSs http://localhost:8080/api/health  || exit 1
@@ -149,6 +157,10 @@ services:
     logging: *default-logging
     labels:
       autoheal: "true"
+      # A single-file bind mount keeps the old inode when Komodo's git pull
+      # replaces the file, so bump this whenever notify-signal.pl changes to
+      # force the container to be recreated.
+      config.revision: "1"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+\-web$$'
       wud.display.name: "Scrutiny"
@@ -158,4 +170,7 @@ services:
 networks:
   monitoring:
     name: monitoring
+    external: true
+  signal-rest-api:
+    name: signal-rest-api
     external: true
