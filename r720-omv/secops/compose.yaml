@@ -185,7 +185,8 @@ services:
     hostname: misp-valkey
     ipc: private
     restart: unless-stopped
-    command: ['valkey-server', '--save', '30', '1', '--loglevel', 'warning']
+    # Snapshot at most hourly: --save 30 1 rewrote the whole dump every 30 s and wore the omv NVMe. A clean stop still saves.
+    command: ['valkey-server', '--save', '3600', '1', '--loglevel', 'warning']
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
     cap_add: [CHOWN, DAC_OVERRIDE, SETGID, SETUID]
