@@ -64,6 +64,12 @@ SIGNAL_API = os.environ.get("SIGNAL_API", "http://signal-rest-api:8080").rstrip(
 SIGNAL_NUMBER = os.environ.get("SIGNAL_NUMBER", "").strip()
 # Group the alerts go to, in signal-cli-rest-api's "group.<base64>" form.
 SIGNAL_RECIPIENT = os.environ.get("SIGNAL_RECIPIENT", "").strip()
+# The base64 part needs its trailing "=" padding or signal-cli-rest-api answers
+# 400 "Invalid identifier". The Komodo variable reached the container without it
+# (2026-10), so every send failed and HA fell back. Restore the padding here.
+if SIGNAL_RECIPIENT.startswith("group."):
+    _gid = SIGNAL_RECIPIENT[len("group."):].rstrip("=")
+    SIGNAL_RECIPIENT = "group." + _gid + "=" * (-len(_gid) % 4)
 # Frigate's unauthenticated API (Traefik frigateapi entrypoint on the host).
 FRIGATE_API = os.environ.get("FRIGATE_API", "http://10.10.1.13:5000/api").rstrip("/")
 # Shared secret HA sends as "Authorization: Bearer <token>".
