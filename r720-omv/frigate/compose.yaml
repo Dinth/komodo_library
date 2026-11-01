@@ -154,11 +154,13 @@ services:
     #
     # Built locally (same pattern as fireflyiii-signal-shim): image: pins the
     # local tag, pull_policy:never keeps the stack-wide `compose pull` from
-    # failing on a non-registry image.
+    # failing on a non-registry image. `compose up` only builds when the tag is
+    # missing, so BUMP THIS TAG whenever signal-feedback/ changes, or a redeploy
+    # keeps running the old build.
     build:
       context: ./signal-feedback
       dockerfile: Dockerfile
-    image: frigate-signal-feedback:latest
+    image: frigate-signal-feedback:2
     pull_policy: never
     container_name: frigate-signal-feedback
     hostname: frigate-signal-feedback
