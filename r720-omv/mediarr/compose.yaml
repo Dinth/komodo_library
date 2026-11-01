@@ -747,6 +747,14 @@ services:
     # and every request failed with "Error starting Chrome: chrome not
     # reachable" then a 60s timeout. Isolated solves never had a problem.
     mem_limit: 3G
+    # FlareSolverr's headless Chromium creates a throwaway profile under /tmp
+    # (org.chromium.Chromium.*) for every solve; without a tmpfs those land in
+    # the container's writable layer on the omv NVMe (~5 GB/day measured
+    # 2026-11-01). The tmpfs pages count against mem_limit (3G), but the
+    # profiles are small and deleted after each solve, so 512m is plenty.
+    # mode=1777 because the service runs as `user: flaresolverr`.
+    tmpfs:
+      - /tmp:size=512m,mode=1777
     command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
     container_name: flaresolverr
     healthcheck:
