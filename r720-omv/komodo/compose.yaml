@@ -74,7 +74,8 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 512M
+    # 512M was too tight: RSS peaked at 477 MiB (93%) over 14 days.
+    mem_limit: 1G
     init: true
     depends_on:
       - mongo
