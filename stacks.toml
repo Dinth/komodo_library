@@ -108,6 +108,8 @@ tags = ["stacks"]
 server = "r720-omv"
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
+poll_for_updates = true
+auto_update = true
 run_directory = "r720-omv/autoheal"
 environment = """
 TZ=[[TZ]]
@@ -129,6 +131,8 @@ tags = ["stacks"]
 server = "r230-nixos"
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
+poll_for_updates = true
+auto_update = true
 run_directory = "r230-nixos/autoheal"
 environment = """
 TZ=[[TZ]]
@@ -1127,6 +1131,11 @@ tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
+# Only imaginary and nextcloud-mcp follow :latest. The rest are version-pinned,
+# but lscr/alpine version tags are rebuilt in place, so skip them explicitly
+# rather than let a rebuild bounce Nextcloud or its database.
+auto_update_skip_services = ["nextcloud", "nextcloud-postgres", "nextcloud-valkey", "nextcloud-collabora"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/nextcloud"
@@ -1619,6 +1628,10 @@ tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r230-nixos"
 poll_for_updates = true
+auto_update = true
+# Only unifi-network-mcp follows :latest; the lscr controller tag is rebuilt in
+# place, so skip it and its database explicitly.
+auto_update_skip_services = ["unifi-db", "unifi-network-application"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r230-nixos/unifi"

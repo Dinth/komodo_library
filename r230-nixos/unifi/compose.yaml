@@ -1,9 +1,10 @@
 x-versions:
   mongo: &mongo-version "docker.io/mongo:8.3.13"
   unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.6.109"
-  # Not pinned: :latest tracks main ahead of the version tags (0.7.0 is older
-  # than the current :latest build) — a pin would be a downgrade. Digest watch.
-  unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:0.41.0"
+  # Follows :latest and the Komodo stack has auto_update on (stacks.toml),
+  # skipping unifi-db and the controller: Global Auto Update redeploys it when
+  # a new image lands (checked every 8 h). WUD ignores it.
+  unifi-mcp: &unifi-mcp-version "ghcr.io/sirkirby/unifi-network-mcp:latest"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -143,9 +144,7 @@ services:
       - unifi-network-application
     logging: *default-logging
     labels:
-      wud.watch: "true"
-      wud.watch.digest: "false"
-      wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/sirkirby/unifi-network-mcp/releases/tag/v$${major}.$${minor}.$${patch}'
+      # Komodo auto_update keeps :latest current (see x-versions).
+      wud.watch: "false"
       wud.display.name: 'UniFi Network MCP'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'

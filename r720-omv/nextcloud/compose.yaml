@@ -1,10 +1,13 @@
 x-versions:
   nextcloud: &nextcloud-version "linuxserver/nextcloud:35.0.2"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
-  # Upstream tags are build datestamps (no semver).
-  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:20261028_094057"
+  # imaginary and nextcloud-mcp follow :latest and the Komodo stack has
+  # auto_update on (stacks.toml), skipping every other service: Global Auto
+  # Update redeploys them when a new image lands (checked every 8 h). WUD
+  # ignores them.
+  imaginary: &imaginary-version "ghcr.io/nextcloud-releases/aio-imaginary:latest"
   collabora: &collabora-version "collabora/code:26.04.5.2.1"
-  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:0.202.1"
+  nextcloud-mcp: &nextcloud-mcp-version "ghcr.io/cbcoutinho/nextcloud-mcp-server:latest"
   postgres: &postgres-version "postgres:18.6-alpine"
 
 x-logging: &default-logging
@@ -100,8 +103,8 @@ services:
       autoheal: "true"
       wud.display.name: "Nextcloud - Imaginary"
       wud.display.icon: "sh:nextcloud"
-      wud.watch: "true"
-      wud.tag.include: '^\d{8}_\d{6}$$'
+      # Komodo auto_update keeps :latest current (see x-versions).
+      wud.watch: "false"
 
   nextcloud-collabora:
     image: *collabora-version
@@ -317,11 +320,10 @@ services:
         max-file: "2"
     labels:
       autoheal: "true"
-      wud.watch: "true"
+      # Komodo auto_update keeps :latest current (see x-versions).
+      wud.watch: "false"
       wud.display.name: "Nextcloud - MCP"
       wud.display.icon: "sh:nextcloud"
-      wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/cbcoutinho/nextcloud-mcp-server/releases/tag/v$${major}.$${minor}.$${patch}"
 
   nextcloud-postgres:
     image: *postgres-version
