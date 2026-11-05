@@ -56,8 +56,12 @@ services:
       retries: 2
       start_period: 10s
     ports:
-      - "127.0.0.1:2379:2375"
-      - "10.10.1.13:2379:2375"
+      # No host IP on purpose: eno1 gets 10.10.1.13 by DHCP, and on a reboot
+      # dockerd can start before the lease, so a 10.10.1.13:<port> bind fails
+      # ("cannot assign requested address") and Docker never retries it — WUD
+      # went blind for 3 days after the 2026-11-01 reboot. -allowfrom above
+      # still limits who can talk to the proxy.
+      - "2379:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:

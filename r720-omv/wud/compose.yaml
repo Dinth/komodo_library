@@ -44,7 +44,12 @@ services:
       - wud
     logging: *default-logging
     ports:
-      - "10.10.1.13:2377:2375"
+      # No host IP on purpose: eno1 gets 10.10.1.13 by DHCP, and on a reboot
+      # dockerd can start before the lease, so a 10.10.1.13:<port> bind fails
+      # ("cannot assign requested address") and Docker never retries it — WUD
+      # went blind for 3 days after the 2026-11-01 reboot. -allowfrom above
+      # still limits who can talk to the proxy.
+      - "2377:2375"
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
