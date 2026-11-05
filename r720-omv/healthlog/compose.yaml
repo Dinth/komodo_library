@@ -1,5 +1,5 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.46.5"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.47.0"
   # Same major as upstream's compose since 1.46. Its one-shot `db-upgrade`
   # service (moves a Postgres 16 `pgdata` volume into 18) is left out: this
   # stack has run 18 from the start. The image's pg_dump is 18 too, which the
@@ -63,7 +63,15 @@ services:
       # 1.40+: the admin key-backup reminder opens on the Docker Compose
       # instructions. Purely cosmetic; the start-up key check runs regardless.
       HEALTHLOG_PLATFORM: "compose"
-      # Rotating it invalidates every issued API/ingest token.
+      # Rotating it invalidates every issued API/ingest token. Since 1.47 it
+      # also derives the password of the restricted DB role
+      # `healthlog_app_healthlog_<hash>` the entrypoint creates on every start
+      # (PG 17+, owner may CREATEROLE - true here). The app/worker connect as
+      # that role (rows + queue, no schema changes); migrations, the
+      # pre-migration dump and restores stay on the DATABASE_URL owner, and
+      # `docker exec healthlog ...` scripts still get the owner env.
+      # DB_APP_ROLE is deliberately left unset (default = on); `off` reverts
+      # to the owner. See upstream docs/self-hosting/database-role.md.
       API_TOKEN_HMAC_KEY: "${HEALTHLOG_API_TOKEN_HMAC_KEY}"
       # Both read at runtime on the prebuilt image (OAuth/OIDC redirect URIs,
       # links in notifications are derived from them). Other NEXT_PUBLIC_*
@@ -176,12 +184,17 @@ services:
       # a minute; the 10m only matters on a slow one, where the old 90s let
       # autoheal restart the container mid-migration. Five misses (2.5 min)
       # before "unhealthy", so a DB pool saturated for a minute costs a probe,
-      # not a restart. wget's own 4 s timeout ends inside Docker's 5 s, so a
+      # not a restart. The probe's own 4 s abort ends inside Docker's 5 s, so a
       # stalled connection reads as one clean miss rather than a killed probe.
+      # Since 1.47 the image is Debian slim with no real wget (only a
+      # health-check shim kept for old compose files), so the probe calls Node
+      # directly, as upstream's compose does.
       test:
-        - "CMD-SHELL"
+        - "CMD"
+        - "node"
+        - "-e"
         # yamllint disable-line rule:line-length
-        - "wget -q --tries=1 --timeout=4 --spider http://127.0.0.1:3000/api/health || exit 1"
+        - "fetch('http://127.0.0.1:3000/api/health',{signal:AbortSignal.timeout(4000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
       interval: 30s
       timeout: 5s
       retries: 5
