@@ -1,5 +1,5 @@
 x-versions:
-  adminer: &adminer-version "adminer:6.2.0"
+  adminer: &adminer-version "adminer:6.3.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -15,29 +15,13 @@ services:
     ipc: private
     restart: unless-stopped
     user: adminer
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     mem_limit: 256M
-    command: ['php','-S','[::]:8080','-t','/var/www/html']
-    entrypoint: ['entrypoint.sh','docker-php-entrypoint']
-    working_dir: /var/www/html
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     ports:
       - 9009:8080/tcp
     networks:
