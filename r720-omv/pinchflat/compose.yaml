@@ -1,11 +1,20 @@
 x-versions:
   # Pinchflat-ngx fork (TheBadFella), a strict superset of upstream
   # kieraneglin/pinchflat (upstream dormant since Dec 2025). The fork publishes
-  # real CalVer tags on GHCR (YYYY.M.D, no `v` prefix), so we pin a version
-  # tag. SQLite image, NOT the `-postgres` variant.
+  # real CalVer tags on GHCR (no `v` prefix), so we pin a version tag.
+  # Up to 2026.10.x tags were YYYY.M.D; as of 2026.11.0 upstream switched to
+  # year.month.patch CalVer (last number = patch count, NOT day). The WUD
+  # regex `^\d{4}\.\d+\.\d+$$` matches both schemes.
+  # SQLite image, NOT the `-postgres` variant.
   # First start runs one-way schema migrations on /config: rollback = restore
   # the pre-migration config backup + the old upstream image.
-  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.10.20"
+  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.11.1"
+  # bgutil PO-token provider (Node variant; plain `X.Y.Z` tag = `-node`).
+  # Keep in LOCKSTEP with the bgutil yt-dlp plugin bundled in the
+  # pinchflat-ngx image (its Dockerfile `ARG BGUTIL_PLUGIN_VERSION`, 2.0.0 in
+  # 2026.11.1). Upstream provider latest is 2.0.2 - do NOT bump it ahead of
+  # the plugin; re-check the ARG on every pinchflat-ngx bump.
+  pot-provider: &pot-provider-version "brainicism/bgutil-ytdlp-pot-provider:2.0.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -45,6 +54,10 @@ services:
       TZ: "${TZ}"
       # Fork defaults to debug, which floods Loki.
       LOG_LEVEL: "info"
+      # bgutil PO-token provider sidecar (YouTube "confirm you're not a bot").
+      POT_PROVIDER_URL: "http://pot-provider:4416"
+    depends_on:
+      - pot-provider
     ports:
       - '8945:8945'
     volumes:
@@ -59,6 +72,45 @@ services:
       wud.display.name: 'Pinchflat-ngx'
       wud.tag.include: '^\d{4}\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/TheBadFella/pinchflat-ngx/releases/tag/$${major}.$${minor}.$${patch}'
+
+  # Unauthenticated HTTP API on 4416: internal `pinchflat` network ONLY - no
+  # ports, no traefik. No compose `profiles:` (Komodo wouldn't start it).
+  # Stateless (in-memory token/minter cache), so no volumes.
+  pot-provider:
+    image: *pot-provider-version
+    container_name: pot-provider
+    hostname: pot-provider
+    ipc: private
+    restart: unless-stopped
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    environment:
+      TZ: "${TZ}"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - pinchflat
+    # node:26-bookworm-slim base has no curl/wget; use node's global fetch.
+    healthcheck:
+      test:
+        - "CMD"
+        - "node"
+        - "-e"
+        - "fetch('http://127.0.0.1:4416/ping').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging: *default-logging
+    labels:
+      wud.watch: 'true'
+      wud.display.name: 'bgutil PO-token provider'
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.template: 'https://github.com/Brainicism/bgutil-ytdlp-pot-provider/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   pinchflat:
