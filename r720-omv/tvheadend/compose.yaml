@@ -1,8 +1,10 @@
 x-versions:
-  # LinuxServer publishes these from upstream VCS, not semver:
-  #   tvheadend -> version-<8-char git hash>
+  # LinuxServer publishes oscam from upstream VCS, not semver:
   #   oscam     -> version-<OSCam SVN revision>
-  tvheadend: &tvheadend-version "linuxserver/tvheadend:version-71159218"
+  # tvheadend follows :latest and the Komodo stack has auto_update on
+  # (stacks.toml), skipping oscam: Global Auto Update redeploys it when a
+  # new image lands (checked every 8 h). WUD ignores it.
+  tvheadend: &tvheadend-version "linuxserver/tvheadend:latest"
   oscam: &oscam-version "linuxserver/oscam:version-11968"
 
 x-logging: &default-logging
@@ -85,13 +87,10 @@ services:
       traefik.http.routers.tvheadend.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.tvheadend.middlewares: "secHeaders@file,authelia-auth@docker"
       traefik.http.services.tvheadend.loadbalancer.server.port: "9981"
-      wud.watch: "true"
+      # Komodo auto_update keeps :latest current (see x-versions).
+      wud.watch: "false"
       wud.display.name: "TVHeadend"
       wud.display.icon: "sh:tvheadend"
-      # Git hashes carry no ordering, so WUD cannot tell "newer" from
-      # "different" — but LinuxServer only ever publishes forward, so any tag
-      # that isn't the pinned one is in fact an update.
-      wud.tag.include: '^version-[0-9a-f]{8}$$'
 
   oscam:
     image: *oscam-version

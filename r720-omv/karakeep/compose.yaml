@@ -1,7 +1,11 @@
 x-versions:
   karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.34.1"
   meilisearch: &meilisearch-version "getmeili/meilisearch:v1.56.0"
-  chrome: &chrome-version "ghcr.io/karakeep-app/karakeep-chrome:156.0.8078.47-r1"
+  # karakeep-chrome follows upstream's :release tag (what their own compose
+  # uses) and the Komodo stack has auto_update on (stacks.toml), skipping
+  # karakeep and karakeep-meilisearch: Global Auto Update redeploys it when a
+  # new image lands (checked every 8 h). WUD ignores it.
+  chrome: &chrome-version "ghcr.io/karakeep-app/karakeep-chrome:release"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -260,11 +264,10 @@ services:
     logging: *default-logging
     labels:
       autoheal: "true"
-      wud.watch: "true"
+      # Komodo auto_update keeps :release current (see x-versions).
+      wud.watch: "false"
       wud.display.name: "KaraKeep - Chrome headless"
       wud.display.icon: "sh:karakeep"
-      wud.tag.include: '^\d+\.\d+\.\d+\.\d+-r\d+$$'
-      wud.link.template: "https://github.com/karakeep-app/karakeep/pkgs/container/karakeep-chrome"
 
 networks:
   karakeep:

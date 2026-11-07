@@ -862,6 +862,11 @@ LAN: http://10.10.1.13:3000"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
+poll_for_updates = true
+auto_update = true
+# Only karakeep-chrome follows a floating tag (:release); karakeep and
+# meilisearch stay version-pinned and are skipped explicitly.
+auto_update_skip_services = ["karakeep", "karakeep-meilisearch"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/karakeep"
@@ -1613,6 +1618,10 @@ tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
+# Only tvheadend follows :latest. LinuxServer rebuilds oscam's version- tag in
+# place, so skip it explicitly rather than let a rebuild bounce it.
+auto_update_skip_services = ["oscam"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/tvheadend"
