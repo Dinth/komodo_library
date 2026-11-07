@@ -619,6 +619,11 @@ Grafana MCP: http://10.10.1.13:5133/mcp"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
+poll_for_updates = true
+auto_update = true
+# Only mcp-grafana follows :latest; every other service is version-pinned and
+# upgraded deliberately (WUD), so skip them explicitly.
+auto_update_skip_services = ["grafana", "prometheus", "node-exporter", "cadvisor", "dcgm-exporter", "blackbox-exporter", "snmp-exporter", "ha-bluetooth-exporter"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/grafana-prometheus"
