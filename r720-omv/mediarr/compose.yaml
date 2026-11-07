@@ -567,27 +567,21 @@ services:
   # BBC Iplayer downloader
   #############################################################################
   iplayarr:
+    # The image's docker_entry.sh has to start as root: it chowns /config,
+    # /data and /logs to PUID:PGID and then su-execs to that user, so this
+    # service sets PUID/PGID rather than `user:`. These five caps are exactly
+    # what that entrypoint needs before it drops privileges.
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
       - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
     mem_limit: 512M
-    command: ['npm','run','start']
     container_name: iplayarr
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:4404/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))\""]
@@ -595,8 +589,6 @@ services:
       timeout: 10s
       start_period: 30s
       retries: 5
-    entrypoint:
-      - docker-entrypoint.sh
     # No REDIS_HOST: caches in memory. Redis is optional since v1.0.0; the
     # old iplayarr-valkey was removed. Settings: SQLite /config/iplayarr.db.
     environment:
