@@ -10,11 +10,12 @@ x-versions:
   # the pre-migration config backup + the old upstream image.
   pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.11.1"
   # bgutil PO-token provider (Node variant; plain `X.Y.Z` tag = `-node`).
-  # Keep in LOCKSTEP with the bgutil yt-dlp plugin bundled in the
-  # pinchflat-ngx image (its Dockerfile `ARG BGUTIL_PLUGIN_VERSION`, 2.0.0 in
-  # 2026.11.1). Upstream provider latest is 2.0.2 - do NOT bump it ahead of
-  # the plugin; re-check the ARG on every pinchflat-ngx bump.
-  pot-provider: &pot-provider-version "brainicism/bgutil-ytdlp-pot-provider:2.0.0"
+  # Must stay on the same MAJOR.MINOR as the bgutil yt-dlp plugin bundled in
+  # the pinchflat-ngx image (its Dockerfile `ARG BGUTIL_PLUGIN_VERSION`, 2.0.0
+  # in 2026.11.1). Patch releases are server-side only (2.0.1/2.0.2 = npm CVE
+  # fixes), so they're safe ahead of the plugin; a minor/major bump is not.
+  # Re-check the ARG on every pinchflat-ngx bump.
+  pot-provider: &pot-provider-version "brainicism/bgutil-ytdlp-pot-provider:2.0.2"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -30,21 +31,9 @@ services:
     ipc: private
     restart: unless-stopped
     user: "${MEDIA_PUID}:${MEDIA_PGID}"
-    cap_add:
-      - AUDIT_WRITE
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
-      - SETGID
-      - SETPCAP
-      - SETUID
-      - SYS_CHROOT
+    # No cap_add: it runs as a non-root user under no-new-privileges, so
+    # capabilities could never take effect anyway. (The old list was Docker's
+    # default set, copied from when the image still ran as root.)
     cap_drop:
       - ALL
     security_opt:
@@ -55,18 +44,30 @@ services:
       # Fork defaults to debug, which floods Loki.
       LOG_LEVEL: "info"
       # bgutil PO-token provider sidecar (YouTube "confirm you're not a bot").
-      POT_PROVIDER_URL: "http://pot-provider:4416"
+      POT_PROVIDER_URL: "http://pinchflat-pot-provider:4416"
     depends_on:
-      - pot-provider
-    ports:
-      - '8945:8945'
+      - pinchflat-pot-provider
+    # Web UI via Traefik only (no published port). Pinchflat has no login of
+    # its own, so Authelia forward-auth guards it. LiveView sockets work
+    # behind the proxy: the image sets check_origin: false.
     volumes:
       - /opt/docker/pinchflat/pinchflat_config:/config
       - /Data/IT/pinchflat_downloads:/downloads
     networks:
       - pinchflat
+      - traefik
     logging: *default-logging
     labels:
+      traefik.enable: "true"
+      traefik.http.routers.pinchflat.rule: "Host(`pinchflat.${DOMAIN_NAME}`)"
+      traefik.http.routers.pinchflat.entrypoints: "websecure"
+      traefik.http.routers.pinchflat.tls: "true"
+      traefik.http.routers.pinchflat.tls.certresolver: "letsencrypt"
+      traefik.http.routers.pinchflat.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.pinchflat.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.pinchflat.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.pinchflat.loadbalancer.server.port: "8945"
+      traefik.docker.network: "traefik"
       wud.watch: 'true'
       wud.display.icon: 'sh-pinchflat'
       wud.display.name: 'Pinchflat-ngx'
@@ -76,10 +77,10 @@ services:
   # Unauthenticated HTTP API on 4416: internal `pinchflat` network ONLY - no
   # ports, no traefik. No compose `profiles:` (Komodo wouldn't start it).
   # Stateless (in-memory token/minter cache), so no volumes.
-  pot-provider:
+  pinchflat-pot-provider:
     image: *pot-provider-version
-    container_name: pot-provider
-    hostname: pot-provider
+    container_name: pinchflat-pot-provider
+    hostname: pinchflat-pot-provider
     ipc: private
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
@@ -108,7 +109,8 @@ services:
     logging: *default-logging
     labels:
       wud.watch: 'true'
-      wud.display.name: 'bgutil PO-token provider'
+      wud.display.icon: 'sh-pinchflat'
+      wud.display.name: 'Pinchflat - bgutil PO-token provider'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/Brainicism/bgutil-ytdlp-pot-provider/releases/tag/$${major}.$${minor}.$${patch}'
 
@@ -117,3 +119,5 @@ networks:
     name: pinchflat
     driver: bridge
     external: false
+  traefik:
+    external: true
