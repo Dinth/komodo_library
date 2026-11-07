@@ -11,7 +11,7 @@ x-versions:
   whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.6"
   iplayarr-valkey: &iplayarr-valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
-  iplayarr: &iplayarr-version "nikorag/iplayarr:0.11.6"
+  iplayarr: &iplayarr-version "nikorag/iplayarr:v1.0.0"
   cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.12"
   radarr: &radarr-version "lscr.io/linuxserver/radarr:6.4.4"
   sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.20"
@@ -663,7 +663,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Nikorag/iplayarr/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.template: 'https://github.com/Nikorag/iplayarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Iplayarr"
       wud.display.icon: "sh-iplayarr"
     networks:
