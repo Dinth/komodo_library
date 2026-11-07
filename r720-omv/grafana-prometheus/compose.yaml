@@ -1,9 +1,10 @@
 x-versions:
   grafana: &grafana-version "grafana/grafana:13.3.0"
-  prometheus: &prometheus-version "prom/prometheus:v3.15.1"
+  prometheus: &prometheus-version "prom/prometheus:v3.16.0"
   node-exporter: &node-exporter-version "prom/node-exporter:v1.12.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
-  dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.6.1-4.8.4-distroless"
+  # 4.9.0 renamed metrics to DCGM 4.7 names (+unit changes); dashboards/alert use "new or old" queries
+  dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.7.0-4.9.0-distroless"
   blackbox-exporter: &blackbox-exporter-version "prom/blackbox-exporter:v0.29.1"
   snmp-exporter: &snmp-exporter-version "prom/snmp-exporter:v0.31.0"
   mcp-grafana: &mcp-grafana-version "grafana/mcp-grafana:2.1.1"
@@ -151,6 +152,8 @@ services:
       # is unauthenticated (/-/quit, /-/reload). Config reload = container restart.
       - '--web.enable-otlp-receiver'
       - '--web.enable-remote-write-receiver'
+      # integral() (kWh from watt gauges) — experimental in 3.16
+      - '--enable-feature=promql-experimental-functions'
     environment:
       TZ: "${TZ}"
     hostname: prometheus
