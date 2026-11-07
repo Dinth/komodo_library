@@ -1062,6 +1062,11 @@ tags = [
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+auto_update = true
+# Only n8n-mcp follows :latest. n8n is version-pinned and the postgres -alpine
+# tag is rebuilt in place, so skip both explicitly rather than let a rebuild
+# bounce n8n or its database.
+auto_update_skip_services = ["n8n", "n8n-postgres"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/n8n"
