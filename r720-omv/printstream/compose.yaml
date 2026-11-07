@@ -6,7 +6,7 @@
 # release stream lands.
 x-versions:
   printstream: &printstream-version "ghcr.io/printstreamapp/printstream:1.3.20"
-  printstream-slicer: &printstream-slicer-version "ghcr.io/printstreamapp/printstream-slicer:1.3.19"
+  printstream-slicer: &printstream-slicer-version "ghcr.io/printstreamapp/printstream-slicer:1.3.20"
   postgres: &postgres-version "postgres:18-bookworm"
 
 x-logging: &default-logging
