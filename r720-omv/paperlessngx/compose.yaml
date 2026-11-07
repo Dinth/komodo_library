@@ -5,7 +5,7 @@ x-versions:
   # Pinned to Tika 3.x -- paperless-ngx targets the Tika 3 server API; a 4.0
   # exists but don't follow it.
   tika: &tika-version "docker.io/apache/tika:3.3.3.0"
-  gotenberg: &gotenberg-version "docker.io/gotenberg/gotenberg:8.39.0"
+  gotenberg: &gotenberg-version "docker.io/gotenberg/gotenberg:8.40.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -166,6 +166,9 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
+      # Pinned to Gotenberg 8: Paperless-ngx 3.4.2 (gotenberg-client ~=1.0) calls /forms/pdfengines/merge
+      # and sends the `pdfa` field, both removed in Gotenberg 9.0 (404/400) -> office/email conversion breaks.
+      # 8.40.0 is the final 8.x release; widen this regex once a Paperless release supports Gotenberg 9.
       wud.tag.include: '^8\.\d+\.\d+$$'
       wud.link.template: 'https://github.com/gotenberg/gotenberg/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Paperless-ngx - Gotenberg"
