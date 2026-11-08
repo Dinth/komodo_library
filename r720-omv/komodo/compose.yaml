@@ -43,9 +43,10 @@ services:
       komodo.skip:
       wud.watch: "true"
       # Held on MongoDB 8.3 (michal's call, 2026-10-28). 9.0 needs FCV 8.3 set
-      # first and a deliberate upgrade; widen this only when doing that.
-      wud.tag.include: '^8\.3\.\d+$$'
-      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
+      # first and a deliberate upgrade. The regex follows the running
+      # major.minor, so bumping the image tag is the only edit needed.
+      wud.tag.include: '^$${major}\.$${minor}\.\d+$$'
+      wud.link.changelog: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo Mongo DB'
       wud.display.icon: 'sh:komodo'
 
@@ -118,6 +119,6 @@ services:
       komodo.skip:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo'
       wud.display.icon: 'sh:komodo'

@@ -105,7 +105,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "n8n"
       wud.display.icon: "sh:n8n"
-      wud.link.template: "https://github.com/n8n-io/n8n/releases/tag/n8n%40$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/n8n-io/n8n/releases/tag/n8n%40$${major}.$${minor}.$${patch}"
 
   n8n-mcp:
     image: *n8n-mcp-version
@@ -230,7 +230,7 @@ services:
       wud.tag.include: '^18\.\d+-alpine$$'
       wud.display.name: "n8n PostgreSQL"
       wud.display.icon: "sh:postgresql"
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.link.changelog: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
 
 networks:
   n8n:

@@ -141,7 +141,7 @@ services:
       traefik.docker.network: "traefik"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-tensorrt$$'
-      wud.link.template: "https://github.com/blakeblackshear/frigate/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/blakeblackshear/frigate/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Frigate"
       wud.display.icon: "mdi:cctv"
 

@@ -74,8 +74,12 @@ labels:
   wud.watch: "true"                                    # What's Up Docker monitoring
   wud.tag.include: '^\d+\.\d+\.\d+$$'                  # Version regex
   wud.display.name: "Service Name"
-  wud.link.template: 'https://github.com/org/repo/releases/tag/v$${major}.$${minor}.$${patch}'
+  wud.link.changelog: 'https://github.com/org/repo/releases/tag/v$${major}.$${minor}.$${patch}'
 ```
+`wud.link.template` is deprecated (WUD 9.5.0): use `wud.link.changelog` for
+release notes, or `wud.link.doc` when the only link is a homepage/docs page.
+To hold a series, use WUD's version variables instead of hard-coding it, e.g.
+`wud.tag.include: '^$${major}\.$${minor}\.\d+$$'` — it follows the running tag.
 
 ### Logging
 ```yaml

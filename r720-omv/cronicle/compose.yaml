@@ -188,7 +188,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/jhuckaby/Cronicle/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/jhuckaby/Cronicle/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Cronicle"
       wud.display.icon: "sh:cronicle"
 

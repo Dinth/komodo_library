@@ -260,7 +260,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+-alpine$$'
-      wud.link.template: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
+      wud.link.changelog: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
       wud.display.name: "Postgres - Piped"
 
 networks:

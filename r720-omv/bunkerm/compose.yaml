@@ -55,7 +55,7 @@ services:
       wud.tag.include: '^browser-\d+\.\d+\.\d+$$'
       wud.display.name: "MQTT Explorer"
       wud.display.icon: "sh-bunkerm"
-      wud.link.template: "https://github.com/smeagolworms4/mqtt-explorer-docker/releases"
+      wud.link.changelog: "https://github.com/smeagolworms4/mqtt-explorer-docker/releases"
 
   bunkerm:
     image: *bunkerm-version
@@ -104,7 +104,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "BunkerM"
       wud.display.icon: "sh:bunkerm"
-      wud.link.template: "https://github.com/bunkeriot/BunkerM/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/bunkeriot/BunkerM/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   traefik:

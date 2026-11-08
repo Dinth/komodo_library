@@ -47,7 +47,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "Docker Socket Proxy - Telegraf"
       wud.display.icon: "mdi:connection"
 
@@ -98,7 +98,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+-alpine$$'
       wud.display.name: "InfluxDB"
       wud.display.icon: "si:influxdb"
-      wud.link.template: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/influxdata/influxdb/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
@@ -151,7 +151,7 @@ services:
       wud.tag.include: '^\d+\.\d+-alpine$$'
       wud.display.name: "Telegraf"
       wud.display.icon: "si:influxdb"
-      wud.link.template: 'https://github.com/influxdata/telegraf/releases/tag/v$${major}.$${minor}.0'
+      wud.link.changelog: 'https://github.com/influxdata/telegraf/releases/tag/v$${major}.$${minor}.0'
     logging:
       driver: "json-file"
       options:
@@ -226,7 +226,7 @@ services:
       wud.display.name: "UnPoller"
       wud.display.icon: "si:ubiquiti"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/unpoller/unpoller/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/unpoller/unpoller/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:

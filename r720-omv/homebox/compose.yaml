@@ -145,7 +145,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Homebox"
       wud.display.icon: "sh:homebox"
-      wud.link.template: "https://github.com/sysadminsmedia/homebox/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/sysadminsmedia/homebox/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   homebox:

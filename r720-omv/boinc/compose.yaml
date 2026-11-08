@@ -53,7 +53,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/BOINC/boinc/releases/tag/client_release%2F$${major}.$${minor}%2F$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/BOINC/boinc/releases/tag/client_release%2F$${major}.$${minor}%2F$${major}.$${minor}.$${patch}'
       wud.display.name: 'BOINC'
       wud.display.icon: 'sh:boinc'
       # KasmVNC web GUI behind Traefik TLS (provides the secure context the client

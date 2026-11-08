@@ -196,7 +196,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "DVinyl"
       wud.display.icon: "mdi:album"
-      wud.link.template: "https://github.com/Kyonew/DVinyl/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/Kyonew/DVinyl/releases/tag/v$${major}.$${minor}.$${patch}"
 
   dvinyl-mongo:
     image: *mongo-version
@@ -243,11 +243,12 @@ services:
     labels:
       wud.watch: "true"
       # Held on MongoDB 8.3 (michal's call, 2026-10-28). 9.0 needs FCV 8.3 set
-      # first and a deliberate upgrade; widen this only when doing that.
-      wud.tag.include: '^8\.3\.\d+$$'
+      # first and a deliberate upgrade. The regex follows the running
+      # major.minor, so bumping the image tag is the only edit needed.
+      wud.tag.include: '^$${major}\.$${minor}\.\d+$$'
       wud.display.name: "DVinyl - Mongo"
       wud.display.icon: "sh:mongodb"
-      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
 
 networks:
   dvinyl:

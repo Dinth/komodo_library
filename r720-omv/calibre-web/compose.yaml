@@ -63,7 +63,7 @@ services:
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
       wud.watch: "true"
       wud.tag.include: '^v?[0-4]\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/janeczku/calibre-web/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/janeczku/calibre-web/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: "Calibre-Web"
       wud.display.icon: "sh-calibre-web"
 

@@ -55,7 +55,7 @@ services:
     labels:
       wud.watch: "true"
       wud.display.name: "Docker Socket Proxy - MCP Gateway"
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
 
   mcp-gateway:

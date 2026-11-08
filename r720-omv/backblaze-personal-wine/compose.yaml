@@ -135,7 +135,7 @@ services:
       # The image runs the mutable `ubuntu22` tag, so only its digest is
       # tracked; the release link has no version to template in.
       wud.tag.include: '^ubuntu22$$'
-      wud.link.template: "https://github.com/JonathanTreffler/backblaze-personal-wine-container/releases"
+      wud.link.changelog: "https://github.com/JonathanTreffler/backblaze-personal-wine-container/releases"
       wud.display.name: "Blackblaze"
       wud.display.icon: "sh-backblaze"
 
@@ -196,7 +196,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://busybox.net/"
+      wud.link.doc: "https://busybox.net/"
       wud.display.name: "Backblaze exporter (busybox)"
       wud.display.icon: "sh-backblaze"
 

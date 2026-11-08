@@ -69,7 +69,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Bricktracker"
       wud.display.icon: "sh:bricktracker"
-      wud.link.template: "https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   bricktracker:

@@ -61,7 +61,7 @@ services:
       wud.display.icon: "sh-searxng"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
   searxng:
     image: *searxng-version

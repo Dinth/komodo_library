@@ -63,7 +63,7 @@ services:
       wud.display.icon: "sh-ebusd"
       wud.display.name: "Ebusd"
       wud.tag.include: '^v\d+\.\d$$'
-      wud.link.template: "https://github.com/john30/ebusd/releases/tag/v$${major}.$${minor}"
+      wud.link.changelog: "https://github.com/john30/ebusd/releases/tag/v$${major}.$${minor}"
 
 networks:
   ebusd:

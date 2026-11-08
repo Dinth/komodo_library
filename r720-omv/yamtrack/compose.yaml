@@ -75,7 +75,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Yamtrack"
       wud.display.icon: "sh:yamtrack"
-      wud.link.template: "https://github.com/FuzzyGrim/Yamtrack/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/FuzzyGrim/Yamtrack/releases/tag/v$${major}.$${minor}.$${patch}"
 
   yamtrack-postgres:
     image: *postgres-version
@@ -130,7 +130,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^18\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.link.changelog: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "Yamtrack - Postgres"
       wud.display.icon: "sh-yamtrack"
 
@@ -174,7 +174,7 @@ services:
       wud.display.icon: "sh-yamtrack"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   yamtrack:

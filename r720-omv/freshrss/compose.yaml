@@ -79,7 +79,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^18\.\d+-alpine$$'
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.link.changelog: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
       wud.display.name: "FreshRSS - Postgres"
       wud.display.icon: "sh-freshrss"
 
@@ -170,7 +170,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "FreshRSS"
       wud.display.icon: "sh:freshrss"
-      wud.link.template: "https://github.com/FreshRSS/FreshRSS/releases/$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/FreshRSS/FreshRSS/releases/$${major}.$${minor}.$${patch}"
 
 networks:
   freshrss:

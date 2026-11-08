@@ -29,7 +29,7 @@ services:
       wud.display.icon: "sh-dawarich"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
     healthcheck:
       # Fast probing only while starting (gates depends_on), 30s once healthy.
       test: '[ $$(valkey-cli ping) = ''PONG'' ]'
@@ -219,7 +219,7 @@ services:
       traefik.http.services.dawarich.loadbalancer.server.port: "3000"
       wud.display.icon: "sh:dawarich"
       wud.display.name: "Dawarich"
-      wud.link.template: 'https://github.com/Freika/dawarich/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/Freika/dawarich/releases/tag/$${major}.$${minor}.$${patch}'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.watch: "true"
     restart: unless-stopped

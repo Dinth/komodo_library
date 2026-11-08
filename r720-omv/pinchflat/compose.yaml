@@ -73,7 +73,7 @@ services:
       wud.display.icon: 'sh-pinchflat'
       wud.display.name: 'Pinchflat-ngx'
       wud.tag.include: '^\d{4}\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/TheBadFella/pinchflat-ngx/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/TheBadFella/pinchflat-ngx/releases/tag/$${major}.$${minor}.$${patch}'
 
   # Unauthenticated HTTP API on 4416: internal `pinchflat` network ONLY - no
   # ports, no traefik. No compose `profiles:` (Komodo wouldn't start it).
@@ -113,7 +113,7 @@ services:
       wud.display.icon: 'sh-pinchflat'
       wud.display.name: 'Pinchflat - bgutil PO-token provider'
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Brainicism/bgutil-ytdlp-pot-provider/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/Brainicism/bgutil-ytdlp-pot-provider/releases/tag/$${major}.$${minor}.$${patch}'
 
 networks:
   pinchflat:

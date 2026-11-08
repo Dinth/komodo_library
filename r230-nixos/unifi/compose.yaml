@@ -44,10 +44,11 @@ services:
       # Held on MongoDB 8.3, like the other Mongo instances (michal's call,
       # 2026-10-28). UniFi Network 10.x officially supports MongoDB only up to
       # 8.0 (8.3 here already runs past that). Its bundled Java driver 5.1.4 is
-      # untested against 9.0, and 9.0 also needs FCV 8.3 set first. Widen the
-      # regex only once Ubiquiti or linuxserver list 9.0.
-      wud.tag.include: '^8\.3\.\d+$$'
-      wud.link.template: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
+      # untested against 9.0, and 9.0 also needs FCV 8.3 set first. Move to 9.0
+      # only once Ubiquiti or linuxserver list it; the regex follows the
+      # running major.minor, so the image tag is the only edit needed.
+      wud.tag.include: '^$${major}\.$${minor}\.\d+$$'
+      wud.link.changelog: 'https://github.com/mongodb/mongo/releases/tag/r$${major}.$${minor}.$${patch}'
       wud.display.name: 'Unifi Network Application - Mongo DB'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
 
@@ -102,7 +103,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/linuxserver/docker-unifi-network-application/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/linuxserver/docker-unifi-network-application/releases/tag/$${major}.$${minor}.$${patch}'
       wud.display.name: 'Unifi Network Application'
       wud.display.icon: 'sh:ubiquiti-unifi-dark'
 

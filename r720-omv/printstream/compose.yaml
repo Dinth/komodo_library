@@ -150,7 +150,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "PrintStream - API"
       wud.display.icon: "sh:bambulab"
-      wud.link.template: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
 
   printstream-slicer:
     image: *printstream-slicer-version
@@ -202,7 +202,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "PrintStream - Slicer"
       wud.display.icon: "sh:bambulab"
-      wud.link.template: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
 
   printstream-bridge:
     image: *printstream-version
@@ -256,7 +256,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "PrintStream - Bridge"
       wud.display.icon: "sh:bambulab"
-      wud.link.template: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/PrintStreamApp/printstream/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   printstream:

@@ -41,7 +41,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: 'Docker Socket Proxy - Promtail'
       wud.display.icon: 'mdi:connection'
     volumes:
@@ -96,7 +96,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Loki"
       wud.display.icon: "si:grafana"
-      wud.link.template: 'https://github.com/grafana/loki/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/grafana/loki/releases/tag/v$${major}.$${minor}.$${patch}'
     logging: *default-logging
 
   alloy:
@@ -150,7 +150,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Grafana Alloy"
       wud.display.icon: "si:grafana"
-      wud.link.template: "https://github.com/grafana/alloy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/grafana/alloy/releases/tag/v$${major}.$${minor}.$${patch}"
     networks:
       - monitoring
     logging: *default-logging

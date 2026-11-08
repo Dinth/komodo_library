@@ -100,7 +100,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Grafana"
       wud.display.icon: "si:grafana"
-      wud.link.template: 'https://github.com/grafana/grafana/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/grafana/grafana/releases/tag/v$${major}.$${minor}.$${patch}'
       # --- Traefik router (TLS, NO forward-auth: Grafana drives its own OIDC flow) ---
       traefik.enable: "true"
       traefik.docker.network: "traefik"
@@ -191,7 +191,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Prometheus"
       wud.display.icon: "si:prometheus"
-      wud.link.template: 'https://github.com/prometheus/prometheus/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/prometheus/prometheus/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
@@ -254,7 +254,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Node Exporter"
       wud.display.icon: "si:prometheus"
-      wud.link.template: 'https://github.com/prometheus/node_exporter/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/prometheus/node_exporter/releases/tag/$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
@@ -308,7 +308,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "cAdvisor"
       wud.display.icon: "si:docker"
-      wud.link.template: 'https://github.com/google/cadvisor/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/google/cadvisor/releases/tag/$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
@@ -412,7 +412,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Blackbox Exporter"
       wud.display.icon: "si:prometheus"
-      wud.link.template: 'https://github.com/prometheus/blackbox_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/prometheus/blackbox_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
@@ -450,7 +450,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "SNMP Exporter"
       wud.display.icon: "si:prometheus"
-      wud.link.template: 'https://github.com/prometheus/snmp_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/prometheus/snmp_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:

@@ -100,7 +100,7 @@ services:
       # (26.09.3 -> 26.9.3) and invents .0 for 26.09, both of which 404.
       # Links to Anki's own release notes (the image repo has none).
       # yamllint disable-line rule:line-length
-      wud.link.template: "https://github.com/ankitects/anki/releases/tag/$${raw}"
+      wud.link.changelog: "https://github.com/ankitects/anki/releases/tag/$${raw}"
 
 networks:
   traefik:

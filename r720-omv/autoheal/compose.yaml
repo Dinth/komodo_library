@@ -62,7 +62,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Docker Socket Proxy - Autoheal"
       wud.display.icon: "mdi:connection"
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
 
   autoheal:
     image: *autoheal-version

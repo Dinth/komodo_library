@@ -74,7 +74,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/qdm12/gluetun/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/qdm12/gluetun/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Gluetun"
       wud.display.icon: "sh-gluetun"
 
@@ -129,7 +129,7 @@ services:
       autoheal: "true"
       wud.display.icon: "sh-qbittorrent"
       wud.display.name: "QBittorrent"
-      wud.link.template: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/qbittorrent/qBittorrent/releases/tag/release-$${major}.$${minor}.$${patch}'
       # 5.2.2 regression: WebUI unreachable on the bridge IP after any VPN
       # reconnect — hold at 5.2.1 and never propose 5.2.2.
       wud.tag.exclude: '^v?5\.2\.2$$'
@@ -181,7 +181,7 @@ services:
       autoheal: "true"
       wud.display.icon: "sh-prowlarr"
       wud.display.name: "Prowlarr"
-      wud.link.template: "https://github.com/Prowlarr/Prowlarr/releases"
+      wud.link.changelog: "https://github.com/Prowlarr/Prowlarr/releases"
       wud.tag.include: "^v?\\d+\\.\\d+\\.\\d+$$"
       wud.watch: "true"
   #############################################################################
@@ -241,7 +241,7 @@ services:
       traefik.http.services.seerr.loadbalancer.server.port: "5055"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/seerr-team/seerr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/seerr-team/seerr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Seerr"
       wud.display.icon: "sh-seerr"
   #############################################################################
@@ -320,7 +320,7 @@ services:
       wud.watch: "true"
       # Releases also ship -linux-amd64/-arm64 tags; match only the plain one.
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/giuseppe99barchetta/SuggestArr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/giuseppe99barchetta/SuggestArr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "SuggestArr"
       wud.display.icon: "sh-suggestarr"
   #############################################################################
@@ -376,7 +376,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Bazarr"
       wud.display.icon: "sh-bazarr"
     logging:
@@ -497,7 +497,7 @@ services:
       # Tags are published in pairs (v1.10.0 and v1.10.0-gpu); this must only
       # ever match the GPU build.
       wud.tag.include: '^v?\d+\.\d+\.\d+-gpu$$'
-      wud.link.template: 'https://github.com/ahmetoner/whisper-asr-webservice/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/ahmetoner/whisper-asr-webservice/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Whisper ASR"
       wud.display.icon: "si:openai"
   #############################################################################
@@ -545,7 +545,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?[0-7]\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Lidarr/Lidarr/releases'
+      wud.link.changelog: 'https://github.com/Lidarr/Lidarr/releases'
       wud.display.name: "Lidarr"
       wud.display.icon: "sh-lidarr"
     logging:
@@ -611,7 +611,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Nikorag/iplayarr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/Nikorag/iplayarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Iplayarr"
       wud.display.icon: "sh-iplayarr"
     networks:
@@ -667,7 +667,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Cleanuparr/Cleanuparr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/Cleanuparr/Cleanuparr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Cleanuperr"
       wud.display.icon: "sh-cleanuperr"
     networks:
@@ -715,7 +715,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/FlareSolverr/FlareSolverr/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/FlareSolverr/FlareSolverr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Flaresolverr"
       wud.display.icon: "sh-flaresolverr"
     logging:
@@ -774,7 +774,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Radarr/Radarr/releases'
+      wud.link.changelog: 'https://github.com/Radarr/Radarr/releases'
       wud.display.name: "Radarr"
       wud.display.icon: "sh-radarr"
     logging:
@@ -831,7 +831,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/Sonarr/Sonarr/releases'
+      wud.link.changelog: 'https://github.com/Sonarr/Sonarr/releases'
       wud.display.name: "Sonarr"
       wud.display.icon: "sh-sonarr"
     healthcheck:

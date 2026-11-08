@@ -307,7 +307,7 @@ services:
       wud.display.name: "Ollama"
       wud.display.icon: "sh:ollama"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/ollama/ollama/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/ollama/ollama/releases/tag/v$${major}.$${minor}.$${patch}"
     healthcheck:
       test: "ollama --version && ollama ps && bash -c 'cat < /dev/null > /dev/tcp/localhost/11434'|| exit 1"
       interval: 30s
@@ -469,7 +469,7 @@ services:
       wud.watch.digest: "false"
       wud.display.name: "ComfyUI"
       wud.display.icon: "sh:comfyui"
-      wud.link.template: "https://github.com/ai-dock/comfyui/releases"
+      wud.link.changelog: "https://github.com/ai-dock/comfyui/releases"
     networks:
       - openwebui
     # No published port: only OpenWebUI uses it, as http://comfyui:8188.
@@ -718,7 +718,7 @@ services:
       wud.display.name: "OpenWebUI Server - AI agent manager"
       wud.display.icon: "sh:open-webui"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/open-webui/open-webui/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/open-webui/open-webui/releases/tag/v$${major}.$${minor}.$${patch}"
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     volumes:
@@ -784,7 +784,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: 'https://github.com/unclecode/crawl4ai/releases/tag/v$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/unclecode/crawl4ai/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Crawl4AI"
       wud.display.icon: "sh:spider"
     restart: unless-stopped
@@ -914,7 +914,7 @@ services:
       traefik.http.services.zeroclaw.loadbalancer.server.port: "8080"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
-      wud.link.template: 'https://github.com/nginx/nginx/releases'
+      wud.link.changelog: 'https://github.com/nginx/nginx/releases'
       wud.display.name: 'ZeroClaw - Selector'
       wud.display.icon: 'sh:nginx'
   zeroclaw-michal:
@@ -933,7 +933,7 @@ services:
       wud.watch: "false"
       wud.display.name: "ZeroClaw - Michal"
       wud.display.icon: "sh:robot"
-      wud.link.template: "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v$${major}.$${minor}.$${patch}"
     volumes:
       - /opt/docker/openwebui/zeroclaw_data:/zeroclaw-data
   zeroclaw-paulina:

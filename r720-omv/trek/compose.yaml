@@ -105,7 +105,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "TREK"
       wud.display.icon: "sh-trek"
-      wud.link.template: "https://github.com/liketrek/TREK/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/liketrek/TREK/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   trek:

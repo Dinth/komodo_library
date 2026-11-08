@@ -60,8 +60,8 @@ services:
       wud.display.icon: "sh-monica"
       wud.watch: "true"
       # Stay on the 12.3 LTS series (EOL June 2029); 13.x is short-lived rolling.
-      wud.tag.include: '^12\.3\.\d+$$'
-      wud.link.template: 'https://mariadb.com/docs/release-notes/community-server/12.3/$${major}.$${minor}.$${patch}'
+      wud.tag.include: '^$${major}\.$${minor}\.\d+$$'
+      wud.link.changelog: 'https://mariadb.com/docs/release-notes/community-server/12.3/$${major}.$${minor}.$${patch}'
 
   monica:
     image: *monica-version
@@ -126,7 +126,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+-apache$$'
       wud.display.name: "Monica"
       wud.display.icon: "sh:monica"
-      wud.link.template: "https://github.com/monicahq/monica/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/monicahq/monica/releases/tag/v$${major}.$${minor}.$${patch}"
 
   # Runs the Laravel scheduler (busybox crond -> `artisan schedule:run` every
   # minute), which fires `send:reminders` hourly to repopulate reminder_outbox.

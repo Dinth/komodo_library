@@ -259,7 +259,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "HealthLog"
       wud.display.icon: "mdi:heart-pulse"
-      wud.link.template: "https://github.com/MBombeck/HealthLog/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/MBombeck/HealthLog/releases/tag/v$${major}.$${minor}.$${patch}"
 
   healthlog-postgres:
     image: *postgres-version
@@ -328,7 +328,7 @@ services:
       wud.tag.include: '^18\.\d+-alpine$$'
       wud.display.name: "HealthLog - Postgres"
       wud.display.icon: "sh:postgresql"
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.link.changelog: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
 
 networks:
   healthlog:

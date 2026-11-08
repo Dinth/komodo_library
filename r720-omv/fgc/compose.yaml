@@ -165,7 +165,7 @@ services:
       # Upstream tags are 2-part (v1.1), so no $${patch} component here.
       wud.tag.include: '^v\d+\.\d+$$'
       wud.display.name: "Free Games Claimer (Remaster)"
-      wud.link.template: 'https://github.com/P-Adamiec/Free-Games-Claimer-Remaster/releases/tag/v$${major}.$${minor}'
+      wud.link.changelog: 'https://github.com/P-Adamiec/Free-Games-Claimer-Remaster/releases/tag/v$${major}.$${minor}'
     networks:
       - fgc
       # For NOTIFY above; the signal-rest-api stack owns this network.

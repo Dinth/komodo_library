@@ -98,7 +98,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+\-collector$$'
       wud.display.name: "Scrutiny Collector"
       wud.display.icon: "sh:scrutiny"
-      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
 
   scrutiny-web:
     image: *scrutiny-web-version
@@ -165,7 +165,7 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+\-web$$'
       wud.display.name: "Scrutiny"
       wud.display.icon: "sh:scrutiny"
-      wud.link.template: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/AnalogJ/scrutiny/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   monitoring:

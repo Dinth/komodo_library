@@ -120,7 +120,7 @@ services:
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III"
       wud.display.icon: "sh:firefly-iii"
-      wud.link.template: "https://github.com/firefly-iii/firefly-iii/releases/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/firefly-iii/firefly-iii/releases/v$${major}.$${minor}.$${patch}"
 
   fireflyiii_paulina_dataimporter:
     image: *fireflyiii-dataimporter-version
@@ -194,7 +194,7 @@ services:
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III Data importer"
       wud.display.icon: "sh:firefly-iii"
-      wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
 
   fireflyiii_michal_dataimporter:
     image: *fireflyiii-dataimporter-version
@@ -272,7 +272,7 @@ services:
       wud.tag.include: '^version-\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III Data importer"
       wud.display.icon: "sh:firefly-iii"
-      wud.link.template: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/firefly-iii/data-importer/releases/v$${major}.$${minor}.$${patch}"
 
   fireflyiii-signal-shim:
     # Firefly III 6.6.x can only notify over mail, Slack or Pushover - its ntfy
@@ -405,7 +405,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Firefly III MCP"
       wud.display.icon: "sh:firefly-iii"
-      wud.link.template: "https://github.com/daften/fireflyiii-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/daften/fireflyiii-mcp/releases/tag/v$${major}.$${minor}.$${patch}"
 
   fireflyiii-postgres:
     image: *postgres-version
@@ -451,7 +451,7 @@ services:
       wud.tag.include: '^18\.\d+-alpine$$'
       wud.display.name: "Firefly III PostgreSQL"
       wud.display.icon: "sh:postgresql"
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.link.changelog: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
 
 networks:
   fireflyiii:

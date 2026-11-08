@@ -70,7 +70,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/wollomatic/socket-proxy/releases/tag/$${major}.$${minor}.$${patch}"
       wud.display.name: "Docker Socket Proxy - Scanopy"
       wud.display.icon: "mdi:connection"
 
@@ -120,7 +120,7 @@ services:
       autoheal: "true"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Daemon"
 
   scanopy-postgres:
@@ -150,7 +150,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+-alpine$$'
-      wud.link.template: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
+      wud.link.changelog: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
       wud.display.name: "Postgres - Scanopy"
   scanopy-server:
     image: *scanopy-server-version
@@ -186,7 +186,7 @@ services:
     labels:
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/scanopy/scanopy/releases/tag/v$${major}.$${minor}.$${patch}"
       wud.display.name: "Scanopy Server"
       wud.display.icon: "sh:scanopy"
 

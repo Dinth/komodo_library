@@ -161,7 +161,7 @@ services:
       wud.display.name: "KaraKeep"
       wud.display.icon: "sh:karakeep"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/karakeep-app/karakeep/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/karakeep-app/karakeep/releases/tag/v$${major}.$${minor}.$${patch}"
 
   karakeep-meilisearch:
     image: *meilisearch-version
@@ -215,7 +215,7 @@ services:
       wud.display.name: "KaraKeep - Meilisearch"
       wud.display.icon: "sh:karakeep"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/meilisearch/meilisearch/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/meilisearch/meilisearch/releases/tag/v$${major}.$${minor}.$${patch}"
 
   karakeep-chrome:
     image: *chrome-version

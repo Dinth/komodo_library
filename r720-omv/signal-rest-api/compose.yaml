@@ -64,7 +64,7 @@ services:
       wud.tag.include: '^\d+\.\d+$$'
       wud.display.name: "Signal Rest API"
       wud.display.icon: "sh:signal"
-      wud.link.template: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}"
+      wud.link.changelog: "https://github.com/bbernhard/signal-cli-rest-api/releases/tag/$${major}.$${minor}"
 
   # Lives here rather than in its own stack because signal-cli is its only
   # backend: the two version and deploy together, and apprise on its own would
@@ -148,7 +148,7 @@ services:
       wud.tag.include: '^\d+\.\d+\.\d+$$'
       wud.display.name: "Apprise"
       wud.display.icon: "sh:apprise"
-      wud.link.template: "https://github.com/caronc/apprise-api/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/caronc/apprise-api/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   # Joined by wud, uptime-kuma, backrest and pricebuddy (via apprise);

@@ -125,7 +125,7 @@ services:
       wud.tag.transform: '^(\d+)\.(\d+)ubu\d+-ls(\d+)$$ => $$1.$$2.$$3'
       # Upstream tags releases `v12.0` now, so major.minor only. $${patch} is
       # the LSIO build counter here and would 404.
-      wud.link.template: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}"
+      wud.link.changelog: "https://github.com/jellyfin/jellyfin/releases/tag/v$${major}.$${minor}"
 networks:
   jellyfin:
     name: jellyfin

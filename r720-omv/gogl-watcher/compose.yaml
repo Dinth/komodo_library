@@ -77,7 +77,7 @@ services:
       wud.display.name: "gogl-watcher"
       wud.display.icon: "mdi:download-box"
       # yamllint disable-line rule:line-length
-      wud.link.template: "https://github.com/alehel/gogl-watcher/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/alehel/gogl-watcher/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   traefik:

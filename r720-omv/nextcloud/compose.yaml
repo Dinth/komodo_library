@@ -64,7 +64,7 @@ services:
       wud.display.icon: "sh:nextcloud"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+\-alpine$$'
-      wud.link.template: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.link.changelog: 'https://github.com/valkey-io/valkey/releases/tag/$${major}.$${minor}.$${patch}'
 
   nextcloud-imaginary:
     image: *imaginary-version
@@ -165,7 +165,7 @@ services:
       traefik.http.routers.collabora.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.docker.network: "traefik"
       wud.watch: "true"
-      wud.link.template: "https://www.collaboraonline.com/code/"
+      wud.link.doc: "https://www.collaboraonline.com/code/"
       wud.tag.include: '^\d+\.\d+\.\d+\.\d+\.\d+$$'
       wud.display.name: "Nextcloud - Collabora"
       wud.display.icon: "si:collaboraonline"
@@ -273,7 +273,7 @@ services:
       wud.display.name: "NextCloud"
       wud.display.icon: "sh:nextcloud"
       wud.tag.include: '^\d+\.\d+\.\d+$$'
-      wud.link.template: "https://github.com/nextcloud/server/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/nextcloud/server/releases/tag/v$${major}.$${minor}.$${patch}"
 
   nextcloud-mcp:
     image: *nextcloud-mcp-version
@@ -369,7 +369,7 @@ services:
       wud.tag.include: '^18\.\d+-alpine$$'
       wud.display.name: "Nextcloud PostgreSQL"
       wud.display.icon: "sh:postgresql"
-      wud.link.template: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
+      wud.link.changelog: 'https://github.com/postgres/postgres/releases/tag/REL_$${major}_$${minor}'
 
 configs:
   nextcloud-php-ini:

@@ -66,7 +66,7 @@ services:
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+$$'
       wud.display.name: "OpenTTD"
-      wud.link.template: 'https://github.com/OpenTTD/OpenTTD/releases/tag/$${major}.$${minor}'
+      wud.link.changelog: 'https://github.com/OpenTTD/OpenTTD/releases/tag/$${major}.$${minor}'
 
 networks:
   openttd:

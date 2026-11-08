@@ -107,7 +107,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Navidrome"
       wud.display.icon: "sh:navidrome"
-      wud.link.template: "https://github.com/navidrome/navidrome/releases/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/navidrome/navidrome/releases/v$${major}.$${minor}.$${patch}"
 
 networks:
   navidrome:

@@ -60,7 +60,7 @@ services:
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.display.name: "Audiobookshelf"
       wud.display.icon: "sh:audiobookshelf"
-      wud.link.template: "https://github.com/advplyr/audiobookshelf/releases/tag/v$${major}.$${minor}.$${patch}"
+      wud.link.changelog: "https://github.com/advplyr/audiobookshelf/releases/tag/v$${major}.$${minor}.$${patch}"
 
 networks:
   audiobookshelf:
