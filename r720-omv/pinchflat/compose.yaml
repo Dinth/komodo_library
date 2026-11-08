@@ -48,7 +48,8 @@ services:
     depends_on:
       - pinchflat-pot-provider
     # Web UI via Traefik only (no published port). Pinchflat has no login of
-    # its own, so Authelia forward-auth guards it. LiveView sockets work
+    # its own, so Authelia forward-auth guards it, and lan-only@file limits it
+    # to the workstation VLAN + Tailscale. LiveView sockets work
     # behind the proxy: the image sets check_origin: false.
     volumes:
       - /opt/docker/pinchflat/pinchflat_config:/config
@@ -65,7 +66,7 @@ services:
       traefik.http.routers.pinchflat.tls.certresolver: "letsencrypt"
       traefik.http.routers.pinchflat.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.pinchflat.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.pinchflat.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.routers.pinchflat.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
       traefik.http.services.pinchflat.loadbalancer.server.port: "8945"
       traefik.docker.network: "traefik"
       wud.watch: 'true'
