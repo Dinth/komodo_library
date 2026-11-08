@@ -11,7 +11,7 @@ x-versions:
   whisper: &whisper-version "onerahmet/openai-whisper-asr-webservice:v1.10.0-gpu"
   lidarr: &lidarr-version "lscr.io/linuxserver/lidarr:3.1.6"
   iplayarr: &iplayarr-version "nikorag/iplayarr:v1.0.0"
-  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.10.12"
+  cleanuparr: &cleanuparr-version "ghcr.io/cleanuparr/cleanuparr:2.11.0"
   radarr: &radarr-version "lscr.io/linuxserver/radarr:6.4.4"
   sonarr: &sonarr-version "lscr.io/linuxserver/sonarr:4.0.20"
 services:
