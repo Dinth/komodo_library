@@ -9,7 +9,7 @@ x-versions:
   # 0.101 changed the image: s6-overlay as user 1000 instead of a root
   # entrypoint, so SIGNAL_CLI_UID/GID are gone - see user/tmpfs below.
   signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:1791633879-ci"
-  apprise: &apprise-version "caronc/apprise:2.0.2"
+  apprise: &apprise-version "caronc/apprise:2.1.0"
 
 x-logging: &default-logging
   driver: "json-file"
