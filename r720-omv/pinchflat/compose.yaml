@@ -8,7 +8,7 @@ x-versions:
   # SQLite image, NOT the `-postgres` variant.
   # First start runs one-way schema migrations on /config: rollback = restore
   # the pre-migration config backup + the old upstream image.
-  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.11.1"
+  pinchflat: &pinchflat-version "ghcr.io/thebadfella/pinchflat-ngx:2026.11.2"
   # bgutil PO-token provider (Node variant; plain `X.Y.Z` tag = `-node`).
   # Must stay on the same MAJOR.MINOR as the bgutil yt-dlp plugin bundled in
   # the pinchflat-ngx image (its Dockerfile `ARG BGUTIL_PLUGIN_VERSION`, 2.0.0
