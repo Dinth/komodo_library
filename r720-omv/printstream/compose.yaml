@@ -182,7 +182,9 @@ services:
     # image's own root-owned /opt/printstream-slicers (not a bind mount) at
     # startup, so it must run as the image default (root) like upstream's
     # compose; forcing PUID:PGID fails with EPERM on that profile setup.
-    mem_limit: 1G
+    # Upstream default (SLICER_MEMORY_LIMIT:-8g) — BambuStudio slices of large
+    # multi-plate projects need well over 1G.
+    mem_limit: 8g
     environment:
       SLICER_PORT: "4010"
       SLICER_SERVICE_TOKEN: "${PRINTSTREAM_SLICER_TOKEN}"
@@ -193,9 +195,16 @@ services:
       TZ: "${TZ}"
     volumes:
       - /opt/docker/printstream/printstream_slicer_work:/work
+      # Since 1.3.20 slicing engines (Bambu Studio builds, ~530 MB each) are
+      # downloaded from GitHub at runtime instead of baked into the image.
+      # Persist them so a recreate doesn't re-download.
+      - /opt/docker/printstream/printstream_slicer_engines:/data/engines
       - /etc/localtime:/etc/localtime:ro
     networks:
       - slicer-internal
+      # slicer-internal is internal: true (no egress); the engine download
+      # needs internet, so also join the stack's ordinary bridge network.
+      - printstream
     logging: *default-logging
     labels:
       wud.watch: "true"
