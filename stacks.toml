@@ -996,11 +996,11 @@ MCP_GATEWAY_AUTH_TOKEN=[[MCP_GATEWAY_AUTH_TOKEN]]
 [[stack]]
 name = "mediarr"
 description = """
-*arr media automation: Sonarr, Radarr, Lidarr, Prowlarr, Bazarr (+ Whisper subtitles), qBittorrent/Prowlarr/Flaresolverr behind Gluetun VPN, Iplayarr, Cleanuparr, Seerr, SuggestArr.
+*arr media automation: Sonarr, Radarr, Lidarr, Prowlarr, Bazarr (+ Whisper subtitles), qBittorrent/Prowlarr/Flaresolverr behind Gluetun VPN, Iplayarr, Cleanuparr, Seerr, SuggestArr, Sonobarr.
 All at http://10.10.1.13:<port>
 Sonarr 8989 / Radarr 7878 / Lidarr 8686 / Prowlarr 9696 / Bazarr 6767
 qBittorrent 8008 / Iplayarr 4404 / Cleanuparr 11011
-Except, via Traefik only: Seerr https://seerr.wickhay.uk / SuggestArr https://suggestarr.wickhay.uk (Authelia)"""
+Except, via Traefik only: Seerr https://seerr.wickhay.uk / SuggestArr https://suggestarr.wickhay.uk (Authelia) / Sonobarr https://sonobarr.wickhay.uk (Authelia)"""
 tags = ["needs-improvement", "stacks"]
 [stack.config]
 server = "r720-omv"
@@ -1021,6 +1021,7 @@ QBITTORRENT__PASSWORD=[[QBITTORRENT_PASS]]
 SONARR__INSTANCES__0__APIKEY=[[SONARR_APIKEY]]
 RADARR__INSTANCES__0__APIKEY=[[RADARR_APIKEY]]
 LIDARR__INSTANCES__0__APIKEY=[[LIDARR_APIKEY]]
+LIDARR_APIKEY=[[LIDARR_APIKEY]]
 HOMEPAGE_BAZARR_API=[[HOMEPAGE_BAZARR_API]]
 HOMEPAGE_LIDARR_API=[[HOMEPAGE_LIDARR_API]]
 HOMEPAGE_PROWLARR_API=[[HOMEPAGE_PROWLARR_API]]
@@ -1029,6 +1030,10 @@ HOMEPAGE_RADARR_API=[[HOMEPAGE_RADARR_API]]
 WIREGUARD_PRIVATE_KEY=[[WIREGUARD_PRIVATE_KEY]]
 WIREGUARD_PRESHARED_KEY=[[WIREGUARD_PRESHARED_KEY]]
 WIREGUARD_ADDRESSES=[[WIREGUARD_ADDRESSES]]
+SONOBARR_SECRET_KEY=[[SONOBARR_SECRET_KEY]]
+SONOBARR_ADMIN_PASSWORD=[[SONOBARR_ADMIN_PASSWORD]]
+LASTFM_API_KEY=[[LASTFM_API_KEY]]
+LASTFM_API_SECRET=[[LASTFM_API_SECRET]]
 """
 
 ##

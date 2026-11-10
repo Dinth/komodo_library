@@ -5,6 +5,7 @@ x-versions:
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.7.0"
   seerr: &seerr-version "ghcr.io/seerr-team/seerr:v3.5.1"
   suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.3.0"
+  sonobarr: &sonobarr-version "ghcr.io/dodelidoo-labs/sonobarr:0.13.0"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.2"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
   # against the new image (patched copy is bind-mounted over upstream's).
@@ -323,6 +324,89 @@ services:
       wud.link.changelog: 'https://github.com/giuseppe99barchetta/SuggestArr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "SuggestArr"
       wud.display.icon: "sh-suggestarr"
+  #############################################################################
+  # Sonobarr
+  # Music discovery for Lidarr: finds artists similar to the ones already in
+  # the library (Last.fm) and adds them to Lidarr. Reaches Lidarr over the
+  # mediarr bridge; served only through Traefik.
+  #############################################################################
+  sonobarr:
+    image: *sonobarr-version
+    container_name: sonobarr
+    hostname: sonobarr
+    restart: unless-stopped
+    ipc: private
+    # init.sh only chowns /sonobarr/config and su-execs when started as root;
+    # started as this user it runs gunicorn directly, so no caps are needed.
+    # The bind mount must already be owned by MEDIA_PUID:MEDIA_PGID.
+    user: "${MEDIA_PUID}:${MEDIA_PGID}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256M
+    environment:
+      TZ: "${TZ}"
+      secret_key: "${SONOBARR_SECRET_KEY}"
+      lidarr_address: "http://lidarr:8686"
+      lidarr_api_key: "${LIDARR_APIKEY}"
+      # Lidarr's root folder as Lidarr sees it (/Data/Music on the host).
+      root_folder_path: "/music/"
+      quality_profile_id: "1"
+      # 3 = "Albums + Singles"
+      metadata_profile_id: "3"
+      lidarr_api_timeout: "120"
+      fallback_to_top_result: "false"
+      search_for_missing_albums: "false"
+      dry_run_adding_to_lidarr: "false"
+      similar_artist_batch_size: "10"
+      auto_start: "false"
+      auto_start_delay: "60"
+      last_fm_api_key: "${LASTFM_API_KEY}"
+      last_fm_api_secret: "${LASTFM_API_SECRET}"
+      # Only read when the superadmin row is first created (or when
+      # sonobarr_superadmin_reset is "true").
+      sonobarr_superadmin_username: "dinth"
+      sonobarr_superadmin_password: "${SONOBARR_ADMIN_PASSWORD}"
+      sonobarr_superadmin_display_name: "Michal"
+      sonobarr_superadmin_reset: "false"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/docker/mediarr/sonobarr_config:/sonobarr/config
+    # mediarr for Lidarr; traefik for ingress.
+    networks:
+      - mediarr
+      - traefik
+    healthcheck:
+      # /login is the only unauthenticated 200 (/api/* wants the API key).
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/login')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      autoheal: "true"
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.sonobarr.rule: "Host(`sonobarr.${DOMAIN_NAME}`)"
+      traefik.http.routers.sonobarr.entrypoints: "websecure"
+      traefik.http.routers.sonobarr.tls: "true"
+      traefik.http.routers.sonobarr.tls.certresolver: "letsencrypt"
+      traefik.http.routers.sonobarr.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.sonobarr.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.sonobarr.middlewares: "secHeaders@file,authelia-auth@docker"
+      traefik.http.services.sonobarr.loadbalancer.server.port: "5000"
+      wud.watch: "true"
+      # Tags are bare semver (no v prefix).
+      wud.tag.include: '^\d+\.\d+\.\d+$$'
+      wud.link.changelog: 'https://github.com/Dodelidoo-Labs/sonobarr/releases/tag/$${major}.$${minor}.$${patch}'
+      wud.display.name: "Sonobarr"
+      wud.display.icon: "sh-sonobarr"
   #############################################################################
   # Bazarr
   # Subtitle manager and downloader
