@@ -1629,9 +1629,7 @@ tags = ["stacks"]
 server = "r720-omv"
 poll_for_updates = true
 auto_update = true
-# Only tvheadend follows :latest. LinuxServer rebuilds oscam's version- tag in
-# place, so skip it explicitly rather than let a rebuild bounce it.
-auto_update_skip_services = ["oscam"]
+# tvheadend and oscam both follow :latest; Komodo redeploys whichever changed.
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/tvheadend"

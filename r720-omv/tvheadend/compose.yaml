@@ -1,11 +1,11 @@
 x-versions:
-  # LinuxServer publishes oscam from upstream VCS, not semver:
-  #   oscam     -> version-<OSCam SVN revision>
-  # tvheadend follows :latest and the Komodo stack has auto_update on
-  # (stacks.toml), skipping oscam: Global Auto Update redeploys it when a
-  # new image lands (checked every 8 h). WUD ignores it.
+  # Both follow :latest and the Komodo stack has auto_update on
+  # (stacks.toml): Global Auto Update redeploys either one when a new image
+  # lands (checked every 8 h). WUD ignores both. LinuxServer builds oscam
+  # from upstream SVN (version-<revision> tags, rebuilt in place), so a
+  # pinned tag gained nothing over :latest.
   tvheadend: &tvheadend-version "linuxserver/tvheadend:latest"
-  oscam: &oscam-version "linuxserver/oscam:version-11968"
+  oscam: &oscam-version "linuxserver/oscam:latest"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -141,11 +141,10 @@ services:
       traefik.http.routers.oscam.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.oscam.middlewares: "secHeaders@file,authelia-auth@docker,lan-only@file"
       traefik.http.services.oscam.loadbalancer.server.port: "8888"
-      wud.watch: "true"
+      # Komodo auto_update keeps :latest current (see x-versions).
+      wud.watch: "false"
       wud.display.name: "OSCam"
       wud.display.icon: "sh:oscam"
-      # OSCam SVN revisions are monotonic integers, so these do sort correctly.
-      wud.tag.include: '^version-\d+$$'
 
 networks:
   tvheadend:
