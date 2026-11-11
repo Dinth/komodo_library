@@ -91,6 +91,9 @@ services:
       traefik.http.routers.loki.rule: "PathPrefix(`/`)"
       traefik.http.routers.loki.middlewares: "trusted-allowlist@docker"
       traefik.http.routers.loki.service: "loki"
+      # Log pushes from other hosts: no access-log lines for them, or every
+      # push writes a Traefik log line that Alloy ships straight back here.
+      traefik.http.routers.loki.observability.accesslogs: "false"
       traefik.http.services.loki.loadbalancer.server.port: "3100"
       wud.watch: "true"
       wud.tag.include: '^\d+\.\d+\.\d+$$'

@@ -169,8 +169,8 @@ services:
       # endpoint is only on the traefik network, not published to the host).
       - traefik
     volumes:
+      # No rule files: every alert rule is Grafana-managed (provisioning/alerting).
       - /opt/docker/grafana-prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - /opt/docker/grafana-prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
       - /opt/docker/grafana-prometheus/prometheus_storage:/prometheus
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy | grep -q 'Prometheus Server is Healthy'"]
@@ -186,6 +186,9 @@ services:
       traefik.http.routers.prometheus.rule: "PathPrefix(`/`)"
       traefik.http.routers.prometheus.middlewares: "trusted-allowlist@docker"
       traefik.http.routers.prometheus.service: "prometheus"
+      # Machine traffic (remote-write pushes): thousands of access-log lines an
+      # hour that only feed Loki its own noise.
+      traefik.http.routers.prometheus.observability.accesslogs: "false"
       traefik.http.services.prometheus.loadbalancer.server.port: "9090"
       wud.watch: "true"
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
@@ -217,7 +220,16 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    # Host network + host PID, as node_exporter's README requires for Docker:
+    # in a bridge netns /host/proc/net/* resolves to the exporter's own
+    # namespace, so netdev/netstat/conntrack/sockstat described the
+    # container's eth0, not eno1-4. Bound to the monitoring bridge gateway
+    # (fixed subnet below) so :9100 stays off the LAN; Prometheus scrapes
+    # 10.56.0.1:9100 (prometheus.yml relabels instance to "node-exporter").
+    network_mode: host
+    pid: host
     command:
+      - '--web.listen-address=10.56.0.1:9100'
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/host'
@@ -228,22 +240,18 @@ services:
       - '--collector.textfile.directory=/host/opt/docker/node-exporter/textfile'
     environment:
       TZ: "${TZ}"
-    hostname: node-exporter
     ipc: private
     mem_limit: 512M
     # Needs almost no CPU but must answer inside the 10s scrape timeout. Weight
     # it high: losing the host exporter blinds us exactly when the box is busy.
     cpu_shares: 4096
-    networks:
-      - monitoring
-    ports: []
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/host:ro,rslave
       - /run/udev/data:/run/udev/data:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:9100/ || exit 1"]
+      test: ["CMD-SHELL", "wget -qO /dev/null http://10.56.0.1:9100/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
