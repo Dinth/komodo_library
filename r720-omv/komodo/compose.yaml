@@ -114,6 +114,11 @@ services:
       - /opt/docker/komodo/keys:/config/keys
     extra_hosts:
       - host.docker.internal:host-gateway
+    networks:
+      - default
+      # The "signal" alerter (servers.toml) posts to apprise:8000, which lives
+      # in the signal-rest-api stack and owns this network.
+      - signal-rest-api
     logging: *default-logging
     labels:
       komodo.skip:
@@ -122,3 +127,7 @@ services:
       wud.link.changelog: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo'
       wud.display.icon: 'sh:komodo'
+
+networks:
+  signal-rest-api:
+    external: true

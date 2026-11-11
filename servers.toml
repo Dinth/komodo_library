@@ -13,3 +13,32 @@ tags = ["servers"]
 [server.config]
 address = "https://host.docker.internal:8120"
 enabled = true
+
+##
+
+# Komodo's own alerts -> Signal tech group, through apprise's locked "komodo"
+# key (/opt/docker/signal-cli-api/apprise_config/komodo.cfg, a copy of
+# autoheal.cfg). komodo-core joins the signal-rest-api network to reach it.
+# Discord type on purpose: it posts {"content": "<text>"} as JSON, and
+# apprise's `?:content=body` remap turns that into its message body. Ntfy
+# posts text with no Content-Type (apprise rejects it) and Custom posts the
+# raw alert JSON. [[APPRISE_ADMIN_PASSWORD]] is interpolated by Komodo at send
+# time, as autoheal does with the same login.
+# Only what Grafana and WUD can't see: unreachable servers, Periphery/Core
+# version drift and failed builds/procedures/actions (rebuild-local-images
+# reports here). Host CPU/memory/disk stay with Grafana, image updates with WUD.
+[[alerter]]
+name = "signal"
+description = "Komodo alerts to the Signal tech group via apprise (key: komodo)."
+[alerter.config]
+enabled = true
+endpoint.type = "Discord"
+endpoint.params.url = "http://admin:[[APPRISE_ADMIN_PASSWORD]]@apprise:8000/notify/komodo?:content=body"
+alert_types = [
+  "ServerUnreachable",
+  "ServerVersionMismatch",
+  "BuildFailed",
+  "RepoBuildFailed",
+  "ProcedureFailed",
+  "ActionFailed",
+]
