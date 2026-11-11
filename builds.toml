@@ -36,6 +36,12 @@ git_provider = "github.com"
 git_https = true
 repo = "snapspecter/mitmproxy-mcp"
 branch = "main"
+# Pinned to a reviewed upstream commit (tag v0.8.0, 2026-11-06). This is a
+# third-party repo whose containers the gateway starts with Docker API access
+# (--network mcp-docker), so new upstream code must not arrive unreviewed via
+# the weekly rebuild; that rebuild still refreshes the base image and pip
+# packages. To upgrade: read the diff, then move this hash to the new tag.
+commit = "919bf0f4d792e80eda780e2f27ca9f5cb48e1817"
 build_path = "."
 dockerfile_path = "Dockerfile"
 # Rebuild from scratch: Periphery runs a bare `docker build`, which would reuse
@@ -160,12 +166,21 @@ webhook_enabled = false
 #
 # The gateway spawns a fresh MCP container from the current :latest for every
 # session; mcp-gateway is redeployed only to move its prune guards along. That
-# redeploy MUST follow the MCP builds even when something else fails: Komodo's
-# auto_prune (on for r720-omv) deletes every image no container uses, so a
-# freshly built :latest that no guard adopts is gone by the next prune, and the
-# gateway can then spawn none of these servers. That is what happened on
-# 2026-10-04, when kittygram's build (lapis migrate) failed in the shared
-# stage and skipped the guard redeploy.
+# redeploy MUST follow every MCP build that succeeded: Komodo's auto_prune (on
+# for r720-omv) deletes every image no container uses, so a freshly built
+# :latest that no guard adopts is gone by the next prune, and the gateway can
+# then spawn none of these servers. That is what happened on 2026-10-04, when
+# kittygram's build (lapis migrate) failed in the shared stage and skipped the
+# guard redeploy. Hence one build per stage, each followed by its own guard
+# redeploy: a failed build stops everything after it, but every image built
+# before it has already been adopted (and the failed one keeps its old tag).
+#
+# The compose-built helpers (fireflyiii-signal-shim, frigate-signal-feedback,
+# ha-bluetooth-exporter) have no Komodo Build. Their stacks set run_build with
+# --pull (stacks.toml), so deploying just that one service rebuilds it on a
+# fresh python:3.13-slim and recreates it only if the image changed. The
+# zeroclaw image is left out on purpose: a ~40 min cargo build whose tag
+# encodes its patch set, rebuilt when that tag is bumped.
 [[procedure]]
 name = "rebuild-local-images"
 tags = ["builds"]
@@ -178,20 +193,51 @@ schedule_enabled = true
 schedule_alert = false
 failure_alert = true
 
+# Each "Redeploy MCP prune guards" stage re-points the *-guard containers at
+# the new MCP images; the gateway itself is digest-pinned, so compose leaves
+# it running untouched. Third-party mitmproxy-mcp goes last of the three.
 [[procedure.config.stage]]
-name = "Build MCP images"
+name = "Build mcpmqtt"
 executions = [
   { execution.type = "RunBuild", execution.params.build = "mcpmqtt" },
-  { execution.type = "RunBuild", execution.params.build = "mitmproxy-mcp" },
+]
+
+[[procedure.config.stage]]
+name = "Redeploy MCP prune guards (mcpmqtt)"
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "mcp-gateway" },
+]
+
+[[procedure.config.stage]]
+name = "Build homebox-mcp"
+executions = [
   { execution.type = "RunBuild", execution.params.build = "homebox-mcp" },
 ]
 
 [[procedure.config.stage]]
-name = "Redeploy MCP prune guards"
+name = "Redeploy MCP prune guards (homebox-mcp)"
 executions = [
-  # Re-points the *-guard containers at the new MCP images; the gateway
-  # itself is digest-pinned, so compose leaves it running untouched.
   { execution.type = "DeployStack", execution.params.stack = "mcp-gateway" },
+]
+
+[[procedure.config.stage]]
+name = "Build mitmproxy-mcp"
+executions = [
+  { execution.type = "RunBuild", execution.params.build = "mitmproxy-mcp" },
+]
+
+[[procedure.config.stage]]
+name = "Redeploy MCP prune guards (mitmproxy-mcp)"
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "mcp-gateway" },
+]
+
+[[procedure.config.stage]]
+name = "Rebuild compose-built helpers"
+executions = [
+  { execution.type = "DeployStack", execution.params.stack = "fireflyiii", execution.params.services = ["fireflyiii-signal-shim"] },
+  { execution.type = "DeployStack", execution.params.stack = "frigate", execution.params.services = ["frigate-signal-feedback"] },
+  { execution.type = "DeployStack", execution.params.stack = "grafana-prometheus", execution.params.services = ["ha-bluetooth-exporter"] },
 ]
 
 [[procedure.config.stage]]

@@ -460,6 +460,11 @@ tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+# fireflyiii-signal-shim is built by compose (python:3.13-slim). Build on
+# every deploy with a fresh base pull; rebuild-local-images (builds.toml)
+# deploys just that service weekly so base-image fixes land unattended.
+run_build = true
+build_extra_args = ["--pull"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/fireflyiii"
@@ -543,6 +548,10 @@ tags = ["stacks"]
 server = "r720-omv"
 poll_for_updates = true
 auto_update = true
+# Only freshrss-rssbridge follows :latest. freshrss is version-pinned and the
+# postgres -alpine tag is rebuilt in place, so skip both explicitly rather
+# than let a rebuild bounce the reader or its database.
+auto_update_skip_services = ["freshrss", "freshrss-postgres"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/freshrss"
@@ -571,6 +580,11 @@ tags = ["stacks", "needs-improvement"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
+# frigate-signal-feedback is built by compose (python:3.13-slim). Build on
+# every deploy with a fresh base pull; rebuild-local-images (builds.toml)
+# deploys just that service weekly so base-image fixes land unattended.
+run_build = true
+build_extra_args = ["--pull"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/frigate"
@@ -624,6 +638,11 @@ auto_update = true
 # Only mcp-grafana follows :latest; every other service is version-pinned and
 # upgraded deliberately (WUD), so skip them explicitly.
 auto_update_skip_services = ["grafana", "prometheus", "node-exporter", "cadvisor", "dcgm-exporter", "blackbox-exporter", "snmp-exporter", "ha-bluetooth-exporter"]
+# ha-bluetooth-exporter is built by compose (python:3.13-slim). Build on every
+# deploy with a fresh base pull; rebuild-local-images (builds.toml) deploys
+# just that service weekly so base-image fixes land unattended.
+run_build = true
+build_extra_args = ["--pull"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/grafana-prometheus"
@@ -679,7 +698,9 @@ tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
-auto_update = true
+# No auto_update: harborguard is digest-pinned (WUD reports new digests) and
+# the rest are version tags, so the only thing auto_update could ever do
+# here is bounce postgres when its -alpine tag is rebuilt in place.
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/harborguard"
@@ -1470,6 +1491,9 @@ tags = ["stacks", "needs-improvement"]
 server = "r720-omv"
 poll_for_updates = true
 auto_update = true
+# searxng follows :latest on purpose; its valkey is version-pinned and the
+# -alpine tag is rebuilt in place, so skip it rather than bounce the cache.
+auto_update_skip_services = ["searxng-valkey"]
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/searxng"
@@ -1790,7 +1814,9 @@ tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
 poll_for_updates = true
-auto_update = true
+# No auto_update: every image here is version-pinned (WUD handles upgrades),
+# so the only thing auto_update could do is bounce postgres/valkey when
+# their -alpine tags are rebuilt in place.
 git_account = "michal@gawronskikot.com"
 repo = "Dinth/komodo_library"
 run_directory = "r720-omv/yamtrack"
