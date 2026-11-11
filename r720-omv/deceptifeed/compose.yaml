@@ -19,6 +19,13 @@ services:
       - ALL
     environment:
       TZ: "${TZ}"
+    # Settings live in /data/config.xml (server-side, beside the database):
+    # the HTTPS honeypot takes the source IP from X-Forwarded-For, which
+    # Traefik sets to the real TCP peer (it trusts no forwarded headers, so a
+    # client-supplied value is replaced). Private IPs and Cloudflare's edge
+    # ranges (/data/exclude.conf) stay out of the feed; without this every
+    # web hit was recorded as Traefik's own address.
+    command: ["-config", "/data/config.xml"]
     mem_limit: 256M
     networks:
       - deceptifeed
@@ -29,12 +36,12 @@ services:
     logging: *default-logging
     labels:
       traefik.enable: "true"
-      traefik.http.routers.deceptifeed-http.rule: "HostRegexp(`{host:.+}`) || PathPrefix(`/`)"
-      traefik.http.routers.deceptifeed-http.entrypoints: "web"
-      traefik.http.routers.deceptifeed-http.priority: "1"
-      traefik.http.routers.deceptifeed-http.service: "deceptifeed-http-svc"
-      traefik.http.services.deceptifeed-http-svc.loadbalancer.server.port: "8080"
-      traefik.http.routers.deceptifeed-https.rule: "HostRegexp(`{host:.+}`) || PathPrefix(`/`)"
+      # Catch-all for any host no other router claims. No router on `web`:
+      # its entrypoint redirect (priority 1000) sends every plain-HTTP request
+      # to websecure first, so a priority-1 web router never matched.
+      # (`{host:.+}` was v2 HostRegexp syntax; under v3 it is a literal regex
+      # that matches nothing, so the PathPrefix alone did the work.)
+      traefik.http.routers.deceptifeed-https.rule: "PathPrefix(`/`)"
       traefik.http.routers.deceptifeed-https.entrypoints: "websecure"
       traefik.http.routers.deceptifeed-https.priority: "1"
       traefik.http.routers.deceptifeed-https.service: "deceptifeed-https-svc"
