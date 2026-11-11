@@ -561,6 +561,10 @@ services:
       - ./whisper/faster_whisper_engine.py:/app/app/asr_models/faster_whisper_engine.py:ro
     networks:
       - mediarr
+      # ZeroClaw transcribes Signal voice notes here (local_whisper provider,
+      # http://whisper:9000/asr, see openwebui's patch 0004). Its instances
+      # live on the openwebui network.
+      - openwebui
     healthcheck:
       test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/docs')\" || exit 1"]
       interval: 30s
@@ -945,4 +949,7 @@ networks:
   mediarr:
     external: false
   traefik:
+    external: true
+  # Owned by the openwebui stack (whisper joins it for ZeroClaw).
+  openwebui:
     external: true
