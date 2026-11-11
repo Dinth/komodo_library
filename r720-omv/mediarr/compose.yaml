@@ -370,6 +370,17 @@ services:
       sonobarr_superadmin_password: "${SONOBARR_ADMIN_PASSWORD}"
       sonobarr_superadmin_display_name: "Michal"
       sonobarr_superadmin_reset: "false"
+      # Sign-in via Authelia (client 'sonobarr', lan_one_factor). OIDC-only,
+      # as with WUD: the password form would bypass Authelia's 2FA. New
+      # accounts are created on first login, named after the email claim (so
+      # the bootstrap 'dinth' above stays an unused local account); members
+      # of Authelia's 'admins' group become Sonobarr admins on every login.
+      # The id. hostname resolves to Traefik over the traefik network (alias).
+      oidc_client_id: "sonobarr"
+      oidc_client_secret: "${SONOBARR_OIDC_CLIENT_SECRET}"
+      oidc_server_metadata_url: "https://id.${DOMAIN_NAME}/.well-known/openid-configuration"
+      oidc_admin_group: "admins"
+      oidc_only: "true"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /opt/docker/mediarr/sonobarr_config:/sonobarr/config
@@ -378,8 +389,9 @@ services:
       - mediarr
       - traefik
     healthcheck:
-      # /login is the only unauthenticated 200 (/api/* wants the API key).
-      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/login')\" || exit 1"]
+      # /logged-out is a static page that needs no session. Not /login: with
+      # oidc_only it redirects to Authelia, which the probe would then follow.
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/logged-out')\" || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 30s
