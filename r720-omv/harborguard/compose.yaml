@@ -95,6 +95,9 @@ services:
     image: *postgres-version
     container_name: harborguard-postgres
     ipc: private
+    # tini as PID 1: Postgres as PID 1 treats a killed `docker exec` orphan
+    # (Scanopy's nightly probe) as a backend crash and resets all clients.
+    init: true
     restart: unless-stopped
     cap_add:
       - CHOWN

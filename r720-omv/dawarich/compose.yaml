@@ -73,6 +73,9 @@ services:
     hostname: dawarich-postgis
     image: *postgis-version
     ipc: private
+    # tini as PID 1: Postgres as PID 1 treats a killed `docker exec` orphan
+    # (Scanopy's nightly probe) as a backend crash and resets all clients.
+    init: true
     mem_limit: 4G
     healthcheck:
       test: [ 'CMD-SHELL','pg_isready','-U','dawarich','-d','dawarich' ]

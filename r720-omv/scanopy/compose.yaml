@@ -127,6 +127,9 @@ services:
     image: *scanopy-postgres-version
     container_name: scanopy-postgres
     ipc: private
+    # tini as PID 1: Postgres as PID 1 treats a killed `docker exec` orphan
+    # (Scanopy's nightly probe) as a backend crash and resets all clients.
+    init: true
     restart: unless-stopped
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
     security_opt: ["no-new-privileges:true"]

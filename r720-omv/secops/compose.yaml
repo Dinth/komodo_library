@@ -212,6 +212,8 @@ services:
     image: *misp-mariadb-version
     container_name: misp-mariadb
     ipc: private
+    # tini as PID 1 reaps orphans left by `docker exec` (Scanopy's probe).
+    init: true
     restart: unless-stopped
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]

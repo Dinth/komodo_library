@@ -21,6 +21,9 @@ services:
     container_name: printstream-db
     hostname: printstream-db
     ipc: private
+    # tini as PID 1: Postgres as PID 1 treats a killed `docker exec` orphan
+    # (Scanopy's nightly probe) as a backend crash and resets all clients.
+    init: true
     restart: unless-stopped
     entrypoint: ['docker-entrypoint.sh']
     command: ['postgres']

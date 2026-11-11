@@ -266,6 +266,9 @@ services:
     container_name: healthlog-postgres
     hostname: healthlog-postgres
     ipc: private
+    # tini as PID 1: Postgres as PID 1 treats a killed `docker exec` orphan
+    # (Scanopy's nightly probe) as a backend crash and resets all clients.
+    init: true
     restart: unless-stopped
     # The official entrypoint starts as root, chowns PGDATA and drops to the
     # image's postgres user (70 on alpine) - it needs exactly these caps.
