@@ -4,7 +4,7 @@ x-versions:
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
   prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:2.7.0"
   seerr: &seerr-version "ghcr.io/seerr-team/seerr:v3.5.1"
-  suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.3.0"
+  suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.4.0"
   sonobarr: &sonobarr-version "ghcr.io/dodelidoo-labs/sonobarr:0.13.0"
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.2"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
