@@ -432,7 +432,12 @@ services:
         worker-src 'self' blob: data:;
         child-src 'self' blob: data:;
         frame-src 'self' blob: data: https://www.youtube.com
-      traefik.http.routers.sonobarr.middlewares: "sonobarr-csp,secHeaders@file,authelia-auth@docker"
+      # Traefik sends X-Forwarded-Proto "wss" on WebSocket upgrades; Socket.IO
+      # (engineio) then derives the allowed origin as wss://sonobarr... and
+      # rejects the browser's https:// Origin ("is not an accepted origin"),
+      # leaving the client stuck on long-polling. Pin it to https.
+      traefik.http.middlewares.sonobarr-wsproto.headers.customrequestheaders.X-Forwarded-Proto: "https"
+      traefik.http.routers.sonobarr.middlewares: "sonobarr-csp,sonobarr-wsproto,secHeaders@file,authelia-auth@docker"
       traefik.http.services.sonobarr.loadbalancer.server.port: "5000"
       wud.watch: "true"
       # Tags are bare semver (no v prefix).
