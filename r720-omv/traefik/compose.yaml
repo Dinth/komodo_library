@@ -85,6 +85,13 @@ services:
       # RAM and charged to the container, so the un-rotated log grew unbounded
       # (~360 MB over 13 days) and looked like a memory leak. RSS stayed ~100 MB.
       TRAEFIK_ACCESSLOG_FORMAT: "json"
+      # Requests through Cloudflare's proxy arrive from CF edge IPs, so
+      # ClientHost is the edge, not the visitor. Log CF's own client-IP header
+      # as request_Cf-Connecting-Ip. Informational only: a direct (non-CF)
+      # client can send any value. Not used for trust (forwardedHeaders stay
+      # untrusted), because CF appends to client-supplied headers and a spoofed
+      # 10.x would then pass Authelia's one-factor LAN rule.
+      TRAEFIK_ACCESSLOG_FIELDS_HEADERS_NAMES_Cf-Connecting-Ip: "keep"
       TZ: "${TZ}"
       # --- Metrics (Prometheus) ---
       # Exposes /metrics on the internal `traefik` entrypoint (:8080, not published
