@@ -411,7 +411,28 @@ services:
       traefik.http.routers.sonobarr.tls.certresolver: "letsencrypt"
       traefik.http.routers.sonobarr.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.sonobarr.tls.domains[0].sans: "*.${DOMAIN_NAME}"
-      traefik.http.routers.sonobarr.middlewares: "secHeaders@file,authelia-auth@docker"
+      # secHeaders' baseline CSP plus what Sonobarr's templates load from CDNs:
+      # Bootstrap (cdn.jsdelivr.net), Font Awesome + Socket.IO + DOMPurify
+      # (cdnjs.cloudflare.com), the YouTube preview iframe and iTunes audio
+      # previews (media-src https:). Without them the page has no CSS/JS and
+      # sticks on "loading". Listed before secHeaders@file because the first
+      # middleware wins on response headers; keep the baseline in sync with
+      # traefik_dynamic.yml (same as openwebui's openwebai-csp).
+      traefik.http.middlewares.sonobarr-csp.headers.customresponseheaders.Content-Security-Policy: >-
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+        style-src 'self' 'unsafe-inline' blob: data: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+        img-src 'self' blob: data: https:;
+        font-src 'self' blob: data: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+        object-src 'none';
+        frame-ancestors 'self';
+        connect-src 'self' https: wss: blob:;
+        form-action 'self';
+        media-src 'self' blob: data: https:;
+        worker-src 'self' blob: data:;
+        child-src 'self' blob: data:;
+        frame-src 'self' blob: data: https://www.youtube.com
+      traefik.http.routers.sonobarr.middlewares: "sonobarr-csp,secHeaders@file,authelia-auth@docker"
       traefik.http.services.sonobarr.loadbalancer.server.port: "5000"
       wud.watch: "true"
       # Tags are bare semver (no v prefix).
