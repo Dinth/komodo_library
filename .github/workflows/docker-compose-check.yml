@@ -13,6 +13,8 @@ on:
       - '**/Dockerfile'
       - '.yamllint' # Also run if yamllint config changes
       - '.trivyignore.yaml'
+      - '*.toml' # Komodo resource files (stacks/builds/builders/servers)
+      - '.github/scripts/**'
       - '.github/workflows/docker-compose-check.yml'
   pull_request:
     # Optionally filter branches for pull_request events
@@ -23,12 +25,16 @@ on:
       - '**/Dockerfile'
       - '.yamllint' # Also run if yamllint config changes
       - '.trivyignore.yaml'
+      - '*.toml' # Komodo resource files (stacks/builds/builders/servers)
+      - '.github/scripts/**'
       - '.github/workflows/docker-compose-check.yml'
 
 permissions: read-all # Default permissions
 
-# Every step still has continue-on-error: the checks report, but don't block,
-# until they have stayed green for a while.
+# A check starts with continue-on-error (it reports but doesn't fail the run)
+# and loses it once it has stayed green for a while. Lint and compose
+# validation graduated on 2026-11-11 after 30 green runs in a row, so a
+# failure there now fails the run (and GitHub emails about it).
 
 jobs:
   check-lint-docker-compose:
@@ -46,7 +52,6 @@ jobs:
       # name (docker-compose-check.yml) matches the docker-compose*.y*ml glob.
       - name: Lint YAML files
         shell: bash
-        continue-on-error: true
         run: |
           echo "Linting Docker Compose files..."
 
@@ -64,7 +69,7 @@ jobs:
       # the first one.
       - name: Validate Docker Compose syntax
         shell: bash
-        continue-on-error: true
+        if: ${{ !cancelled() }}
         run: |
           echo "Validating Docker Compose files..."
 
@@ -90,9 +95,20 @@ jobs:
           fi
           echo "✓ All files validated successfully"
 
+      # `compose config` above runs without the stack env, so an unmapped
+      # variable is only a warning there. This fails on it, on a TOML syntax
+      # error in the Komodo resource files, and on auto_update_skip_services
+      # naming a service that doesn't exist. New, so report-only for now.
+      - name: Cross-check stacks.toml against compose files
+        shell: bash
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: python3 .github/scripts/check-stack-env.py .
+
       # Accepted findings, each with its reason, are in .trivyignore.yaml.
       - name: Run Trivy security scan
         uses: aquasecurity/trivy-action@v0.36.0
+        if: ${{ !cancelled() }}
         continue-on-error: true
         with:
           scan-type: 'config'
