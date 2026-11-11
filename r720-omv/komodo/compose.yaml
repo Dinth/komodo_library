@@ -95,7 +95,8 @@ services:
       KOMODO_MONITORING_INTERVAL: "15-sec"
       KOMODO_RESOURCE_POLL_INTERVAL: "5-min"
       KOMODO_LOCAL_AUTH: "true"
-      KOMODO_DISABLE_USER_REGISTRATION: "false"
+      # No self-sign-up on the LAN-wide :9120; new users are created by an admin.
+      KOMODO_DISABLE_USER_REGISTRATION: "true"
       KOMODO_ENABLE_NEW_USERS: "false"
       KOMODO_DISABLE_NON_ADMIN_CREATE: "false"
       KOMODO_TRANSPARENT_MODE: "false"

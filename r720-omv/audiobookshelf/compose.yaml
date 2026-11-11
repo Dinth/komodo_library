@@ -41,7 +41,9 @@ services:
       - /opt/docker/audiobookshelf/audiobookshelf_config:/config
       - /opt/docker/audiobookshelf/audiobookshelf_metadata:/metadata
       - /Data/Ebooks/Audiobooks:/audiobooks:ro
-      - /Data/Ebooks/Podcasts:/podcasts:ro
+      # Read-write: Audiobookshelf downloads podcast episodes into the
+      # library folder itself, so :ro would fail every download.
+      - /Data/Ebooks/Podcasts:/podcasts
     networks:
       - audiobookshelf
       - traefik
