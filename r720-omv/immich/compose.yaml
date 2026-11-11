@@ -2,7 +2,7 @@ x-versions:
   immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v3.3.6"
   immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v3.3.6-cuda"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
-  postgres: &postgres-version "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.3.0"
+  postgres: &postgres-version "ghcr.io/immich-app/postgres:17-vectorchord0.4.3"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -173,6 +173,9 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    # Upstream's compose sets this; Docker's 64 MB default can fail parallel
+    # workers with "could not resize shared memory segment".
+    shm_size: 128mb
     deploy:
       resources:
         limits:
@@ -191,25 +194,29 @@ services:
       interval: 10s
       retries: 5
     volumes:
-      - /opt/docker/immich/immich_postgres_data:/var/lib/postgresql/data
+      # PG17 since 2026-11-11 (14 reached community EOL 2026-11-12), moved by
+      # pg_dump/restore. Rollback: the untouched PG14 cluster is still in
+      # /opt/docker/immich/immich_postgres_data — point this back at it and
+      # restore the 14-vectorchord0.4.3-pgvectors0.3.0 image. pgvecto.rs was
+      # dropped with the move: the extension was no longer installed and both
+      # vector indexes were already vchordrq.
+      - /opt/docker/immich/immich_postgres17_data:/var/lib/postgresql/data
     networks:
       - immich
       - adminer
     logging: *default-logging
     labels:
       wud.watch: "true"
-      # pgvectors is pinned rather than globbed. The tag carries two
-      # independent versions and semver has only three numeric slots, so
-      # letting both float leaves ties (0.4.3-pgvectors0.2.0 vs
-      # 0.4.3-pgvectors0.3.0) that WUD breaks arbitrarily. Bump this when
-      # immich's own compose moves to a newer pgvectors.
-      wud.tag.include: '^14-vectorchord\d+\.\d+\.\d+\-pgvectors0\.3\.0$$'
-      # Rewrite 14-vectorchord0.4.3-pgvectors0.3.0 -> 0.4.3 so the
+      # Held to the vectorchord 0.4.x line that immich's own compose pins
+      # (17-vectorchord0.5.3 exists, but a vchord minor bump means
+      # ALTER EXTENSION + reindex). Widen when immich's compose moves on.
+      wud.tag.include: '^17-vectorchord0\.4\.\d+$$'
+      # Rewrite 17-vectorchord0.4.3 -> 0.4.3 so the
       # vectorchord version is what gets compared. Untransformed, semver
       # coercion stops at the first non-digit and reduces every tag to
       # 14.0.0 — WUD then has nothing to sort on and reports an older
       # vectorchord build as an available "update".
-      wud.tag.transform: '^14-vectorchord(\d+)\.(\d+)\.(\d+)\-pgvectors0\.3\.0$$ => $$1.$$2.$$3'
+      wud.tag.transform: '^17-vectorchord(\d+)\.(\d+)\.(\d+)$$ => $$1.$$2.$$3'
       wud.display.name: "Immich - Postgres"
       wud.display.icon: "sh-immich"
 
