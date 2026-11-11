@@ -627,7 +627,6 @@ services:
       - ALL
     container_name: openwebui
     environment:
-      USE_OLLAMA_DOCKER: "true"
       PORT: "8080"
       OLLAMA_BASE_URL: "http://ollama:11434"
       PIPELINES_URL: "http://openwebui-pipelines:9099"
@@ -749,12 +748,12 @@ services:
     # Chromium is started with --no-sandbox by the entrypoint, so SYS_ADMIN is not needed.
     container_name: crawl4ai
     environment:
-      # The upstream server reads its token from config.yml, not directly from an
-      # env var. The value is plumbed in so a future config.yml bind mount can pick
-      # it up via ${CRAWL4AI_API_TOKEN}. Until then the API accepts unauthenticated
-      # requests — acceptable because the service is internal-only on the openwebui
-      # network with no Traefik route and no published host port.
-      OPENWEBCRAWL4AI_API_TOKEN: "${OPENWEBUI_CRAWL4AI_API_TOKEN}"
+      # Since 0.9 the server binds to the container's loopback unless
+      # CRAWL4AI_API_TOKEN is set (it logs "binding loopback only"), and with
+      # it every endpoint except GET /health needs "Authorization: Bearer".
+      # The Open WebUI tool "Crawl4AI Web Scraper" sends that token from its
+      # CRAWL4AI_API_TOKEN valve (set in Workspace > Tools); keep the two equal.
+      CRAWL4AI_API_TOKEN: "${OPENWEBUI_CRAWL4AI_API_TOKEN}"
       SECRET_KEY: "${OPENWEBUI_CRAWL4AI_API_TOKEN}"
       CRAWL4AI_HOOKS_ENABLED: "false"
       TZ: "${TZ}"
