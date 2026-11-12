@@ -1,7 +1,7 @@
 x-versions:
   dvinyl: &dvinyl-version "ghcr.io/kyonew/dvinyl:3.3.0"
   # Upstream's compose uses mongo:latest; DVinyl needs MongoDB 6+.
-  mongo: &mongo-version "mongo:8.3.13"
+  mongo: &mongo-version "mongo:8.3.17"
 
 x-logging: &default-logging
   driver: "json-file"

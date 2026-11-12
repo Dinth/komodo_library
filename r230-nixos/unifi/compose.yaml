@@ -1,5 +1,5 @@
 x-versions:
-  mongo: &mongo-version "docker.io/mongo:8.3.13"
+  mongo: &mongo-version "docker.io/mongo:8.3.17"
   unifi: &unifi-version "lscr.io/linuxserver/unifi-network-application:10.6.109"
   # Follows :latest and the Komodo stack has auto_update on (stacks.toml),
   # skipping unifi-db and the controller: Global Auto Update redeploys it when
