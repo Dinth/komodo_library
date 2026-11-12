@@ -7,6 +7,9 @@ x-versions:
   misp-mariadb-version: &misp-mariadb-version mariadb:12.3.3
   misp-valkey-version: &misp-valkey-version docker.io/valkey/valkey:9.1.3-alpine
   mitmproxy-version: &mitmproxy-version mitmproxy/mitmproxy:12.3.1
+  # Base image the local recon toolbox is built FROM (see recon/Dockerfile,
+  # which also pins the tool versions and their checksums).
+  recon-base: &recon-base "debian:13.7-slim"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -290,6 +293,52 @@ services:
       wud.display.name: "mitmproxy"
       wud.display.icon: "sh:mitmproxy"
       wud.link.changelog: "https://github.com/mitmproxy/mitmproxy/releases/tag/v$${major}.$${minor}.$${patch}"
+
+  # External attack-surface recon toolbox: subfinder, dnsx, alterx, naabu,
+  # httpx, tlsx, katana and nuclei in one idle container. Nothing runs on its
+  # own; drive it with `docker exec recon <tool> ...`. `nuclei-recon` is nuclei
+  # with the non-intrusive profile (recon/nuclei-recon.yaml) forced on.
+  # Everything the tools keep lives under /recon: nuclei templates, results,
+  # and subfinder's API keys (.config/subfinder/provider-config.yaml, kept
+  # server-side only).
+  recon:
+    build:
+      context: ./recon
+      args:
+        BASE_IMAGE: *recon-base
+    # Bump the -pN suffix whenever recon/Dockerfile or recon/nuclei-recon.yaml
+    # changes: a change there doesn't alter the compose, so Komodo would reuse
+    # the cached image and never rebuild.
+    image: secops-recon:p1
+    pull_policy: never
+    container_name: recon
+    # tini as PID 1 reaps whatever `docker exec` leaves behind.
+    init: true
+    ipc: private
+    restart: unless-stopped
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    # No NET_RAW, and not root: naabu falls back to a TCP connect scan, which
+    # is all this profile needs.
+    cap_drop: [ALL]
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 4G
+    cpus: 4.0
+    pids_limit: 2048
+    # Public resolvers, not the host's AdGuard: its blocklists would hide
+    # hostnames, and bulk resolution would flood its query log.
+    dns: [1.1.1.1, 8.8.8.8]
+    environment:
+      - TZ=${TZ}
+    tmpfs:
+      - /tmp:mode=1777
+    volumes:
+      - /opt/docker/secops/recon:/recon
+    networks: [secops]
+    logging: *default-logging
+    labels:
+      # Locally built tag, nothing for WUD to compare against.
+      wud.watch: "false"
 
 networks:
   secops:

@@ -1508,10 +1508,11 @@ DOMAIN_NAME=[[DOMAIN_NAME]]
 [[stack]]
 name = "secops"
 description = """
-Security tooling: SpiderFoot OSINT, MISP threat intel, mitmproxy.
+Security tooling: SpiderFoot OSINT, MISP threat intel, mitmproxy, recon toolbox.
 SpiderFoot: http://10.10.1.13:5001
 MISP: http://10.10.1.13:8081
-mitmproxy: proxy 10.10.1.13:8084 / web UI http://10.10.1.13:8184"""
+mitmproxy: proxy 10.10.1.13:8084 / web UI http://10.10.1.13:8184
+recon: no UI, `docker exec recon <tool>` (subfinder, dnsx, naabu, httpx, tlsx, katana, nuclei-recon)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"

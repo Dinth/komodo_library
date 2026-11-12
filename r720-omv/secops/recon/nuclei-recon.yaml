@@ -1,0 +1,45 @@
+# Nuclei profile for reconnaissance without break-in attempts, used by the
+# `nuclei-recon` wrapper in the recon image.
+#
+# Allow-list first: only templates that identify what is exposed. CVE exposure
+# is then assessed from the detected products and versions, not by firing the
+# exploit-style CVE templates.
+tags:
+  - tech
+  - detect
+  - discovery
+  - panel
+  - exposure
+  - misconfig
+  - takeover
+  - ssl
+  - dns
+
+# Deny-list on top, because a template can carry an allowed tag and one of
+# these. Checked against nuclei-templates' tag list on 2026-11-12.
+exclude-tags:
+  - intrusive
+  - default-login
+  - bruteforce
+  - brute-force
+  - creds-stuffing
+  - token-spray
+  - fuzz
+  - fuzzing
+  - dast
+  - dos
+  - file-upload
+  - rce
+  - sqli
+  - lfi
+  - ssrf
+  - ssti
+  - xxe
+  - xss
+  - oast
+  - auth-bypass
+  - local
+
+# Polite defaults; override per run with -rl / -c.
+rate-limit: 50
+concurrency: 10
