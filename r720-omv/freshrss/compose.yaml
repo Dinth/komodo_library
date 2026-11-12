@@ -41,8 +41,6 @@ services:
       - "4746:80"
     volumes:
       - /opt/docker/freshrss/freshrss-rssbridge_config:/config
-      # Custom bridge kept in git (new CVEs per product from the NVD API).
-      - ./rss-bridge/NvdCveBridge.php:/app/bridges/NvdCveBridge.php:ro
     networks:
       - freshrss
     logging: *default-logging
