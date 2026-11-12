@@ -26,6 +26,10 @@ services:
       - 10.10.1.12
       - 10.10.0.1
     entrypoint: ["sh", "-c", "/app/bin/cache-clear && exec /app/docker-entrypoint.sh"]
+    environment:
+      # Optional NVD API key for NvdCveBridge: 50 requests per 30 s instead of
+      # 5. Unset works too: the bridge retries, then serves its last result.
+      RSSBRIDGE_NvdCveBridge_api_key: "${NVD_API_KEY:-}"
     healthcheck:
       # The old check echoed "HTTP FAIL" and still exited 0, so it never failed.
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/80"]
@@ -37,6 +41,8 @@ services:
       - "4746:80"
     volumes:
       - /opt/docker/freshrss/freshrss-rssbridge_config:/config
+      # Custom bridge kept in git (new CVEs per product from the NVD API).
+      - ./rss-bridge/NvdCveBridge.php:/app/bridges/NvdCveBridge.php:ro
     networks:
       - freshrss
     logging: *default-logging
