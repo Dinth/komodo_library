@@ -33,9 +33,9 @@ services:
       # Mosyle Business login for MosyleBridge, kept out of the feed URLs
       # (a URL lands in access logs, FreshRSS's database and the feed itself).
       # Unset works too: the bridge then takes them from the feed URL.
-      RSSBRIDGE_MosyleBridge_username: "${MOSYLE_USERNAME:-}"
-      RSSBRIDGE_MosyleBridge_password: "${MOSYLE_PASSWORD:-}"
-      RSSBRIDGE_MosyleBridge_company: "${MOSYLE_COMPANY:-}"
+      RSSBRIDGE_MosyleBridge_username: "${FRESHRSS_MOSYLE_USERNAME:-}"
+      RSSBRIDGE_MosyleBridge_password: "${FRESHRSS_MOSYLE_PASSWORD:-}"
+      RSSBRIDGE_MosyleBridge_company: "${FRESHRSS_MOSYLE_COMPANY:-}"
     healthcheck:
       # The old check echoed "HTTP FAIL" and still exited 0, so it never failed.
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/80"]
