@@ -37,8 +37,15 @@ services:
       RSSBRIDGE_MosyleBridge_password: "${FRESHRSS_MOSYLE_PASSWORD:-}"
       RSSBRIDGE_MosyleBridge_company: "${FRESHRSS_MOSYLE_COMPANY:-}"
     healthcheck:
-      # The old check echoed "HTTP FAIL" and still exited 0, so it never failed.
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/80"]
+      # Is nginx listening on :80 (state 0A in the kernel's socket table)?
+      # Looked up instead of connected to: an empty TCP connect made nginx
+      # log a `"" 400` line every 30 s, 2,880 a day. php-fpm is PID 1, so
+      # the container itself stops if that dies.
+      test:
+        - CMD
+        - bash
+        - -c
+        - "grep -Eq ':0050 0+:0000 0A' /proc/net/tcp /proc/net/tcp6"
       interval: 30s
       timeout: 5s
       retries: 3
