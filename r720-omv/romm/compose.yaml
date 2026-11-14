@@ -7,7 +7,7 @@ x-versions:
   # (EOL June 2029); MARIADB_AUTO_UPGRADE below runs mariadb-upgrade itself.
   mariadb: &mariadb-version "mariadb:12.3.3"
   valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
-  pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls89"
+  pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls90"
   dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2609-ls85"
 
 x-logging: &default-logging
