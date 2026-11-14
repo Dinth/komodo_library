@@ -6,6 +6,8 @@ x-versions:
   seerr: &seerr-version "ghcr.io/seerr-team/seerr:v3.5.1"
   suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.4.0"
   sonobarr: &sonobarr-version "ghcr.io/dodelidoo-labs/sonobarr:0.13.0"
+  # Bumping this tag requires re-diffing bazarr/whisperai.py against the new
+  # image (patched copy is bind-mounted over upstream's whisper provider).
   bazarr: &bazarr-version "lscr.io/linuxserver/bazarr:1.6.2"
   # Bumping this tag requires re-diffing whisper/faster_whisper_engine.py
   # against the new image (patched copy is bind-mounted over upstream's).
@@ -497,6 +499,8 @@ services:
     labels:
       autoheal: "true"
       wud.watch: "true"
+      # An update here is NOT a blind bump: re-diff the bind-mounted
+      # bazarr/whisperai.py against the new tag first.
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'
       wud.link.changelog: 'https://github.com/morpheus65535/bazarr/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: "Bazarr"
@@ -518,6 +522,12 @@ services:
       - /Data/Anime:/anime
       - /Data/Cartoons:/cartoons
       - /Data/CartoonMovies:/cartoon_movies
+      # Whisper provider with a raised match set: whisper transcribes this
+      # exact file, so it now outranks online subs made for a different
+      # release (no group/source match) but not ones for this release.
+      # Used through Bazarr's "Use Whisper as Fallback for Automated
+      # Searches". Pinned to 1.6.2; re-diff on bump.
+      - ./bazarr/whisperai.py:/app/bazarr/bin/custom_libs/subliminal_patch/providers/whisperai.py:ro
   #############################################################################
   # Whisper ASR Webservice
   # Speech-to-text backend for Bazarr's Whisper provider. Last resort only:
