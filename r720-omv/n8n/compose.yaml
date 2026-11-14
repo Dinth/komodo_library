@@ -7,7 +7,7 @@ x-versions:
   # (stacks.toml), skipping n8n and n8n-postgres: Global Auto Update
   # redeploys it when a new image lands (checked every 8 h). WUD ignores it.
   n8n-mcp: &n8n-mcp-version "ghcr.io/czlonkowski/n8n-mcp:latest"
-  postgres: &postgres-version "postgres:18.6-alpine"
+  postgres: &postgres-version "postgres:18.7-alpine"
 
 x-logging: &default-logging
   driver: "json-file"

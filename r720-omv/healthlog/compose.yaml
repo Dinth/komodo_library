@@ -4,7 +4,7 @@ x-versions:
   # service (moves a Postgres 16 `pgdata` volume into 18) is left out: this
   # stack has run 18 from the start. The image's pg_dump is 18 too, which the
   # nightly dump needs (a client dumps its own major and older only).
-  postgres: &postgres-version "postgres:18.6-alpine"
+  postgres: &postgres-version "postgres:18.7-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
