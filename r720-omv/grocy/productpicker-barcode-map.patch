@@ -1,0 +1,34 @@
+Grocy product picker: build the product -> barcodes lookup once, instead of
+a linear search through all barcode rows for every product.
+
+Applied at container start by the entrypoint in compose.yaml (see the comment
+there for the measurements and for when to remove it). Reported upstream as
+https://github.com/grocy/grocy/issues/3022.
+
+Made against Grocy 4.7.1, views/components/productpicker.blade.php,
+sha256 7b59d32d58dd2cba6386032afd5c96b4cda6a9b379063a98d7234f8f5a7355cf.
+
+--- a/views/components/productpicker.blade.php
++++ b/views/components/productpicker.blade.php
+@@ -62,13 +62,17 @@
+ 		@endif
+ 		data-target="@productpicker">
+ 		<option value=""></option>
+-		@foreach($products as $product)
+-		@php $bc = null;
++		@php $barcodesByProductId = [];
+ 		if(isset($barcodes)) {
+-		$bc = FindObjectInArrayByPropertyValue($barcodes, 'product_id', $product->id);
++		foreach($barcodes as $barcodeRow) {
++		if(!array_key_exists($barcodeRow->product_id, $barcodesByProductId)) {
++		$barcodesByProductId[$barcodeRow->product_id] = $barcodeRow->barcodes;
++		}
++		}
+ 		}
+ 		@endphp
+-		<option data-additional-searchdata="@if(isset($bc)){{ strtolower($bc->barcodes) }}@endif,"
++		@foreach($products as $product)
++		<option data-additional-searchdata="@if(isset($barcodesByProductId[$product->id])){{ strtolower($barcodesByProductId[$product->id]) }}@endif,"
+ 			value="{{ $product->id }}">{{ $product->name }}</option>
+ 		@endforeach
+ 	</select>

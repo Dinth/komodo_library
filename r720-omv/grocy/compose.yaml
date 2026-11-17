@@ -1,4 +1,6 @@
 x-versions:
+  # On every Grocy update: check the temporary productpicker patch on the
+  # grocy service below (grocy/grocy#3022) and remove it once it is fixed.
   grocy: &grocy-version "linuxserver/grocy:4.7.1"
   grocy-mcp: &grocy-mcp-version "ghcr.io/saya6k/mcp-grocy-api:1.4.13"
 
@@ -11,6 +13,36 @@ x-logging: &default-logging
 services:
   grocy:
     image: *grocy-version
+    # TEMPORARY patch - remove once a Grocy release fixes
+    # https://github.com/grocy/grocy/issues/3022.
+    # The product picker finds each product's barcodes with a linear search
+    # through all barcode rows, so with ~6,100 products the purchase,
+    # inventory, shopping-list-item and recipe-ingredient forms took 4.5-5.5 s
+    # to render (consume ~1.1 s). productpicker-barcode-map.patch builds that
+    # lookup once instead: ~300 ms, same options and same barcode search data
+    # (measured 2026-11-17 on a clone of the live data). Upstream accepts no
+    # code contributions, so the fix is carried here until they implement it.
+    # The patch is applied only while the template is byte-identical to the
+    # 4.7.1 one (sha256 below). After a Grocy update that changes that file -
+    # including one that ships the fix - the container logs a WARNING and runs
+    # unpatched. When that happens, delete this entrypoint, the patch mount
+    # under volumes and productpicker-barcode-map.patch.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        f=/app/www/views/components/productpicker.blade.php
+        if [ -e "$$f.unpatched" ]; then
+          echo "productpicker patch: already patched"
+        elif echo "7b59d32d58dd2cba6386032afd5c96b4cda6a9b379063a98d7234f8f5a7355cf  $$f" | sha256sum -c >/dev/null 2>&1 \
+            && cp -p "$$f" "$$f.unpatched" \
+            && patch "$$f" /opt/grocy-patches/productpicker-barcode-map.patch >/dev/null; then
+          echo "productpicker patch: patched"
+        else
+          [ -e "$$f.unpatched" ] && mv -f "$$f.unpatched" "$$f"
+          echo "WARNING: productpicker patch NOT applied (template differs from Grocy 4.7.1) - running UNPATCHED. If this release fixes grocy/grocy#3022, remove the patch from compose.yaml"
+        fi
+        exec /init
     container_name: grocy
     hostname: grocy
     ipc: private
@@ -43,6 +75,8 @@ services:
       - 9283:80/tcp
     volumes:
       - /opt/docker/grocy/grocy_data:/config
+      # Temporary, see the entrypoint comment above.
+      - ./productpicker-barcode-map.patch:/opt/grocy-patches/productpicker-barcode-map.patch:ro
     networks:
       - grocy
       - traefik
