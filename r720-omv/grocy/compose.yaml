@@ -18,15 +18,17 @@ services:
     # The product picker finds each product's barcodes with a linear search
     # through all barcode rows, so with ~6,100 products the purchase,
     # inventory, shopping-list-item and recipe-ingredient forms took 4.5-5.5 s
-    # to render (consume ~1.1 s). productpicker-barcode-map.patch builds that
-    # lookup once instead: ~300 ms, same options and same barcode search data
-    # (measured 2026-11-17 on a clone of the live data). Upstream accepts no
-    # code contributions, so the fix is carried here until they implement it.
-    # The patch is applied only while the template is byte-identical to the
-    # 4.7.1 one (sha256 below). After a Grocy update that changes that file -
-    # including one that ships the fix - the container logs a WARNING and runs
-    # unpatched. When that happens, delete this entrypoint, the patch mount
-    # under volumes and productpicker-barcode-map.patch.
+    # to render (consume ~1.1 s). productpicker-barcode-map.php rewrites the
+    # template to build that lookup once instead: ~300 ms, same options and
+    # same barcode search data (measured 2026-11-17 on a clone of the live
+    # data). Upstream accepts no code contributions, so the fix is carried
+    # here until they implement it. PHP rather than a .patch file because the
+    # image has no `patch` binary.
+    # The script only touches the template while it is byte-identical to the
+    # 4.7.1 one (it checks the sha256). After a Grocy update that changes that
+    # file - including one that ships the fix - the container logs a WARNING
+    # and runs unpatched. When that happens, delete this entrypoint, the patch
+    # mount under volumes and productpicker-barcode-map.php.
     entrypoint:
       - /bin/sh
       - -c
@@ -34,9 +36,7 @@ services:
         f=/app/www/views/components/productpicker.blade.php
         if [ -e "$$f.unpatched" ]; then
           echo "productpicker patch: already patched"
-        elif echo "7b59d32d58dd2cba6386032afd5c96b4cda6a9b379063a98d7234f8f5a7355cf  $$f" | sha256sum -c >/dev/null 2>&1 \
-            && cp -p "$$f" "$$f.unpatched" \
-            && patch "$$f" /opt/grocy-patches/productpicker-barcode-map.patch >/dev/null; then
+        elif cp -p "$$f" "$$f.unpatched" && php /opt/grocy-patches/productpicker-barcode-map.php "$$f"; then
           echo "productpicker patch: patched"
         else
           [ -e "$$f.unpatched" ] && mv -f "$$f.unpatched" "$$f"
@@ -76,7 +76,7 @@ services:
     volumes:
       - /opt/docker/grocy/grocy_data:/config
       # Temporary, see the entrypoint comment above.
-      - ./productpicker-barcode-map.patch:/opt/grocy-patches/productpicker-barcode-map.patch:ro
+      - ./productpicker-barcode-map.php:/opt/grocy-patches/productpicker-barcode-map.php:ro
     networks:
       - grocy
       - traefik
