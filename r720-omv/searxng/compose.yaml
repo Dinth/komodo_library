@@ -108,6 +108,11 @@ services:
       # memory footprint.
       GRANIAN_WORKERS: "${SEARXNG_WORKERS:-2}"
       GRANIAN_BLOCKING_THREADS: "${SEARXNG_THREADS:-4}"
+      # Brave Search API key for the "brave api" engine (braveapi_locale.py,
+      # mounted below). Read from the environment by that module, so the key
+      # lives only in Komodo's secret variable. Unset or unresolved -> the
+      # engine logs one error at start and is not loaded; nothing else breaks.
+      BRAVE_API_KEY: "${BRAVE_API_KEY:-}"
     depends_on:
       searxng-valkey:
         condition: service_healthy
@@ -134,6 +139,10 @@ services:
       # every redeploy gets a fresh anonymous volume and the favicon/engine
       # cache is thrown away. Must be owned by 977:977 (the container's user).
       - /opt/docker/searxng/searxng-data:/var/cache/searxng:rw
+      # Locale-aware Brave Search API engine; upstream's braveapi sends no
+      # country, so the API defaults to US. Enabled (default-off, opt-in per
+      # browser) as "brave api" in the server-side settings.yml.
+      - ./braveapi_locale.py:/usr/local/searxng/searx/engines/braveapi_locale.py:ro
     networks:
       - searxng
       - traefik

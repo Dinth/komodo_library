@@ -1504,6 +1504,7 @@ run_directory = "r720-omv/searxng"
 environment = """
 TZ=[[TZ]]
 DOMAIN_NAME=[[DOMAIN_NAME]]
+BRAVE_API_KEY=[[BRAVE_API_KEY]]
 """
 
 ##
