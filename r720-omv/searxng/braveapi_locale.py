@@ -13,8 +13,8 @@ Why not upstream's ``braveapi`` engine:
 - It sends the time filter as ``time_range``; Brave's documented parameter is
   ``freshness`` (pd/pw/pm/py).
 - It needs the key in settings.yml. This one reads ``BRAVE_API_KEY`` from the
-  environment, which Komodo fills from the secret ``[[BRAVE_API_KEY]]``
-  variable, so the key is in neither the repo nor the server's config files.
+  environment, which compose fills from the Komodo secret variable
+  ``[[SEARXNG_BRAVE_API_KEY]]``, so the key is in neither the repo nor the server's config files.
 
 Why the API at all: since 2026-11-16 search.brave.com answers this IP's scraper
 requests with 429 on every query, while the same image and settings via the

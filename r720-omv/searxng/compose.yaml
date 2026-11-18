@@ -110,9 +110,10 @@ services:
       GRANIAN_BLOCKING_THREADS: "${SEARXNG_THREADS:-4}"
       # Brave Search API key for the "brave api" engine (braveapi_locale.py,
       # mounted below). Read from the environment by that module, so the key
-      # lives only in Komodo's secret variable. Unset or unresolved -> the
-      # engine logs one error at start and is not loaded; nothing else breaks.
-      BRAVE_API_KEY: "${BRAVE_API_KEY:-}"
+      # lives only in the Komodo secret [[SEARXNG_BRAVE_API_KEY]]. Unset or
+      # unresolved -> the engine logs one error at start and is not loaded;
+      # nothing else breaks.
+      BRAVE_API_KEY: "${SEARXNG_BRAVE_API_KEY:-}"
     depends_on:
       searxng-valkey:
         condition: service_healthy
