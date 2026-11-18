@@ -614,7 +614,13 @@ services:
       # live on the openwebui network.
       - openwebui
     healthcheck:
-      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/docs')\" || exit 1"]
+      # TCP connect, not HTTP: v1.10.0's async /asr and /detect-language call
+      # the blocking transcribe() inline (app/webservice.py:56,91), so the
+      # event loop answers nothing for the minutes each job takes and an HTTP
+      # probe flaps unhealthy (and piles up) while Bazarr queues work. The
+      # kernel listen backlog still accepts, so this catches a dead process,
+      # not a wedged loop. No autoheal label: a restart kills the transcription.
+      test: ["CMD", "python3", "-c", "import socket; socket.create_connection(('127.0.0.1', 9000), 5).close()"]
       interval: 30s
       timeout: 10s
       # Generous: a cold start can be pulling ~3G of weights before the service
