@@ -1,6 +1,6 @@
 x-versions:
-  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.34.1"
-  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.56.1"
+  karakeep: &karakeep-version "ghcr.io/karakeep-app/karakeep:0.35.0"
+  meilisearch: &meilisearch-version "getmeili/meilisearch:v1.57.0"
   # karakeep-chrome follows upstream's :release tag (what their own compose
   # uses) and the Komodo stack has auto_update on (stacks.toml), skipping
   # karakeep and karakeep-meilisearch: Global Auto Update redeploys it when a
@@ -60,7 +60,10 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    # 0.35.0 parses PDFs in a subprocess whose heap may reach 1024 MB
+    # (ASSET_PREPROCESSING_PDF_PARSER_MEM_LIMIT_MB default), on top of web +
+    # workers (peak ~350 MB) - 1G would let a big PDF OOM the whole container.
+    mem_limit: 2G
     environment:
       NEXTAUTH_SECRET: "${KARAKEEP_SECRET}"
       MEILI_MASTER_KEY: "${MEILISEARCH_SECRET}"
@@ -100,6 +103,13 @@ services:
       # any VLAN (GUEST, IoT) could self-register. Admin Settings > Users can
       # still add accounts (admin-created users bypass this).
       DISABLE_SIGNUPS: "true"
+      # Password logins are reachable from the internet (no Authelia in front).
+      # Signed-in requests are limited per user; sign-in/sign-up/password reset
+      # per client IP AND per email. Traefik replaces X-Forwarded-For with the
+      # connecting address, so via Cloudflare the "client IP" is the CF edge -
+      # the per-email limit is what protects an account. TRUSTED_PROXIES stays
+      # unset (single proxy, per upstream docs).
+      RATE_LIMITING_ENABLED: "true"
       # Embeddings power the Semantic/Hybrid search modes and feed similar
       # bookmarks' tags into the tagging prompt (less tag sprawl). Not on by
       # default with Ollama. nomic-embed-text is already resident for ZeroClaw
