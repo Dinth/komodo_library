@@ -1,6 +1,7 @@
 x-versions:
-  dvinyl: &dvinyl-version "ghcr.io/kyonew/dvinyl:3.3.0"
-  # Upstream's compose uses mongo:latest; DVinyl needs MongoDB 6+.
+  dvinyl: &dvinyl-version "ghcr.io/kyonew/dvinyl:4.0.0"
+  # Only read by the one-off 3.x -> SQLite move (4.0 copies it on the first
+  # start with /app/data mounted). Retire after checking the move.
   mongo: &mongo-version "mongo:8.3.17"
 
 x-logging: &default-logging
@@ -59,7 +60,7 @@ services:
         patch("/app/views/partials/shell/nav-shortcuts.ejs", "['type', 'format'].every",
           "['type', 'format', 'platform'].every", "'format', 'platform'");
         EOF
-        exec npx tsx app.ts
+        exec node --import tsx app.ts
     container_name: dvinyl
     hostname: dvinyl
     ipc: private
@@ -83,6 +84,13 @@ services:
         condition: service_healthy
     environment:
       TZ: "${TZ}"
+      # Upstream CMD is `node --import tsx app.ts`, exec'd by the entrypoint
+      # above - keep the two in step on upgrades.
+      #
+      # 3.x -> 4.0 move: with /app/data mounted, the first start copies this
+      # MongoDB into data/dvinyl.sqlite ("[IMPORT] Done." in the log) and marks
+      # it as moved; after that the URL is unused. Remove it with the mongo
+      # service once the app looks right.
       # The DB user is Mongo's root user (as in the komodo stack): Backrest's
       # pre-backup hook mongodumps every *mongo* container with the
       # MONGO_INITDB_ROOT_* credentials from that container's own env.
@@ -97,10 +105,9 @@ services:
       # hop). Must stay "true" behind HTTPS or logins break.
       PROD: "true"
       VINYL_PORT: "3099"
-      # npx is PID 1 (upstream CMD `npx tsx app.ts`, exec'd by the entrypoint
-      # above - keep the two in step on upgrades); stop npm's weekly
-      # registry poll for a newer npm.
-      NPM_CONFIG_UPDATE_NOTIFIER: "false"
+      # Push notifications: the push services want a contact for the sender;
+      # this public address is used for it (no mailto: - the repo is public).
+      PUBLIC_URL: "https://vinyl.${DOMAIN_NAME}"
 
       # --- SSO via Authelia (client 'dvinyl' in its configuration.yml, with
       # claims_policy 'dvinyl' putting email/email_verified into the ID token,
@@ -166,7 +173,14 @@ services:
       start_period: 60s
       start_interval: 5s
     volumes:
-      # Item images and avatars. No-code item types live in Mongo; their
+      # The whole collection: dvinyl.sqlite (+ -wal while running), and the
+      # automatic backups in data/backups. A live copy of the .sqlite is not
+      # consistent, and Backrest's dump hook only covers *mongo* containers,
+      # so the scheduled ZIP backup (Instance admin > Backup, daily, before
+      # the 12:45 restic run) is what restores cleanly. Created root-owned
+      # by Docker on first deploy, like uploads - don't pre-create it.
+      - /opt/docker/dvinyl/data:/app/data
+      # Item images and avatars. No-code item types live in the database; their
       # plugins/<id>/ folders are rebuilt from it at boot.
       - /opt/docker/dvinyl/uploads:/app/public/uploads
       - /etc/localtime:/etc/localtime:ro
