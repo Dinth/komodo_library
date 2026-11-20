@@ -1,5 +1,5 @@
 x-versions:
-  adguardhome: &adguardhome-version "adguard/adguardhome:v1.0.0-b.2"
+  adguardhome: &adguardhome-version "adguard/adguardhome:v1.0.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -44,8 +44,11 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^v\d+\.\d+\.\d+-b\.\d+$$'
+      # Stable tags, held to the running minor series: since v1.0 a minor
+      # release (v1.1, v1.2) may break compatibility, so read its notes and
+      # bump the minor by hand.
+      wud.tag.include: '^v$${major}\.$${minor}\.\d+$$'
       wud.display.name: "AdGuard Home"
-      # ${original} is the full tag (v0.108.0-b.90). ${prerelease} is only the
-      # first prerelease field ("b"), which made the link .../v0.108.0-b.
+      # ${original} is the full tag (v1.0.0). ${prerelease} is only the first
+      # prerelease field, which cut beta links to .../v0.108.0-b.
       wud.link.changelog: 'https://github.com/AdguardTeam/AdGuardHome/releases/tag/$${original}'
