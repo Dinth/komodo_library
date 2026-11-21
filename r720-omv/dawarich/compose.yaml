@@ -1,5 +1,5 @@
 x-versions:
-  dawarich: &dawarich-version "freikin/dawarich:1.22.0"
+  dawarich: &dawarich-version "freikin/dawarich:1.23.0"
   valkey: &valkey-version "docker.io/valkey/valkey:9.2.0-alpine"
   postgis: &postgis-version "postgis/postgis:17-3.7-alpine"
 services:
@@ -112,21 +112,15 @@ services:
   # to run the old worker beside the new app: it was stopped and removed by
   # hand at the 1.18.1 upgrade.
   dawarich:
+    # Starts as root only to chown its writable paths (public, storage, tmp -
+    # the watched mount included - db, log) to PUID:PGID, then gosu's to that
+    # user, so the app itself holds no capabilities. Without PUID/PGID (e.g.
+    # the Komodo env lacks them) it stays root.
     cap_add:
-      - AUDIT_WRITE
       - CHOWN
       - DAC_OVERRIDE
-      - FOWNER
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - NET_RAW
-      - SETFCAP
       - SETGID
-      - SETPCAP
       - SETUID
-      - SYS_CHROOT
     cap_drop:
       - ALL
     security_opt:
@@ -135,6 +129,8 @@ services:
     container_name: dawarich
     entrypoint: 'web-entrypoint.sh'
     environment:
+      PUID: "${DOCKER_PUID}"
+      PGID: "${DOCKER_PGID}"
       DATABASE_HOST: "dawarich-postgis"
       DATABASE_USERNAME: "dawarich"
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
@@ -229,10 +225,8 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/docker/dawarich/dawarich_watched:/var/app/tmp/imports/watched
-      - /opt/docker/dawarich/dawarich_gem_cache_app:/usr/local/bundle/gems_app
       - /opt/docker/dawarich/dawarich_public:/var/app/public
       - /opt/docker/dawarich/dawarich_storage:/var/app/storage
-      - /opt/docker/dawarich/dawarich_sqlite_data:/dawarich_sqlite_data
 networks:
   dawarich:
     name: dawarich
