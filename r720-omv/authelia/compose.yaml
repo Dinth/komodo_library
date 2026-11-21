@@ -3,7 +3,7 @@ x-versions:
   # Releases: https://github.com/authelia/authelia/releases
   # Bump this + redeploy (rebuild) to update; the WebAuthn patch re-applies.
   authelia-base: &authelia-base "authelia/authelia:4.39.28"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.2.0-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -91,14 +91,13 @@ services:
     container_name: authelia-valkey
     ipc: private
     restart: unless-stopped
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    # Own UID/GID, used by nothing else on the host (was the shared docker
+    # user, which owns other services' files too). tini (PID 1) and
+    # valkey-server share it, so docker stop's SIGTERM reaches valkey and the
+    # shutdown save runs. Non-root needs no capabilities.
+    user: "63791:63791"
     security_opt:
       - no-new-privileges:true
-    cap_add:
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - CHOWN
     cap_drop:
       - ALL
     mem_limit: 128M

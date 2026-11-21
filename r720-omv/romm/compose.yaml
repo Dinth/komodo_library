@@ -6,7 +6,7 @@ x-versions:
   # Official image: linuxserver/mariadb stops at 11.8. 12.3 is the current LTS
   # (EOL June 2029); MARIADB_AUTO_UPGRADE below runs mariadb-upgrade itself.
   mariadb: &mariadb-version "mariadb:12.3.3"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.2.0-alpine"
   pcsx2: &pcsx2-version "lscr.io/linuxserver/pcsx2:2.8.2-ls91"
   dolphin: &dolphin-version "lscr.io/linuxserver/dolphin:2609-ls85"
 
@@ -147,13 +147,14 @@ services:
     hostname: romm-valkey
     ipc: private
     restart: unless-stopped
+    # Own UID/GID, used by nothing else on the host. The image's tini (PID 1)
+    # then shares it with valkey-server, so it can forward docker stop's
+    # SIGTERM and the shutdown save runs. Started as root, the entrypoint
+    # setpriv'd to uid 999 and tini (no CAP_KILL) died on stop instead.
+    # Non-root needs no capabilities.
+    user: "63797:63797"
     # Snapshot at most hourly: --save 30 1 rewrote a 200 MB dump every 30 s (~3.8 TB/week) and wore the omv NVMe. A clean stop still saves.
     command: ['valkey-server','--save','3600','1','--loglevel','warning', '--maxmemory', '768mb','--maxmemory-policy', 'allkeys-lru']
-    cap_add:
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - CHOWN
     cap_drop:
       - ALL
     security_opt:

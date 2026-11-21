@@ -1,6 +1,6 @@
 x-versions:
   vouchervault: &vouchervault-version "l4rm4nd/vouchervault:1.32.0"
-  valkey: &valkey-version "docker.io/valkey/valkey:9.1.3-alpine"
+  valkey: &valkey-version "docker.io/valkey/valkey:9.2.0-alpine"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -83,13 +83,14 @@ services:
     hostname: vouchervault-valkey
     ipc: private
     restart: unless-stopped
+    # Own UID/GID, used by nothing else on the host. The image's tini (PID 1)
+    # then shares it with valkey-server, so it can forward docker stop's
+    # SIGTERM and the shutdown save runs. Started as root, the entrypoint
+    # setpriv'd to uid 999 and tini (no CAP_KILL) died on stop instead.
+    # Non-root needs no capabilities.
+    user: "63800:63800"
     # Snapshot at most hourly: --save 30 1 rewrote the whole dump every 30 s and wore the omv NVMe. A clean stop still saves.
     command: ['valkey-server','--save','3600','1','--loglevel','warning']
-    cap_add:
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-      - CHOWN
     cap_drop:
       - ALL
     security_opt:
