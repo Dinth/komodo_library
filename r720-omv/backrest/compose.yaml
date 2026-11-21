@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.2"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.14.0"
   backrest: &backrest-version "garethgeorge/backrest:v1.14.1-alpine"
 
 x-logging: &default-logging
@@ -10,7 +10,7 @@ x-logging: &default-logging
 
 services:
   # Scoped Docker API for Backrest's pre-backup DB-dump hooks (docker exec into the
-  # Postgres/MariaDB containers). Read-only socket; only containers/exec endpoints.
+  # Postgres/MariaDB containers). Read-only socket; exec and listing endpoints only.
   backrest-socket-proxy:
     image: *socket-proxy-version
     ipc: private
@@ -18,10 +18,20 @@ services:
       - '-loglevel=info'
       - '-allowfrom=backrest'
       - '-listenip=0.0.0.0'
-      # docker-cli prefixes paths with the negotiated API version (e.g. /v1.52/containers/...),
-      # so allow an optional /vX.Y/ prefix or every exec call 403s.
-      - '-allowGET=/(v[0-9.]+/)?(containers/.*|exec/.*|version|info|_ping)'
-      - '-allowPOST=/(v[0-9.]+/)?(containers/.*|exec/.*)'
+      # Exactly what the hooks' `docker exec` and `docker ps` call, one rule per
+      # endpoint (socket-proxy >= 1.12 takes repeated -allow* flags). docker-cli
+      # prefixes paths with the negotiated API version (/v1.52/...), hence the
+      # optional /vX.Y/. No POST containers/create: that would let anything
+      # reaching this proxy start a privileged container with / mounted.
+      - '-allowGET=/(v[0-9.]+/)?_ping'
+      - '-allowGET=/(v[0-9.]+/)?version'
+      - '-allowGET=/(v[0-9.]+/)?info'
+      - '-allowGET=/(v[0-9.]+/)?containers/json'        # docker ps
+      - '-allowGET=/(v[0-9.]+/)?containers/[^/]+/json'  # inspect (name -> id)
+      - '-allowGET=/(v[0-9.]+/)?exec/[^/]+/json'        # exec exit code
+      - '-allowPOST=/(v[0-9.]+/)?containers/[^/]+/exec' # create exec
+      - '-allowPOST=/(v[0-9.]+/)?exec/[^/]+/start'
+      - '-allowPOST=/(v[0-9.]+/)?exec/[^/]+/resize'     # docker exec -t
       - '-allowHEAD=/(v[0-9.]+/)?_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'

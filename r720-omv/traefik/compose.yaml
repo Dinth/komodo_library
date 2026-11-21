@@ -1,5 +1,5 @@
 x-versions:
-  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.2"
+  socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.14.0"
   traefik: &traefik-version "traefik:v3.7.19"
 
 x-logging: &default-logging
@@ -9,14 +9,27 @@ x-logging: &default-logging
     max-file: "3"
 
 services:
+  # Serves a filtered unix socket instead of TCP :2375. The proxy used to sit on
+  # the shared `traefik` network, which every routed service joins, with only
+  # the -allowfrom hostname check between them and the Docker API. Now it has
+  # no network at all; Traefik reaches it through the socket file in
+  # /opt/docker/traefik/socket-proxy (dir 65534:<docker gid> 0750, created by
+  # hand). The healthcheck still works: it uses its own 127.0.0.1:55555.
   traefik-socket-proxy:
     image: *socket-proxy-version
     ipc: private
+    network_mode: none
     command:
       - '-loglevel=info'
-      - '-allowfrom=traefik'
-      - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
+      - '-proxysocketendpoint=/run/socket-proxy/docker.sock'
+      - '-proxysocketendpointfilemode=0660'
+      # Only what the docker provider calls, one rule per endpoint. Not
+      # containers/.*, which would also allow /containers/<id>/archive (read
+      # any file from any container) and /export.
+      - '-allowGET=/v1\..{1,2}/version'
+      - '-allowGET=/v1\..{1,2}/containers/json'
+      - '-allowGET=/v1\..{1,2}/containers/[^/]+/json'
+      - '-allowGET=/v1\..{1,2}/events'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
@@ -38,8 +51,7 @@ services:
     user: "65534:${DOCKER_SOCKET_GID}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - traefik
+      - /opt/docker/traefik/socket-proxy:/run/socket-proxy
     logging: *default-logging
     labels:
       wud.watch: "true"
@@ -159,7 +171,9 @@ services:
       # --- Providers Configuration ---
       # Docker Provider
       TRAEFIK_PROVIDERS_DOCKER: "true"
-      TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
+      # Filtered socket served by traefik-socket-proxy (see above). Traefik runs
+      # as root with DAC_OVERRIDE, so the 0660 mode does not need group_add.
+      TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "unix:///run/socket-proxy/docker.sock"
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
       TRAEFIK_PROVIDERS_DOCKER_NETWORK: "traefik"
       # File Provider
@@ -226,6 +240,9 @@ services:
       # Vendored local plugin source (see EXPERIMENTAL_LOCALPLUGINS above).
       # Read-only: Yaegi interprets the source in memory, nothing is written back.
       - /opt/docker/traefik/plugins-local:/plugins-local:ro
+      # The directory, not the socket file: the proxy recreates the socket on
+      # every start, and a file bind would keep pointing at the old inode.
+      - /opt/docker/traefik/socket-proxy:/run/socket-proxy:ro
     tmpfs:
       - /tmp
     logging: *default-logging
