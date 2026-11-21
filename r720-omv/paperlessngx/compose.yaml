@@ -1,5 +1,5 @@
 x-versions:
-  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:3.4.2"
+  paperlessngx: &paperlessngx-version "ghcr.io/paperless-ngx/paperless-ngx:3.5.1"
   postgres: &postgres-version "docker.io/postgres:18.7-alpine"
   valkey: &valkey-version "docker.io/valkey/valkey:9.2.0-alpine"
   # Pinned to Tika 3.x -- paperless-ngx targets the Tika 3 server API; a 4.0
@@ -276,7 +276,8 @@ services:
       # connection for the whole upload, so the pool has to be wide enough to
       # absorb the burst -- at max_size=8 requests queued past psycopg's fixed
       # 30s wait and died with PoolTimeout. Sized against postgres'
-      # max_connections=200 below: ~8 DB-connecting processes x 20 = 160 < 197.
+      # max_connections=300 (see paperlessngx-postgres): ~11 pooled processes
+      # x 20 = 220 worst case, under the 297 usable.
       # Note PAPERLESS_DB_POOLSIZE is deprecated in v3 (removed in 3.2); the
       # supported form is this comma-separated dot-notation string, NOT the JSON
       # shown in the deprecation hint.
