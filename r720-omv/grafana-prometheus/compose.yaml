@@ -1,7 +1,7 @@
 x-versions:
   grafana: &grafana-version "grafana/grafana:13.3.1"
   prometheus: &prometheus-version "prom/prometheus:v3.16.0"
-  node-exporter: &node-exporter-version "prom/node-exporter:v1.12.1"
+  node-exporter: &node-exporter-version "prom/node-exporter:v1.13.1"
   cadvisor: &cadvisor-version "gcr.io/cadvisor/cadvisor:v0.55.1"
   # 4.9.0 renamed metrics to DCGM 4.7 names (+unit changes); dashboards/alert use "new or old" queries
   dcgm-exporter: &dcgm-exporter-version "nvidia/dcgm-exporter:4.7.0-4.9.0-distroless"
@@ -210,12 +210,8 @@ services:
     # group rapl (gid 989) so the rapl collector can read them as nobody.
     group_add:
       - "989"
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - SETGID
-      - SETUID
+    # The image runs as nobody (USER nobody), so added capabilities never took
+    # effect; everything it reads is world-readable or reached via group 989.
     cap_drop:
       - ALL
     security_opt:
@@ -238,6 +234,19 @@ services:
       - '--collector.netdev.device-exclude=^(veth.*|br-.*|docker.*|lo)$$'
       # *.prom files written by other stacks (e.g. backblaze-exporter).
       - '--collector.textfile.directory=/host/opt/docker/node-exporter/textfile'
+      # Subsystems this host doesn't have: each failed on every scrape
+      # (node_scrape_collector_success 0). kernel_hung reads
+      # /proc/sys/kernel/hung_task_detect_count, which the 6.12 kernel here
+      # doesn't provide. Re-enable one if its hardware/filesystem/kernel appears.
+      - '--no-collector.bcachefs'
+      - '--no-collector.bonding'
+      - '--no-collector.fibrechannel'
+      - '--no-collector.infiniband'
+      - '--no-collector.ipvs'
+      - '--no-collector.kernel_hung'
+      - '--no-collector.nfs'
+      - '--no-collector.nfsd'
+      - '--no-collector.tapestats'
     environment:
       TZ: "${TZ}"
     ipc: private
@@ -262,7 +271,8 @@ services:
       wud.tag.include: '^v\d+\.\d+\.\d+$$'
       wud.display.name: "Node Exporter"
       wud.display.icon: "si:prometheus"
-      wud.link.changelog: 'https://github.com/prometheus/node_exporter/releases/tag/$${major}.$${minor}.$${patch}'
+      # Upstream tags are v-prefixed; without the v the link 404s.
+      wud.link.changelog: 'https://github.com/prometheus/node_exporter/releases/tag/v$${major}.$${minor}.$${patch}'
     logging:
       driver: "json-file"
       options:
