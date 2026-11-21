@@ -1,5 +1,5 @@
 x-versions:
-  influxdb: &influxdb-version "influxdb:2.9.1-alpine"
+  influxdb: &influxdb-version "influxdb:2.10.1-alpine"
   telegraf-version: &telegraf-version "telegraf:1.40-alpine"
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.13.2"
   unpoller-version: &unpoller-version "ghcr.io/unpoller/unpoller:v5.9.6"
@@ -57,12 +57,7 @@ services:
     restart: unless-stopped
     mem_limit: 4G
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - SETGID
-      - SETUID
+    # Runs as DOCKER_PUID (non-root), so added capabilities never took effect.
     cap_drop:
       - ALL
     security_opt:
@@ -111,13 +106,9 @@ services:
     restart: unless-stopped
     mem_limit: 512M
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - SETGID
-      - SETUID
-      - NET_RAW  # Needed for SNMP/ICMP
+    # Runs as DOCKER_PUID (non-root) with no-new-privileges, so added
+    # capabilities (the old NET_RAW included) never took effect: SNMP needs
+    # none, and ICMP from a non-root process relies on ping_group_range.
     cap_drop:
       - ALL
     security_opt:
@@ -164,12 +155,7 @@ services:
     restart: unless-stopped
     mem_limit: 256M
     user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - FOWNER
-      - SETGID
-      - SETUID
+    # Runs as DOCKER_PUID (non-root), so added capabilities never took effect.
     cap_drop:
       - ALL
     security_opt:
