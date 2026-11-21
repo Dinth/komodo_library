@@ -17,14 +17,14 @@ x-versions:
   # with q8_0 KV cache + flash-attn; e4b + 12b-32k loaded = 13.5 GB of
   # 16 GB; 12b-32k 31-token answer 8.8 s cold, 0.9 s warm.
   ollama: &ollama-version "ollama/ollama:0.40.16"
-  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.13.3"
+  openwebui: &openwebui-version "ghcr.io/open-webui/open-webui:v0.13.4"
   # No version tags upstream (latest/main/nightly only): pinned by digest.
   ollama-metrics: &ollama-metrics-version "ghcr.io/norskhelsenett/ollama-metrics:latest@sha256:3dd32882666cf0e77272086446b5639c636fb090ac9ea629c11874200c629164"
   # latest-cuda resolved to this tag and has not moved since 2024-09 (ai-dock
   # stopped publishing), so pin what actually runs.
   comfyui: &comfyui-version "ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-base-22.04-v0.2.7"
   comfyui-idle: &comfyui-idle-version "curlimages/curl:8.23.0"
-  crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.5"
+  crawl4ai: &crawl4ai-version "unclecode/crawl4ai:0.9.6"
   # Upstream publishes no releases/version tags — :main is the only stream.
   openwebui-pipelines: &openwebui-pipelines-version "ghcr.io/open-webui/pipelines:main@sha256:b48e9bc338ce2be0acfbeff01810db72408a12f07739f9e3879c1f2b00952d6e"
   # Prebuilt Debian image (bash/git/curl + the web dashboard bundle). The
