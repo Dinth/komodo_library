@@ -842,6 +842,13 @@ services:
     # mode=1777 because the service runs as `user: flaresolverr`.
     tmpfs:
       - /tmp:size=512m,mode=1777
+    environment:
+      # Seconds Chrome gets to reach each expected page state per attempt
+      # (new in 3.5.2, default 1). On a loaded host (r720 load avg 7-8) 1 s
+      # gives up early and restarts the whole challenge; 2026-11-19..21 saw
+      # 31 of 160 solves end in the 60 s timeout, mostly 1337x. Prowlarr's
+      # FlareSolverr proxy timeout was raised 60 -> 120 s the same day.
+      BROWSER_WAIT_TIMEOUT: "3"
     command: ["/usr/local/bin/python","-u","/app/flaresolverr.py"]
     container_name: flaresolverr
     healthcheck:
