@@ -18,7 +18,14 @@ services:
       - '-loglevel=info'
       - '-allowfrom=alloy'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/v1\..{1,2}/(version|containers/.*|networks|events)'
+      # Only what discovery.docker + loki.source.docker were seen calling
+      # (capture 2026-11-21), one rule per endpoint. Not containers/.*, which
+      # also allows /containers/<id>/archive and /export.
+      - '-allowGET=/v1\..{1,2}/version'
+      - '-allowGET=/v1\..{1,2}/containers/json'
+      - '-allowGET=/v1\..{1,2}/containers/[^/]+/json'
+      - '-allowGET=/v1\..{1,2}/containers/[^/]+/logs'
+      - '-allowGET=/v1\..{1,2}/networks'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'

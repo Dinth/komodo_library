@@ -75,7 +75,12 @@ services:
       - '-loglevel=info'
       - '-allowfrom=homepage-michal,homepage-paulina'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/(version|containers/.*)'
+      # Only what the boards were seen calling (capture 2026-11-21: list +
+      # stats, never inspect), one rule per endpoint. Not containers/.*, which
+      # also allows /containers/<id>/archive (any file from any container).
+      - '-allowGET=/(v[0-9.]+/)?version'
+      - '-allowGET=/(v[0-9.]+/)?containers/json'
+      - '-allowGET=/(v[0-9.]+/)?containers/[^/]+/stats'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
       - '-shutdowngracetime=10'

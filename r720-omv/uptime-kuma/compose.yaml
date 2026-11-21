@@ -20,7 +20,12 @@ services:
       - '-loglevel=info'
       - '-allowfrom=uptime-kuma'
       - '-listenip=0.0.0.0'
-      - '-allowGET=/(version|containers/.*|events.*)'
+      # Uptime Kuma made no Docker API calls at all in 37 minutes of capture
+      # (2026-11-21), so this only keeps what a docker-container monitor and the
+      # "test docker host" button need, one rule per endpoint.
+      - '-allowGET=/(v[0-9.]+/)?version'
+      - '-allowGET=/(v[0-9.]+/)?info'
+      - '-allowGET=/(v[0-9.]+/)?containers/[^/]+/json'
       - '-allowHEAD=/_ping'
       - '-watchdoginterval=1200'
       - '-stoponwatchdog'
