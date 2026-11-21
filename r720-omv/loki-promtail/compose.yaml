@@ -1,7 +1,7 @@
 x-versions:
   loki: &loki-version "grafana/loki:3.7.10"
   promtail-socket-proxy: &promtail-socket-proxy-version "wollomatic/socket-proxy:1.13.2"
-  alloy: &alloy-version "grafana/alloy:v1.21.3"
+  alloy: &alloy-version "grafana/alloy:v1.22.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -119,6 +119,9 @@ services:
       - "1514:1514/tcp"
       - "1515:1515/udp"
       - "1515:1515/tcp"
+      # iDRAC syslog (r720 + r230 BMCs): their messages fit neither RFC, so
+      # they get a `raw` listener of their own (config.alloy section 8).
+      - "1516:1516/udp"
       # 12345 (Alloy UI/debug API, self-metrics) is not published: nothing
       # outside the container uses it. Open the UI with `ssh -L 12345:<alloy IP>:12345`.
     depends_on:
@@ -130,7 +133,9 @@ services:
     # alloy-storage volume. Without it they lived in /data-alloy inside the
     # container, so every recreate re-read docker logs and 12h of journal and
     # Loki rejected the resent entries as "too far behind".
-    command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting", "--storage.path=/var/lib/alloy/data" ]
+    # --stability.level=experimental: loki.source.syslog's `raw` format (the
+    # iDRAC listener) is experimental. Only that listener uses it.
+    command: [ "run", "--server.http.listen-addr=0.0.0.0:12345", "/etc/alloy/config.alloy", "--disable-reporting", "--storage.path=/var/lib/alloy/data", "--stability.level=experimental" ]
     environment:
       TZ: "${TZ}"
       HOSTNAME: "r720-omv"
