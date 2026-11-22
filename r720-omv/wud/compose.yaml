@@ -1,6 +1,6 @@
 x-versions:
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.14.0"
-  wud: &wud-version "getwud/wud:9.8.0"
+  wud: &wud-version "getwud/wud:9.9.0"
 
 x-logging: &default-logging
   driver: "json-file"
