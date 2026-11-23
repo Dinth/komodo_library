@@ -152,7 +152,7 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      wud.tag.include: '^\d+\.\d+-alpine$$'
+      wud.tag.include: '^$${major}\.\d+-alpine$$'
       wud.link.changelog: "https://www.postgresql.org/docs/release/$${major}.$${minor}/"
       wud.display.name: "Postgres - Scanopy"
   scanopy-server:
