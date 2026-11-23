@@ -2,7 +2,7 @@ x-versions:
   immich-server: &immich-server-version "ghcr.io/immich-app/immich-server:v3.4.2"
   immich-ml: &immich-ml-version "ghcr.io/immich-app/immich-machine-learning:v3.4.2-cuda"
   valkey: &valkey-version "docker.io/valkey/valkey:9.2.0-alpine"
-  postgres: &postgres-version "ghcr.io/immich-app/postgres:17-vectorchord0.4.3"
+  postgres: &postgres-version "ghcr.io/immich-app/postgres:18-vectorchord1.1.1-pgvector0.8.7"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -198,12 +198,14 @@ services:
       interval: 10s
       retries: 5
     volumes:
-      # PG17 since 2026-11-11 (14 reached community EOL 2026-11-12), moved by
-      # pg_dump/restore. Rollback: the untouched PG14 cluster is still in
-      # /opt/docker/immich/immich_postgres_data — point this back at it and
-      # restore the 14-vectorchord0.4.3-pgvectors0.3.0 image. pgvecto.rs was
-      # dropped with the move: the extension was no longer installed and both
-      # vector indexes were already vchordrq.
+      # PG18 since 2026-11-23, upgraded in place from 17.6 by a one-off run
+      # of the matching -upgrade image (pg_upgrade). The folder name is
+      # historical: the image's entrypoint runs the cluster in data/18/.
+      # data/17.bak/ is the old PG17 cluster with vchord dropped. To roll
+      # back, delete data/18, move 17.bak's contents up into data/ and use
+      # 17-vectorchord0.4.3; Immich recreates vchord and its indexes on
+      # start. /opt/docker/immich/immich_postgres_data is the older PG14
+      # cluster. Delete both once 18 has proved itself.
       - /opt/docker/immich/immich_postgres17_data:/var/lib/postgresql/data
     networks:
       - immich
@@ -211,16 +213,17 @@ services:
     logging: *default-logging
     labels:
       wud.watch: "true"
-      # Held to the vectorchord 0.4.x line that immich's own compose pins
-      # (17-vectorchord0.5.3 exists, but a vchord minor bump means
-      # ALTER EXTENSION + reindex). Widen when immich's compose moves on.
-      wud.tag.include: '^17-vectorchord0\.4\.\d+$$'
-      # Rewrite 17-vectorchord0.4.3 -> 0.4.3 so the
-      # vectorchord version is what gets compared. Untransformed, semver
-      # coercion stops at the first non-digit and reduces every tag to
-      # 14.0.0 — WUD then has nothing to sort on and reports an older
-      # vectorchord build as an available "update".
-      wud.tag.transform: '^17-vectorchord(\d+)\.(\d+)\.(\d+)$$ => $$1.$$2.$$3'
+      # Held to PG18 + vectorchord 1.x (immich v3.4 accepts >=0.3 <2).
+      # Immich runs ALTER EXTENSION vchord UPDATE + reindex itself on start.
+      # The anchored $$ keeps the -upgrade variants out.
+      wud.tag.include: '^18-vectorchord1\.\d+\.\d+-pgvector0\.\d+\.\d+$$'
+      # Compare on the vectorchord version. Untransformed, semver coercion
+      # stops at the first non-digit and every tag reads as 18.0.0.
+      wud.tag.transform: '^18-vectorchord(\d+)\.(\d+)\.(\d+)-pgvector.*$$ => $$1.$$2.$$3'
+      # Immich rebuilds the same tag for PG minor releases (17-vectorchord
+      # 0.4.3 was stuck on 17.6 because it no longer got rebuilds), so the
+      # digest has to be watched as well.
+      wud.watch.digest: "true"
       wud.display.name: "Immich - Postgres"
       wud.display.icon: "sh-immich"
 
