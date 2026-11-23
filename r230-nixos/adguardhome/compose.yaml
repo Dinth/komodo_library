@@ -24,9 +24,12 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1G
+    mem_limit: 2G
     environment:
       TZ: "${TZ}"
+      # Go GC soft limit below mem_limit; the 12h filter refresh briefly
+      # holds old+new engines (~3M rules) and was OOM-killed at 1G
+      GOMEMLIMIT: "1800MiB"
     ports:
       - "53:53/tcp"
       - "53:53/udp"
