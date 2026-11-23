@@ -40,7 +40,8 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    mem_limit: 1536M
+    # OOM-killed at 1536M (gunicorn/python workers, 2026-11-17/21)
+    mem_limit: 3G
     environment:
       DB_ENGINE: "django.db.backends.postgresql"
       SECRET_KEY: "${TANDOOR_SECRET_KEY}"

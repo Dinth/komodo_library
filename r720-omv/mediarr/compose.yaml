@@ -471,15 +471,15 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    # 1G, not 512M: the cgroup OOM killer took bazarr's python3 at 505 MB on
-    # 2026-09-18, and it idles at ~400 MB, so 512M left no headroom for a
-    # subtitle-analysis spike.
+    # 2G: the cgroup OOM killer took bazarr's python3 at 505 MB under 512M
+    # (2026-09-18), then at the 1G cap 5x (2026-11-15..19). It idles at
+    # ~400 MB; subtitle-analysis spikes need the headroom.
     #
     # s6 restarts the killed process within the second and the container never
     # restarts (RestartCount stays 0, though State.OOMKilled flips true), so
     # the only trace is a dmesg line. Easy to miss entirely — hence the ceiling
     # rather than relying on noticing.
-    mem_limit: 1G
+    mem_limit: 2G
     container_name: bazarr
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:6767/"]
