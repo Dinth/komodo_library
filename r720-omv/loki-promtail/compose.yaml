@@ -76,6 +76,10 @@ services:
     command: ["-config.file=/etc/loki/local-config.yml"]
     environment:
       TZ: "${TZ}"
+      # Go GC soft limit under mem_limit. Loki was OOM-killed at 2G on
+      # 2026-11-11/12, and an OOM mid-index-upload once left a 0-byte TSDB
+      # file that crash-looped it (2026-10-18).
+      GOMEMLIMIT: "1800MiB"
     hostname: loki
     ipc: private
     networks:
