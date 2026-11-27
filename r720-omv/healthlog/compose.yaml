@@ -1,9 +1,11 @@
 x-versions:
-  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.48.5"
+  healthlog: &healthlog-version "ghcr.io/mbombeck/healthlog:1.49.0"
   # Same major as upstream's compose since 1.46. Its one-shot `db-upgrade`
   # service (moves a Postgres 16 `pgdata` volume into 18) is left out: this
-  # stack has run 18 from the start. The image's pg_dump is 18 too, which the
-  # nightly dump needs (a client dumps its own major and older only).
+  # stack has run 18 from the start. Since 1.49 the image's pg_dump and
+  # pg_restore are 19, which dump and restore 18 fine. The nightly dump needs
+  # that: a client handles its own major and older only, so keep this server
+  # at or below the image's client major.
   postgres: &postgres-version "postgres:18.7-alpine"
 
 x-logging: &default-logging
@@ -110,6 +112,13 @@ services:
       VAPID_PUBLIC_KEY: "${HEALTHLOG_VAPID_PUBLIC_KEY}"
       VAPID_PRIVATE_KEY: "${HEALTHLOG_VAPID_PRIVATE_KEY}"
       VAPID_SUBJECT: "mailto:${ADMIN_EMAIL}"
+      # 1.49+: PUSH_RELAY_MODE is deliberately unset, so after the update an
+      # admin is asked once in the UI (dashboard / Admin > Push and channels)
+      # whether to use the hosted HealthLog push relay (push.healthlog.dev).
+      # With no APNS_* key here it is the only way to push to the App Store
+      # iPhone app; it needs iOS app 1.7+ and each person opts in on their
+      # phone. PUSH_RELAY_MODE=off would hide the question entirely.
+      # PUSH_RELAY_LIVE_ACTIVITY stays unset (medication-only, off by default).
 
       # --- Local AI: Ollama on omv. :11434 is the ollama-metrics proxy in the
       # openwebui stack (Ollama itself is on :11435), so HealthLog's calls land
@@ -189,6 +198,11 @@ services:
       # Since 1.47 the image is Debian slim with no real wget (only a
       # health-check shim kept for old compose files), so the probe calls Node
       # directly, as upstream's compose does.
+      # The 1.49.0 first boot runs 39 migrations before the app serves,
+      # including a `CONCURRENTLY` index build on `measurements` (0518); the
+      # 10m start_period covers that, but do not restart it midway: an
+      # interrupted build leaves an INVALID index (upstream docs/ops/deploy.md,
+      # "A concurrent index build that failed").
       test:
         - "CMD"
         - "node"
