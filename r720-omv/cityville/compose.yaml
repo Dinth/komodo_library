@@ -181,13 +181,14 @@ services:
     hostname: cityville-mssql
     ipc: private
     restart: unless-stopped
-    # The image's own `mssql` user (10001:10001), not DOCKER_PUID. SQL Server
-    # itself runs under any UID that can write /var/opt/mssql. But Microsoft's
-    # container docs say sqlcmd can't run in the container unless the UID is a
-    # named user (root or mssql), and DOCKER_PUID isn't in this image's
-    # /etc/passwd. The healthcheck below, and any `docker exec ... sqlcmd`,
-    # need it.
-    user: "10001:10001"
+    # SQL Server runs under any UID that can write /var/opt/mssql. DOCKER_PUID
+    # has no /etc/passwd entry in this image, and Microsoft's container docs
+    # say sqlcmd needs a named user (root or mssql), so the healthcheck below
+    # doesn't use sqlcmd. For manual queries, exec as the image's mssql user
+    # (sqlcmd only talks TCP to localhost, so file ownership doesn't matter):
+    #   docker exec -it -u 10001 cityville-mssql /opt/mssql-tools18/bin/sqlcmd \
+    #     -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
     # sqlservr ships with file capability cap_net_bind_service=+ep. With that
     # cap missing from the bounding set (cap_drop ALL alone), the kernel
     # refuses to exec a binary whose effective-bit file caps it can't grant,
@@ -216,14 +217,11 @@ services:
       # memory.memorylimitmb. Default is 80% of the 2g limit.
       MSSQL_MEMORY_LIMIT_MB: "1536"
     healthcheck:
-      # $$ reaches the container as $, so the password is read from the
-      # container's own env, not written into this file. -b: non-zero exit on
-      # an SQL error. -C: trust the self-signed cert (tools18 encrypts by
-      # default).
-      test:
-        - "CMD-SHELL"
-        # yamllint disable-line rule:line-length
-        - '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -b -l 5 -Q "SELECT 1" -o /dev/null'
+      # Port 1433 accepting connections (bash /dev/tcp; sqlcmd can't run as
+      # DOCKER_PUID, see user: above). On first boot logins can still fail for a
+      # few seconds after the port opens while master is upgraded; the app then
+      # exits on its startup migration and restart: unless-stopped retries it.
+      test: ["CMD", "bash", "-c", ": > /dev/tcp/127.0.0.1/1433"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -235,7 +233,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       # The WHOLE /var/opt/mssql, not just data/ as upstream mounts it: secrets/
       # (the machine key) and log/ (errorlog) would otherwise be lost on every
-      # recreate. Must exist as 10001:10001 before the first deploy.
+      # recreate. Must exist as DOCKER_PUID:DOCKER_PGID before the first deploy.
       - /opt/docker/cityville/mssql/data:/var/opt/mssql
     networks:
       - cityville
