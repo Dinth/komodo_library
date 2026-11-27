@@ -296,6 +296,8 @@ services:
       traefik.http.routers.romm.tls.certresolver: "letsencrypt"
       traefik.http.routers.romm.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.romm.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # Uploads can outlast websecure's 60s readTimeout (Traefik >=3.8).
+      traefik.http.routers.romm.respondingtimeouts.readtimeout: "1200s"
       # romm-csp MUST be listed first: Traefik applies response headers
       # outermost-last, so the leading middleware wins and can overwrite the
       # shared secHeaders CSP. Needed because the emulator-streaming player

@@ -1,6 +1,6 @@
 x-versions:
   socket-proxy: &socket-proxy-version "wollomatic/socket-proxy:1.14.0"
-  traefik: &traefik-version "traefik:v3.7.19"
+  traefik: &traefik-version "traefik:v3.8.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -104,6 +104,12 @@ services:
       # untrusted), because CF appends to client-supplied headers and a spoofed
       # 10.x would then pass Authelia's one-factor LAN rule.
       TRAEFIK_ACCESSLOG_FIELDS_HEADERS_NAMES_Cf-Connecting-Ip: "keep"
+      # Some clients put credentials in the URL: over 24h on 2026-11-27 Loki
+      # held Jellyfin ?ApiKey=, Dawarich (traces.) ?api_key= and Home
+      # Assistant ?token= values, and Loki is readable without auth from the
+      # trusted allow-list. "drop" logs only the path (RequestPath has no
+      # query string). All-or-nothing: per-parameter keep isn't supported.
+      TRAEFIK_ACCESSLOG_FIELDS_QUERYPARAMETERS_DEFAULTMODE: "drop"
       TZ: "${TZ}"
       # --- Metrics (Prometheus) ---
       # Exposes /metrics on the internal `traefik` entrypoint (:8080, not published
@@ -135,8 +141,9 @@ services:
       # MCP servers with no client auth of their own (grafana, grocy) keep their historical LAN URLs
       # (http://10.10.1.13:<port>/mcp, as configured in Claude Desktop), but
       # Traefik now owns the ports so the mcp-allowlist middleware can refuse
-      # anything outside the workstation VLAN and Tailscale. Streamable HTTP
-      # holds responses open, so the timeouts mirror websecure's.
+      # anything outside the workstation VLAN and Tailscale.
+      # readTimeout keeps its old 1200s; it only bounds request arrival (see
+      # websecure), so held-open Streamable HTTP responses don't depend on it.
       TRAEFIK_ENTRYPOINTS_MCPGRAFANA_ADDRESS: ":5133"
       TRAEFIK_ENTRYPOINTS_MCPGROCY_ADDRESS: ":5135"
       TRAEFIK_ENTRYPOINTS_MCPGRAFANA_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
@@ -162,7 +169,20 @@ services:
       TRAEFIK_ENTRYPOINTS_PROMETHEUS_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "letsencrypt"
-      TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "1200s"
+      # readTimeout bounds only how long a request (headers + body) may take
+      # to arrive: Go clears the deadline once the body is read, so long
+      # responses and websockets are unaffected. 60s is Traefik's default and
+      # bounds slow clients on this internet-facing origin (pfSense forwards
+      # WAN 443 from any source, not only Cloudflare). Upload routers override
+      # it with traefik.http.routers.<r>.respondingtimeouts.readtimeout:
+      # "1200s" (Traefik >=3.8); currently immich, nextcloud, collabora,
+      # paperlessngx, romm, audiobookshelf and dawarich. A new service whose
+      # uploads fail after ~60s needs that label.
+      # writeTimeout stays 1200s to bound slow readers; only WUD's SSE stream
+      # hits it, and it reconnects. idleTimeout stays 1200s, above
+      # Cloudflare's ~900s idle origin keep-alive: closing sooner shows up as
+      # sporadic 520s.
+      TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_READTIMEOUT: "60s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_IDLETIMEOUT: "1200s"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_TRANSPORT_RESPONDINGTIMEOUTS_WRITETIMEOUT: "1200s"
       # Backend TLS is verified by default. The only self-signed backend
@@ -201,6 +221,13 @@ services:
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROVIDER: "cloudflare"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROPAGATION_DELAYBEFORECHECKS: "30"
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_DNSCHALLENGE_PROPAGATION_DISABLECHECKS: "true"
+      # P-256 instead of the RSA4096 default: far cheaper handshakes and
+      # smaller certs. Takes effect at the next renewal (~2026-12-04 for the
+      # cert expiring 2027-01-03); acme.json needs no edit. Needs >=3.8: 3.7
+      # reused the stored key on every renewal whatever keyType said.
+      # reusePrivateKey=false generates a fresh key on every renewal.
+      TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_KEYTYPE: "EC256"
+      TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_REUSEPRIVATEKEY: "false"
       CF_API_EMAIL: "${ADMIN_EMAIL}"
       CF_DNS_API_TOKEN: "${TRAEFIK_CF_DNS_API_TOKEN}"
       LOCAL_IPS: "127.0.0.1/32,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"

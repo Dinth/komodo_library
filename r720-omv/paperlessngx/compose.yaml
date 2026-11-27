@@ -377,6 +377,8 @@ services:
         child-src 'self' blob: data:;
         frame-src 'self' blob: data:
       traefik.http.routers.paperlessngx.middlewares: "paperlessngx-csp,secHeaders@file"
+      # Uploads can outlast websecure's 60s readTimeout (Traefik >=3.8).
+      traefik.http.routers.paperlessngx.respondingtimeouts.readtimeout: "1200s"
       traefik.http.services.paperlessngx.loadbalancer.server.port: "8000"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'

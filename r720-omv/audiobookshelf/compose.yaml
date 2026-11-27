@@ -57,6 +57,8 @@ services:
       traefik.http.routers.audiobookshelf.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.audiobookshelf.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.audiobookshelf.middlewares: "secHeaders@file"
+      # Uploads can outlast websecure's 60s readTimeout (Traefik >=3.8).
+      traefik.http.routers.audiobookshelf.respondingtimeouts.readtimeout: "1200s"
       traefik.http.services.audiobookshelf.loadbalancer.server.port: "80"
       wud.watch: "true"
       wud.tag.include: '^v?\d+\.\d+\.\d+$$'

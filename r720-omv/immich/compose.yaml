@@ -73,6 +73,8 @@ services:
       traefik.http.routers.immich.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.immich.tls.domains[0].sans: "*.${DOMAIN_NAME}"
       traefik.http.routers.immich.middlewares: "secHeaders@file"
+      # Uploads can outlast websecure's 60s readTimeout (Traefik >=3.8).
+      traefik.http.routers.immich.respondingtimeouts.readtimeout: "1200s"
       traefik.http.services.immich.loadbalancer.server.port: "2283"
       wud.watch: "true"
       wud.display.icon: "sh-immich"

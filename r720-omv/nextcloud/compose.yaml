@@ -164,6 +164,8 @@ services:
       traefik.http.services.collabora.loadbalancer.server.port: "9980"
       traefik.http.routers.collabora.tls.domains[0].main: "${DOMAIN_NAME}"
       traefik.http.routers.collabora.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # Uploads can outlast websecure's 60s readTimeout (Traefik >=3.8).
+      traefik.http.routers.collabora.respondingtimeouts.readtimeout: "1200s"
       traefik.docker.network: "traefik"
       wud.watch: "true"
       wud.link.doc: "https://www.collaboraonline.com/code/"
@@ -259,6 +261,8 @@ services:
       # and Office never loaded its editor. baseHeaders keeps the rest,
       # including the Remote-* request-header stripping.
       traefik.http.routers.nextcloud.middlewares: "baseHeaders@file,nextcloud-redirectregex1,nextcloud-redirectregex2,compresstraefik,nextcloud-securityheaders"
+      # Uploads can outlast websecure's 60s readTimeout (Traefik >=3.8).
+      traefik.http.routers.nextcloud.respondingtimeouts.readtimeout: "1200s"
       traefik.http.middlewares.compresstraefik.compress: "true"
       traefik.http.middlewares.nextcloud-redirectregex1.redirectregex.permanent: "true"
       traefik.http.middlewares.nextcloud-redirectregex1.redirectregex.regex: "https?://([^/]*)/.well-known/(card|cal)dav"
