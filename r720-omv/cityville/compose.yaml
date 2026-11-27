@@ -1,13 +1,14 @@
 x-versions:
   # CityVilleDotnet (GPL-3.0, branch 2013) publishes no image: the app is
-  # built here from upstream's own Dockerfile, straight from the git tag.
+  # built here from the git tag with the inline Dockerfile below.
   # Releases: https://github.com/besuper/CityVilleDotnet/releases
   # BUMP BOTH LINES TOGETHER. `compose up` only builds when the image tag is
   # missing, so a new git ref under the old tag silently keeps the old build.
+  # Bump the -pN suffix too whenever the inline Dockerfile changes.
   # (A YAML anchor can't be interpolated into a string, hence two lines.)
   # yamllint disable-line rule:line-length
   cityville-src: &cityville-src "https://github.com/besuper/CityVilleDotnet.git#v2013-2026.11.25"
-  cityville: &cityville-version "cityville-local:2013-2026.11.25"
+  cityville: &cityville-version "cityville-local:2013-2026.11.25-p1"
   # SQL Server 2022 CU, not 2022-latest. The only DB the app supports
   # (EF Core SqlServer provider). Build list:
   # https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-2022/build-versions
@@ -24,8 +25,30 @@ services:
     # Local build of the remote git context, the same as the repo's other
     # compose-built images: pull_policy never stops the stack-wide pull from
     # aborting on a tag no registry has.
+    # The inline Dockerfile is upstream's (sdk:11.0 publish -> aspnet:11.0),
+    # with one change: the bundled web root (Ruffle, Bootstrap, css,
+    # zcache/ZCache.swf, assets/default.*) moves to /app/wwwroot.dist, and the
+    # entrypoint copies it over the bind-mounted web root on every start, next
+    # to the game asset pack. Upstream's compose just mounts over
+    # /app/wwwroot, which hides Ruffle and the CSS. Doing the copy here instead
+    # of in a one-shot init container means Komodo never sees an exited
+    # container and calls the stack unhealthy. No `$` in it: compose would
+    # interpolate it.
+    # yamllint disable rule:line-length
     build:
       context: *cityville-src
+      dockerfile_inline: |
+        FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
+        WORKDIR /src
+        COPY . .
+        RUN dotnet publish CityVilleDotnet.Api/CityVilleDotnet.Api.csproj -c Release -o /app/publish \
+         && mv /app/publish/wwwroot /app/publish/wwwroot.dist
+        FROM mcr.microsoft.com/dotnet/aspnet:11.0
+        WORKDIR /app
+        COPY --from=build /app/publish .
+        EXPOSE 5221
+        ENTRYPOINT ["bash", "-c", "cp -rT --preserve=timestamps /app/wwwroot.dist /app/wwwroot && exec dotnet CityVilleDotnet.Api.dll"]
+    # yamllint enable rule:line-length
     image: *cityville-version
     pull_policy: never
     container_name: cityville
@@ -45,8 +68,6 @@ services:
     # of heap. Raise it if the boot parse gets OOM-killed. Don't shrink it.
     mem_limit: 1536M
     depends_on:
-      cityville-seed:
-        condition: service_completed_successfully
       cityville-mssql:
         condition: service_healthy
     environment:
@@ -84,8 +105,10 @@ services:
       start_interval: 5s
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      # The web root: upstream's web files (refreshed by cityville-seed on
-      # every deploy) plus the game asset pack, which you add here yourself.
+      # The web root: upstream's web files (re-copied from /app/wwwroot.dist by
+      # the entrypoint on every start; it fails, and the container won't start,
+      # if a same-named file here isn't writable by DOCKER_PUID) plus the game
+      # asset pack, which you add here yourself.
       # The app reads its game data from hardcoded wwwroot/ paths and writes
       # wwwroot/pictures/ (profile pictures). It also opens the settings XML
       # files read-WRITE (FileMode.Open's default), so everything here must be
@@ -143,35 +166,6 @@ services:
       # it. The watchers use WATCHALL, so opting out needs this explicit label.
       # Otherwise WUD looks the image up on Docker Hub and gets a 401. Track
       # new tags by hand: https://github.com/besuper/CityVilleDotnet/releases
-      wud.watch: "false"
-
-  cityville-seed:
-    # One-shot init, not a scheduler: copies the image's bundled /app/wwwroot
-    # (Ruffle, Bootstrap, css, zcache/ZCache.swf, assets/default.*) into the
-    # bind-mounted web root, then exits. Runs on every deploy, so a new image
-    # refreshes upstream's files. The asset pack in the same directory survives
-    # (only same-named files are overwritten). Upstream's own compose just
-    # mounts over /app/wwwroot, which hides Ruffle and the CSS.
-    # It fails, and the app then won't start, if a same-named file in the web
-    # root isn't writable by DOCKER_PUID.
-    image: *cityville-version
-    pull_policy: never
-    container_name: cityville-seed
-    entrypoint: ["cp", "-rT", "--preserve=timestamps", "/app/wwwroot", "/seed"]
-    ipc: private
-    restart: "no"
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    user: "${DOCKER_PUID}:${DOCKER_PGID}"
-    mem_limit: 64M
-    network_mode: none
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /opt/docker/cityville/cityville/wwwroot:/seed
-    logging: *default-logging
-    labels:
       wud.watch: "false"
 
   cityville-mssql:
