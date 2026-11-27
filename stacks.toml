@@ -957,7 +957,7 @@ TZ=[[TZ]]
 name = "komodo"
 description = """
 Komodo Core (this deployment manager) + MongoDB.
-Web UI: http://10.10.1.13:9120"""
+Web UI: https://komodo.wickhay.uk (LAN/Tailscale only)"""
 tags = ["stacks"]
 [stack.config]
 server = "r720-omv"
@@ -970,6 +970,7 @@ KOMODO_DB_USERNAME=admin
 KOMODO_DB_PASSWORD=[[KOMODO_DB_PASSWORD]]
 KOMODO_PASSKEY=[[KOMODO_PASSKEY]]
 TZ=[[TZ]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
 HOMEPAGE_KOMODO_USERNAME=[[HOMEPAGE_KOMODO_USERNAME]]
 HOMEPAGE_KOMODO_PASSWORD=[[HOMEPAGE_KOMODO_PASSWORD]]
 """

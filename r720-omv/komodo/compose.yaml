@@ -88,14 +88,15 @@ services:
       COMPOSE_KOMODO_IMAGE_TAG: "latest"
       COMPOSE_LOGGING_DRIVER: "local"
       KOMODO_DB_USERNAME: "${KOMODO_DB_USERNAME}"
-      KOMODO_HOST: "http://10.10.1.13:9120"
+      KOMODO_HOST: "https://komodo.${DOMAIN_NAME}"
       KOMODO_TITLE: "Komodo"
       KOMODO_FIRST_SERVER: "https://host.docker.internal:8120"
       KOMODO_DISABLE_CONFIRM_DIALOG: "true"
       KOMODO_MONITORING_INTERVAL: "15-sec"
       KOMODO_RESOURCE_POLL_INTERVAL: "5-min"
       KOMODO_LOCAL_AUTH: "true"
-      # No self-sign-up on the LAN-wide :9120; new users are created by an admin.
+      # No self-sign-up on the LAN-wide Traefik route; new users are created
+      # by an admin.
       KOMODO_DISABLE_USER_REGISTRATION: "true"
       KOMODO_ENABLE_NEW_USERS: "false"
       KOMODO_DISABLE_NON_ADMIN_CREATE: "false"
@@ -107,8 +108,9 @@ services:
       KOMODO_AWS_ACCESS_KEY_ID: ""
       KOMODO_AWS_SECRET_ACCESS_KEY: ""
       KOMODO_HETZNER_TOKEN: ""
-    ports:
-      - 9120:9120
+    # No published port: UI is served via Traefik only. Komodo deploys Traefik
+    # itself, so if Traefik is down the way back in is SSH to the host plus
+    # `docker compose`.
     volumes:
       - /opt/docker/komodo/komodo_syncs:/syncs
       - /opt/docker/komodo/core.config.toml:/config/config.toml
@@ -120,6 +122,10 @@ services:
       # The "signal" alerter (servers.toml) posts to apprise:8000, which lives
       # in the signal-rest-api stack and owns this network.
       - signal-rest-api
+      - traefik
+      # Homepage's Komodo widget calls komodo-core:9120 over this network:
+      # through Traefik, a container-sourced request is 403'd by lan-only.
+      - monitoring
     logging: *default-logging
     labels:
       komodo.skip:
@@ -128,7 +134,24 @@ services:
       wud.link.changelog: 'https://github.com/moghtech/komodo/releases/tag/v$${major}.$${minor}.$${patch}'
       wud.display.name: 'Komodo'
       wud.display.icon: 'sh:komodo'
+      # --- Traefik router (TLS, LAN-only). NO authelia forward-auth: Komodo
+      # has its own local auth. ---
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.komodo.rule: "Host(`komodo.${DOMAIN_NAME}`)"
+      traefik.http.routers.komodo.entrypoints: "websecure"
+      traefik.http.routers.komodo.tls: "true"
+      traefik.http.routers.komodo.tls.certresolver: "letsencrypt"
+      traefik.http.routers.komodo.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.komodo.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      traefik.http.routers.komodo.middlewares: "secHeaders@file,lan-only@file"
+      traefik.http.services.komodo.loadbalancer.server.port: "9120"
 
 networks:
   signal-rest-api:
+    external: true
+  traefik:
+    external: true
+  monitoring:
+    name: monitoring
     external: true
