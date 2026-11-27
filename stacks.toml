@@ -319,6 +319,28 @@ HOMEPAGE_CALIBREWEB_PASS=[[HOMEPAGE_CALIBREWEB_PASS]]
 ##
 
 [[stack]]
+name = "cityville"
+description = """
+CityVille (2013) flash-game server: CityVilleDotnet + SQL Server Express, played in-browser via Ruffle.
+https://cityville.wickhay.uk (LAN + Tailscale only)"""
+tags = ["stacks"]
+[stack.config]
+server = "r720-omv"
+poll_for_updates = true
+git_account = "michal@gawronskikot.com"
+repo = "Dinth/komodo_library"
+run_directory = "r720-omv/cityville"
+environment = """
+TZ=[[TZ]]
+DOCKER_PUID=[[DOCKER_PUID]]
+DOCKER_PGID=[[DOCKER_PGID]]
+DOMAIN_NAME=[[DOMAIN_NAME]]
+CITYVILLE_MSSQL_SA_PASSWORD=[[CITYVILLE_MSSQL_SA_PASSWORD]]
+"""
+
+##
+
+[[stack]]
 name = "cronicle"
 description = """
 Job scheduler with web UI; runs the homelab's scheduled jobs.

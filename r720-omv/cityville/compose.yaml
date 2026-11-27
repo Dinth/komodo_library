@@ -1,0 +1,269 @@
+x-versions:
+  # CityVilleDotnet (GPL-3.0, branch 2013) publishes no image: the app is
+  # built here from upstream's own Dockerfile, straight from the git tag.
+  # Releases: https://github.com/besuper/CityVilleDotnet/releases
+  # BUMP BOTH LINES TOGETHER. `compose up` only builds when the image tag is
+  # missing, so a new git ref under the old tag silently keeps the old build.
+  # (A YAML anchor can't be interpolated into a string, hence two lines.)
+  # yamllint disable-line rule:line-length
+  cityville-src: &cityville-src "https://github.com/besuper/CityVilleDotnet.git#v2013-2026.11.25"
+  cityville: &cityville-version "cityville-local:2013-2026.11.25"
+  # SQL Server 2022 CU, not 2022-latest. The only DB the app supports
+  # (EF Core SqlServer provider). Build list:
+  # https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-2022/build-versions
+  mssql: &mssql-version "mcr.microsoft.com/mssql/server:2022-CU28-ubuntu-22.04"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  cityville:
+    # Local build of the remote git context, the same as the repo's other
+    # compose-built images: pull_policy never stops the stack-wide pull from
+    # aborting on a tag no registry has.
+    build:
+      context: *cityville-src
+    image: *cityville-version
+    pull_policy: never
+    container_name: cityville
+    hostname: cityville
+    ipc: private
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Binds :5221, so no caps. Writes only to the three bind mounts below.
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    # Game and quest settings (tens of MB of XML) are deserialized with
+    # XmlSerializer at boot and stay resident as object graphs in singletons.
+    # The parse itself makes a burst of garbage on top. The Web SDK runs
+    # Server GC, whose heap hard limit defaults to 75% of this, so about 1.1G
+    # of heap. Raise it if the boot parse gets OOM-killed. Don't shrink it.
+    mem_limit: 1536M
+    depends_on:
+      cityville-seed:
+        condition: service_completed_successfully
+      cityville-mssql:
+        condition: service_healthy
+    environment:
+      TZ: "${TZ}"
+      # Upstream's compose uses Development. That only adds exception stack
+      # traces on /Error, Debug console logging and DI scope validation, and
+      # its appsettings.Development.json Urls/connection string are overridden
+      # here anyway.
+      ASPNETCORE_ENVIRONMENT: "Production"
+      URLS: "http://0.0.0.0:5221"
+      # The SA password is embedded unescaped, so it must not contain `;`.
+      # EF Core creates and migrates the CityVille DB on every boot, so this
+      # login needs dbcreator, which sa has.
+      # yamllint disable-line rule:line-length
+      ConnectionStrings__Database: "Server=cityville-mssql,1433;Database=CityVille;User Id=sa;Password=${CITYVILLE_MSSQL_SA_PASSWORD};TrustServerCertificate=True;Application Name=CityVille;"
+      # ASP.NET DataProtection keeps its cookie-signing keys in
+      # $HOME/.aspnet/DataProtection-Keys. Without a persistent HOME every
+      # recreate logs everybody out. (UID 1000 is `ubuntu` in this image, HOME
+      # /home/ubuntu, which is inside the container.)
+      HOME: "/data"
+      # Gates the in-game cheat panel and its /cheat endpoints. Upstream
+      # default true, set here so it's visible. "false" turns both off.
+      enableCheat: "true"
+      # Discord__ClientId / Discord__ClientSecret deliberately unset: no
+      # Discord login.
+    healthcheck:
+      # Kestrel only starts listening after migrations and the settings parse
+      # are done (app.Run() comes last in Program.cs), so an open port means
+      # fully booted. The image has no curl or wget, but it has bash.
+      test: ["CMD", "bash", "-c", ": > /dev/tcp/127.0.0.1/5221"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5m
+      start_interval: 5s
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # The web root: upstream's web files (refreshed by cityville-seed on
+      # every deploy) plus the game asset pack, which you add here yourself.
+      # The app reads its game data from hardcoded wwwroot/ paths and writes
+      # wwwroot/pictures/ (profile pictures). It also opens the settings XML
+      # files read-WRITE (FileMode.Open's default), so everything here must be
+      # owned by DOCKER_PUID:DOCKER_PGID.
+      - /opt/docker/cityville/cityville/wwwroot:/app/wwwroot
+      # Serilog's ./logs/log.txt (daily rolling). The admin Logs page reads it.
+      - /opt/docker/cityville/cityville/logs:/app/logs
+      # HOME (DataProtection keys).
+      - /opt/docker/cityville/cityville/data:/data
+    networks:
+      - cityville
+      - traefik
+    logging: *default-logging
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik"
+      traefik.http.routers.cityville.rule: "Host(`cityville.${DOMAIN_NAME}`)"
+      traefik.http.routers.cityville.entrypoints: "websecure"
+      traefik.http.routers.cityville.tls: "true"
+      traefik.http.routers.cityville.tls.certresolver: "letsencrypt"
+      traefik.http.routers.cityville.tls.domains[0].main: "${DOMAIN_NAME}"
+      traefik.http.routers.cityville.tls.domains[0].sans: "*.${DOMAIN_NAME}"
+      # secHeaders' baseline CSP plus what this app needs:
+      # - cdn.jsdelivr.net: Bootstrap 4.6.2 CSS/JS, jQuery slim and
+      #   bootstrap-icons (CSS + font files), loaded by the game and admin
+      #   layouts.
+      # - fonts.googleapis.com / fonts.gstatic.com: the layouts' web fonts.
+      # - unpkg.com: the optional swf2es player (/Game?player=swf2es) imports
+      #   its module, chunks and an AudioWorklet from there. Its SWF-to-JS
+      #   output runs as blob: scripts, which the baseline already allows.
+      # Ruffle (the default player) needs nothing extra: 'unsafe-eval' covers
+      # its WebAssembly, and its SWF/XML/AMF fetches are same-origin.
+      # Listed before secHeaders@file because the first middleware wins on
+      # response headers. Keep the baseline in sync with traefik_dynamic.yml.
+      traefik.http.middlewares.cityville-csp.headers.customresponseheaders.Content-Security-Policy: >-
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:
+        cdn.jsdelivr.net unpkg.com;
+        style-src 'self' 'unsafe-inline' blob: data:
+        cdn.jsdelivr.net fonts.googleapis.com;
+        img-src 'self' blob: data: https:;
+        font-src 'self' blob: data: cdn.jsdelivr.net fonts.gstatic.com;
+        object-src 'none';
+        frame-ancestors 'self';
+        connect-src 'self' https: wss: blob:;
+        form-action 'self';
+        media-src 'self' blob: data:;
+        worker-src 'self' blob: data:;
+        child-src 'self' blob: data:;
+        frame-src 'self' blob: data:
+      # LAN + Tailscale only: registration is open, with 2-character passwords.
+      traefik.http.routers.cityville.middlewares: "cityville-csp,secHeaders@file,lan-only@file"
+      traefik.http.services.cityville.loadbalancer.server.port: "5221"
+      # WUD disabled: a locally built tag no registry has, so WUD can't watch
+      # it. The watchers use WATCHALL, so opting out needs this explicit label.
+      # Otherwise WUD looks the image up on Docker Hub and gets a 401. Track
+      # new tags by hand: https://github.com/besuper/CityVilleDotnet/releases
+      wud.watch: "false"
+
+  cityville-seed:
+    # One-shot init, not a scheduler: copies the image's bundled /app/wwwroot
+    # (Ruffle, Bootstrap, css, zcache/ZCache.swf, assets/default.*) into the
+    # bind-mounted web root, then exits. Runs on every deploy, so a new image
+    # refreshes upstream's files. The asset pack in the same directory survives
+    # (only same-named files are overwritten). Upstream's own compose just
+    # mounts over /app/wwwroot, which hides Ruffle and the CSS.
+    # It fails, and the app then won't start, if a same-named file in the web
+    # root isn't writable by DOCKER_PUID.
+    image: *cityville-version
+    pull_policy: never
+    container_name: cityville-seed
+    entrypoint: ["cp", "-rT", "--preserve=timestamps", "/app/wwwroot", "/seed"]
+    ipc: private
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "${DOCKER_PUID}:${DOCKER_PGID}"
+    mem_limit: 64M
+    network_mode: none
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/docker/cityville/cityville/wwwroot:/seed
+    logging: *default-logging
+    labels:
+      wud.watch: "false"
+
+  cityville-mssql:
+    image: *mssql-version
+    container_name: cityville-mssql
+    # Stable @@SERVERNAME across recreates.
+    hostname: cityville-mssql
+    ipc: private
+    restart: unless-stopped
+    # The image's own `mssql` user (10001:10001), not DOCKER_PUID. SQL Server
+    # itself runs under any UID that can write /var/opt/mssql. But Microsoft's
+    # container docs say sqlcmd can't run in the container unless the UID is a
+    # named user (root or mssql), and DOCKER_PUID isn't in this image's
+    # /etc/passwd. The healthcheck below, and any `docker exec ... sqlcmd`,
+    # need it.
+    user: "10001:10001"
+    # sqlservr ships with file capability cap_net_bind_service=+ep. With that
+    # cap missing from the bounding set (cap_drop ALL alone), the kernel
+    # refuses to exec a binary whose effective-bit file caps it can't grant,
+    # and the container dies with "Operation not permitted". Adding it back
+    # only restores it to the bounding set: no-new-privileges plus a non-root
+    # user still means the process gains no capability.
+    cap_add:
+      - NET_BIND_SERVICE
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # SQL Server refuses to start below 2 GB of RAM. Its own cap below leaves
+    # ~500M of headroom for everything outside its memory manager.
+    mem_limit: 2g
+    # SIGTERM triggers a clean shutdown with a checkpoint. Docker's default
+    # 10 s can cut it short.
+    stop_grace_period: 30s
+    environment:
+      TZ: "${TZ}"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      # 8+ characters, at least 3 of upper/lower/digit/symbol, else first boot
+      # fails. Also embedded in the app's connection string: no `;`.
+      MSSQL_SA_PASSWORD: "${CITYVILLE_MSSQL_SA_PASSWORD}"
+      # memory.memorylimitmb. Default is 80% of the 2g limit.
+      MSSQL_MEMORY_LIMIT_MB: "1536"
+    healthcheck:
+      # $$ reaches the container as $, so the password is read from the
+      # container's own env, not written into this file. -b: non-zero exit on
+      # an SQL error. -C: trust the self-signed cert (tools18 encrypts by
+      # default).
+      test:
+        - "CMD-SHELL"
+        # yamllint disable-line rule:line-length
+        - '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -b -l 5 -Q "SELECT 1" -o /dev/null'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # First boot builds the system databases. Docker ends start_period at the
+      # first passing probe.
+      start_period: 5m
+      start_interval: 5s
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # The WHOLE /var/opt/mssql, not just data/ as upstream mounts it: secrets/
+      # (the machine key) and log/ (errorlog) would otherwise be lost on every
+      # recreate. Must exist as 10001:10001 before the first deploy.
+      - /opt/docker/cityville/mssql/data:/var/opt/mssql
+    networks:
+      - cityville
+    logging: *default-logging
+    labels:
+      wud.watch: "true"
+      # 2022 CUs on ubuntu-22.04 only, mapped to 16.<CU>.0 for semver.
+      # Per-CU GDR (security) tags such as 2022-CU27-GDR2-ubuntu-22.04 are not
+      # offered. The next CU contains their fixes.
+      # mcr.microsoft.com needs a WUD registry (custom type, anonymous) in the
+      # wud stack, or this container reports "Unsupported Registry".
+      wud.tag.include: '^2022-CU\d+-ubuntu-22\.04$$'
+      wud.tag.transform: '^2022-CU(\d+)-ubuntu-22\.04$$ => 16.$$1.0'
+      wud.display.name: "CityVille - SQL Server"
+      wud.display.icon: "sh:microsoft-sql-server"
+      # The per-CU release notes live at KB-numbered URLs that can't be built
+      # from the tag, so this links the build list, which links each CU's notes.
+      wud.link.changelog: "https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-2022/build-versions"
+
+networks:
+  # App <-> SQL Server only. internal: no egress. Express can't opt out of
+  # SQL Server's usage/diagnostic telemetry (Microsoft's mssql-conf docs), so
+  # cutting the route is the only way to stop it. The app keeps egress through
+  # traefik.
+  cityville:
+    name: cityville
+    driver: bridge
+    external: false
+    internal: true
+  traefik:
+    external: true
