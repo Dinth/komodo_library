@@ -74,6 +74,10 @@ services:
       traefik.http.middlewares.authelia-auth.forwardauth.trustForwardHeader: "true"
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups, Remote-Name, Remote-Email"
       traefik.http.middlewares.authelia-auth.forwardauth.authResponseHeadersRegex: "^(Location|Set-Cookie)$"
+      # Caps the authz reply Traefik buffers per request at 64 KiB: Authelia's
+      # 302/401 is a few hundred bytes, anything larger gets 401 (fails closed).
+      # Silences the per-router "maxResponseBodySize is not configured" warning.
+      traefik.http.middlewares.authelia-auth.forwardauth.maxResponseBodySize: "65536"
       # --- Whats up Docker? config ---
       # WUD disabled: the running image is a locally-built patched tag, not a
       # registry tag, so WUD can't watch it. Restore these (set watch back to

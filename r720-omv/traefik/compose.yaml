@@ -80,6 +80,18 @@ services:
     # default so proxying never queues behind batch work.
     cpu_shares: 4096
     environment:
+      # --- Global ---
+      # Go treats Remote-User, Remote_User and Remote.User as three different
+      # headers, but CGI/WSGI/PHP/nginx-style backends read all three as
+      # HTTP_REMOTE_USER. secHeaders and Authelia's authResponseHeaders only
+      # manage the dash spelling. "delete" silently drops any request header
+      # whose name has a character other than a letter, digit or dash, so a
+      # look-alike can't smuggle a spoofed identity past them. "delete", not
+      # "reject": no request is ever refused. Applies to every entrypoint
+      # (Traefik >=3.7, the `global` default); without it Traefik warns at
+      # every start. If an integration ever loses a header with "_" or "." in
+      # its name, this is why; revert = remove this line.
+      TRAEFIK_GLOBAL_ALIASHEADERSSTRATEGY: "delete"
       # --- API, Dashboard & Logging ---
       TRAEFIK_API_DASHBOARD: "true"
       # Insecure API is ENABLED so the Homepage widget can read it, but the :8080
