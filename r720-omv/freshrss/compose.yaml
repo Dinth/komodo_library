@@ -1,5 +1,5 @@
 x-versions:
-  freshrss: &freshrss-version "freshrss/freshrss:1.30.4"
+  freshrss: &freshrss-version "freshrss/freshrss:1.31.0"
   # The newest date tag (2025-08-05) is a year behind :latest, so this follows
   # :latest; the Komodo stack has auto_update on (stacks.toml): Global Auto
   # Update redeploys it when a new image lands (checked every 8 h). WUD

@@ -9,7 +9,7 @@ x-versions:
   # 0.101 changed the image: s6-overlay as user 1000 instead of a root
   # entrypoint, so SIGNAL_CLI_UID/GID are gone - see user/tmpfs below.
   signal-rest-api: &signal-rest-api-version "bbernhard/signal-cli-rest-api:1791633879-ci"
-  apprise: &apprise-version "caronc/apprise:2.1.0"
+  apprise: &apprise-version "caronc/apprise:2.2.0"
 
 x-logging: &default-logging
   driver: "json-file"
@@ -113,6 +113,14 @@ services:
       APPRISE_PASSWORD: "${APPRISE_ADMIN_PASSWORD}"
       # A handful of notifications a day; one worker is ample.
       APPRISE_WORKER_COUNT: "1"
+      # 2.2.0 added reminders (notifications saved now, sent later), on by
+      # default and run by an extra `scheduler` Django process under
+      # supervisord. Nothing here uses them — scheduling lives in Cronicle and
+      # Home Assistant — and the container already averages ~169 MiB (peaks
+      # ~202 MiB) of its 256M limit, so a second Python process risks OOM.
+      # With "no" the scheduler exits 0 at start and supervisord leaves it
+      # stopped; every /reminder route answers 404.
+      APPRISE_REMINDER_ENABLED: "no"
     cap_drop:
       - ALL
     security_opt:
