@@ -2,7 +2,7 @@ x-versions:
   gluetun: &gluetun-version "qmcgaw/gluetun:v3.41.3"
   qbittorrent: &qbittorrent-version "lscr.io/linuxserver/qbittorrent:5.3.0"
   flaresolverr: &flaresolverr-version "flaresolverr/flaresolverr:v3.5.2"
-  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:3.0.2"
+  prowlarr: &prowlarr-version "lscr.io/linuxserver/prowlarr:3.1.0"
   seerr: &seerr-version "ghcr.io/seerr-team/seerr:v3.5.2"
   suggestarr: &suggestarr-version "ghcr.io/giuseppe99barchetta/suggestarr:v3.5.0"
   sonobarr: &sonobarr-version "ghcr.io/dodelidoo-labs/sonobarr:0.13.0"
