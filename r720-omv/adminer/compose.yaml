@@ -1,5 +1,5 @@
 x-versions:
-  adminer: &adminer-version "adminer:6.3.0"
+  adminer: &adminer-version "adminer:6.3.1"
 
 x-logging: &default-logging
   driver: "json-file"
